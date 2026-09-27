@@ -18,17 +18,30 @@ use PHPUnit\Framework\TestCase;
 /**
  * Covers the delay-pipeline decision behavior.
  *
- * Seven mutants of this class survive `bin/harness mutation`, and they are
+ * Some mutants survive `bin/harness mutation` in this class, and they are
  * equivalent rather than gaps -- the classification matters more than the
- * number, so it is written down here:
+ * number, so it is written down here, mutant by mutant:
  *
- * - `123` (five mutants, `IncrementInteger`/`DecrementInteger`): every bound on
- *   that line is unreachable behind `updatronix_sanitize_schedule_array()`,
- *   which already clamps the window to 1..365 when the delay is on and to 0
- *   when it is off. Moving either bound therefore changes no decision.
- * - `261` `CastString`: `(string)` on a concatenation operand coerces exactly
+ * - line 131 (four mutants, `IncrementInteger`/`DecrementInteger`): the window
+ *   is clamped to 1..365 by `updatronix_sanitize_schedule_array()` when the
+ *   delay is on and to 0 when it is off, so `max( 0, ...)`, `min( 366, ...)`,
+ *   the ternary's `: 0` and `0` -> `-1` agree with the original on every operand
+ *   the line can hold. Infection is told to skip the expression -- see the
+ *   `@infection-ignore-all` annotation on the array item in the source -- because
+ *   a ratio over a one-line diff cannot hold four unobservable mutants beside
+ *   the five the tests here kill. The line is answered by
+ *   `bin/harness counterfactual` instead, which is the hand-over DESIGN.md
+ *   section 5 wires these two gates together with.
+ *
+ *   The fifth mutant, the ternary's `: 1` -> `: 2`, was *not* equivalent and was
+ *   the gap this classification had been hiding: with the delay off the stored
+ *   window is 0 and the ternary takes its else-branch, which nothing asserted.
+ *   `test_schedule_slice_coerces_the_stored_flag_and_clamps_the_window` asserts
+ *   it now, and that assertion is also what kills the `min(` -> `max(` twin
+ *   `bin/harness counterfactual` substitutes on this line.
+ * - line 269 `CastString`: `(string)` on a concatenation operand coerces exactly
  *   the way PHP coerces it anyway. Stated in the ledger test that covers it.
- * - `336` `CastBool`: `wp_json_encode()` of an array is never a falsy
+ * - line 344 `CastBool`: `wp_json_encode()` of an array is never a falsy
  *   non-empty string, so the cast and the bare truthiness agree on every value
  *   the call can produce.
  *
@@ -274,12 +287,20 @@ final class AutoUpdateDelayBehaviorTest extends TestCase {
 	 * `'1'` is what a checkbox submitted by a form, a WP-CLI `update_option` or
 	 * an import leaves behind. The window is clamped to whole days between 1 and
 	 * 365: zero means one day, and a year is the ceiling.
+	 *
+	 * The fourth case is the one `bin/harness mutation` found missing. With the
+	 * delay off, the sanitizer stores a window of 0, the slice's expression then
+	 * takes its *else* branch, and nothing asserted what that branch produces --
+	 * so a mutant that turns its `1` into a `2` survived. It is also the case
+	 * `bin/harness counterfactual` substitutes on that line (the `min(` -> `max(`
+	 * twin), and this assertion is what kills it.
 	 */
 	public function test_schedule_slice_coerces_the_stored_flag_and_clamps_the_window(): void {
 		$cases = array(
-			'string flag, ordinary window' => array( '1', 5, 5 ),
-			'zero means one day'           => array( true, 0, 1 ),
-			'a year is the ceiling'        => array( true, 1000, 365 ),
+			'string flag, ordinary window'      => array( '1', 5, true, 5 ),
+			'zero means one day'                => array( true, 0, true, 1 ),
+			'a year is the ceiling'             => array( true, 1000, true, 365 ),
+			'delay off, the window is one day'  => array( false, 0, false, 1 ),
 		);
 
 		foreach ( $cases as $label => $case ) {
@@ -297,8 +318,8 @@ final class AutoUpdateDelayBehaviorTest extends TestCase {
 
 			$slice = $this->setting_slice();
 
-			$this->assertSame( $case[2], $slice['days'] ?? null, "$label: the soak window must be clamped to 1..365 whole days." );
-			$this->assertTrue( $slice['enabled'] ?? null, "$label: the stored flag must reach the slice as a real boolean." );
+			$this->assertSame( $case[3], $slice['days'] ?? null, "$label: the soak window must be clamped to 1..365 whole days." );
+			$this->assertSame( $case[2], $slice['enabled'] ?? null, "$label: the stored flag must reach the slice as a real boolean." );
 		}
 	}
 

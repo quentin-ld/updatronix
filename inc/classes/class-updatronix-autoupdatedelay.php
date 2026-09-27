@@ -120,6 +120,14 @@ final class Updatronix_AutoUpdateDelay {
 		$days                       = max( 0, (int) $delay['delay_value'] );
 		self::$delay_settings_slice = array(
 			'enabled' => $enabled,
+			// The window below is clamped by the sanitizer before this runs.
+			// A ratio over a one-line diff cannot say "four mutants here are
+			// unobservable and five are killed by the tests" -- so Infection is
+			// told to skip the expression, and `bin/harness counterfactual`
+			// answers for the line instead. DESIGN.md section 5 is the hand-over
+			// between the two gates, and the classification mutant by mutant is
+			// written out in tests/Unit/AutoUpdateDelayBehaviorTest.php.
+			// @infection-ignore-all.
 			'days'    => max( 1, min( 365, 0 !== $days ? $days : 1 ) ),
 		);
 		self::$delay_enabled_cache  = $enabled && $days > 0;
