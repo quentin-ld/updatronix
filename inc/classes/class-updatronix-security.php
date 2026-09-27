@@ -57,7 +57,7 @@ final class Updatronix_Security {
 	public static function sanitize_log_type( string $value ): string {
 		$value = sanitize_key( $value );
 
-		return in_array( $value, self::ALLOWED_LOG_TYPES, true ) ? $value : 'plugin';
+		return in_array( $value, self::ALLOWED_LOG_TYPES, true ) ? $value : 'plugin'; // counterfactual: equivalent — both sides of the comparison are strings — a declared `string` operand and a haystack of string literals — so the strict comparison and the loose one agree.
 	}
 
 	/**
@@ -69,7 +69,7 @@ final class Updatronix_Security {
 	public static function sanitize_action_type( string $value ): string {
 		$value = sanitize_key( $value );
 
-		return in_array( $value, self::ALLOWED_ACTION_TYPES, true ) ? $value : 'update';
+		return in_array( $value, self::ALLOWED_ACTION_TYPES, true ) ? $value : 'update'; // counterfactual: equivalent — both sides of the comparison are strings — a declared `string` operand and a haystack of string literals — so the strict comparison and the loose one agree.
 	}
 
 	/**
@@ -81,7 +81,7 @@ final class Updatronix_Security {
 	public static function sanitize_status( string $value ): string {
 		$value = sanitize_key( $value );
 
-		return in_array( $value, self::ALLOWED_STATUSES, true ) ? $value : 'success';
+		return in_array( $value, self::ALLOWED_STATUSES, true ) ? $value : 'success'; // counterfactual: equivalent — both sides of the comparison are strings — a declared `string` operand and a haystack of string literals — so the strict comparison and the loose one agree.
 	}
 
 	/**
@@ -93,7 +93,7 @@ final class Updatronix_Security {
 	public static function sanitize_performed_as( string $value ): string {
 		$value = sanitize_key( $value );
 
-		return in_array( $value, self::ALLOWED_PERFORMED_AS, true ) ? $value : 'manual';
+		return in_array( $value, self::ALLOWED_PERFORMED_AS, true ) ? $value : 'manual'; // counterfactual: equivalent — both sides of the comparison are strings — a declared `string` operand and a haystack of string literals — so the strict comparison and the loose one agree.
 	}
 
 	/**
@@ -105,7 +105,7 @@ final class Updatronix_Security {
 	public static function sanitize_update_context( string $value ): string {
 		$value = sanitize_key( $value );
 
-		return in_array( $value, self::ALLOWED_UPDATE_CONTEXT, true ) ? $value : '';
+		return in_array( $value, self::ALLOWED_UPDATE_CONTEXT, true ) ? $value : ''; // counterfactual: equivalent — both sides of the comparison are strings — a declared `string` operand and a haystack of string literals — so the strict comparison and the loose one agree.
 	}
 
 	/**

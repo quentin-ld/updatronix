@@ -576,4 +576,16 @@ final class SecurityTest extends TestCase {
 		$GLOBALS['updatronix_test_is_super_admin'] = true;
 		$this->assertTrue( Updatronix_Security::user_can_manage_logs() );
 	}
+
+	/**
+	 * A site path is redacted: internal filesystem layout must not reach a log
+	 * entry, and the path prefixes are what does the redacting.
+	 *
+	 * @return void
+	 */
+	public function test_redact_sensitive_text_redacts_a_site_path(): void {
+		$traced = Updatronix_Security::sanitize_trace( 'PHP Warning: fopen(/tmp/some-dir/file.php): failed' );
+
+		$this->assertStringNotContainsString( '/tmp/some-dir/file.php', $traced );
+	}
 }

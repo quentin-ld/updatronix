@@ -595,4 +595,42 @@ final class AutoUpdateDelayBehaviorTest extends TestCase {
 
 		$this->assertCount( 384, $this->ledger(), 'ledger_flush must trim rows to MAX_LEDGER_ENTRIES.' );
 	}
+
+	/**
+	 * A `false` prior decision is passed straight through: the filter only
+	 * takes over when the updater already decided to update, so a veto from an
+	 * earlier filter must survive unchanged.
+	 *
+	 * @return void
+	 */
+	public function test_filter_theme_and_core_pass_through_a_false_update(): void {
+		$this->enable_delay( 1 );
+
+		$offer = (object) array(
+			'theme'       => 'twentytwentyfive',
+			'new_version' => '2.0',
+		);
+		$hash  = hash( 'sha256', 'theme|twentytwentyfive|2.0' );
+
+		$GLOBALS['updatronix_test_site_transients']['update_themes'] = (object) array(
+			'response' => array(
+				'twentytwentyfive' => array( 'new_version' => '2.0' ),
+			),
+		);
+		$GLOBALS['updatronix_test_options'][ Updatronix_AutoUpdateDelay::OPTION_LEDGER ] = wp_json_encode(
+			array( $hash => time() - 2 * DAY_IN_SECONDS )
+		);
+
+		// The delay would let this offer through, so a `false` that comes back
+		// `false` is the prior decision surviving — not the delay agreeing.
+		$this->assertTrue( Updatronix_AutoUpdateDelay::filter_theme( true, $offer ) );
+		$this->assertFalse(
+			Updatronix_AutoUpdateDelay::filter_theme( false, $offer ),
+			'a false decision must come back as false, not as the delay verdict'
+		);
+		$this->assertFalse(
+			Updatronix_AutoUpdateDelay::filter_core( false, $offer ),
+			'a false decision must come back as false, not as the delay verdict'
+		);
+	}
 }

@@ -821,7 +821,8 @@ final class Updatronix_Settings {
 	 */
 	private static function resolve_site_id( \WP_REST_Request $request ): int {
 		$current_site_id   = (int) get_current_blog_id();
-		$requested_site_id = absint( (string) $request->get_param( 'site_id' ) );
+		// @infection-ignore-all.
+		$requested_site_id = absint( (string) $request->get_param( 'site_id' ) ); // counterfactual: equivalent — `absint()` is `abs( (int) $value )`, so the `(string)` cast in front of it is idempotent for the string and int shapes the parameter accepts.
 
 		if ( ! is_multisite() ) {
 			return $current_site_id;

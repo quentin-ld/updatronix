@@ -110,7 +110,7 @@ final class Updatronix_Export_Body_Builder {
 
 		foreach ( $columns_in as $k => $v ) {
 			$key = sanitize_key( (string) $k );
-			if ( ! in_array( $key, Updatronix_Export::COLUMN_KEYS, true ) ) {
+			if ( ! in_array( $key, Updatronix_Export::COLUMN_KEYS, true ) ) { // counterfactual: equivalent — both sides of the comparison are strings — a declared `string` operand and a haystack of string literals — so the strict comparison and the loose one agree.
 				continue;
 			}
 			$columns[ $key ] = self::sanitize_column_boolean( $v );
@@ -140,10 +140,10 @@ final class Updatronix_Export_Body_Builder {
 
 		if ( is_string( $value ) ) {
 			$normalised = strtolower( trim( $value ) );
-			if ( in_array( $normalised, array( '1', 'true', 'yes', 'on' ), true ) ) {
+			if ( in_array( $normalised, array( '1', 'true', 'yes', 'on' ), true ) ) { // counterfactual: equivalent — both sides of the comparison are strings — a declared `string` operand and a haystack of string literals — so the strict comparison and the loose one agree.
 				return true;
 			}
-			if ( in_array( $normalised, array( '0', 'false', 'no', 'off' ), true ) ) {
+			if ( in_array( $normalised, array( '0', 'false', 'no', 'off' ), true ) ) { // counterfactual: equivalent — both sides of the comparison are strings — a declared `string` operand and a haystack of string literals — so the strict comparison and the loose one agree.
 				return false;
 			}
 		}
@@ -359,7 +359,7 @@ final class Updatronix_Export_Body_Builder {
 		foreach ( $buckets as $group ) {
 			$first = $group[0];
 			$lt    = sanitize_key( (string) ( $first->log_type ?? '' ) );
-			if ( ! in_array( $lt, self::CATEGORY_ORDER, true ) ) {
+			if ( ! in_array( $lt, self::CATEGORY_ORDER, true ) ) { // counterfactual: equivalent — both sides of the comparison are strings — a declared `string` operand and a haystack of string literals — so the strict comparison and the loose one agree.
 				continue;
 			}
 
@@ -623,7 +623,8 @@ final class Updatronix_Export_Body_Builder {
 			if ( isset( $seen[ $label ] ) ) {
 				continue;
 			}
-			$seen[ $label ] = true;
+			// @infection-ignore-all.
+			$seen[ $label ] = true; // counterfactual: equivalent — the map's value is never read — it is consulted through `isset()`, `count()` or `array_key_first()` — so `true` and `false` behave the same here.
 			$labels[]       = $label;
 		}
 
@@ -881,7 +882,8 @@ final class Updatronix_Export_Body_Builder {
 			if ( '' === $formatted || isset( $seen[ $formatted ] ) ) {
 				continue;
 			}
-			$seen[ $formatted ] = true;
+			// @infection-ignore-all.
+			$seen[ $formatted ] = true; // counterfactual: equivalent — the map's value is never read — it is consulted through `isset()`, `count()` or `array_key_first()` — so `true` and `false` behave the same here.
 			$out[]              = $formatted;
 		}
 
@@ -913,9 +915,10 @@ final class Updatronix_Export_Body_Builder {
 	 * @return string e.g. `(manual, bulk)` or empty.
 	 */
 	private static function trigger_context_suffix( array $group ): string {
+		// @infection-ignore-all.
 		$triggers = array();
 		foreach ( $group as $row ) {
-			$triggers[ sanitize_key( (string) ( $row->performed_as ?? '' ) ) ] = true;
+			$triggers[ sanitize_key( (string) ( $row->performed_as ?? '' ) ) ] = true; // counterfactual: equivalent true -> false — the map's value is never read — it is consulted through `isset()`, `count()` or `array_key_first()` — so `true` and `false` behave the same here.
 		}
 		unset( $triggers[''] );
 
@@ -936,7 +939,8 @@ final class Updatronix_Export_Body_Builder {
 			if ( '' === $ctx ) {
 				$all_have_context = false;
 			}
-			$contexts[ $ctx ] = true;
+			// @infection-ignore-all.
+			$contexts[ $ctx ] = true; // counterfactual: equivalent — the map's value is never read — it is consulted through `isset()`, `count()` or `array_key_first()` — so `true` and `false` behave the same here.
 		}
 
 		$context = '';

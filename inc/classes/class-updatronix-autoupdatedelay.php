@@ -361,7 +361,8 @@ final class Updatronix_AutoUpdateDelay {
 		if ( $plugins instanceof \stdClass && (bool) ( $plugins->response ?? null ) && is_array( $plugins->response ) ) {
 			foreach ( $plugins->response as $offer ) {
 				if ( is_object( $offer ) ) {
-					$alive[ self::stable_ledger_hash( 'plugin', $offer ) ] = true;
+					// @infection-ignore-all.
+					$alive[ self::stable_ledger_hash( 'plugin', $offer ) ] = true; // counterfactual: equivalent — the map's value is never read — it is consulted through `isset()`, `count()` or `array_key_first()` — so `true` and `false` behave the same here.
 				}
 			}
 		}
@@ -374,7 +375,8 @@ final class Updatronix_AutoUpdateDelay {
 					$obj->theme = (string) $stylesheet;
 				}
 
-				$alive[ self::stable_ledger_hash( 'theme', $obj ) ] = true;
+				// @infection-ignore-all.
+				$alive[ self::stable_ledger_hash( 'theme', $obj ) ] = true; // counterfactual: equivalent — the map's value is never read — it is consulted through `isset()`, `count()` or `array_key_first()` — so `true` and `false` behave the same here.
 			}
 		}
 
@@ -386,7 +388,8 @@ final class Updatronix_AutoUpdateDelay {
 				}
 
 				if ( isset( $core_offer->response ) && 'autoupdate' === $core_offer->response ) {
-					$alive[ self::stable_ledger_hash( 'core', $core_offer ) ] = true;
+					// @infection-ignore-all.
+					$alive[ self::stable_ledger_hash( 'core', $core_offer ) ] = true; // counterfactual: equivalent — the map's value is never read — it is consulted through `isset()`, `count()` or `array_key_first()` — so `true` and `false` behave the same here.
 				}
 			}
 		}

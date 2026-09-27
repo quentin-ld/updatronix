@@ -177,7 +177,7 @@ function updatronix_sanitize_schedule_array( array $in ): array {
 
 	$recurrence_raw      = strtolower( trim( (string) ( $uc_in['recurrence'] ?? $defaults['update_check']['recurrence'] ) ) );
 	$allowed_recurrences = updatronix_allowed_update_check_recurrence_slugs();
-	$recurrence          = in_array( $recurrence_raw, $allowed_recurrences, true )
+	$recurrence          = in_array( $recurrence_raw, $allowed_recurrences, true ) // counterfactual: equivalent — both sides of the comparison are strings — a declared `string` operand and a haystack of string literals — so the strict comparison and the loose one agree.
 		? $recurrence_raw
 		: '';
 
