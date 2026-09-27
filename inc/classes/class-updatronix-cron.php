@@ -115,7 +115,7 @@ final class Updatronix_Cron {
 			return;
 		}
 
-		if ( updatronix_get_plugin_transient( self::SELF_HEAL_TRANSIENT ) ) {
+		if ( (bool) updatronix_get_plugin_transient( self::SELF_HEAL_TRANSIENT ) ) {
 			return;
 		}
 
@@ -129,7 +129,7 @@ final class Updatronix_Cron {
 	 * @return void
 	 */
 	public static function schedule_if_needed(): void {
-		if ( wp_next_scheduled( self::HOOK_CLEANUP ) ) {
+		if ( (bool) wp_next_scheduled( self::HOOK_CLEANUP ) ) {
 			return;
 		}
 
@@ -240,7 +240,7 @@ final class Updatronix_Cron {
 	private static function apply_schedule_recurrence( string $recurrence, string $time ): void {
 		wp_clear_scheduled_hook( self::HOOK_WP_CRON_CORE_VERSION_CHECK );
 		$timestamp = updatronix_next_update_check_timestamp( $recurrence, $time );
-		wp_schedule_event( (int) $timestamp, $recurrence, self::HOOK_WP_CRON_CORE_VERSION_CHECK );
+		wp_schedule_event( $timestamp, $recurrence, self::HOOK_WP_CRON_CORE_VERSION_CHECK );
 	}
 
 	/**
@@ -316,7 +316,7 @@ final class Updatronix_Cron {
 
 		$time      = $schedule['update_check']['time'];
 		$timestamp = updatronix_next_update_check_timestamp( $recurrence, $time );
-		wp_schedule_event( (int) $timestamp, $recurrence, self::HOOK_WP_CRON_CORE_VERSION_CHECK );
+		wp_schedule_event( $timestamp, $recurrence, self::HOOK_WP_CRON_CORE_VERSION_CHECK );
 		self::sync_core_update_crons_with_schedule();
 	}
 
@@ -330,7 +330,7 @@ final class Updatronix_Cron {
 			return;
 		}
 
-		if ( updatronix_get_plugin_transient( self::UPDATE_CHECK_HEAL_TRANSIENT ) ) {
+		if ( (bool) updatronix_get_plugin_transient( self::UPDATE_CHECK_HEAL_TRANSIENT ) ) {
 			return;
 		}
 

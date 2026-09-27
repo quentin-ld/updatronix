@@ -116,11 +116,11 @@ final class Updatronix_AutoUpdateDelay {
 
 		$schedule                   = updatronix_get_settings()['schedule'];
 		$delay                      = $schedule['delay_updates'];
-		$enabled                    = ! empty( $delay['enabled'] );
+		$enabled                    = $delay['enabled'];
 		$days                       = max( 0, (int) $delay['delay_value'] );
 		self::$delay_settings_slice = array(
 			'enabled' => $enabled,
-			'days'    => max( 1, min( 365, $days ? $days : 1 ) ),
+			'days'    => max( 1, min( 365, 0 !== $days ? $days : 1 ) ),
 		);
 		self::$delay_enabled_cache  = $enabled && $days > 0;
 
@@ -333,7 +333,7 @@ final class Updatronix_AutoUpdateDelay {
 		}
 
 		$encoded_ledger = wp_json_encode( $ledger );
-		updatronix_update_plugin_option( self::OPTION_LEDGER, $encoded_ledger ? $encoded_ledger : '{}', false );
+		updatronix_update_plugin_option( self::OPTION_LEDGER, (bool) $encoded_ledger ? $encoded_ledger : '{}', false );
 		self::$ledger_cache = $ledger;
 	}
 
@@ -350,7 +350,7 @@ final class Updatronix_AutoUpdateDelay {
 		$alive = array();
 
 		$plugins = get_site_transient( 'update_plugins' );
-		if ( $plugins instanceof \stdClass && ! empty( $plugins->response ) && is_array( $plugins->response ) ) {
+		if ( $plugins instanceof \stdClass && (bool) ( $plugins->response ?? null ) && is_array( $plugins->response ) ) {
 			foreach ( $plugins->response as $offer ) {
 				if ( is_object( $offer ) ) {
 					$alive[ self::stable_ledger_hash( 'plugin', $offer ) ] = true;
@@ -359,7 +359,7 @@ final class Updatronix_AutoUpdateDelay {
 		}
 
 		$themes = get_site_transient( 'update_themes' );
-		if ( $themes instanceof \stdClass && ! empty( $themes->response ) && is_array( $themes->response ) ) {
+		if ( $themes instanceof \stdClass && (bool) ( $themes->response ?? null ) && is_array( $themes->response ) ) {
 			foreach ( $themes->response as $stylesheet => $row ) {
 				$obj = (object) $row;
 				if ( ! isset( $obj->theme ) ) {
@@ -371,7 +371,7 @@ final class Updatronix_AutoUpdateDelay {
 		}
 
 		$core_bundle = get_site_transient( 'update_core' );
-		if ( $core_bundle instanceof \stdClass && ! empty( $core_bundle->updates ) && is_array( $core_bundle->updates ) ) {
+		if ( $core_bundle instanceof \stdClass && (bool) ( $core_bundle->updates ?? null ) && is_array( $core_bundle->updates ) ) {
 			foreach ( $core_bundle->updates as $core_offer ) {
 				if ( ! is_object( $core_offer ) ) {
 					continue;

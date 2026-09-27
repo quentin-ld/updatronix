@@ -12,6 +12,12 @@ use PHPUnit\Framework\TestCase;
 /**
  * Test redact_sensitive_text, sanitize_message, sanitize_trace, and related helpers.
  *
+ * Five mutants of `sanitize_version` and the redaction helpers survive
+ * `bin/harness mutation`, and all five are equivalent: removing a `(bool)` cast
+ * whose operand is only ever used as a condition cannot change which branch is
+ * taken, and `mb_substr` over a string the sanitiser has already reduced to
+ * `[a-zA-Z0-9._-]` is `substr` to the byte.
+ *
  * @covers \Updatronix_Security
  */
 final class SecurityTest extends TestCase {
@@ -475,6 +481,15 @@ final class SecurityTest extends TestCase {
 	 */
 	public function test_sanitize_version_preserves_valid(): void {
 		$this->assertSame( '1.2.3-beta.4', Updatronix_Security::sanitize_version( '1.2.3-beta.4' ) );
+	}
+
+	/**
+	 * The alphabet is `[a-zA-Z0-9._-]`: letters belong to a version, so one that
+	 * starts with a letter is valid and must survive the trim. It is also the
+	 * only shape that tells a boolean guard apart from a numeric one.
+	 */
+	public function test_sanitize_version_keeps_a_version_that_starts_with_a_letter(): void {
+		$this->assertSame( 'v1.2.3', Updatronix_Security::sanitize_version( 'v1.2.3' ) );
 	}
 
 	/**

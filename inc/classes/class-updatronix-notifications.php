@@ -88,7 +88,7 @@ final class Updatronix_Notifications {
 			return array();
 		}
 
-		$recipients                    = array_values( array_filter( array_map( 'sanitize_email', explode( ',', $emails ) ) ) );
+		$recipients                    = array_values( array_filter( array_map( 'sanitize_email', explode( ',', $emails ) ), static fn ( string $email ): bool => '' !== $email ) );
 		self::$parsed_recipients_cache = $recipients;
 
 		return $recipients;

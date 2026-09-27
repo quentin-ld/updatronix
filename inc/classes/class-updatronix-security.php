@@ -144,7 +144,7 @@ final class Updatronix_Security {
 	public static function sanitize_version( string $value ): string {
 		$clean = preg_replace( '/[^a-zA-Z0-9._-]/', '', $value );
 
-		return mb_substr( $clean ? $clean : '', 0, 64 );
+		return mb_substr( (bool) $clean ? $clean : '', 0, 64 );
 	}
 
 	/**
@@ -169,9 +169,9 @@ final class Updatronix_Security {
 	 */
 	private static function redact_sensitive_text( string $value ): string {
 		$redacted = preg_replace( '/([?&](?:token|signature|sig|key|access_token|auth(?![a-zA-Z]))[^=\s]*=)[^&\s]+/i', '$1[redacted]', $value );
-		$value    = $redacted ? $redacted : $value;
+		$value    = (bool) $redacted ? $redacted : $value;
 		$redacted = preg_replace( '/([A-Z0-9._%+\-]+)@([A-Z0-9.\-]+\.[A-Z]{2,})/i', '[redacted-email]', $value );
-		$value    = $redacted ? $redacted : $value;
+		$value    = (bool) $redacted ? $redacted : $value;
 
 		// Redact server paths so internal filesystem layout is not exposed in log entries.
 		$path_prefixes = array();
@@ -192,7 +192,7 @@ final class Updatronix_Security {
 			$pattern     = '/(' . implode( '|', $path_prefixes ) . ')[^\s"]*/i';
 			$replacement = basename( untrailingslashit( ABSPATH ) ) . '[redacted]';
 			$redacted    = preg_replace( $pattern, $replacement, $value );
-			$value       = $redacted ? $redacted : $value;
+			$value       = (bool) $redacted ? $redacted : $value;
 		}
 
 		return $value;

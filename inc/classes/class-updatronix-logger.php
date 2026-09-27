@@ -362,7 +362,7 @@ final class Updatronix_Logger {
 				$found     = false;
 				$cached    = wp_cache_get( $cache_key, self::CACHE_GROUP, false, $found );
 
-				if ( $found ) {
+				if ( (bool) $found ) {
 					return $cached instanceof \stdClass ? $cached : null;
 				}
 

@@ -151,7 +151,7 @@ final class Updatronix_Export_Rate_Limiter {
 
 		if ( wp_using_ext_object_cache() ) {
 			$cur = (int) wp_cache_get( $key, $group, false, $found );
-			if ( ! $found ) {
+			if ( ! (bool) $found ) {
 				$cur = 0;
 			}
 			if ( $cur + 1 > $max ) {

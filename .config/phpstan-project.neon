@@ -19,6 +19,20 @@
 #       scanFiles:
 #           - vendor/woocommerce/woocommerce/woocommerce.php
 parameters:
+    # 67 of the raised floor's findings were `cast.useless`, and every one of
+    # them is PHPStan trusting a docblock: it reads `@param string $post_type`
+    # as certain, so the `(string) $post_type` on the line below it looks
+    # redundant. The cast is not redundant -- PHP is not typed at runtime, and
+    # deleting it lets a value that does not match its own docblock reach
+    # `get_posts()`, a transient or the database uncoerced. A defensive cast on
+    # a documented type is the shape of this codebase, so the finding is what is
+    # wrong here, not 67 lines of it. (The nine the setting does not cover were
+    # casts on natively typed values, and those were removed.)
+    #
+    # PHPStan's own message for the rule names this setting. It is set here
+    # rather than in the generated `.config/phpstan.neon` because it is this
+    # project's decision, not a change to the floor the other twelve meet.
+    treatPhpDocTypesAsCertain: false
     excludePaths:
         analyseAndScan:
             - .config/*

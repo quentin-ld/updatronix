@@ -65,7 +65,7 @@ final class Updatronix_Export_Transient_Manager {
 			return new WP_Error( 'internal', '', array( 'status' => 500 ) );
 		}
 
-		if ( ! preg_match( self::KEY_PATTERN, $new_key ) ) {
+		if ( 1 !== preg_match( self::KEY_PATTERN, $new_key ) ) {
 			return new WP_Error( 'internal', '', array( 'status' => 500 ) );
 		}
 
@@ -91,7 +91,7 @@ final class Updatronix_Export_Transient_Manager {
 
 		// Best-effort cleanup of the prior transient. The old one expires
 		// naturally via TTL if this delete fails.
-		if ( '' !== $prior && preg_match( self::KEY_PATTERN, $prior ) && $prior !== $new_key ) {
+		if ( '' !== $prior && 1 === preg_match( self::KEY_PATTERN, $prior ) && $prior !== $new_key ) {
 			$deleted = updatronix_delete_plugin_transient( $prior );
 			if ( ! $deleted && defined( 'WP_DEBUG_LOG' ) && WP_DEBUG_LOG ) {
                 // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- gated diagnostic only.

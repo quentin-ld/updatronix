@@ -279,6 +279,13 @@ if (!function_exists('get_option')) {
     $GLOBALS['updatronix_test_options'] = [];
 
     /**
+     * Autoload flag per option, as passed to update_option() by the code under test.
+     *
+     * @var array<string, bool|null>
+     */
+    $GLOBALS['updatronix_test_option_autoload'] = [];
+
+    /**
      * Stub for get_option used in unit tests.
      *
      * Reads the test option store; falls back to $default when unset.
@@ -309,6 +316,10 @@ if (!function_exists('update_option')) {
      */
     function update_option(string $option, $value, $autoload = null): bool {
         $GLOBALS['updatronix_test_options'][$option] = $value;
+        // Recorded, and not turned into an assertion here: whether an option is
+        // written with autoload on is a decision of the code under test, and a
+        // stub that drops the third argument cannot see it.
+        $GLOBALS['updatronix_test_option_autoload'][$option] = $autoload;
 
         return true;
     }

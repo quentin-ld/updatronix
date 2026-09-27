@@ -597,7 +597,7 @@ final class Updatronix_Export_Body_Builder {
 		}
 
 		$user = get_userdata( $user_id );
-		if ( $user ) {
+		if ( (bool) $user ) {
 			return self::normalize_field( (string) $user->display_name );
 		}
 
@@ -877,7 +877,7 @@ final class Updatronix_Export_Body_Builder {
 		$out  = array();
 		$seen = array();
 		foreach ( $stamps as $ts ) {
-			$formatted = self::format_export_datetime( (int) $ts );
+			$formatted = self::format_export_datetime( $ts );
 			if ( '' === $formatted || isset( $seen[ $formatted ] ) ) {
 				continue;
 			}

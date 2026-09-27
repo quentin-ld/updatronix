@@ -27,7 +27,7 @@ final class Updatronix_Export_Request_Schema {
 		/**
 		 * Raw payload received from the REST request.
 		 *
-		 * @var mixed
+		 * @var array<string, mixed>
 		 */
 		$raw_params = $request->get_json_params();
 		if ( ! is_array( $raw_params ) ) {

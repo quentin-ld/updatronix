@@ -77,7 +77,7 @@ function updatronix_get_allowed_cron_schedule_labels(): array {
 	/**
 	 * All registered cron schedules, keyed by schedule slug.
 	 *
-	 * @var array<string, array{display: string, interval: int, ...}> $all
+	 * @var array<int|string, array{interval: int, display: string}> $all
 	 */
 	$all = wp_get_schedules();
 	$out = array();
@@ -211,7 +211,7 @@ function updatronix_sanitize_schedule_array( array $in ): array {
  * @return string Canonical `HH:mm` defaulting to 03:00 when empty or invalid (for daily schedules).
  */
 function updatronix_sanitize_schedule_wall_time( string $time_raw ): string {
-	if ( '' !== $time_raw && preg_match( '/^(?:([01]?[0-9]|2[0-3])):([0-5][0-9])$/', $time_raw, $matches ) ) {
+	if ( '' !== $time_raw && 1 === preg_match( '/^(?:([01]?[0-9]|2[0-3])):([0-5][0-9])$/', $time_raw, $matches ) ) {
 		$h = (int) $matches[1];
 		$m = (int) $matches[2];
 		$h = max( 0, min( 23, $h ) );
@@ -238,11 +238,11 @@ function updatronix_sanitize_schedule_wall_time( string $time_raw ): string {
  */
 function updatronix_next_update_check_timestamp( string $recurrence, string $time ): int {
 	if ( 'hourly' === $recurrence ) {
-		return (int) time();
+		return time();
 	}
 
 	if ( 'daily' !== $recurrence && 'twicedaily' !== $recurrence && 'weekly' !== $recurrence ) {
-		return (int) time();
+		return time();
 	}
 
 	$tz = wp_timezone();
@@ -256,7 +256,7 @@ function updatronix_next_update_check_timestamp( string $recurrence, string $tim
 		$run        = \DateTimeImmutable::createFromFormat( 'Y-m-d H:i:s', sprintf( '%s %02d:%02d:00', $today, $hour, $minute ), $tz );
 
 		if ( false === $run ) {
-			return (int) time();
+			return time();
 		}
 
 		if ( $run->getTimestamp() <= $now->getTimestamp() ) {
@@ -271,7 +271,7 @@ function updatronix_next_update_check_timestamp( string $recurrence, string $tim
 
 		return (int) $run->getTimestamp();
 	} catch ( \Throwable $exception ) {
-		return (int) time();
+		return time();
 	}
 }
 
@@ -294,7 +294,7 @@ function updatronix_maybe_grant_manage_cap(): void {
 		return;
 	}
 	$role = get_role( 'administrator' );
-	if ( $role && ! $role->has_cap( UPDATRONIX_CAP_MANAGE ) ) {
+	if ( (bool) $role && ! $role->has_cap( UPDATRONIX_CAP_MANAGE ) ) {
 		$role->add_cap( UPDATRONIX_CAP_MANAGE );
 	}
 	update_option( 'updatronix_cap_migrated', '1', false );
@@ -543,7 +543,7 @@ function updatronix_sanitize_emails( mixed $value ): string {
 		// Validate before sanitize_email() coerces: tokens that are not already a
 		// valid address (e.g. "Bcc: attacker@example.invalid", which has a space)
 		// are rejected outright rather than mangled into a deceptive address.
-		if ( '' === $candidate || ! is_email( $candidate ) ) {
+		if ( '' === $candidate || ! (bool) is_email( $candidate ) ) {
 			continue;
 		}
 		$clean = sanitize_email( $candidate );

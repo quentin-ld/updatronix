@@ -26,7 +26,7 @@ final class Updatronix_Core_Update_Log_Versions {
 		if ( '' === $contents ) {
 			return '';
 		}
-		if ( preg_match( '/\$wp_version\s*=\s*[\'"]([^\'"\r\n]+)[\'"]\s*;/', $contents, $m ) ) {
+		if ( 1 === preg_match( '/\$wp_version\s*=\s*[\'"]([^\'"\r\n]+)[\'"]\s*;/', $contents, $m ) ) {
 			return $m[1];
 		}
 

@@ -367,7 +367,8 @@ final class Updatronix_Settings {
 				array_map(
 					static fn ( \stdClass $log ): int => (int) ( $log->user_id ?? 0 ),
 					$logs
-				)
+				),
+				static fn ( int $user_id ): bool => 0 !== $user_id
 			)
 		);
 		if ( array() !== $user_ids ) {
@@ -396,7 +397,7 @@ final class Updatronix_Settings {
 		$log = Updatronix_Logger::get_log( $id, true );
 
 		$scope = self::resolve_site_id( $request );
-		if ( ! $log || ( $scope > 0 && (int) ( $log->site_id ?? 0 ) !== $scope ) ) {
+		if ( ! (bool) $log || ( $scope > 0 && (int) ( $log->site_id ?? 0 ) !== $scope ) ) {
 			return new WP_REST_Response(
 				array(
 					'message' => __( 'The requested log entry could not be found.', 'updatronix' ),
@@ -429,8 +430,8 @@ final class Updatronix_Settings {
 		} else {
 			$user = get_userdata( $user_id );
 			/* translators: %d: WordPress user ID when display name is not available */
-			$log->performed_by_display = $user ? $user->display_name : sprintf( __( 'User #%d', 'updatronix' ), $user_id );
-			$log->user_edit_link       = get_edit_user_link( $user_id ) ? get_edit_user_link( $user_id ) : '';
+			$log->performed_by_display = (bool) $user ? $user->display_name : sprintf( __( 'User #%d', 'updatronix' ), $user_id );
+			$log->user_edit_link       = (bool) get_edit_user_link( $user_id ) ? get_edit_user_link( $user_id ) : '';
 		}
 
 		$performed_as = $log->performed_as ?? 'manual';
@@ -468,7 +469,7 @@ final class Updatronix_Settings {
 
 		$log->summary_text = self::build_summary_text( $log );
 		if ( ! isset( $log->detail_available ) ) {
-			$log->detail_available = ! empty( $log->message ) || ! empty( $log->trace );
+			$log->detail_available = (bool) ( $log->message ?? null ) || (bool) ( $log->trace ?? null );
 		} else {
 			$log->detail_available = (bool) $log->detail_available;
 		}
@@ -492,7 +493,7 @@ final class Updatronix_Settings {
 				return sprintf(
 					/* translators: 1: item name, 2: version number */
 					__( 'Language pack updated for %1$s %2$s', 'updatronix' ),
-					$item_name ? $item_name : __( 'WordPress', 'updatronix' ),
+					(bool) $item_name ? $item_name : __( 'WordPress', 'updatronix' ),
 					$version_after
 				);
 			}
@@ -500,7 +501,7 @@ final class Updatronix_Settings {
 			return sprintf(
 				/* translators: %s: item name */
 				__( 'Language pack updated for %s', 'updatronix' ),
-				$item_name ? $item_name : __( 'WordPress', 'updatronix' )
+				(bool) $item_name ? $item_name : __( 'WordPress', 'updatronix' )
 			);
 		}
 
@@ -554,7 +555,7 @@ final class Updatronix_Settings {
 		$id    = (int) $request->get_param( 'id' );
 		$log   = Updatronix_Logger::get_log( $id, false );
 		$scope = self::resolve_site_id( $request );
-		if ( ! $log || ( $scope > 0 && (int) ( $log->site_id ?? 0 ) !== $scope ) ) {
+		if ( ! (bool) $log || ( $scope > 0 && (int) ( $log->site_id ?? 0 ) !== $scope ) ) {
 			return new WP_REST_Response( array( 'message' => __( 'The requested log entry could not be found.', 'updatronix' ) ), 404 );
 		}
 

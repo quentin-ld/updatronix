@@ -99,7 +99,7 @@ function updatronix_options_page(): void {
 			<header class="updatronix-header">
 				<div class="updatronix-header-title">
 					<div class="updatronix-header-title-logo">
-						<?php if ( $logo_url ) { ?>
+						<?php if ( (bool) $logo_url ) { ?>
 							<img
 								src="<?php echo esc_url( $logo_url ); ?>"
 								alt=""
@@ -116,7 +116,7 @@ function updatronix_options_page(): void {
 						<p class="updatronix-header-title-text-description">
 							<?php echo esc_html__( 'Manage your WordPress updates.', 'updatronix' ); ?>
 						</p>
-						<?php if ( $plugin_version ) { ?>
+						<?php if ( (bool) $plugin_version ) { ?>
 							<p class="updatronix-plugin-version">
 								<?php
 								printf(

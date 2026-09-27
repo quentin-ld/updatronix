@@ -69,7 +69,7 @@ add_action( 'network_admin_notices', 'updatronix_activation_subsite_notice' );
  * @return void
  */
 function updatronix_activation_subsite_notice(): void {
-	if ( ! updatronix_get_plugin_option( 'updatronix_activation_subsite_skipped', '' ) ) {
+	if ( ! (bool) updatronix_get_plugin_option( 'updatronix_activation_subsite_skipped', '' ) ) {
 		return;
 	}
 
@@ -121,7 +121,7 @@ function updatronix_activate(): void {
 	// cap is only meaningful on single-site installs (access is super-admin-gated otherwise).
 	if ( ! is_multisite() ) {
 		$role = get_role( 'administrator' );
-		if ( $role ) {
+		if ( (bool) $role ) {
 			$role->add_cap( UPDATRONIX_CAP_MANAGE );
 		}
 		updatronix_update_plugin_option( 'updatronix_cap_migrated', '1', false );

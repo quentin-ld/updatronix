@@ -182,7 +182,7 @@ final class Updatronix_AutoUpdates {
 	public static function is_section_locked( string $section ): bool {
 		$constants = self::get_constants();
 		foreach ( $constants as $info ) {
-			if ( $info['locks'] && in_array( $section, $info['affects'], true ) && $info['value'] ) {
+			if ( $info['locks'] && in_array( $section, $info['affects'], true ) && (bool) $info['value'] ) {
 				return true;
 			}
 		}
@@ -251,11 +251,11 @@ final class Updatronix_AutoUpdates {
 
 		$icons            = array();
 		$update_transient = get_site_transient( 'update_plugins' );
-		if ( $update_transient ) {
+		if ( (bool) $update_transient ) {
 			foreach ( array( 'response', 'no_update' ) as $group ) {
-				if ( ! empty( $update_transient->{$group} ) ) {
+				if ( (bool) ( $update_transient->{$group} ?? null ) ) {
 					foreach ( $update_transient->{$group} as $file => $data ) {
-						if ( ! empty( $data->icons ) ) {
+						if ( (bool) ( $data->icons ?? null ) ) {
 							$icons[ $file ] = (array) $data->icons;
 						}
 					}
@@ -276,7 +276,7 @@ final class Updatronix_AutoUpdates {
 				$icon_url  = $icon_data['svg'] ?? $icon_data['2x'] ?? $icon_data['1x'] ?? $icon_data['default'] ?? '';
 			}
 
-			$auto_update_available = $update_transient
+			$auto_update_available = (bool) $update_transient
 				&& ( isset( $update_transient->response[ $file ] )
 					|| isset( $update_transient->no_update[ $file ] ) );
 
@@ -338,7 +338,7 @@ final class Updatronix_AutoUpdates {
 		$themes = array();
 		foreach ( $all_themes as $stylesheet => $theme ) {
 			$auto_update_available = false;
-			if ( $update_themes_transient ) {
+			if ( (bool) $update_themes_transient ) {
 				$auto_update_available = isset( $update_themes_transient->response[ $stylesheet ] )
 					|| isset( $update_themes_transient->no_update[ $stylesheet ] );
 			}
@@ -352,7 +352,7 @@ final class Updatronix_AutoUpdates {
 					'version'               => $theme->get( 'Version' ),
 					'author'                => wp_strip_all_tags( $theme->get( 'Author' ) ),
 					'theme_uri'             => $theme->get( 'ThemeURI' ),
-					'icon'                  => $theme->get_screenshot() ? $theme->get_screenshot() : '',
+					'icon'                  => (bool) $theme->get_screenshot() ? $theme->get_screenshot() : '',
 					'auto_update'           => in_array( $stylesheet, $auto_update_themes, true ),
 					/**
 					 * Whether this item is known to WordPress.org's update API.

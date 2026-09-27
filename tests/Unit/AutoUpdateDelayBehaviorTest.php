@@ -18,6 +18,20 @@ use PHPUnit\Framework\TestCase;
 /**
  * Covers the delay-pipeline decision behavior.
  *
+ * Seven mutants of this class survive `bin/harness mutation`, and they are
+ * equivalent rather than gaps -- the classification matters more than the
+ * number, so it is written down here:
+ *
+ * - `123` (five mutants, `IncrementInteger`/`DecrementInteger`): every bound on
+ *   that line is unreachable behind `updatronix_sanitize_schedule_array()`,
+ *   which already clamps the window to 1..365 when the delay is on and to 0
+ *   when it is off. Moving either bound therefore changes no decision.
+ * - `261` `CastString`: `(string)` on a concatenation operand coerces exactly
+ *   the way PHP coerces it anyway. Stated in the ledger test that covers it.
+ * - `336` `CastBool`: `wp_json_encode()` of an array is never a falsy
+ *   non-empty string, so the cast and the bare truthiness agree on every value
+ *   the call can produce.
+ *
  * @covers \Updatronix_AutoUpdateDelay
  */
 final class AutoUpdateDelayBehaviorTest extends TestCase {
@@ -134,6 +148,20 @@ final class AutoUpdateDelayBehaviorTest extends TestCase {
 	}
 
 	/**
+	 * Read the settings slice the gate cached for the rest of the request.
+	 *
+	 * @return array<string, mixed>
+	 */
+	private function setting_slice(): array {
+		$prop = new ReflectionProperty( Updatronix_AutoUpdateDelay::class, 'delay_settings_slice' );
+		$prop->setAccessible( true );
+
+		$slice = $prop->getValue();
+
+		return is_array( $slice ) ? $slice : array();
+	}
+
+	/**
 	 * Invoke a private static method.
 	 *
 	 * @param string            $method Method name.
@@ -237,6 +265,143 @@ final class AutoUpdateDelayBehaviorTest extends TestCase {
 
 		$this->assertTrue( $result, 'An offer past the soak window must be allowed through.' );
 		$this->assertArrayHasKey( $hash, $this->ledger(), 'The matured row must remain in the ledger.' );
+	}
+
+	/**
+	 * The schedule option is JSON, so its flag and its window arrive untyped,
+	 * and the gate caches a slice of them that every later decision reads.
+	 *
+	 * `'1'` is what a checkbox submitted by a form, a WP-CLI `update_option` or
+	 * an import leaves behind. The window is clamped to whole days between 1 and
+	 * 365: zero means one day, and a year is the ceiling.
+	 */
+	public function test_schedule_slice_coerces_the_stored_flag_and_clamps_the_window(): void {
+		$cases = array(
+			'string flag, ordinary window' => array( '1', 5, 5 ),
+			'zero means one day'           => array( true, 0, 1 ),
+			'a year is the ceiling'        => array( true, 1000, 365 ),
+		);
+
+		foreach ( $cases as $label => $case ) {
+			self::reset_delay_state();
+			$GLOBALS['updatronix_test_options'][ UPDATRONIX_OPTION_NETWORK_SCHEDULE ] = wp_json_encode(
+				array(
+					'delay_updates' => array(
+						'enabled'     => $case[0],
+						'delay_value' => $case[1],
+					),
+				)
+			);
+
+			Updatronix_AutoUpdateDelay::register_filters();
+
+			$slice = $this->setting_slice();
+
+			$this->assertSame( $case[2], $slice['days'] ?? null, "$label: the soak window must be clamped to 1..365 whole days." );
+			$this->assertTrue( $slice['enabled'] ?? null, "$label: the stored flag must reach the slice as a real boolean." );
+		}
+	}
+
+	/**
+	 * A site with nothing pending leaves `update_plugins`, `update_themes` and
+	 * `update_core` as bare stdClass objects -- no `response`, no `updates`.
+	 * The prune walks all three on every decision, and reading a missing
+	 * `response` as something walkable is a warning on the most ordinary site
+	 * there is. The run is the assertion: PHPUnit turns that warning into a
+	 * failure.
+	 */
+	public function test_prune_reads_bare_transients_without_running_over_them(): void {
+		$this->enable_delay( 1 );
+
+		$GLOBALS['updatronix_test_site_transients']['update_plugins'] = new stdClass();
+		$GLOBALS['updatronix_test_site_transients']['update_themes']  = new stdClass();
+		$GLOBALS['updatronix_test_site_transients']['update_core']    = new stdClass();
+
+		$this->assertFalse(
+			Updatronix_AutoUpdateDelay::filter_plugin( true, $this->plugin_offer() ),
+			'The first sighting is deferred, and the prune runs before the row is written.'
+		);
+	}
+
+	/**
+	 * The ledger is read on every automatic-update decision and is of no use to
+	 * a front-end request, so it is the one option this class writes with
+	 * autoload off.
+	 */
+	public function test_ledger_is_written_with_autoload_off(): void {
+		$this->enable_delay( 1 );
+
+		Updatronix_AutoUpdateDelay::filter_plugin( true, $this->plugin_offer() );
+
+		$this->assertSame(
+			false,
+			$GLOBALS['updatronix_test_option_autoload'][ Updatronix_AutoUpdateDelay::OPTION_LEDGER ] ?? null,
+			'The delay ledger must not autoload.'
+		);
+	}
+
+	/**
+	 * The prune reads a theme row back out of `update_themes`, where WordPress
+	 * keys the offer by stylesheet and the payload may not repeat the slug. The
+	 * row the API is still offering has to keep its first-seen stamp: a prune
+	 * that cannot see the offer drops the row, and the gate then re-seeds it,
+	 * which silently restarts a soak window that had already run.
+	 */
+	public function test_prune_keeps_a_theme_row_the_transient_still_offers(): void {
+		$this->enable_delay( 1 );
+
+		$offer = (object) array(
+			'theme'       => 'twentytwentyfive',
+			'new_version' => '2.0',
+		);
+		$hash  = hash( 'sha256', 'theme|twentytwentyfive|2.0' );
+		$aged  = time() - 2 * DAY_IN_SECONDS;
+
+		$GLOBALS['updatronix_test_site_transients']['update_themes']                     = (object) array(
+			'response' => array(
+				'twentytwentyfive' => array( 'new_version' => '2.0' ),
+			),
+		);
+		$GLOBALS['updatronix_test_options'][ Updatronix_AutoUpdateDelay::OPTION_LEDGER ] = wp_json_encode( array( $hash => $aged ) );
+
+		$this->assertTrue( Updatronix_AutoUpdateDelay::filter_theme( true, $offer ), 'An offer past the soak window must be allowed through.' );
+
+		$ledger = $this->ledger();
+		$this->assertArrayHasKey( $hash, $ledger, 'The row the update API still offers must not be pruned.' );
+		$this->assertSame( $aged, $ledger[ $hash ], 'And it must keep the first-seen stamp it had: re-seeding restarts the soak window.' );
+	}
+
+	/**
+	 * Same walk for `update_core`, whose offers carry the running version in
+	 * `current` and the offered one in `version`, and only count when WordPress
+	 * marked them `autoupdate`.
+	 */
+	public function test_prune_keeps_a_core_row_the_transient_still_offers(): void {
+		$this->enable_delay( 1 );
+
+		$offer = (object) array(
+			'current' => '6.5.0',
+			'version' => '6.6.1',
+		);
+		$hash  = hash( 'sha256', 'core|6.5.0|6.6.1' );
+		$aged  = time() - 2 * DAY_IN_SECONDS;
+
+		$GLOBALS['updatronix_test_site_transients']['update_core']                       = (object) array(
+			'updates' => array(
+				(object) array(
+					'response' => 'autoupdate',
+					'current'  => '6.5.0',
+					'version'  => '6.6.1',
+				),
+			),
+		);
+		$GLOBALS['updatronix_test_options'][ Updatronix_AutoUpdateDelay::OPTION_LEDGER ] = wp_json_encode( array( $hash => $aged ) );
+
+		$this->assertTrue( Updatronix_AutoUpdateDelay::filter_core( true, $offer ), 'An offer past the soak window must be allowed through.' );
+
+		$ledger = $this->ledger();
+		$this->assertArrayHasKey( $hash, $ledger, 'The row the update API still offers must not be pruned.' );
+		$this->assertSame( $aged, $ledger[ $hash ], 'And it must keep the first-seen stamp it had: re-seeding restarts the soak window.' );
 	}
 
 	/**

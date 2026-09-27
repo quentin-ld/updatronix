@@ -101,7 +101,7 @@ final class Updatronix_Uninstall {
 		Updatronix_Database::drop_table();
 
 		$role = get_role( 'administrator' );
-		if ( $role && $role->has_cap( UPDATRONIX_CAP_MANAGE ) ) {
+		if ( (bool) $role && $role->has_cap( UPDATRONIX_CAP_MANAGE ) ) {
 			$role->remove_cap( UPDATRONIX_CAP_MANAGE );
 		}
 

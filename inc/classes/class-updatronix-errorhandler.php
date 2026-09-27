@@ -131,13 +131,13 @@ final class Updatronix_ErrorHandler {
 	 * @return string Plugin file path or empty.
 	 */
 	private static function get_plugin_file_from_options_or_upgrader( array $options, WP_Upgrader $upgrader ): string {
-		if ( ! empty( $options['plugins'] ) && is_array( $options['plugins'] ) ) {
+		if ( (bool) ( $options['plugins'] ?? null ) && is_array( $options['plugins'] ) ) {
 			$file = $options['plugins'][0] ?? '';
 			if ( is_string( $file ) && '' !== $file ) {
 				return $file;
 			}
 		}
-		if ( ! empty( $options['plugin'] ) && is_string( $options['plugin'] ) ) {
+		if ( (bool) ( $options['plugin'] ?? null ) && is_string( $options['plugin'] ) ) {
 			return $options['plugin'];
 		}
 		if ( method_exists( $upgrader, 'plugin_info' ) ) {
@@ -242,7 +242,7 @@ final class Updatronix_ErrorHandler {
 		$i     = 0;
 		foreach ( $bt as $frame ) {
 			$file = $frame['file'] ?? '';
-			$line = (int) ( $frame['line'] ?? 0 );
+			$line = $frame['line'] ?? 0;
 			$func = $frame['function'];
 			if ( in_array( $func, $skip, true ) ) {
 				continue;
@@ -319,15 +319,15 @@ final class Updatronix_ErrorHandler {
 		$skin = $upgrader->skin;
 		$type = 'plugin';
 		$name = '';
-		if ( isset( $skin->plugin ) && is_string( $skin->plugin ) ) {
+		if ( property_exists( $skin, 'plugin' ) && is_string( $skin->plugin ) ) {
 			$name = $skin->plugin;
-		} elseif ( isset( $skin->theme ) && is_string( $skin->theme ) ) {
+		} elseif ( property_exists( $skin, 'theme' ) && is_string( $skin->theme ) ) {
 			$type = 'theme';
 			$name = $skin->theme;
 		}
 		$performed_as = Updatronix_Update_Logger::is_automatic_update() ? 'automatic' : 'manual';
 		$event_key    = Updatronix_UpdateLogState::find_pending_event_key( $type, $name );
-		Updatronix_Logger::log( $type, 'failed', $name ? $name : 'unknown', '', '', '', 'error', $reply->get_error_message(), self::capture_trace(), $performed_as, '', $event_key );
+		Updatronix_Logger::log( $type, 'failed', (bool) $name ? $name : 'unknown', '', '', '', 'error', $reply->get_error_message(), self::capture_trace(), $performed_as, '', $event_key );
 		if ( '' !== $event_key ) {
 			Updatronix_UpdateLogState::mark_finalized( $event_key );
 		}

@@ -192,7 +192,7 @@ final class Updatronix_Export {
 		/**
 		 * Raw JSON request parameters.
 		 *
-		 * @var mixed
+		 * @var array<string, mixed>
 		 */
 		$raw_params = $request->get_json_params();
 		if ( ! is_array( $raw_params ) ) {
@@ -343,7 +343,7 @@ final class Updatronix_Export {
 			&& strlen( $new_accumulated ) < self::MAX_BYTES_TOTAL
 			&& ( $more_in_db || $partial_batch );
 
-		$filters_fp   = hash( 'sha256', wp_json_encode( $validated['fingerprint_source'] ?? array() ) ? wp_json_encode( $validated['fingerprint_source'] ?? array() ) : '' );
+		$filters_fp   = hash( 'sha256', (bool) wp_json_encode( $validated['fingerprint_source'] ?? array() ) ? wp_json_encode( $validated['fingerprint_source'] ?? array() ) : '' );
 		$generated_at = time();
 
 		$payload_meta = array(
@@ -446,7 +446,7 @@ final class Updatronix_Export {
 		$offset        = (int) $decoded['o'];
 
 		$stored = updatronix_get_plugin_transient( $transient_key );
-		if ( ! is_array( $stored ) || empty( $stored['validated_export'] ) || ! is_array( $stored['validated_export'] ) ) {
+		if ( ! is_array( $stored ) || ! (bool) ( $stored['validated_export'] ?? null ) || ! is_array( $stored['validated_export'] ) ) {
 			return new WP_Error( 'cursor_expired', '', array( 'status' => 410 ) );
 		}
 

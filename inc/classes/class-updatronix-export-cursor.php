@@ -84,7 +84,7 @@ final class Updatronix_Export_Cursor {
 		$s = isset( $data['s'] ) ? (int) $data['s'] : 0;
 		$u = isset( $data['u'] ) ? (int) $data['u'] : 0;
 
-		if ( 1 !== $v || ! preg_match( Updatronix_Export_Transient_Manager::KEY_PATTERN, $k )
+		if ( 1 !== $v || 1 !== preg_match( Updatronix_Export_Transient_Manager::KEY_PATTERN, $k )
 			|| $o < 0 || $t <= 0 || ( time() - $t ) > Updatronix_Export::TRANSIENT_TTL
 			|| $s !== $site_id || $u !== $user_id ) {
 			return new WP_Error( 'view_invalid', '', array( 'status' => 400 ) );

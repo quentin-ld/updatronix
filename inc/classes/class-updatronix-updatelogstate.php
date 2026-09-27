@@ -112,7 +112,7 @@ final class Updatronix_UpdateLogState {
 
 		return array_filter(
 			$state,
-			static fn ( array $event ): bool => empty( $event['finalized'] )
+			static fn ( array $event ): bool => ! (bool) ( $event['finalized'] ?? null )
 		);
 	}
 
@@ -194,7 +194,7 @@ final class Updatronix_UpdateLogState {
 		$state = self::get_state();
 		$event = $state[ $event_key ] ?? array();
 
-		return ! empty( $event['finalized'] );
+		return (bool) ( $event['finalized'] ?? null );
 	}
 
 	/**

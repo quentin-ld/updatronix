@@ -147,7 +147,7 @@ function updatronix_i18n_split_bundle_cache_is_valid( $cached ): bool {
 		}
         // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- Same race-condition guard as caller; suppress stat noise.
 		$current = @filemtime( $entry['path'] );
-		if ( false === $current || (int) $entry['mtime'] !== (int) $current ) {
+		if ( false === $current || (int) $entry['mtime'] !== $current ) {
 			return false;
 		}
 	}
@@ -252,7 +252,7 @@ function updatronix_admin_enqueue_scripts( string $admin_page ): void {
 	}
 
 	$asset = include $asset_file;
-	if ( ! is_array( $asset ) || empty( $asset['dependencies'] ) || empty( $asset['version'] ) ) {
+	if ( ! is_array( $asset ) || ! (bool) ( $asset['dependencies'] ?? null ) || ! (bool) ( $asset['version'] ?? null ) ) {
 		return;
 	}
 

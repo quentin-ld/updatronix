@@ -121,7 +121,7 @@ function updatronix_render_delay_context_admin_notice(): void {
 function updatronix_delay_updates_is_active_from_settings(): bool {
 	$delay = updatronix_get_settings()['schedule']['delay_updates'];
 
-	return ! empty( $delay['enabled'] ) && (int) $delay['delay_value'] > 0;
+	return (bool) ( $delay['enabled'] ?? null ) && (int) $delay['delay_value'] > 0;
 }
 
 /**
