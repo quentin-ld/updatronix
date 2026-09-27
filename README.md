@@ -85,37 +85,59 @@ Updatronix aims to be fully accessible to all of its users. If you run into a pr
 
 Activation creates the log table and schedules a daily cleanup. Deactivation cancels the cleanup but leaves your data alone. Deletion removes everything. On multisite, network-activate the plugin from the Network Admin; its data lives at the network level.
 
+<!-- harness:start -->
 ## Development
-
-Full command/config/test reference: `.agents/docs/BUILD.md`.
 
 ### Requirements
 
-- PHP **8.1+** · WordPress **6.2+** · Composer · Node.js **LTS** + npm · Python **3**
-- **Local by Flywheel** required for `lint:pcp`, `make:pot`, and integration tests.
+- PHP **8.1+** · WordPress **6.2+** · Composer · Node.js LTS + npm
+- Docker. Every command runs through `bin/harness`, which resolves the backend
+  for you — DDEV first, then LocalWP, then the host. Nothing needs installing.
 
 ### Setup
 
 ```bash
 composer install
 npm install
-bash bin/setup-dev.sh   # one-time: writes .config/wp-tests.env + installs the WP test stack
+bin/harness setup   # one-time: dependencies and this project's toolchain
 ```
 
 ### Key commands
 
 | Command | What it does |
 |---------|--------------|
-| `npm run test:all` | All linters + unit + integration (no build) |
-| `npm run build:all` | `test:all` + `make:pot` + `build` |
-| `composer run verify:php` | WordPress Coding Standards (WPCS) + PHPStan + PHPUnit **unit** tests |
-| `npm run lint` / `npm run lint:css` / `npm run format` | ESLint / Stylelint / Prettier (`:fix` variants auto-fix) |
-| `composer run lint:pcp` | Plugin Check via WP-CLI (**Local only**) |
-| `composer run make:pot` | Regenerate `languages/updatronix.pot` (**Local only**) |
-| `composer run test:integration` | PHPUnit **integration** suite (uses Local's PHP/mysqli) |
-| `npm run zip` | Build distributable zip via `.config/zip.js` |
+| `npm run test:all` | every linter, and the suites the project has |
+| `npm run build:all` | `test:all`, then the `.pot`, then the bundle |
+| `composer run verify:php` | the pre-push gate: standards and static analysis |
+| `composer run verify:all` | the same, plus the suites the project has |
+| `composer run lint:wpcs` / `npm run lint` / `npm run lint:css` | WPCS, ESLint, Stylelint — the `:fix` variants rewrite |
+| `composer run lint:pcp` | Plugin Check, where the project ships through WordPress.org |
+| `composer run make:pot` | regenerate `languages/updatronix.pot` |
+| `npm run zip` | the distributable archive |
 
-Assets: `npm start` to watch, `npm run build` for a one-shot bundle via `@wordpress/scripts` (entry `assets/src/index.js` → `assets/build/`).
+**Tests.** This project carries the full test layer: `bin/harness test` (unit), `bin/harness integration` (real WordPress), `bin/harness coverage`, `bin/harness test:js` (Vitest) and `bin/harness e2e` (Playwright).
+
+**Anti-tautology.** A test that cannot fail is worse than no test, because it still reports coverage. This is machine-enforced:
+
+- `bin/harness mutation` runs Infection **on the diff only** (`--git-diff-lines`) and fails below **MSI 70**.
+- `bin/harness counterfactual` substitutes one token on one changed line, runs the fastest suite that has tests, and reverts -- for the lines Infection cannot reach.
+- `bin/check-test-antipatterns.php` runs on every commit. It is a tokenizer scan, not a style opinion, and it **blocks**: `assertTrue(true)` and friends on literals, `markTestSkipped()` with no reason, `expectException()` with no message, and any assertion inside a `try {} catch {}`.
+
+A test that survives a mutation is a finding to fix, not a warning to note.
+
+Assets: `npm start` to watch, `npm run build` for a one-shot bundle.
+
+Anything without a script above goes through the runtime directly:
+
+```bash
+bin/harness doctor          # backend, tools, graft, manifest — run this first
+bin/harness help            # every command
+```
+
+**Never call `php`, `composer`, `node`, `npm` or `wp` directly.** The backend is
+resolved per project, and a direct call fails in a way that looks like a broken
+project rather than a missing environment.
+<!-- harness:end -->
 
 ## Support & Contribution
 

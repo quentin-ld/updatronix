@@ -21,7 +21,7 @@ Follow the architect Phase 4–5 rules throughout (retry ceiling, self-review, t
 
 ## Reference docs
 
-Grep one section only — never load whole `.agents/docs/` mirrors. The WordPress Documentation Style Guide is at `.agents/docs/wordpress-documentation-style-guide-consolidated.md`.
+Grep one section only — never load a whole `.agents/docs/` file. They run to megabytes and one section is almost always the answer.
 
 ## Plan changes
 
@@ -30,3 +30,7 @@ Update `## Tasks` and note in `## Log` if the remaining plan is wrong.
 ## Hand-off
 
 Follow `review_required` and lint tiers from the task file and `AGENTS.md`.
+
+## Project specifics
+
+Paths, commands and build steps for this project are in `AGENTS.md` and `workflow.md`. Read them rather than assuming the layout of another project in this fleet.

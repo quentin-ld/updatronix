@@ -136,10 +136,13 @@ export async function copyTextToClipboard( text ) {
  * @return {Promise<void>}
  */
 export async function copyFormattedToClipboard( text ) {
-	if ( typeof ClipboardItem !== 'undefined' && navigator.clipboard?.write ) {
+	if (
+		typeof window.ClipboardItem !== 'undefined' &&
+		navigator.clipboard?.write
+	) {
 		const html = buildFormattedHtml( text );
 		await navigator.clipboard.write( [
-			new ClipboardItem( {
+			new window.ClipboardItem( {
 				'text/plain': new Blob( [ text ], { type: 'text/plain' } ),
 				'text/html': new Blob( [ html ], { type: 'text/html' } ),
 			} ),

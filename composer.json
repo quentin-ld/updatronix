@@ -19,40 +19,48 @@
 		"squizlabs/php_codesniffer": "^3.11",
 		"phpunit/phpunit": "^9.6",
 		"yoast/phpunit-polyfills": "^2.0",
-		"wp-coding-standards/wpcs": "^3.1"
+		"wp-coding-standards/wpcs": "^3.1",
+		"infection/infection": "^0.35",
+		"phpstan/phpstan-strict-rules": "^2.0",
+		"phpstan/phpstan-deprecation-rules": "^2.0",
+		"phpcompatibility/phpcompatibility-wp": "^2.1",
+		"sirbrillig/phpcs-variable-analysis": "^2.11"
 	},
 	"scripts": {
-		"lint:wpcs": "vendor/bin/phpcs --standard=.config/phpcs.xml",
-		"lint:wpcs:fix": "vendor/bin/phpcbf --standard=.config/phpcs.xml",
-		"lint:php": [
-			"@lint:wpcs",
-			"vendor/bin/phpstan analyse --memory-limit=2048M --configuration=.config/phpstan.neon updatronix.php uninstall.php inc"
+		"lint:wpcs": "bash bin/harness lint:wpcs",
+		"lint:wpcs:fix": "bash bin/harness lint:fix",
+		"lint:php": "bash bin/harness lint",
+		"verify:php": [
+			"@lint:php",
+			"@test"
 		],
-        "verify:php": [
-            "@lint:php",
-            "@test"
-        ],
-        "verify:all": [
-            "@lint:php",
-            "@test",
-            "@test:integration"
-        ],
-        "test": "phpunit --configuration=.config/phpunit.xml.dist",
-        "test:coverage": "bash .config/local-wp-cli.sh coverage unit",
-        "test:coverage:integration": "bash .config/local-wp-cli.sh coverage integration",
-        "coverage:check": "bash bin/check-coverage.sh build/coverage/unit.txt ${COVERAGE_THRESHOLD:-10}",
-        "test:integration": "bash .config/local-wp-cli.sh integration-test",
-        "test:all": [
-            "@test",
-            "@test:integration"
-        ],
-        "lint:pcp": "bash .config/local-wp-cli.sh pcp",
-        "make:pot": "bash .config/local-wp-cli.sh pot",
-        "setup": "bash bin/setup-dev.sh"
+		"verify:all": [
+			"@lint:php",
+			"@test",
+			"@test:integration"
+		],
+		"test": "bash bin/harness test",
+		"test:coverage": "bash bin/harness coverage",
+		"test:coverage:integration": "bash bin/harness coverage --suite=integration",
+		"coverage:check": "bash bin/check-coverage.sh .cache/coverage/unit.txt ${COVERAGE_THRESHOLD:-10}",
+		"test:integration": "bash bin/harness integration",
+		"test:all": [
+			"@test",
+			"@test:integration"
+		],
+		"lint:pcp": "bash bin/harness pcp",
+		"make:pot": "bash bin/harness pot",
+		"setup": "bash bin/harness setup",
+		"harness": "bash bin/harness",
+		"harness:verify": "bash bin/harness verify",
+		"harness:mutation": "bash bin/harness mutation",
+		"harness:pot": "bash bin/harness pot",
+		"harness:zip": "bash bin/harness zip"
 	},
 	"config": {
 		"allow-plugins": {
-			"dealerdirect/phpcodesniffer-composer-installer": true
+			"dealerdirect/phpcodesniffer-composer-installer": true,
+			"infection/extension-installer": false
 		}
 	}
 }

@@ -22,7 +22,9 @@ Do not bump versions without explicit owner authorization in this conversation.
 
 ## Version sync (lockstep)
 
-`updatronix.php` (`Version:` + `UPDATRONIX_VERSION`) · `composer.json` / `package.json` `version` · `readme.txt` `Stable tag:`
+Every place the version is written, changed in one commit:
+
+`updatronix.php` (`Version:` header, plus the version constant where the project defines one) · `composer.json` and `package.json` `version` · `readme.txt` `Stable tag:`
 
 Confirm version with owner before writing.
 
@@ -30,13 +32,13 @@ Confirm version with owner before writing.
 
 `Stable tag:` matches constant · update `Tested up to:` if needed · promote changelog (plain text bullets) · upgrade notice only when required
 
-Prose style: grep the WordPress Documentation Style Guide one section if needed — never load the full file.
+Prose style: grep one section of the WordPress Documentation Style Guide — never load the whole file.
 
 ## Build order
 
 1. `npm run build`
 2. `composer run make:pot` — note any new/changed strings. If new strings appear, add them to the changelog entry: "Updated translations" or list the new strings if significant.
-3. `composer run lint:pcp`
+3. `composer run lint:pcp` — plugins that ship through WordPress.org
 4. `npm run test:all`
 5. `npm run zip`
 
@@ -48,4 +50,4 @@ On completion, report: "Release ready: version `X.Y.Z`, zip at `<path>`. All che
 
 Failures → stop; **worker** tier thread with `/resume` for fixes
 - Security issue → stop; `/security` on **audit** tier
-- Never edit frozen `wordpress-native-updates-reference.md`
+- Never edit a frozen reference document under `.agents/docs/`

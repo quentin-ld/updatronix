@@ -28,8 +28,8 @@ Fill in before starting:
 Run from the plugin root before any manual steps. Details in `workflow.md`.
 
 - [ ] `npm run build:all` passes end to end (includes `verify:php`, Plugin Check, ESLint, Stylelint, Prettier, POT, build).
-- [ ] `bash .config/local-wp-cli.sh integration-test` passes (single-site integration suite).
-- [ ] `WP_MULTISITE=1 bash .config/local-wp-cli.sh integration-test --filter Multisite` passes (multisite suite).
+- [ ] `bin/harness integration` passes (single-site integration suite).
+- [ ] `WP_MULTISITE=1 bin/harness integration --filter Multisite` passes (multisite suite).
 - [ ] `git status` is clean apart from `assets/build/` and `languages/updatronix.pot` updates that belong to the release.
 
 ## 1. Install, activate, deactivate, uninstall
@@ -210,7 +210,7 @@ Quality bar (automated) — for cross-reference, the canonical pipeline lives in
 - `composer run verify:php` (WPCS + PHPStan + unit tests)
 - `composer run lint:pcp` (Local / WP-CLI)
 - `npm run lint` / `npm run lint:css` / `npm run format` when JS/CSS changed
-- `bash .config/local-wp-cli.sh integration-test` (single-site integration tests)
-- `WP_MULTISITE=1 bash .config/local-wp-cli.sh integration-test --filter Multisite` (multisite integration tests)
+- `bin/harness integration` (single-site integration tests)
+- `WP_MULTISITE=1 bin/harness integration --filter Multisite` (multisite integration tests)
 
 Or run the full pipeline minus integration tests with `npm run build:all`.

@@ -75,15 +75,15 @@ function partsToHi( v ) {
 /**
  * Schedule tab body: background update recurrence and delay preferences.
  *
- * @param {Object}   props                         Component props.
- * @param {Object}   props.settings                Current settings including `schedule`.
- * @param {Function} props.setSettings             Setter.
- * @param {Function} props.saveSettings            Async save.
- * @param {boolean}  props.saving                  Saving state.
- * @param {Object}   props.scheduleMeta            Labels + next run diagnostics.
- * @param {Object}   props.wpConfigConstants       Localized constant map (same payload as Auto-updates).
- * @param {Function} props.onDismissConstantNotice Dismiss handler for dismissible constant notices.
- * @return {JSX.Element} JSX.
+ * @param {Object}                     props                         Component props.
+ * @param {Object}                     props.settings                Current settings including `schedule`.
+ * @param {(settings: Object) => void} props.setSettings             Setter.
+ * @param {() => Promise<void>}        props.saveSettings            Async save.
+ * @param {boolean}                    props.saving                  Saving state.
+ * @param {Object}                     props.scheduleMeta            Labels + next run diagnostics.
+ * @param {Object}                     props.wpConfigConstants       Localized constant map (same payload as Auto-updates).
+ * @param {(name: string) => void}     props.onDismissConstantNotice Dismiss handler for dismissible constant notices.
+ * @return {import('react').JSX.Element} JSX.
  */
 export const SchedulePanel = memo( function SchedulePanelComponent( {
 	settings,
@@ -128,7 +128,7 @@ export const SchedulePanel = memo( function SchedulePanelComponent( {
 		),
 	} );
 
-	const scheduleDriver = scheduleMeta.schedule_driver ?? 'wordpress';
+	const scheduleDriver = scheduleMeta.schedule_driver ?? 'WordPress';
 
 	let nextScheduledCopy;
 	if (
@@ -141,7 +141,7 @@ export const SchedulePanel = memo( function SchedulePanelComponent( {
 			__( 'Next automatic update check: %s', 'updatronix' ),
 			scheduleMeta.update_check_next_human
 		);
-	} else if ( scheduleDriver === 'wordpress' ) {
+	} else if ( scheduleDriver === 'WordPress' ) {
 		nextScheduledCopy = __(
 			'WordPress picks when update checks and automatic updates run.',
 			'updatronix'
@@ -201,7 +201,7 @@ export const SchedulePanel = memo( function SchedulePanelComponent( {
 											value === 'hourly'
 												? ''
 												: ps.update_check.time ||
-												  '03:00',
+													'03:00',
 									},
 								},
 							};
@@ -349,7 +349,7 @@ export const SchedulePanel = memo( function SchedulePanelComponent( {
 													ps.delay_updates
 														.delay_value || 1,
 													1
-											  )
+												)
 											: 0,
 									},
 								},

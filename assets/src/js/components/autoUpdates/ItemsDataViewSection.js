@@ -109,10 +109,10 @@ export function ItemsDataViewSection( {
 								title={
 									item.auto_update_locked
 										? item.auto_update_locked_reason ||
-										  __(
+											__(
 												'Locked by Safe Mode due to incompatibility',
 												'updatronix'
-										  )
+											)
 										: undefined
 								}
 								aria-label={ ( () => {

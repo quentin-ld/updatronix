@@ -21,7 +21,7 @@ const DEFAULT_SCHEDULE_META = {
 	update_check_next_human: '',
 	wp_cron_disabled: false,
 	timezone_string: '',
-	schedule_driver: 'wordpress',
+	schedule_driver: 'WordPress',
 	unified_schedule_active: false,
 };
 
@@ -94,7 +94,7 @@ export function usePluginSettings() {
 						? opts.dismissed_constants
 						: [],
 					schedule,
-			  }
+				}
 			: {
 					logging_enabled: true,
 					retention_days: 90,
@@ -105,7 +105,7 @@ export function usePluginSettings() {
 					auto_update_translations: true,
 					dismissed_constants: [],
 					schedule,
-			  };
+				};
 
 		const scheduleMeta = {
 			...DEFAULT_SCHEDULE_META,
@@ -167,7 +167,7 @@ export function usePluginSettings() {
 												.delay_updates?.delay_value
 										) || 0,
 								},
-						  }
+							}
 						: settings.schedule;
 				setSettings( {
 					...rest,

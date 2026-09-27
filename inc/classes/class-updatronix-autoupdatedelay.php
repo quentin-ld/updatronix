@@ -250,16 +250,16 @@ final class Updatronix_AutoUpdateDelay {
 	 */
 	private static function stable_ledger_hash( string $type, object $item ): string {
 		$parts = match ( $type ) {
-			'plugin' => isset( $item->plugin, $item->new_version )
+			'plugin' => ( isset( $item->plugin, $item->new_version )
 				? 'plugin|' . strtolower( (string) $item->plugin ) . '|' . (string) $item->new_version
-				: '',
-			'theme' => isset( $item->theme, $item->new_version )
+				: '' ),
+			'theme' => ( isset( $item->theme, $item->new_version )
 				? 'theme|' . strtolower( (string) $item->theme ) . '|' . (string) $item->new_version
-				: '',
-			'core' => isset( $item->current )
+				: '' ),
+			'core' => ( isset( $item->current )
 				? 'core|' . (string) $item->current . '|' . (string) ( $item->version ?? '' )
-				: ( isset( $item->version ) ? 'core|' . (string) $item->version : '' ),
-			default => isset( $item->type, $item->slug, $item->language, $item->version )
+				: ( isset( $item->version ) ? 'core|' . (string) $item->version : '' ) ),
+			default => ( isset( $item->type, $item->slug, $item->language, $item->version )
 				? sprintf(
 					'translation|%s|%s|%s|%s',
 					(string) $item->type,
@@ -267,7 +267,7 @@ final class Updatronix_AutoUpdateDelay {
 					(string) $item->language,
 					(string) $item->version,
 				)
-				: '',
+				: '' ),
 		};
 
 		if ( '' === $parts ) {
@@ -361,7 +361,7 @@ final class Updatronix_AutoUpdateDelay {
 		$themes = get_site_transient( 'update_themes' );
 		if ( $themes instanceof \stdClass && ! empty( $themes->response ) && is_array( $themes->response ) ) {
 			foreach ( $themes->response as $stylesheet => $row ) {
-				$obj = is_object( $row ) ? $row : (object) $row;
+				$obj = (object) $row;
 				if ( ! isset( $obj->theme ) ) {
 					$obj->theme = (string) $stylesheet;
 				}

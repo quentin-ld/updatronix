@@ -14,11 +14,11 @@ Grep by command name. Source of truth for script tables: `composer.json` / `pack
 | `test` | PHPUnit **unit** suite only (`.config/phpunit.xml.dist` → `tests/Unit/`) |
 | `verify:php` | `lint:php` then `test` — quick PHP gate before commits |
 | `verify:all` | `lint:php` + `test` + `test:integration` — full PHP gate (unit **and** integration) |
-| `test:integration` | PHPUnit **integration** suite via `bash .config/local-wp-cli.sh integration-test` (uses Local's PHP/mysqli; needs `bin/setup-dev.sh` once) |
+| `test:integration` | PHPUnit **integration** suite via `bin/harness integration` (uses Local's PHP/mysqli; needs `bin/harness setup` once) |
 | `test:all` | `test` then `test:integration` |
-| `lint:pcp` | `bash .config/local-wp-cli.sh pcp` |
-| `make:pot` | `bash .config/local-wp-cli.sh pot` |
-| `setup` | `bash bin/setup-dev.sh` — one-time dev environment setup |
+| `lint:pcp` | `bin/harness pcp` |
+| `make:pot` | `bin/harness pot` |
+| `setup` | `bin/harness setup` — one-time dev environment setup |
 
 ## npm scripts (front-end, reference)
 
@@ -28,7 +28,7 @@ Grep by command name. Source of truth for script tables: `composer.json` / `pack
 | `lint:css` / `lint:css:fix` | Stylelint on `assets/src/**/*.scss` |
 | `format` / `format:fix` | Prettier on `assets/src/**/*.{js,jsx}` |
 | `start` / `build` | `@wordpress/scripts` bundle |
-| `setup` | `bash bin/setup-dev.sh` — one-time dev environment setup (env file + WP test stack) |
+| `setup` | `bin/harness setup` — one-time dev environment setup (env file + WP test stack) |
 | `test:all` | `verify:all` (WPCS + PHPStan + unit + integration) + `lint:pcp` + `lint` + `lint:css` + `format` |
 | `build:all` | `test:all` + `make:pot` + `build` (see **Build** below) |
 | `zip` | Build distributable zip via `.config/zip.js` (uses `archiver`; respects `.distignore`-style exclusions) |
@@ -46,11 +46,11 @@ Grep by command name. Source of truth for script tables: `composer.json` / `pack
 | `.config/stylelintrc.json` | Stylelint (`@wordpress/stylelint-config/scss-stylistic` + project overrides) |
 | `package.json` | `"prettier": "@wordpress/prettier-config"` for ESLint / editor Prettier |
 | `.editorconfig` | Tabs for source; spaces for `package.json` / YAML |
-| `.config/local-wp-cli.sh` | Local WP shell + `wp` for `lint:pcp` / `make:pot` / `integration-test` / `setup` |
+| `.config/local-wp-cli.sh` | **Removed.** `bin/harness` resolves the backend itself (DDEV → LocalWP → host) |
 | `.config/pcp-setup.php` | Loaded by `wp plugin check --require` (CLI only) |
-| `.config/zip.js` | Distributable zip builder (`npm run zip`); excludes dev files via `archiver` globs |
-| `.config/wp-tests-env.example` | Template for integration test DB / path variables (generated automatically by `bin/setup-dev.sh` → `.config/wp-tests.env`) |
-| `bin/setup-dev.sh` | One-time dev setup: installs deps + generates `.config/wp-tests.env` + installs the WP test stack |
+| `.config/zip.js` | Distributable zip builder (`npm run zip`); reads `.distignore`, so there is one exclusion list |
+| `.config/wp-tests-env.example` | Template for integration test DB / path variables (generated automatically by `bin/harness setup` → `.config/wp-tests.env`) |
+| `bin/harness setup` | One-time dev setup: installs deps + generates `.config/wp-tests.env` + installs the WP test stack |
 | `bin/install-wp-tests.sh` | Installs WordPress core + `wordpress-tests-lib` (invoked by `setup`) |
 
 ## PHP — `composer run verify:php`
@@ -61,7 +61,7 @@ Runs, in order:
 2. **PHPStan** — `.config/phpstan.neon`
 3. **PHPUnit (unit)** — `.config/phpunit.xml.dist` (`tests/Unit/`)
 
-For integration tests only, see **`tests/README.md`** and `bash .config/local-wp-cli.sh integration-test`.
+For integration tests only, see **`tests/README.md`** and `bin/harness integration`.
 
 ## Test suites at a glance
 
@@ -85,28 +85,24 @@ Multisite tests **self-skip** when the bootstrap is not in multisite mode, so th
 - **Stylelint** — `.config/stylelintrc.json`; lints SCSS under `assets/src/` (scripts pass `--config`).
 - **Prettier** — configured via `package.json` and `@wordpress/prettier-config`; `format` / `format:fix` apply to JavaScript/JSX only so SCSS stays aligned with Stylelint stylistic rules.
 
-## Plugin Check and POT — Local by Flywheel only
+## Plugin Check and POT
 
-`lint:pcp` and `make:pot` are **not** plain Composer binaries: they run **`.config/local-wp-cli.sh`**, which:
+`lint:pcp` and `make:pot` are Composer scripts, but they run no Composer binary — they call **`bin/harness`**, which resolves the execution backend and drives WP-CLI there:
 
 1. Resolves the WordPress root (walks up from this plugin until `wp-load.php`).
-2. Finds the matching Local **`~/.config/Local/ssh-entry/*.sh`** entry (same `cd` target as that root).
-3. Sources Local’s `export` / `cd` / `unset` lines so `PATH`, PHP, and WP-CLI match **Open Site Shell**.
-4. Runs `wp plugin check` or `wp i18n make-pot`.
+2. Picks a backend, in order: **DDEV** if the project is running, **LocalWP** if a matching `~/.config/Local/ssh-entry/*.sh` entry exists (same `cd` target as that root), otherwise the host.
+3. Runs `wp plugin check` or `wp i18n make-pot` / `make-mo` / `make-json` / `make-php`.
 
 **Requirements**
 
-- Site created in **Local**; plugin under `wp-content/plugins/updatronix` as usual.
-- Local has generated **ssh-entry** scripts (open **Site Shell** once or start the site if needed).
-- **`bash`** available (Git Bash or WSL on Windows).
+- Either a running DDEV project, or a Local site whose **ssh-entry** scripts exist (open **Site Shell** once).
+- Nothing else. PHP, Node and WP-CLI all come from the resolved backend; none of them needs to be installed on the machine.
 
-No `.env` or extra config files are required for these two commands.
+**Plugin Check exclusions** (`bin/harness`, `cmd_pcp`):
 
-**Plugin Check options** (defined as variables in `.config/local-wp-cli.sh`, edit there to change):
-
-- **Excluded directories:** `.config`, `.github`, `.cursor`, **`bin`** (dev install script), **`tests`** (PHPUnit — not in release zip per `.distignore`)
-- **Excluded files:** `workflow.md`, `.distignore`, `.gitignore`, `.gitattributes`, `.editorconfig`, **`updatronix.zip`** (artifact from `npm run zip` if present)
-- **Ignored result codes:** `plugin_updater_detected`, `update_modification_detected` (expected for an updates-management plugin using core update APIs)
+- **Excluded directories:** the development trees — `.git`, `.github`, `.agents`, `.reasonix`, `.harness`, `.githooks`, `.config`, `.claude`, `.cursor`, `.vscode`, `graft`, `bin`, `tests`, `vendor`, `node_modules`, `build`, `assets/src`.
+- **Excluded files:** `workflow.md`, `AGENTS.md`, `infection.json5`, `.distignore`, `.ignore`, `.gitignore`, `.gitattributes`, `.editorconfig`, `.mcp.json`.
+- **Ignored result codes:** `plugin_updater_detected`, `update_modification_detected` — expected for an updates-management plugin that uses the core update APIs. Nothing else is silenced, so a genuinely stray file in the distribution still gets reported.
 
 ```bash
 composer run lint:pcp
@@ -139,9 +135,9 @@ npm run test:all
 
 Notes:
 
-- Integration tests are part of the default gate. When the WordPress test environment is not installed, they skip gracefully (exit 0). Run `bash bin/setup-dev.sh` once to install the WP test stack.
-- `lint:pcp`, `make:pot`, and the integration tests all rely on **Local by Flywheel** (see `.config/local-wp-cli.sh`). On a fresh machine, `composer install` + `npm install` + `bash bin/setup-dev.sh` is all that is required.
-- Multisite integration tests are not part of the default run; exercise them with `WP_MULTISITE=1 bash .config/local-wp-cli.sh integration-test --filter Multisite`.
+- Integration tests are part of the default gate. When the WordPress test environment is not installed, they skip gracefully (exit 0). Run `bin/harness setup` once to install the WP test stack.
+- `lint:pcp`, `make:pot`, and the integration tests all run through **`bin/harness`**, which resolves DDEV, then LocalWP, then the host. On a fresh machine, `composer install` + `npm install` + `bin/harness setup` is all that is required.
+- Multisite integration tests are not part of the default run; exercise them with `WP_MULTISITE=1 bin/harness integration --filter Multisite`.
 - `npm run build` uses `@wordpress/scripts` to bundle JS (and compile SCSS imports via the entry `assets/src/index.js`) into `assets/build/`.
 
 ## Build assets (`@wordpress/scripts`)

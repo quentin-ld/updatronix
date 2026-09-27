@@ -27,7 +27,7 @@ The user selects the matching model before starting the thread. Reference only a
 2. Every file listed in `## Tasks` — locate task scope and related edges with graft (`graft ask "<surface>" --source` / `graft grep "<symbol>"` / `graft callers <sym> --depth 2`) before reading the files in full
 3. Lint/tests if not clean: `composer run lint:wpcs`, `npm run test:all`
 
-Do not load full `.agents/docs/` mirrors.
+Do not load a whole file under `.agents/docs/` — grep one section.
 
 ## Deliverable
 
@@ -62,4 +62,4 @@ Verdict: **Ship** · **Fix then ship** · **Needs rework**
 
 **Coherence:** REST shapes match task contracts · no duplicated logic · i18n wrapped, existing strings untouched
 
-**WordPress-specific checklists (audit-tier only):** When running on **audit** tier, use the WordPress checklists from `.agents/docs/audit-checklists.md` (plugin bootstrap, REST API, SQL, i18n, security, admin UI, config/build, multisite, error handling) — shared with `qa` and `security`.
+**WordPress-specific checklists (audit-tier only):** When running on **audit** tier, use the WordPress checklists from `.agents/docs/audit-checklists.md` (bootstrap, REST API, SQL, i18n, security, admin UI, config/build, multisite, error handling) — shared with `qa` and `security`.

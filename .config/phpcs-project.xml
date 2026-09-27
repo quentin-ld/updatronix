@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<!--
+	Project-specific PHP_CodeSniffer exceptions.
+
+	This file was seeded by `bin/harness sync` and will never be written again.
+	It is included by `.config/phpcs.xml`, which IS regenerated on every sync —
+	put your own exceptions here rather than in there, where they would be
+	overwritten.
+
+	Two rules of thumb before adding one:
+
+	- An exclusion is a decision, not a fix. Say why, in a comment here, the
+	  way the generated ruleset does for `tests/stubs`.
+	- Exclude the narrowest thing that covers the case. Turning off a whole
+	  sniff for the whole project hides every future violation of it, including
+	  the ones you would have wanted to see.
+
+	Two shapes work:
+
+	<rule ref="WordPress.Files.FileName">
+		<exclude-pattern>*/inc/snippets/meta/*</exclude-pattern>
+	</rule>
+
+	<rule ref="Squiz.Commenting.InlineComment">
+		<severity>0</severity>
+	</rule>
+-->
+<ruleset name="updatronix-project">
+	<!--
+		Nothing yet. Delete this comment when you add the first one.
+	-->
+</ruleset>

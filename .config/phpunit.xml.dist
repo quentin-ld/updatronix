@@ -20,8 +20,8 @@
             <file>../uninstall.php</file>
         </include>
         <report>
-            <clover outputFile="../build/coverage/unit.xml"/>
-            <text outputFile="../build/coverage/unit.txt"/>
+            <clover outputFile="../.cache/coverage/unit.xml"/>
+            <text outputFile="../.cache/coverage/unit.txt"/>
         </report>
     </coverage>
 </phpunit>

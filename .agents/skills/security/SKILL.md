@@ -21,3 +21,6 @@ Input sanitization · nonces · REST permissions · output escaping · `$wpdb->p
 
 ## Deliverable
 `.agents/notes/YYYY-MM-DD-security-<slug>.md`, frontmatter `model_tier: audit`. Sections: **Scope** · **Summary** · **Findings** · **Remediation tasks** · **Coverage gaps**. Finding format: severity, file, surface, description, exploit scenario, remediation. Remediation tasks atomic and executable via **worker** tier `/resume`.
+
+## Project-specific surfaces
+Everything above is the baseline. Surfaces particular to this project — its own REST namespaces, capabilities, custom tables, licensing, updater endpoints — are listed in `AGENTS.md`, and they are in scope for every audit. If `AGENTS.md` names a surface this checklist does not, it still gets audited.

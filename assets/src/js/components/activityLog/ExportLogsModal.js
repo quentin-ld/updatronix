@@ -58,11 +58,11 @@ const COLUMN_OPTIONS = [
  *
  * @param {Object}                                 props                  Props.
  * @param {boolean}                                props.isOpen           Visibility flag.
- * @param {Function}                               props.onClose          Parent close handler (also restores focus target).
+ * @param {() => void}                             props.onClose          Parent close handler (also restores focus target).
  * @param {Object}                                 props.view             Live DataViews view.
  * @param {Array<Object>}                          props.logs             Logs from REST for resolving filter labels → IDs.
  * @param {import('react').RefObject<HTMLElement>} props.exportTriggerRef Focus target after close.
- * @return {JSX.Element|null} Modal subtree while `isOpen` is true.
+ * @return {import('react').JSX.Element|null} Modal subtree while `isOpen` is true.
  */
 export function ExportLogsModal( {
 	isOpen,
@@ -131,7 +131,7 @@ export function ExportLogsModal( {
 	const handleClose = useCallback( () => {
 		resetOutput();
 		onClose?.();
-		requestAnimationFrame( () => {
+		window.requestAnimationFrame( () => {
 			const node =
 				exportTriggerRef?.current?.querySelector?.( 'button' ) ??
 				exportTriggerRef?.current;
@@ -196,12 +196,12 @@ export function ExportLogsModal( {
 							cursor,
 							view: normalizedView,
 							merge,
-					  }
+						}
 					: {
 							view: normalizedView,
 							merge,
 							columns: apiColumns,
-					  };
+						};
 
 				const response = await apiFetch( {
 					path: 'updatronix/v1/logs/export',
@@ -312,11 +312,11 @@ export function ExportLogsModal( {
 						? __(
 								'Plain export copied to the clipboard.',
 								'updatronix'
-						  )
+							)
 						: __(
 								'Formatted export copied to the clipboard.',
 								'updatronix'
-						  )
+							)
 				);
 			} catch {
 				setNotice( {

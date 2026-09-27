@@ -1024,7 +1024,7 @@ final class Updatronix_Export_Body_Builder {
 
 		$formatted = wp_date( self::export_datetime_pattern(), $ts, wp_timezone() );
 
-		return '' !== $formatted ? $formatted : '';
+		return is_string( $formatted ) ? $formatted : '';
 	}
 
 	/**

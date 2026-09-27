@@ -86,6 +86,9 @@ final class LogsRestApiTest extends WP_UnitTestCase {
 	 */
 	private function create_admin(): int {
 		$user_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		if ( is_multisite() && function_exists( 'grant_super_admin' ) ) {
+			grant_super_admin( $user_id );
+		}
 		wp_set_current_user( $user_id );
 
 		return (int) $user_id;

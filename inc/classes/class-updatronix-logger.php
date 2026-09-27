@@ -257,7 +257,7 @@ final class Updatronix_Logger {
 	 *
 	 * @param array<string, mixed> $args            Optional. site_id, log_type, status, performed_as, per_page, page, orderby, order.
 	 * @param bool                 $include_details Whether to include message and trace columns.
-	 * @return array<int, object> Array of log row objects.
+	 * @return array<int, \stdClass> Array of log row objects.
 	 */
 	public static function get_logs( array $args = array(), bool $include_details = true ): array {
 		if ( ! Updatronix_Database::table_exists() ) {
@@ -346,15 +346,15 @@ final class Updatronix_Logger {
 	 *
 	 * @param int  $id Log ID.
 	 * @param bool $include_details Whether to include message and trace.
-	 * @return object|null
+	 * @return \stdClass|null
 	 */
-	public static function get_log( int $id, bool $include_details = true ): ?object {
+	public static function get_log( int $id, bool $include_details = true ): ?\stdClass {
 		if ( ! Updatronix_Database::table_exists() || $id < 1 ) {
 			return null;
 		}
 
 		return self::with_logs_table(
-			static function () use ( $id, $include_details ): ?object {
+			static function () use ( $id, $include_details ): ?\stdClass {
 				global $wpdb;
 				$table     = Updatronix_Database::get_table_name();
 				$id        = absint( $id );
@@ -363,7 +363,7 @@ final class Updatronix_Logger {
 				$cached    = wp_cache_get( $cache_key, self::CACHE_GROUP, false, $found );
 
 				if ( $found ) {
-					return is_object( $cached ) ? $cached : null;
+					return $cached instanceof \stdClass ? $cached : null;
 				}
 
 				if ( $include_details ) {
@@ -389,9 +389,11 @@ final class Updatronix_Logger {
 				// Cache key includes microtime() via get_logs_cache_last_changed(), making it
 				// effectively a per-request cache. The 5-minute TTL is never reached because the
 				// key changes on every request; the TTL is a safety net for persistent cache backends.
-				wp_cache_set( $cache_key, is_object( $row ) ? $row : null, self::CACHE_GROUP, MINUTE_IN_SECONDS * 5 );
+				$entry = $row instanceof \stdClass ? $row : null;
 
-				return is_object( $row ) ? $row : null;
+				wp_cache_set( $cache_key, $entry, self::CACHE_GROUP, MINUTE_IN_SECONDS * 5 );
+
+				return $entry;
 			}
 		);
 	}

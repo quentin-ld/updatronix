@@ -154,7 +154,7 @@ export function getActivityDescription( item ) {
 					/* translators: %s: version number */
 					__( 'v%s', 'updatronix' ),
 					version
-			  )
+				)
 			: EMPTY_FALLBACK;
 	}
 	if ( from && to ) {

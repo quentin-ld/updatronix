@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # Enforce a minimum code-coverage threshold from a PHPUnit coverage-text report
-# (`build/coverage/*.txt`, produced by `composer test:coverage` when a coverage
+# (`.cache/coverage/*.txt`, produced by `composer test:coverage` when a coverage
 # driver such as xdebug/pcov is enabled).
 #
 # Usage:

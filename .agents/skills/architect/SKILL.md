@@ -16,11 +16,11 @@ If requirements are unclear, ask **one grouped message**. Skip if already clear.
 
 ## Phase 2 — Research
 Build context from **graft first**, then read only what you need:
-1. `graft ask "<research question>" --source` to locate/understand · `graft grep "<symbol>"` to find every occurrence · `graft callers <sym>` (or `--depth all` for multi-file changes) to trace edges · `graft skeleton <file>` for an API skim. Add `--in inc/ assets/src/` to narrow a subtree.
+1. `graft ask "<research question>" --source` to locate/understand · `graft grep "<symbol>"` to find every occurrence · `graft callers <sym>` (or `--depth all` for multi-file changes) to trace edges · `graft skeleton <file>` for an API skim. Add `--in <dir>/` to narrow a subtree.
 2. Open source files only at the exact `file:line` graft names — never whole files to rebuild understanding graft gives.
 3. `.agents/notes/` for the same slug
-4. `workflow.md` + `.agents/docs/BUILD.md` for commands
-Follow AGENTS.md reference-doc rules (never load whole `.agents/docs/` files; grep one section). Live by the graft skill: "use graft before raw grep/code-read" is authoritative.
+4. `workflow.md` for the project's commands, and `AGENTS.md` for its layout
+Follow AGENTS.md reference-doc rules (never load a whole file under `.agents/docs/`; grep one section). Live by the graft skill: "use graft before raw grep/code-read" is authoritative.
 
 ## Phase 3 — Plan (planning tier)
 Create `.agents/tasks/YYYY-MM-DD-<type>-<slug>.md`. Generate `uid` from the current time (YYYYMMDD-HHMMSS) if known; otherwise use the date plus a random suffix (YYYYMMDD-<random>).
@@ -88,3 +88,5 @@ On completion: `status: done`, full test gate, one-line summary of what was done
 Fix reported issues; append to `## Feedback`. When stable: `review_required: yes` → "Open `/reviewer` on **audit** tier (planning tier OK only for low-risk optional review)."; else "Review optional; ship when satisfied."
 ## Implementation reflexes
 ABSPATH guard · `updatronix_` hooks · REST `current_user_can()` · `$wpdb->prepare()` · sanitize in / escape out · docblocks on public surfaces · never reword existing i18n strings.
+## Project specifics
+The reflexes above are the baseline. What this project adds — its own capability names, REST namespace, tables, prefix exceptions, block bindings — is in `AGENTS.md`, and it wins where the two disagree. Read it before your first edit, not after.

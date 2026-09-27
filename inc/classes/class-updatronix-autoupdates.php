@@ -119,11 +119,11 @@ final class Updatronix_AutoUpdates {
 	 */
 	private static function get_localized_theme_description( WP_Theme $theme ): string {
 		$desc = $theme->display( 'Description', false, true );
-		if ( false === $desc ) {
+		if ( false === $desc || ! is_string( $desc ) ) {
 			return '';
 		}
 
-		return wp_strip_all_tags( (string) $desc );
+		return wp_strip_all_tags( $desc );
 	}
 
 	/**

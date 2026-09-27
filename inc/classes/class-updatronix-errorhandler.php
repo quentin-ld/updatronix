@@ -78,8 +78,11 @@ final class Updatronix_ErrorHandler {
 			$theme_slug = ( isset( $options['themes'] ) && is_array( $options['themes'] ) && isset( $options['themes'][0] ) )
 				? $options['themes'][0]
 				: ( $options['theme'] ?? '' );
-			if ( '' === $theme_slug && method_exists( $upgrader, 'theme_info' ) && is_object( $upgrader->theme_info() ) ) {
-				$theme_slug = $upgrader->theme_info()->get_stylesheet();
+			if ( '' === $theme_slug && method_exists( $upgrader, 'theme_info' ) ) {
+				$theme_info = $upgrader->theme_info();
+				if ( is_object( $theme_info ) && method_exists( $theme_info, 'get_stylesheet' ) ) {
+					$theme_slug = $theme_info->get_stylesheet();
+				}
 			}
 			if ( '' !== $theme_slug ) {
 				$themes         = wp_get_themes();

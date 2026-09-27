@@ -14,12 +14,12 @@ const TabsContext = createContext();
 /**
  * Provide a tabbed interface with vertical orientation support.
  *
- * @param {Object}   props               Component props.
- * @param {string}   props.selectedTabId Currently selected tab ID.
- * @param {Function} props.onSelect      Callback when a tab is selected.
- * @param {string}   props.orientation   Tab orientation ('vertical' or 'horizontal').
- * @param {Object}   props.children      Child components (TabList and TabPanels).
- * @return {JSX.Element} The tabs container.
+ * @param {Object}               props               Component props.
+ * @param {string}               props.selectedTabId Currently selected tab ID.
+ * @param {(id: string) => void} props.onSelect      Callback when a tab is selected.
+ * @param {string}               props.orientation   Tab orientation ('vertical' or 'horizontal').
+ * @param {Object}               props.children      Child components (TabList and TabPanels).
+ * @return {import('react').JSX.Element} The tabs container.
  */
 export const Tabs = ( {
 	selectedTabId: controlledId,
@@ -85,7 +85,7 @@ export const Tabs = ( {
  * @param {Object} props          Component props.
  * @param {Object} props.children Tab components.
  * @param {string} props.label    Accessible label for the tab navigation.
- * @return {JSX.Element} The tab list container.
+ * @return {import('react').JSX.Element} The tab list container.
  */
 export const TabList = ( { children, label = '' } ) => {
 	const { orientation, tabListRef } = useContext( TabsContext );
@@ -110,11 +110,11 @@ export const TabList = ( { children, label = '' } ) => {
  * @param {Object} props           Component props.
  * @param {string} props.tabId     Unique identifier for the tab.
  * @param {string} props.title     Tab title (uses children if not provided).
- * @param {Object} props.icon      WordPress icon component from @wordpress/icons.
+ * @param {Object} props.icon      WordPress icon component from `@wordpress/icons`.
  * @param {number} props.iconSize  Icon size in pixels (default 24).
  * @param {string} props.className Additional CSS class name.
  * @param {Object} props.children  Tab label content.
- * @return {JSX.Element} The tab button.
+ * @return {import('react').JSX.Element} The tab button.
  */
 export const Tab = ( {
 	tabId,
@@ -237,7 +237,7 @@ export const Tab = ( {
  * @param {Object} props          Component props.
  * @param {string} props.tabId    Unique identifier matching a Tab's tabId.
  * @param {Object} props.children Panel content.
- * @return {JSX.Element} The tab panel (hidden when not selected).
+ * @return {import('react').JSX.Element} The tab panel (hidden when not selected).
  */
 export const TabPanel = ( { tabId, children } ) => {
 	const { selectedTabId } = useContext( TabsContext );

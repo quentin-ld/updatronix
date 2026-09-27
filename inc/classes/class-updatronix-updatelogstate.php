@@ -108,7 +108,7 @@ final class Updatronix_UpdateLogState {
 	 * @return array<string, array<string, mixed>>
 	 */
 	public static function get_pending_events(): array {
-		$state = self::get_state();
+		$state = self::get_state() ?? array();
 
 		return array_filter(
 			$state,
@@ -178,7 +178,7 @@ final class Updatronix_UpdateLogState {
 			return;
 		}
 
-		$state = self::get_state();
+		$state = self::get_state() ?? array();
 		unset( $state[ $event_key ] );
 
 		self::persist_state( $state );
@@ -222,9 +222,9 @@ final class Updatronix_UpdateLogState {
 	/**
 	 * Load the current state and purge stale entries.
 	 *
-	 * @return array<string, array<string, mixed>>
+	 * @return array<string, array<string, mixed>>|null Null when there is no state yet.
 	 */
-	private static function get_state(): array {
+	private static function get_state(): ?array {
 		if ( null !== self::$state_cache ) {
 			return self::$state_cache;
 		}

@@ -130,7 +130,7 @@ final class CronUnifiedScheduleTest extends WP_UnitTestCase {
 		$meta = Updatronix_Cron::get_schedule_rest_meta();
 		self::assertArrayHasKey( 'schedule_driver', $meta );
 		self::assertArrayHasKey( 'unified_schedule_active', $meta );
-		self::assertContains( $meta['schedule_driver'], array( 'wordpress', 'updatronix' ) );
+		self::assertContains( $meta['schedule_driver'], array( 'WordPress', 'updatronix' ) );
 		self::assertIsBool( $meta['unified_schedule_active'] );
 	}
 

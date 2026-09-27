@@ -365,7 +365,7 @@ final class Updatronix_Settings {
 		$user_ids = array_unique(
 			array_filter(
 				array_map(
-					static fn ( object $log ): int => (int) ( $log->user_id ?? 0 ),
+					static fn ( \stdClass $log ): int => (int) ( $log->user_id ?? 0 ),
 					$logs
 				)
 			)
@@ -416,10 +416,10 @@ final class Updatronix_Settings {
 	/**
 	 * Add performed_by_display and user_edit_link to a log object for the UI.
 	 *
-	 * @param object $log Log row object from get_logs().
-	 * @return object Same object with performed_by_display and user_edit_link added.
+	 * @param \stdClass $log Log row object from get_logs().
+	 * @return \stdClass Same object with performed_by_display and user_edit_link added.
 	 */
-	public static function enrich_log_for_display( object $log ): object {
+	public static function enrich_log_for_display( \stdClass $log ): \stdClass {
 		$user_id      = (int) ( $log->user_id ?? 0 );
 		$performed_by = $log->performed_by ?? 'system';
 
@@ -479,10 +479,10 @@ final class Updatronix_Settings {
 	/**
 	 * Build a stable secondary summary line for the activity log list.
 	 *
-	 * @param object $log Log row.
+	 * @param \stdClass $log Log row.
 	 * @return string
 	 */
-	private static function build_summary_text( object $log ): string {
+	private static function build_summary_text( \stdClass $log ): string {
 		$version_before = (string) ( $log->version_before ?? '' );
 		$version_after  = (string) ( $log->version_after ?? '' );
 		$item_name      = (string) ( $log->item_name ?? '' );

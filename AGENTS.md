@@ -2,7 +2,7 @@
 
 ## Communication
 
-Messages may arrive in French or English. **Always reply in US English.** WordPress prose style: `.agents/docs/wordpress-documentation-style-guide-consolidated.md` (lookup sections only — never load the full file).
+Messages may arrive in French or English. **Always reply in US English.** WordPress prose style: the fleet's `wordpress-documentation-style-guide-consolidated.md` mirror (look a section up with `./bin/harness docs find "<query>"` — never load the full file).
 
 **Reply verbosity:** Conclusion first, then evidence. No preamble, no recap, no closing remarks. Action over explanation. Scale detail to complexity — 1–4 lines unless the task needs more. **Stop when done**; do not offer follow-ups.
 
@@ -93,3 +93,73 @@ Review `AGENTS.md` and skills monthly: rules still relevant to `inc/`? repeated 
 <!-- graft:start -->
 This repo is indexed by `graft/` (local, gitignored). Before raw `grep`/code-read, use: `graft ask "<q>" --source` (understand/locate) · `graft grep "<lit>"` (exhaustive) · `graft skeleton <file>` (API skim) · `graft callers <sym> [--direction out|--depth N]` (edges) · `graft map` (orientation). Tools auto-refresh; run `graft build` only for the LLM layer or CI `check`. Full reference: the `graft` skill.
 <!-- graft:end -->
+
+<!-- harness:start -->
+## Harness runtime (0.1.0)
+
+Every tool goes through `bin/harness`. It resolves the execution backend for
+you, in this order: **DDEV**, then **LocalWP**, then the host.
+
+```bash
+bin/harness doctor          # backend, tools, graft, manifest — run this first
+bin/harness env             # resolved paths
+bin/harness help            # every command
+```
+
+**Never call `php`, `composer`, `node`, `npm` or `wp` directly.** The host has
+neither Node nor PHP installed; a direct call fails in a way that looks like a
+broken project rather than a broken environment.
+
+| need | command |
+|---|---|
+| standards + static analysis | `bin/harness lint` |
+| autofix | `bin/harness lint:fix` |
+| code graph | `bin/harness graft ask "<question>" --source` |
+| translations | `bin/harness pot` |
+| distributable | `bin/harness zip` / `bin/harness package` |
+
+**Tests.** This project carries the full test layer: `bin/harness test` (unit), `bin/harness integration` (real WordPress), `bin/harness coverage`, `bin/harness test:js` (Vitest) and `bin/harness e2e` (Playwright).
+
+**Anti-tautology.** A test that cannot fail is worse than no test, because it still reports coverage. This is machine-enforced:
+
+- `bin/harness mutation` runs Infection **on the diff only** (`--git-diff-lines`) and fails below **MSI 70**.
+- `bin/harness counterfactual` substitutes one token on one changed line, runs the fastest suite that has tests, and reverts -- for the lines Infection cannot reach.
+- `bin/check-test-antipatterns.php` runs on every commit. It is a tokenizer scan, not a style opinion, and it **blocks**: `assertTrue(true)` and friends on literals, `markTestSkipped()` with no reason, `expectException()` with no message, and any assertion inside a `try {} catch {}`.
+
+A test that survives a mutation is a finding to fix, not a warning to note.
+
+`bin/harness graft` is the one exception to the container rule: graft is an
+nvm-installed Node binary, so it runs on the host. The runner resolves the nvm
+toolchain explicitly, because an agent shell that never sourced nvm cannot see
+`graft` on `PATH` at all.
+
+## Git hooks
+
+Enable once per clone:
+
+```bash
+git config core.hooksPath .githooks
+```
+
+| stage | budget | contents |
+|---|---|---|
+| `pre-commit` | target < 10 s | staged-file lint, anti-pattern scan, unit tests when PHP changed |
+| `pre-push` | target < 90 s | full lint, the suite, Infection and counterfactual on the diff |
+| `pre-release` | unbounded | integration suite, Plugin Check, i18n, packaging |
+
+The budgets are targets, not guarantees, and the hook prints what it actually
+took. A suite that isolates every test in its own process costs roughly PHP
+startup times the number of tests — `updatronix-pro` measures 38 s that way —
+and the honest response is to move that suite to `pre-push`, never to lower the
+number the gate claims.
+
+Bypassing a hook with `--no-verify` is a hard rule violation, not a
+convenience. If a gate is wrong, fix the gate and say so.
+
+## Generated files
+
+`bin/harness`, `bin/check-test-antipatterns.php`, `.githooks/*` and this section
+are **generated** and carry a manifest in `.harness/manifest.json`. Edits are
+overwritten by the next sync. Everything else in this repository is
+hand-written and never touched by the generator.
+<!-- harness:end -->

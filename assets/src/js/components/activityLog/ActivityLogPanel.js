@@ -54,7 +54,7 @@ const DELETE_MODAL_STYLE = {
  * @param {Object}  props                       Component props.
  * @param {boolean} [props.loggingEnabled=true] Whether update logging is enabled.
  * @param {number}  [props.logsVersion=0]       Incremented to trigger a logs refetch.
- * @return {JSX.Element} The activity log panel UI.
+ * @return {import('react').JSX.Element} The activity log panel UI.
  */
 export function ActivityLogPanel( { loggingEnabled = true, logsVersion = 0 } ) {
 	const { logs, loading, error, fetchLogs, fetchLogDetails, deleteLog } =
@@ -277,7 +277,7 @@ export function ActivityLogPanel( { loggingEnabled = true, logsVersion = 0 } ) {
 								: __(
 										'The log entry could not be deleted. Try again or check your database connection.',
 										'updatronix'
-								  ),
+									),
 							type: deleted ? 'polite' : 'assertive',
 						} );
 						if ( ! deleted ) {

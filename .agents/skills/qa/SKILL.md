@@ -37,7 +37,7 @@ Analyze this feature's behavior as a hostile QA auditor. For everything in scope
 - Scope from user: file paths, feature name, task file, or free-form description.
 - Locate the full blast radius with graft first (`graft ask "<surface>" --source` / `graft grep "<symbol>"` / `graft callers <sym> --depth 2`) so no related file is missed, then read every in-scope file in full for the surfaces you audit.
 - `.agents/notes/` for the same slug if applicable (previous findings).
-- **Do not** load full `.agents/docs/` mirrors. Grep one section if a specific WP rule is needed.
+- **Do not** load a whole file under `.agents/docs/`. Grep one section if a specific WP rule is needed.
 
 ## Model tier
 
@@ -94,3 +94,7 @@ Assume everything is wrong. Prove it right. For every file, ask:
 ## Checklists
 
 WordPress-specific checklists (bootstrap, REST, SQL, i18n, security, admin UI, config/build, multisite, error handling) live in `.agents/docs/audit-checklists.md` — grep one category.
+
+## Project-specific surfaces
+
+The four points above are the baseline. What this project adds to them — its own REST namespaces, capabilities, custom tables, licensing, updater endpoints, block bindings — is in `AGENTS.md`, and it is in scope for every audit. A surface named there but not here still gets audited.

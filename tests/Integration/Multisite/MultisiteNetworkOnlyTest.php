@@ -4,7 +4,7 @@
  *
  * Run with:
  *
- *     WP_MULTISITE=1 bash .config/local-wp-cli.sh integration-test --filter Multisite
+ *     WP_MULTISITE=1 bin/harness integration --filter Multisite
  *
  * @package updatronix
  */

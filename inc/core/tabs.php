@@ -24,7 +24,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @since 1.1.1
  *
- * @return array<string, array{slug: string, label: string, icon: string, priority: int}>
+ * @return array<string, array{slug: string, label: string, icon: string, priority?: int}>
  */
 function updatronix_default_admin_tabs(): array {
 	return array(
@@ -66,7 +66,7 @@ function updatronix_default_admin_tabs(): array {
  *
  * @since 1.1.1
  *
- * @return array<string, array{slug: string, label: string, icon: string, priority: int}>
+ * @return array<string, array{slug: string, label: string, icon: string, priority?: int}>
  */
 function updatronix_get_admin_tabs(): array {
 	/**
@@ -99,7 +99,7 @@ function updatronix_get_admin_tabs(): array {
  *
  * @since 1.1.1
  *
- * @param array<string, array{slug: string, label: string, icon: string, priority: int}> $tabs Tab definitions (from updatronix_get_admin_tabs()).
+ * @param array<string, array{slug: string, label: string, icon: string, priority?: int}> $tabs Tab definitions (from updatronix_get_admin_tabs()).
  * @return string Active tab slug.
  */
 function updatronix_get_active_tab( array $tabs ): string {

@@ -26,8 +26,6 @@ assets/src/
 assets/src
 bin/
 bin
-/build/
-/build
 docs/
 docs
 graft/
@@ -87,5 +85,18 @@ yarn.lock
 .phpactor.json
 AGENTS.md
 
-.ignore
 reasonix.toml
+.githooks
+.githooks/
+.harness
+.harness/
+infection.json5
+src/
+src
+artifacts/
+artifacts
+test-results/
+test-results
+generatepress-settings-all-2025-06-12.json
+generatepress-settings-all-2025-11-26.json
+screenshot-min.png

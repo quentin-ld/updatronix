@@ -164,6 +164,20 @@ final class SecurityTest extends TestCase {
 		$this->assertStringContainsString( "\u{2026}", $result ); // Ellipsis.
 	}
 
+	/**
+	 * Quote entities are decoded too.
+	 *
+	 * `&#8230;` above is numeric, and numeric entities decode whatever the flag
+	 * argument says — so it cannot tell `ENT_QUOTES | ENT_HTML5` from
+	 * `ENT_QUOTES & ENT_HTML5`, which is zero. A quote entity can: it decodes
+	 * only when `ENT_QUOTES` is actually set.
+	 */
+	public function test_sanitize_message_decodes_quote_entities(): void {
+		$result = Updatronix_Security::sanitize_message( 'He said &quot;stop&quot;' );
+
+		$this->assertSame( 'He said "stop"', $result );
+	}
+
 	// --- sanitize_trace ---
 
 	/**
@@ -173,6 +187,20 @@ final class SecurityTest extends TestCase {
 		$input  = str_repeat( 'a', 70000 );
 		$result = Updatronix_Security::sanitize_trace( $input, 100 );
 		$this->assertSame( 100, mb_strlen( $result ) );
+	}
+
+	/**
+	 * The default limit is exactly 65535 characters, not bytes.
+	 *
+	 * Called without an explicit limit, on multibyte input: this pins the
+	 * default itself, so 65534 and 65536 are both wrong, and pins the unit, so
+	 * a byte-based truncation is wrong too.
+	 */
+	public function test_sanitize_trace_default_limit_is_65535_characters(): void {
+		$result = Updatronix_Security::sanitize_trace( str_repeat( 'é', 70000 ) );
+
+		$this->assertSame( 65535, mb_strlen( $result ) );
+		$this->assertSame( 65535 * 2, strlen( $result ) );
 	}
 
 	/**
@@ -198,6 +226,20 @@ final class SecurityTest extends TestCase {
 		$input  = str_repeat( 'x', 70000 );
 		$result = Updatronix_Security::sanitize_message( $input );
 		$this->assertSame( 65535, mb_strlen( $result ) );
+	}
+
+	/**
+	 * The same limit on multibyte input, where the unit matters.
+	 *
+	 * With ASCII the byte and character counts coincide and a byte-based cut is
+	 * indistinguishable. Doubling the expected byte length is what makes the
+	 * distinction observable.
+	 */
+	public function test_sanitize_message_truncates_multibyte_at_the_default_limit(): void {
+		$result = Updatronix_Security::sanitize_message( str_repeat( 'é', 70000 ) );
+
+		$this->assertSame( 65535, mb_strlen( $result ) );
+		$this->assertSame( 65535 * 2, strlen( $result ) );
 	}
 
 	// --- sanitize_log_type ---
@@ -408,6 +450,22 @@ final class SecurityTest extends TestCase {
 	public function test_sanitize_string_truncates_to_custom_max(): void {
 		$result = Updatronix_Security::sanitize_string( str_repeat( 'a', 300 ), 10 );
 		$this->assertSame( 10, mb_strlen( $result ) );
+	}
+
+	/**
+	 * Truncation counts characters, not bytes.
+	 *
+	 * The other truncation tests use ASCII, where `mb_substr` and `substr`
+	 * return the same string and the choice is invisible. With multibyte input
+	 * a byte-based cut lands inside a character, so the result is both shorter
+	 * and broken. This is the test that distinguishes them.
+	 */
+	public function test_sanitize_string_truncates_on_character_boundaries(): void {
+		$result = Updatronix_Security::sanitize_string( str_repeat( 'é', 300 ), 100 );
+
+		$this->assertSame( str_repeat( 'é', 100 ), $result );
+		$this->assertSame( 100, mb_strlen( $result ) );
+		$this->assertSame( 200, strlen( $result ) );
 	}
 
 	// --- sanitize_version ---

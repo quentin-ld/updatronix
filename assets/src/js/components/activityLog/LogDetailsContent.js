@@ -9,11 +9,11 @@ import { formatDate, getStatusLabel } from './utils';
 /**
  * Render message and trace content for a log detail modal.
  *
- * @param {Object}   props                 Component props.
- * @param {Object}   props.log             Summary log item.
- * @param {number}   props.logId           Log ID.
- * @param {Function} props.fetchLogDetails Fetch detail payload.
- * @return {JSX.Element|null} Message and trace sections, or null when no data.
+ * @param {Object}                         props                 Component props.
+ * @param {Object}                         props.log             Summary log item.
+ * @param {number}                         props.logId           Log ID.
+ * @param {(logId: number|string) => void} props.fetchLogDetails Fetch detail payload.
+ * @return {import('react').JSX.Element|null} Message and trace sections, or null when no data.
  */
 export function LogDetailsContent( { log, logId, fetchLogDetails } ) {
 	const [ detailLog, setDetailLog ] = useState( null );

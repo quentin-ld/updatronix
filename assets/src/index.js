@@ -20,7 +20,7 @@ if ( updatronixSettings.nonce ) {
  */
 domReady( () => {
 	const rootEl = document.getElementById( 'updatronix-settings' );
-	if ( ! rootEl || ! ( rootEl instanceof HTMLElement ) ) {
+	if ( ! rootEl ) {
 		return;
 	}
 

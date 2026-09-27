@@ -205,7 +205,7 @@ final class Updatronix_Notifications {
 	 * @param string                $type        success, fail, manual, critical.
 	 * @param mixed                 $core_update The update offer.
 	 * @param mixed                 $result      The result.
-	 * @return array<string, string>
+	 * @return array<string, array<string>|string> The email, with `to` possibly replaced.
 	 */
 	public static function filter_core_email_to( array $email, string $type, mixed $core_update, mixed $result ): array { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter
 		if ( self::should_redirect() ) {
@@ -280,7 +280,7 @@ final class Updatronix_Notifications {
 	 * @param string                            $type              success, fail, mixed.
 	 * @param array<string, array<int, object>> $successful_updates Successful updates.
 	 * @param array<string, array<int, object>> $failed_updates     Failed updates.
-	 * @return array<string, string>
+	 * @return array<string, array<string>|string> The email, with `to` possibly replaced.
 	 */
 	public static function filter_plugin_theme_email_to( array $email, string $type, array $successful_updates, array $failed_updates ): array { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter
 		if ( self::should_redirect() ) {
@@ -328,7 +328,7 @@ final class Updatronix_Notifications {
 	 * @param array<string, string>             $email   to, subject, body, headers.
 	 * @param int                               $failures Number of failures.
 	 * @param array<string, array<int, object>> $results  All update results.
-	 * @return array<string, string>
+	 * @return array<string, array<string>|string> The email, with `to` possibly replaced.
 	 */
 	public static function filter_debug_email_to( array $email, int $failures, array $results ): array { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter
 		if ( self::should_redirect() ) {

@@ -5,7 +5,7 @@ import { NoticeList } from '@wordpress/components';
 /**
  * Display notices from the WordPress notices store.
  *
- * @return {JSX.Element|null} List of notices or null if none exist.
+ * @return {import('react').JSX.Element|null} List of notices or null if none exist.
  */
 export const Notices = () => {
 	const { removeNotice } = useDispatch( noticesStore );

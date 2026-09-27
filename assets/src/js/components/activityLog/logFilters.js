@@ -1,8 +1,8 @@
 /**
  * Single source of truth for the update-log DataView filters.
  *
- * Both the DataView host ({@link ActivityLogPanel}) and the export modal
- * ({@link ExportLogsModal}) consume this registry, so a new filter dimension or
+ * Both the DataView host (`ActivityLogPanel`) and the export modal
+ * (`ExportLogsModal`) consume this registry, so a new filter dimension or
  * per-page size is declared once here instead of being duplicated across files.
  *
  * The PHP allowlists (`Updatronix_Export::FILTER_FIELDS`, `CATEGORICAL_OPERATORS`,

@@ -7,11 +7,11 @@
 $color-accent: var(--wp-components-color-accent, var(--wp-admin-theme-color, #3858e9));
 $color-accent-hover: var(--wp-components-color-accent-darker-20, var(--wp-admin-theme-color-darker-20, #3858e9));
 $color-accent-active-bg: color-mix(in srgb, var(--wp-components-color-accent, var(--wp-admin-theme-color, #3858e9)), transparent 96%);
-$wp-color-foreground: var(--wp-components-color-foreground, var(--wpds-color-foreground-content-neutral, #1e1e1e));
+$wp-color-foreground: var(--wp-components-color-foreground, var(--wpds-color-foreground-content-neutral));
 $wp-color-accent: var(--wp-components-color-accent, var(--wp-admin-theme-color, $color-accent));
 
 // Border (plugin-specific; fallback for environments without WPDS)
-$color-border-light: var(--wpds-color-stroke-surface-neutral-weak, #f0f0f0);
+$color-border-light: var(--wpds-color-stroke-surface-neutral-weak);
 $border-width-thick: 3px;
 $border-radius-none: 0;
 

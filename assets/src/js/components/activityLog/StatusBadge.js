@@ -1,6 +1,6 @@
 /**
  * Status badge UI matching Gutenberg Badge (icon + label). Uses design-system
- * classes; Badge is not in the public @wordpress/components export.
+ * classes; Badge is not in the public `@wordpress/components` export.
  */
 import { memo } from '@wordpress/element';
 import { Icon } from '@wordpress/components';
@@ -28,10 +28,10 @@ function intentIcon( intent ) {
 /**
  * Render a status badge with intent-based styling.
  *
- * @param {Object} props          Component props.
- * @param {string} props.intent   Intent: success, warning, error, default.
- * @param {*}      props.children Content.
- * @return {JSX.Element} Span with badge styling and optional icon.
+ * @param {Object}                    props          Component props.
+ * @param {string}                    props.intent   Intent: success, warning, error, default.
+ * @param {import('react').ReactNode} props.children Content.
+ * @return {import('react').JSX.Element} Span with badge styling and optional icon.
  */
 export const StatusBadge = memo( function StatusBadgeView( {
 	intent = 'default',

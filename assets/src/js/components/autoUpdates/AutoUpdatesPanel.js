@@ -28,7 +28,7 @@ import { TranslationsSection } from './TranslationsSection';
  * @param {Object}                        props
  * @param {string[]}                      [props.dismissedConstants]         Dismissed constant names from plugin settings (keeps notices in sync with Schedule tab).
  * @param {(dismissed: string[]) => void} [props.onDismissedConstantsChange] Fired when a dismissible notice is cleared.
- * @return {JSX.Element} The auto-updates panel UI.
+ * @return {import('react').JSX.Element} The auto-updates panel UI.
  */
 export function AutoUpdatesPanel( {
 	dismissedConstants,

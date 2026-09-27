@@ -11,12 +11,12 @@ import { isSectionLocked } from './utils';
 /**
  * Render the translations auto-update toggle.
  *
- * @param {Object}   props                   Component props.
- * @param {Object}   props.translations      Translation settings: { auto_update }.
- * @param {Object}   props.constants         Constant info from API.
- * @param {Function} props.toggleTranslation Callback to toggle translation auto-updates.
- * @param {boolean}  props.busy              Whether a request is in progress.
- * @return {JSX.Element}                      The translations auto-update section.
+ * @param {Object}                     props                   Component props.
+ * @param {Object}                     props.translations      Translation settings: { auto_update }.
+ * @param {Object}                     props.constants         Constant info from API.
+ * @param {(enabled: boolean) => void} props.toggleTranslation Callback to toggle translation auto-updates.
+ * @param {boolean}                    props.busy              Whether a request is in progress.
+ * @return {import('react').JSX.Element}                      The translations auto-update section.
  */
 export function TranslationsSection( {
 	translations,

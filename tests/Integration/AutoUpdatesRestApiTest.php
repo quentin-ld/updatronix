@@ -26,6 +26,31 @@ final class AutoUpdatesRestApiTest extends WP_UnitTestCase {
 	private $rest_test_server_backup = array();
 
 	/**
+	 * Create an administrator and log them in.
+	 *
+	 * The plugin grants UPDATRONIX_CAP_MANAGE to the administrator role, but on
+	 * multisite `user_can_manage_logs()` additionally requires a Super Admin:
+	 * update management is a network-level concern there, and the guard is
+	 * deliberate (`is_multisite() && ! is_super_admin()`).
+	 *
+	 * Without the grant, every request in this file answers 403 with
+	 * `rest_forbidden` and the suite reports a permission failure instead of
+	 * testing the endpoint. The neighbouring Multisite tests already call
+	 * `grant_super_admin()` for the same reason.
+	 *
+	 * @return int New user ID.
+	 */
+	private function create_admin(): int {
+		$user_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		if ( is_multisite() && function_exists( 'grant_super_admin' ) ) {
+			grant_super_admin( $user_id );
+		}
+		wp_set_current_user( $user_id );
+
+		return (int) $user_id;
+	}
+
+	/**
 	 * Restore $_SERVER keys, clean up REST auth globals, and reset plugin settings
 	 * so state persisted by one test cannot leak into later classes (e.g. `dismissed_constants`).
 	 *
@@ -54,8 +79,7 @@ final class AutoUpdatesRestApiTest extends WP_UnitTestCase {
 	 * @return void
 	 */
 	public function test_get_auto_updates_returns_expected_structure(): void {
-		$user_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
-		wp_set_current_user( $user_id );
+		$user_id = $this->create_admin();
 
 		$request  = new WP_REST_Request( 'GET', '/updatronix/v1/auto-updates' );
 		$response = rest_do_request( $request );
@@ -92,8 +116,7 @@ final class AutoUpdatesRestApiTest extends WP_UnitTestCase {
 	 * @return void
 	 */
 	public function test_set_core_mode_with_valid_mode_returns_200(): void {
-		$user_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
-		wp_set_current_user( $user_id );
+		$user_id = $this->create_admin();
 
 		$request = new WP_REST_Request( 'POST', '/updatronix/v1/auto-updates/core' );
 		$request->set_param( 'mode', 'minor' );
@@ -111,8 +134,7 @@ final class AutoUpdatesRestApiTest extends WP_UnitTestCase {
 	 * @return void
 	 */
 	public function test_set_core_mode_with_invalid_mode_returns_400(): void {
-		$user_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
-		wp_set_current_user( $user_id );
+		$user_id = $this->create_admin();
 
 		$request = new WP_REST_Request( 'POST', '/updatronix/v1/auto-updates/core' );
 		$request->set_param( 'mode', 'invalid-mode' );
@@ -127,8 +149,7 @@ final class AutoUpdatesRestApiTest extends WP_UnitTestCase {
 	 * @return void
 	 */
 	public function test_toggle_plugin_with_valid_plugin_returns_200(): void {
-		$user_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
-		wp_set_current_user( $user_id );
+		$user_id = $this->create_admin();
 
 		$request = new WP_REST_Request( 'POST', '/updatronix/v1/auto-updates/plugin' );
 		$request->set_param( 'plugin', 'hello.php' );
@@ -146,8 +167,7 @@ final class AutoUpdatesRestApiTest extends WP_UnitTestCase {
 	 * @return void
 	 */
 	public function test_toggle_plugin_with_invalid_plugin_returns_404(): void {
-		$user_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
-		wp_set_current_user( $user_id );
+		$user_id = $this->create_admin();
 
 		$request = new WP_REST_Request( 'POST', '/updatronix/v1/auto-updates/plugin' );
 		$request->set_param( 'plugin', 'nonexistent-plugin/nonexistent.php' );
@@ -163,8 +183,7 @@ final class AutoUpdatesRestApiTest extends WP_UnitTestCase {
 	 * @return void
 	 */
 	public function test_toggle_theme_with_invalid_stylesheet_returns_404(): void {
-		$user_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
-		wp_set_current_user( $user_id );
+		$user_id = $this->create_admin();
 
 		$request = new WP_REST_Request( 'POST', '/updatronix/v1/auto-updates/theme' );
 		$request->set_param( 'stylesheet', 'nonexistent-theme' );
@@ -180,8 +199,7 @@ final class AutoUpdatesRestApiTest extends WP_UnitTestCase {
 	 * @return void
 	 */
 	public function test_toggle_translation_returns_200(): void {
-		$user_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
-		wp_set_current_user( $user_id );
+		$user_id = $this->create_admin();
 
 		$request = new WP_REST_Request( 'POST', '/updatronix/v1/auto-updates/translation' );
 		$request->set_param( 'enable', false );
@@ -199,8 +217,7 @@ final class AutoUpdatesRestApiTest extends WP_UnitTestCase {
 	 * @return void
 	 */
 	public function test_dismiss_constant_with_valid_constant_returns_200(): void {
-		$user_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
-		wp_set_current_user( $user_id );
+		$user_id = $this->create_admin();
 
 		$request = new WP_REST_Request( 'POST', '/updatronix/v1/auto-updates/dismiss-constant' );
 		$request->set_param( 'constant', 'WP_AUTO_UPDATE_CORE' );
@@ -218,8 +235,7 @@ final class AutoUpdatesRestApiTest extends WP_UnitTestCase {
 	 * @return void
 	 */
 	public function test_dismiss_constant_with_invalid_constant_returns_400(): void {
-		$user_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
-		wp_set_current_user( $user_id );
+		$user_id = $this->create_admin();
 
 		$request = new WP_REST_Request( 'POST', '/updatronix/v1/auto-updates/dismiss-constant' );
 		$request->set_param( 'constant', 'NOT_A_REAL_CONSTANT' );

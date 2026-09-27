@@ -363,15 +363,16 @@ final class Updatronix_Cron {
 	 *
 	 * @since 1.1.1
 	 * @param null|false|\WP_Error $pre   Short-circuit value. Null to proceed, false to block.
-	 * @param object               $event {
+	 * @param \stdClass            $event {
 	 *     @type string       $hook      Action hook.
 	 *     @type int          $timestamp Unix timestamp (UTC).
 	 *     @type string|false $schedule  Recurrence slug, or false for single events.
 	 *     @type array        $args      Event arguments.
 	 * }
-	 * @return null|false Null to allow the event, false to block.
+	 * @return null|false|\WP_Error Null to allow the event, false to block,
+	 *                           or the error the caller passed in.
 	 */
-	public static function block_single_contamination( $pre, $event ): mixed {
+	public static function block_single_contamination( $pre, \stdClass $event ): mixed {
 		if ( null !== $pre ) {
 			return $pre;
 		}
@@ -474,7 +475,7 @@ final class Updatronix_Cron {
 			'update_check_next_scheduled' => ( false !== $next ) ? $next : false,
 			'wp_cron_disabled'            => defined( 'DISABLE_WP_CRON' ) && DISABLE_WP_CRON,
 			'timezone_string'             => (string) wp_timezone_string(),
-			'schedule_driver'             => $unified ? 'updatronix' : 'wordpress',
+			'schedule_driver'             => $unified ? 'updatronix' : 'WordPress',
 			'unified_schedule_active'     => $unified,
 		);
 	}

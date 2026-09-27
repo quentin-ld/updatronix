@@ -18,6 +18,10 @@ Every command below is `$0`, needs no API key, and returns in under a second.
 There are six of them. **Pick the one that fits the task, run it, act on the
 answer; don't chain tools hoping for more. Most tasks need one call.**
 
+If several repos are checked out side by side, each has **its own** `graft/`.
+Neither knows about the other's files, so run every command from the repo whose
+code you are working on.
+
 ## The tools
 
 ### 1 · `graft ask "<question>" --source`: locate + understand (the default)
@@ -26,7 +30,7 @@ the wiring graph, returning the top hits with exact `file:line`.
 - `--source` inlines the code at each hit, the ≤8-line **crux** of each
   definition, so the result IS the code you need, no follow-up file read. Add
   `--full` only when the crux is too small to act on.
-- `--in <path>` narrows to a subtree before ranking; `-n N` caps results (default 8).
+- `--in <dir>/` narrows to a subtree before ranking; `-n N` caps results (default 8).
 - **Use it when** the question is conceptual or locational: "how does auth
   work", "where is rate-limiting handled", "what assembles the request pipeline".
 - One ask usually answers. A genuinely multi-part question needs one ask per
@@ -44,7 +48,7 @@ enclosing symbol** and ranked by coupling; it also reports files it couldn't rea
   when the code is indexed. If a grep misses, **loosen it** (drop the receiver
   and signature, keep the bare name) and retry `graft grep` — do NOT switch to
   raw `grep -rn`, which is slower and unranked.
-- `-i` case-insensitive; `--in <path>` scopes to a subtree. Raw `grep -rn` is
+- `-i` case-insensitive; `--in <dir>/` scopes to a subtree. Raw `grep -rn` is
   only for files graft genuinely doesn't index (docs, configs, brand-new files).
 
 ### 3 · `graft skeleton <file>`: a file's API at a glance
@@ -104,11 +108,7 @@ The "use graft before raw grep/code-read" rule is authoritative as stated in AGE
 | "What's the API of this file?" | `graft skeleton <file>` | 1 |
 | Debugging a failure in area X | `graft ask "<symptom>" --source`, then `callers` on the suspect | 1–2 |
 | Judging a diff's risk before merge | `graft callers <changed sym> --depth 2` | 1 / symbol |
-| Working inside one repo of a monorepo | add `--in <scope>/` to ask / grep / callers | n/a |
-
-In a multi-repo workspace, graft ranks fairly so the biggest repo can't drown
-the rest, and every hit carries a `[scope/]` label naming its sub-project; when
-you already know where you're working, narrow with `graft ask "<task>" --in <scope>/`.
+| Working inside one area of a large repo | add `--in <dir>/` to ask / grep / callers | n/a |
 
 ## Spend the fewest calls
 - A node's `covers:` list already gives exact `file:line` for every symbol, so

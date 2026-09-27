@@ -1,3 +1,9 @@
+// The `> *` reset appears once per modal section, nested inside the
+// parent it belongs to. `no-descending-specificity` reads that as a
+// lower-specificity selector following a higher one, because it
+// compares compiled selectors and cannot see that the two live under
+// different parents and can never both match the same element.
+/* stylelint-disable no-descending-specificity -- disjoint parents. */
 @use "../abstracts/variables" as *;
 
 .updatronix-activitylog-panel .dataviews-view-activity {
@@ -9,8 +15,8 @@
 			display: flex;
 			flex-direction: row;
 			flex-wrap: wrap;
-			gap: var(--wpds-dimension-gap-md, 12px);
-			row-gap: var(--wpds-dimension-gap-xs, 4px);
+			gap: var(--wpds-dimension-gap-md);
+			row-gap: var(--wpds-dimension-gap-xs);
 		}
 
 		&-field {
@@ -40,7 +46,7 @@
 	.components-modal__content {
 		display: flex;
 		flex-direction: column;
-		gap: var(--wpds-dimension-gap-lg, 16px);
+		gap: var(--wpds-dimension-gap-lg);
 
 		> * {
 			margin-bottom: 0;
@@ -54,7 +60,7 @@
 	&__filters-section {
 		display: flex;
 		flex-direction: column;
-		gap: var(--wpds-dimension-gap-xs, 4px);
+		gap: var(--wpds-dimension-gap-xs);
 
 		> * {
 			margin-bottom: 0;
@@ -73,7 +79,7 @@
 	&__filters {
 		display: flex;
 		flex-wrap: wrap;
-		gap: var(--wpds-dimension-gap-xs, 4px);
+		gap: var(--wpds-dimension-gap-xs);
 		list-style: none;
 		margin: 0;
 		padding: 0;
@@ -113,8 +119,8 @@
 	&__copy-actions {
 		display: flex;
 		flex-wrap: wrap;
-		gap: var(--wpds-dimension-gap-sm, 8px);
-		margin-top: var(--wpds-dimension-gap-md, 12px);
+		gap: var(--wpds-dimension-gap-sm);
+		margin-top: var(--wpds-dimension-gap-md);
 	}
 
 	&__columns {
@@ -124,39 +130,39 @@
 
 		legend {
 			font-weight: 600;
-			margin-bottom: var(--wpds-dimension-gap-xs, 4px);
+			margin-bottom: var(--wpds-dimension-gap-xs);
 			padding: 0;
 		}
 	}
 
 	&__columns-help {
-		color: var(--wpds-color-foreground-content-neutral-weak, #707070);
-		margin: 0 0 var(--wpds-dimension-gap-sm, 8px);
+		color: var(--wpds-color-foreground-content-neutral-weak);
+		margin: 0 0 var(--wpds-dimension-gap-sm);
 	}
 
 	&__columns-grid {
 		align-items: flex-start;
 		display: flex;
 		flex-wrap: wrap;
-		gap: var(--wpds-dimension-gap-xs, 4px) var(--wpds-dimension-gap-md, 12px);
+		gap: var(--wpds-dimension-gap-xs) var(--wpds-dimension-gap-md);
 		margin: 0;
 
 		> * {
-			flex: 0 0 calc((100% - 2 * var(--wpds-dimension-gap-md, 12px)) / 3);
+			flex: 0 0 calc((100% - 2 * var(--wpds-dimension-gap-md)) / 3);
 			margin: 0;
-			max-width: calc((100% - 2 * var(--wpds-dimension-gap-md, 12px)) / 3);
+			max-width: calc((100% - 2 * var(--wpds-dimension-gap-md)) / 3);
 		}
 
 		@media screen and (min-width: 783px) {
 
 			> * {
-				flex: 0 0 calc((100% - 5 * var(--wpds-dimension-gap-md, 12px)) / 6);
-				max-width: calc((100% - 5 * var(--wpds-dimension-gap-md, 12px)) / 6);
+				flex: 0 0 calc((100% - 5 * var(--wpds-dimension-gap-md)) / 6);
+				max-width: calc((100% - 5 * var(--wpds-dimension-gap-md)) / 6);
 			}
 		}
 	}
 
 	&__actions {
-		margin: var(--wpds-dimension-gap-md, 12px) 0;
+		margin: var(--wpds-dimension-gap-md) 0;
 	}
 }

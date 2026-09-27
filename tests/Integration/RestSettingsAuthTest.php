@@ -21,6 +21,31 @@ final class RestSettingsAuthTest extends WP_UnitTestCase {
 	private $rest_test_server_backup = array();
 
 	/**
+	 * Create an administrator and log them in.
+	 *
+	 * The plugin grants UPDATRONIX_CAP_MANAGE to the administrator role, but on
+	 * multisite `user_can_manage_logs()` additionally requires a Super Admin:
+	 * update management is a network-level concern there, and the guard is
+	 * deliberate (`is_multisite() && ! is_super_admin()`).
+	 *
+	 * Without the grant, every request in this file answers 403 with
+	 * `rest_forbidden` and the suite reports a permission failure instead of
+	 * testing the endpoint. The neighbouring Multisite tests already call
+	 * `grant_super_admin()` for the same reason.
+	 *
+	 * @return int New user ID.
+	 */
+	private function create_admin(): int {
+		$user_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		if ( is_multisite() && function_exists( 'grant_super_admin' ) ) {
+			grant_super_admin( $user_id );
+		}
+		wp_set_current_user( $user_id );
+
+		return (int) $user_id;
+	}
+
+	/**
 	 * Restore $_SERVER keys and clean up REST auth globals.
 	 *
 	 * @return void
@@ -113,8 +138,7 @@ final class RestSettingsAuthTest extends WP_UnitTestCase {
 	 * @return void
 	 */
 	public function test_get_settings_returns_200_for_administrator_with_cap(): void {
-		$user_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
-		wp_set_current_user( $user_id );
+		$user_id = $this->create_admin();
 
 		$request  = new WP_REST_Request( 'GET', '/updatronix/v1/settings' );
 		$response = rest_do_request( $request );
@@ -183,8 +207,7 @@ final class RestSettingsAuthTest extends WP_UnitTestCase {
 	 * @return void
 	 */
 	public function test_post_settings_with_cookie_auth_and_valid_nonce_returns_200(): void {
-		$user_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
-		wp_set_current_user( $user_id );
+		$user_id                        = $this->create_admin();
 		$GLOBALS['wp_rest_auth_cookie'] = true;
 		$this->begin_rest_cookie_auth_simulation( 'POST' );
 		$this->set_rest_nonce_header( wp_create_nonce( 'wp_rest' ) );
@@ -210,8 +233,7 @@ final class RestSettingsAuthTest extends WP_UnitTestCase {
 	 * (see {@see rest_cookie_check_errors()}); the route then rejects the request (typically 401).
 	 */
 	public function test_post_settings_with_cookie_auth_and_missing_nonce_is_rejected(): void {
-		$user_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
-		wp_set_current_user( $user_id );
+		$user_id                        = $this->create_admin();
 		$GLOBALS['wp_rest_auth_cookie'] = true;
 		$this->begin_rest_cookie_auth_simulation( 'POST' );
 		$this->set_rest_nonce_header( null );
@@ -232,8 +254,7 @@ final class RestSettingsAuthTest extends WP_UnitTestCase {
 	 * Invalid nonce must not succeed (403 from core).
 	 */
 	public function test_post_settings_with_cookie_auth_and_invalid_nonce_returns_403(): void {
-		$user_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
-		wp_set_current_user( $user_id );
+		$user_id                        = $this->create_admin();
 		$GLOBALS['wp_rest_auth_cookie'] = true;
 		$this->begin_rest_cookie_auth_simulation( 'POST' );
 		$this->set_rest_nonce_header( 'invalid-nonce' );

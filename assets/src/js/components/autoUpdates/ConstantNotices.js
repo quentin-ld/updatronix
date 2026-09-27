@@ -1,9 +1,9 @@
 /**
  * @typedef {Object} ConstantInfo
- * @property {boolean}  defined Whether the constant is defined in wp-config.
- * @property {*}        value   The constant value.
- * @property {string[]} affects Sections affected ('core', 'plugins', etc.).
- * @property {boolean}  locks   Whether the constant locks the setting.
+ * @property {boolean}               defined Whether the constant is defined in wp-config.
+ * @property {string|number|boolean} value   The constant value.
+ * @property {string[]}              affects Sections affected ('core', 'plugins', etc.).
+ * @property {boolean}               locks   Whether the constant locks the setting.
  */
 
 import { Notice } from '@wordpress/components';
@@ -37,8 +37,8 @@ const CONSTANT_DESCRIPTIONS = {
  * @param {boolean}                       [props.dismissibleOnly] When true, only show constants with locks=false (dismissible).
  * @param {boolean}                       [props.lockingOnly]     When true, only show constants with locks=true (locking, non-dismissible).
  * @param {string[]}                      [props.dismissed]       List of dismissed constant names.
- * @param {Function}                      [props.onDismiss]       Called with constant name when dismissed.
- * @return {JSX.Element[]|null} Warning notices, or null if none apply.
+ * @param {(name: string) => void}        [props.onDismiss]       Called with constant name when dismissed.
+ * @return {import('react').JSX.Element[]|null} Warning notices, or null if none apply.
  */
 export function ConstantNotices( {
 	constants,

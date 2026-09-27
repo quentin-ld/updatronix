@@ -1079,8 +1079,8 @@ final class Updatronix_Update_Logger {
 			$stored                 = (array) updatronix_get_plugin_option( self::OPTION_PLUGIN_VERSIONS_BEFORE, array() );
 			$stored[ $plugin_file ] = $version;
 			updatronix_update_plugin_option( self::OPTION_PLUGIN_VERSIONS_BEFORE, $stored );
-			$by_mainfile                             = (array) updatronix_get_plugin_option( self::OPTION_PLUGIN_VERSIONS_BEFORE_BY_MAINFILE, array() );
-			$by_mainfile[ basename( $plugin_file ) ] = $version;
+			$by_mainfile                                      = (array) updatronix_get_plugin_option( self::OPTION_PLUGIN_VERSIONS_BEFORE_BY_MAINFILE, array() );
+			$by_mainfile[ basename( (string) $plugin_file ) ] = $version;
 			updatronix_update_plugin_option( self::OPTION_PLUGIN_VERSIONS_BEFORE_BY_MAINFILE, $by_mainfile );
 		}
 
@@ -1549,12 +1549,13 @@ final class Updatronix_Update_Logger {
 	 * @return string Plain text, one message per line.
 	 */
 	private static function feedback_html_to_plain( string $html ): string {
-		$html  = preg_replace( '/<script\b[^>]*>.*?<\/script>\s*/is', '', $html );
-		$text  = wp_strip_all_tags( $html );
-		$text  = html_entity_decode( $text, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
-		$text  = preg_replace( '/\s*\n\s*/', "\n", $text );
-		$lines = array_filter( array_map( 'trim', explode( "\n", $text ) ) );
-		$lines = array_filter(
+		$stripped  = preg_replace( '/<script\b[^>]*>.*?<\/script>\s*/is', '', $html );
+		$text      = wp_strip_all_tags( is_string( $stripped ) ? $stripped : $html );
+		$text      = html_entity_decode( $text, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+		$collapsed = preg_replace( '/\s*\n\s*/', "\n", $text );
+		$text      = is_string( $collapsed ) ? $collapsed : $text;
+		$lines     = array_filter( array_map( 'trim', explode( "\n", $text ) ) );
+		$lines     = array_filter(
 			$lines,
 			function ( string $line ): bool {
 				if ( 'More details.' === $line ) {
@@ -1567,7 +1568,7 @@ final class Updatronix_Update_Logger {
 				return true;
 			}
 		);
-		$lines = array_map(
+		$lines     = array_map(
 			function ( string $line ): string {
 				$suffix = ' More details.';
 				if ( str_ends_with( $line, $suffix ) ) {

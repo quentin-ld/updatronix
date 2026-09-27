@@ -11,12 +11,12 @@ import { isSectionLocked } from './utils';
 /**
  * Render the core auto-update mode selector.
  *
- * @param {Object}   props             Component props.
- * @param {Object}   props.core        Core settings: { mode, overridden_by_constant }.
- * @param {Object}   props.constants   Constant info from API.
- * @param {Function} props.setCoreMode Callback to change the core update mode.
- * @param {boolean}  props.busy        Whether a request is in progress.
- * @return {JSX.Element}                The core auto-update section.
+ * @param {Object}                 props             Component props.
+ * @param {Object}                 props.core        Core settings: { mode, overridden_by_constant }.
+ * @param {Object}                 props.constants   Constant info from API.
+ * @param {(mode: string) => void} props.setCoreMode Callback to change the core update mode.
+ * @param {boolean}                props.busy        Whether a request is in progress.
+ * @return {import('react').JSX.Element}                The core auto-update section.
  */
 export function CoreSection( { core, constants, setCoreMode, busy } ) {
 	const locked =
@@ -65,7 +65,7 @@ export function CoreSection( { core, constants, setCoreMode, busy } ) {
 						? __(
 								'This choice is set in your wp-config.php file. Edit that file to change it.',
 								'updatronix'
-						  )
+							)
 						: ''
 				}
 			/>

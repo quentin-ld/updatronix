@@ -2,7 +2,9 @@
 
 **Verification stack:** `composer run verify:php` runs WordPress Coding Standards (WPCS), PHPStan, and the **unit** suite; `composer run verify:all` adds the **integration** suite. **`npm run test:all`** runs every linter + unit + integration tests; **`npm run build:all`** adds POT regeneration + `npm run build` — see **`workflow.md`**.
 
-**First-time setup:** `composer install && npm install && bash bin/setup-dev.sh`. The setup script writes `.config/wp-tests.env` (from your site's DB credentials) and installs `wordpress-tests-lib`, after which integration tests run with no further configuration.
+**First-time setup:** `composer install && npm install && bin/harness setup`. The setup script writes `.config/wp-tests.env` from your site's DB credentials and installs WordPress core plus `wordpress-tests-lib`, after which integration tests run with no further configuration.
+
+Every command below goes through **`bin/harness`**, which resolves the execution backend for you — DDEV first, then LocalWP, then the host. You do not need PHP, Node or a MySQL client installed on the machine itself.
 
 ## Unit tests (no WordPress)
 
@@ -20,39 +22,41 @@ Uses **PHPUnit 9.6** (same major version as the WordPress integration suite — 
 
 Uses the same **`tests/bootstrap.php`** as unit tests; **`.config/phpunit.integration.xml.dist`** sets `UPDATRONIX_INTEGRATION_TESTS=1` so the bootstrap loads **wordpress-tests-lib** and the plugin instead of stubs.
 
-Requires the official **wordpress-tests-lib**, a MySQL/MariaDB server, and PHP with **mysqli** (Local’s PHP satisfies this).
+Requires the official **wordpress-tests-lib**, a MySQL/MariaDB server, and PHP with **mysqli**. DDEV's container and Local's PHP both satisfy this; `bin/harness` picks whichever is available.
 
 ### One-time: install WordPress core + test library
 
-Run the setup script (idempotent; safe to re-run):
+Run the setup command (idempotent; safe to re-run):
 
 ```bash
-bash bin/setup-dev.sh
+bin/harness setup
 ```
 
-This calls `bash .config/local-wp-cli.sh setup`, which:
+This:
 
 - Reads your site's DB credentials with `wp config get` and writes **`.config/wp-tests.env`**.
-- Installs WordPress core + `wordpress-tests-lib` under **`$HOME/.cache/updatronix-wp-tests/`**, where paths have **no spaces** (the stock `install-wp-tests.sh` breaks when `TMPDIR` contains spaces, e.g. `Local Sites`).
-- Uses your existing database (the harness uses table prefix **`wptests_`**, so your site tables stay under the normal **`wp_`** prefix in the same database).
+- Installs WordPress core + `wordpress-tests-lib` under **`.cache/wp-tests/`** — inside the project and gitignored, so the host and the container resolve the same files. The paths in the env file are relative for the same reason.
+- Creates a **separate test database** (`<site-db>_test`) and points the suite at it. Your site's tables are never touched.
+- Probes for a database user that can create databases. The site's own user cannot, and the failure is `Access denied` rather than anything obvious; `root` can, and it is what the probe finds.
 
 To regenerate the env file (e.g. after the site's DB credentials change):
 
 ```bash
-bash bin/setup-dev.sh --force
+bin/harness setup --force
 ```
 
 To reinstall the test library only (e.g. after a failed run): delete
-`$HOME/.cache/updatronix-wp-tests/wordpress-tests-lib` and re-run `bash bin/setup-dev.sh`.
+`.cache/wp-tests/wordpress-tests-lib` and re-run `bin/harness setup`.
 
 ### Run integration tests
 
-`composer run test:integration` routes through `.config/local-wp-cli.sh`, so it uses
-Local's PHP + mysqli automatically (the same environment as `composer run lint:pcp`):
-
 ```bash
-composer run test:integration
+bin/harness integration                          # single site
+WP_MULTISITE=1 bin/harness integration           # multisite
+bin/harness integration --filter Multisite       # one file
 ```
+
+`composer run test:integration` is the same thing through composer. Both go through `bin/harness`, so they use the resolved backend's PHP and mysqli automatically — the same environment as `composer run lint:pcp`.
 
 Optional PHPUnit args (after `--`):
 

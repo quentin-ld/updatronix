@@ -21,7 +21,7 @@ const LOG_TYPE_ICONS = {
  *
  * @param {string} logType One of: core, theme, plugin, translation.
  * @param {number} size    Icon size in pixels.
- * @return {JSX.Element|null} Icon element or null.
+ * @return {import('react').JSX.Element|null} Icon element or null.
  */
 export function getIconForLogType( logType, size = 24 ) {
 	const IconComponent =

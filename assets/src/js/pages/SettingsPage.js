@@ -125,7 +125,7 @@ function setTabInUrl( tabId ) {
  *
  * Active tab is synced with the ?tab= URL parameter for direct linking.
  *
- * @return {JSX.Element} The settings page UI.
+ * @return {import('react').JSX.Element} The settings page UI.
  */
 export const SettingsPage = () => {
 	const {
@@ -184,7 +184,7 @@ export const SettingsPage = () => {
 	 * Render a tab panel for a given tab definition.
 	 *
 	 * @param {{slug: string, label: string}} tab Tab definition.
-	 * @return {JSX.Element} The tab panel content.
+	 * @return {import('react').JSX.Element} The tab panel content.
 	 */
 	const renderTabPanel = ( tab ) => {
 		switch ( tab.slug ) {
@@ -238,7 +238,7 @@ export const SettingsPage = () => {
 	 * Returns an empty div when no extension is active.
 	 *
 	 * @param {{slug: string}} props Component props.
-	 * @return {JSX.Element} Mount-point div for the extension tab content.
+	 * @return {import('react').JSX.Element} Mount-point div for the extension tab content.
 	 */
 	function ProTabMount( { slug } ) {
 		const mountRef = useRef( null );

@@ -100,11 +100,11 @@ export function useAutoUpdates( onDismissedConstantsChange ) {
 						? __(
 								'Auto-update enabled for this plugin.',
 								'updatronix'
-						  )
+							)
 						: __(
 								'Auto-update disabled for this plugin.',
 								'updatronix'
-						  ),
+							),
 					{ id: 'updatronix-autoupdate-toggle' }
 				);
 			} catch ( e ) {
@@ -138,11 +138,11 @@ export function useAutoUpdates( onDismissedConstantsChange ) {
 						? __(
 								'Auto-update enabled for this theme.',
 								'updatronix'
-						  )
+							)
 						: __(
 								'Auto-update disabled for this theme.',
 								'updatronix'
-						  ),
+							),
 					{ id: 'updatronix-autoupdate-toggle' }
 				);
 			} catch ( e ) {
