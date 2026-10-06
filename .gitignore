@@ -404,3 +404,4 @@ test-results/
 **/test-results/
 artifacts/
 **/artifacts/
+/.ignore
