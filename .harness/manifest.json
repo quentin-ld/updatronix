@@ -1,5 +1,5 @@
 {
-  "commit": "7268b6d",
+  "commit": "884df44",
   "files": {
     ".agents/docs/DISTILLATION.md": {
       "class": "owned",
@@ -11,7 +11,7 @@
     },
     ".agents/skills/architect/SKILL.md": {
       "class": "owned",
-      "sha256": "7aa316454ae5ae10ed8f228cd4a2fdf730a78c59a0e0862c04eaa505de49be5a"
+      "sha256": "bdf028dd2bd0742dde3c20de0e0c256fde0af6b9c6b099b1c7b965d8981b9ab5"
     },
     ".agents/skills/documentation/SKILL.md": {
       "class": "owned",
@@ -87,7 +87,7 @@
     },
     ".distignore": {
       "class": "lines",
-      "sha256": "276453d434d68435606ef521f385905761c793f8013a358e128c83c452259925"
+      "sha256": "cc27f82c1824cf5328e303030ddac904be8ffa35287d802e8f144015caaa0be3"
     },
     ".githooks/pre-commit": {
       "class": "owned",
@@ -108,7 +108,7 @@
     ".reasonix/skills/architect/SKILL.md": {
       "class": "mirror",
       "from": ".agents/skills/architect/SKILL.md",
-      "sha256": "a272140de73dcb690bcc42b3cbebb30d731d48851f945095f57f4a39171cc45e"
+      "sha256": "3c0218e1eea553344b1fad42bdfc8572f7a62048682c4439a4ff1258bcf51a7b"
     },
     ".reasonix/skills/documentation/SKILL.md": {
       "class": "mirror",
@@ -198,7 +198,7 @@
     },
     "bin/harness": {
       "class": "owned",
-      "sha256": "167a29dee1dd6d161527b13f4e4a6a9a72d2d0954d406a3fa5c3e00b3c34fd2b"
+      "sha256": "0cdd276d699d0d7ad101a33867ff75c81392ab2ad493a3acf7b395bf6d6efd17"
     },
     "bin/install-wp-tests.sh": {
       "class": "owned",
