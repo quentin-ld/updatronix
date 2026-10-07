@@ -1,5 +1,5 @@
 {
-  "commit": "31a39ac",
+  "commit": "17e56a9",
   "files": {
     ".agents/docs/DISTILLATION.md": {
       "class": "owned",
@@ -227,7 +227,7 @@
     },
     ".config/phpstan.neon": {
       "class": "owned",
-      "sha256": "b631c0ee503d027d98258fb87ef368acccb5a641cdb6bcf646bf4a3dcbdd2062"
+      "sha256": "80deb0c79ea37b83e1bcb4be97185fd32df5270083ae6c542dd0dfd57b66c611"
     },
     ".distignore": {
       "class": "lines",
@@ -239,7 +239,7 @@
     },
     ".githooks/pre-push": {
       "class": "owned",
-      "sha256": "b4c26ca1d85396d26b04a7dc0a82a1f234ce320f7ea5dfa9e8d02a269ddb5013"
+      "sha256": "932d6acc9f9c25f827221fa176fa37e0bb7bf4ca9107743519cd7f1f585c69b9"
     },
     ".githooks/pre-release": {
       "class": "owned",
@@ -522,7 +522,7 @@
     },
     "bin/harness": {
       "class": "owned",
-      "sha256": "0cdd276d699d0d7ad101a33867ff75c81392ab2ad493a3acf7b395bf6d6efd17"
+      "sha256": "d6e0234d65df1c8b91ece2494a17ffa81a24fcbbf48e1a9a1b877e8124d14f53"
     },
     "bin/install-wp-tests.sh": {
       "class": "owned",
