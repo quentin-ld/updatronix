@@ -163,7 +163,7 @@ function updatronix_options_page(): void {
 										/* translators: 1: decorative heart emoji, 2: author name */
 											__( 'Made with %1$s by %2$s', 'updatronix' ),
 											'<span aria-hidden="true">❤️</span>',
-											'--Q--'
+											'Quentin Le Duff (--Q--)'
 										)
 									);
 									?>

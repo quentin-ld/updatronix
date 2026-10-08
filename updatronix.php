@@ -4,15 +4,15 @@
  *
  * @package   updatronix
  * @link      https://github.com/quentin-ld/updatronix/
- * @author    --Q--
- * @copyright 2024-2026 --Q--
+ * @author    Quentin Le Duff (--Q--)
+ * @copyright 2024-2026 Quentin Le Duff (--Q--)
  * @license   GPL v2 or later
  *
  * Plugin Name: Updatronix - Update Manager Enhanced
  * Description: Enhanced Update Manager for WordPress. Monitor every change, control all updates, and fine-tune your website maintenance flow.
  * Version: 1.2.0
  * Plugin URI: https://wordpress.org/plugins/updatronix/
- * Author: --Q--
+ * Author: Quentin Le Duff (--Q--)
  * Author URI: https://profiles.wordpress.org/quentinldd/
  * Text Domain: updatronix
  * Domain Path: /languages/

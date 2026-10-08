@@ -136,6 +136,7 @@ Yes. Network-activate Updatronix and manage everything as a Super Admin from the
 * Security: Harden security.
 * Dev: Harden WordPress Coding Standards.
 * Improvement: Update interface components.
+* Documentation: Align the author name across the plugin header, the interface footer, and the package metadata.
 
 = 1.1.6 =
 * Fix: Builded JS not delivered.

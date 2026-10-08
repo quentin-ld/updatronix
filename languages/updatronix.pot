@@ -1,15 +1,15 @@
-# Copyright (C) 2026 --Q--
+# Copyright (C) 2026 Quentin Le Duff (--Q--)
 # This file is distributed under the GPL v2 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Updatronix - Update Manager Enhanced 1.1.6\n"
+"Project-Id-Version: Updatronix - Update Manager Enhanced 1.2.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/updatronix\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-09-24T15:42:48+02:00\n"
+"POT-Creation-Date: 2026-10-08T16:06:41+02:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: updatronix\n"
@@ -31,7 +31,7 @@ msgstr ""
 
 #. Author of the plugin
 #: updatronix.php
-msgid "--Q--"
+msgid "Quentin Le Duff (--Q--)"
 msgstr ""
 
 #. Author URI of the plugin
@@ -201,37 +201,37 @@ msgid "Ask a site administrator who can open Tools → Updatronix to change dela
 msgstr ""
 
 #. translators: 1: number of soak days configured, 2: datetime string when eligibility starts if the update is still offered.
-#: inc/classes/class-updatronix-autoupdatedelay.php:435
+#: inc/classes/class-updatronix-autoupdatedelay.php:446
 #, php-format
 msgid "Updatronix deferred this automatic update: soak is %1$d full day(s) after first detection; eligible no earlier than %2$s."
 msgstr ""
 
-#: inc/classes/class-updatronix-autoupdatedelay.php:474
+#: inc/classes/class-updatronix-autoupdatedelay.php:485
 msgid "Unknown plugin"
 msgstr ""
 
-#: inc/classes/class-updatronix-autoupdatedelay.php:494
+#: inc/classes/class-updatronix-autoupdatedelay.php:505
 msgid "Unknown theme"
 msgstr ""
 
-#: inc/classes/class-updatronix-autoupdatedelay.php:514
-#: inc/classes/class-updatronix-settings.php:495
-#: inc/classes/class-updatronix-settings.php:503
+#: inc/classes/class-updatronix-autoupdatedelay.php:525
+#: inc/classes/class-updatronix-settings.php:496
+#: inc/classes/class-updatronix-settings.php:504
 #: assets/src/js/components/activityLog/utils.js:139
 #: assets/src/js/components/activityLog/utils.js:147
 msgid "WordPress"
 msgstr ""
 
-#: inc/classes/class-updatronix-autoupdatedelay.php:524
+#: inc/classes/class-updatronix-autoupdatedelay.php:535
 msgid "unknown-project"
 msgstr ""
 
-#: inc/classes/class-updatronix-autoupdatedelay.php:525
+#: inc/classes/class-updatronix-autoupdatedelay.php:536
 msgid "locale-unknown"
 msgstr ""
 
 #. translators: 1: project slug or id, 2: locale code
-#: inc/classes/class-updatronix-autoupdatedelay.php:529
+#: inc/classes/class-updatronix-autoupdatedelay.php:540
 #, php-format
 msgid "Translation update (%1$s · %2$s)"
 msgstr ""
@@ -244,12 +244,12 @@ msgstr ""
 msgid "Unknown item"
 msgstr ""
 
-#: inc/classes/class-updatronix-errorhandler.php:97
+#: inc/classes/class-updatronix-errorhandler.php:100
 msgid "Process:"
 msgstr ""
 
 #. translators: %d: HTTP status code
-#: inc/classes/class-updatronix-errorhandler.php:288
+#: inc/classes/class-updatronix-errorhandler.php:291
 #, php-format
 msgid "The core update encountered a redirect error (HTTP %d). Check your server configuration."
 msgstr ""
@@ -279,18 +279,18 @@ msgid "Translation"
 msgstr ""
 
 #: inc/classes/class-updatronix-export-body-builder.php:596
-#: inc/classes/class-updatronix-settings.php:427
+#: inc/classes/class-updatronix-settings.php:428
 msgid "System"
 msgstr ""
 
 #. translators: %d: WordPress user ID when display name is not available
 #: inc/classes/class-updatronix-export-body-builder.php:606
-#: inc/classes/class-updatronix-settings.php:432
+#: inc/classes/class-updatronix-settings.php:433
 #, php-format
 msgid "User #%d"
 msgstr ""
 
-#: inc/classes/class-updatronix-export-body-builder.php:682
+#: inc/classes/class-updatronix-export-body-builder.php:683
 #: assets/src/js/components/activityLog/ActivityLogPanel.js:134
 #: assets/src/js/components/activityLog/ExportLogsModal.js:52
 #: assets/src/js/components/activityLog/LogDetailsContent.js:79
@@ -298,23 +298,23 @@ msgstr ""
 msgid "Category"
 msgstr ""
 
-#: inc/classes/class-updatronix-export-body-builder.php:683
+#: inc/classes/class-updatronix-export-body-builder.php:684
 msgid "Element"
 msgstr ""
 
-#: inc/classes/class-updatronix-export-body-builder.php:684
+#: inc/classes/class-updatronix-export-body-builder.php:685
 #: assets/src/js/components/activityLog/ActivityLogPanel.js:143
 #: assets/src/js/components/activityLog/ExportLogsModal.js:36
 #: assets/src/js/components/activityLog/LogDetailsContent.js:81
 msgid "Action"
 msgstr ""
 
-#: inc/classes/class-updatronix-export-body-builder.php:685
+#: inc/classes/class-updatronix-export-body-builder.php:686
 #: assets/src/js/components/autoUpdates/ItemsDataViewSection.js:211
 msgid "Version"
 msgstr ""
 
-#: inc/classes/class-updatronix-export-body-builder.php:686
+#: inc/classes/class-updatronix-export-body-builder.php:687
 #: assets/src/js/components/activityLog/ActivityLogPanel.js:169
 #: assets/src/js/components/activityLog/LogDetailsContent.js:95
 #: assets/src/js/components/activityLog/logFilters.js:245
@@ -322,19 +322,19 @@ msgstr ""
 msgid "Date"
 msgstr ""
 
-#: inc/classes/class-updatronix-export-body-builder.php:687
+#: inc/classes/class-updatronix-export-body-builder.php:688
 #: assets/src/js/components/activityLog/ExportLogsModal.js:40
 msgid "Run context"
 msgstr ""
 
-#: inc/classes/class-updatronix-export-body-builder.php:688
+#: inc/classes/class-updatronix-export-body-builder.php:689
 #: assets/src/js/components/activityLog/ActivityLogPanel.js:203
 #: assets/src/js/components/activityLog/ExportLogsModal.js:44
 #: assets/src/js/components/activityLog/logFilters.js:220
 msgid "User"
 msgstr ""
 
-#: inc/classes/class-updatronix-export-body-builder.php:689
+#: inc/classes/class-updatronix-export-body-builder.php:690
 #: assets/src/js/components/activityLog/ActivityLogPanel.js:226
 #: assets/src/js/components/activityLog/ExportLogsModal.js:48
 #: assets/src/js/components/activityLog/LogDetailsContent.js:84
@@ -343,179 +343,179 @@ msgstr ""
 msgid "Status"
 msgstr ""
 
-#: inc/classes/class-updatronix-export-body-builder.php:795
+#: inc/classes/class-updatronix-export-body-builder.php:796
 #: assets/src/js/components/activityLog/logFilters.js:209
 #: assets/src/js/components/activityLog/utils.js:54
 msgid "Error"
 msgstr ""
 
-#: inc/classes/class-updatronix-export-body-builder.php:796
+#: inc/classes/class-updatronix-export-body-builder.php:797
 #: assets/src/js/components/activityLog/logFilters.js:210
 #: assets/src/js/components/activityLog/utils.js:57
 msgid "Cancelled"
 msgstr ""
 
-#: inc/classes/class-updatronix-export-body-builder.php:797
+#: inc/classes/class-updatronix-export-body-builder.php:798
 #: assets/src/js/components/activityLog/logFilters.js:211
 #: assets/src/js/components/activityLog/utils.js:60
 msgid "Delayed"
 msgstr ""
 
-#: inc/classes/class-updatronix-export-body-builder.php:798
+#: inc/classes/class-updatronix-export-body-builder.php:799
 #: assets/src/js/components/activityLog/logFilters.js:208
 #: assets/src/js/components/activityLog/utils.js:48
 msgid "Success"
 msgstr ""
 
-#: inc/classes/class-updatronix-export-body-builder.php:925
+#: inc/classes/class-updatronix-export-body-builder.php:928
 msgid "manual"
 msgstr ""
 
-#: inc/classes/class-updatronix-export-body-builder.php:926
+#: inc/classes/class-updatronix-export-body-builder.php:929
 msgid "automatic"
 msgstr ""
 
-#: inc/classes/class-updatronix-export-body-builder.php:927
+#: inc/classes/class-updatronix-export-body-builder.php:930
 msgid "upload"
 msgstr ""
 
-#: inc/classes/class-updatronix-export-body-builder.php:945
+#: inc/classes/class-updatronix-export-body-builder.php:949
 msgid "bulk"
 msgstr ""
 
-#: inc/classes/class-updatronix-export-body-builder.php:946
+#: inc/classes/class-updatronix-export-body-builder.php:950
 msgid "single"
 msgstr ""
 
-#: inc/classes/class-updatronix-export-body-builder.php:974
-#: inc/classes/class-updatronix-settings.php:447
+#: inc/classes/class-updatronix-export-body-builder.php:978
+#: inc/classes/class-updatronix-settings.php:448
 #: assets/src/js/components/activityLog/constants.js:19
 msgid "Update"
 msgstr ""
 
-#: inc/classes/class-updatronix-export-body-builder.php:975
-#: inc/classes/class-updatronix-settings.php:448
+#: inc/classes/class-updatronix-export-body-builder.php:979
+#: inc/classes/class-updatronix-settings.php:449
 #: assets/src/js/components/activityLog/constants.js:20
 msgid "Rollback"
 msgstr ""
 
-#: inc/classes/class-updatronix-export-body-builder.php:976
-#: inc/classes/class-updatronix-settings.php:449
+#: inc/classes/class-updatronix-export-body-builder.php:980
+#: inc/classes/class-updatronix-settings.php:450
 #: assets/src/js/components/activityLog/constants.js:21
 msgid "Install"
 msgstr ""
 
-#: inc/classes/class-updatronix-export-body-builder.php:977
-#: inc/classes/class-updatronix-settings.php:450
+#: inc/classes/class-updatronix-export-body-builder.php:981
+#: inc/classes/class-updatronix-settings.php:451
 #: assets/src/js/components/activityLog/constants.js:22
 msgid "Reinstall"
 msgstr ""
 
-#: inc/classes/class-updatronix-export-body-builder.php:978
-#: inc/classes/class-updatronix-settings.php:451
+#: inc/classes/class-updatronix-export-body-builder.php:982
+#: inc/classes/class-updatronix-settings.php:452
 #: assets/src/js/components/activityLog/constants.js:23
 msgid "Failed"
 msgstr ""
 
-#: inc/classes/class-updatronix-export-body-builder.php:979
-#: inc/classes/class-updatronix-settings.php:452
+#: inc/classes/class-updatronix-export-body-builder.php:983
+#: inc/classes/class-updatronix-settings.php:453
 #: assets/src/js/components/activityLog/constants.js:24
 msgid "Uninstall"
 msgstr ""
 
-#: inc/classes/class-updatronix-export-body-builder.php:980
-#: inc/classes/class-updatronix-settings.php:453
+#: inc/classes/class-updatronix-export-body-builder.php:984
+#: inc/classes/class-updatronix-settings.php:454
 #: assets/src/js/components/activityLog/constants.js:26
 msgid "Prevented"
 msgstr ""
 
-#: inc/classes/class-updatronix-export-body-builder.php:981
-#: inc/classes/class-updatronix-settings.php:454
+#: inc/classes/class-updatronix-export-body-builder.php:985
+#: inc/classes/class-updatronix-settings.php:455
 #: assets/src/js/components/activityLog/constants.js:27
 msgid "Incompatible"
 msgstr ""
 
-#: inc/classes/class-updatronix-export-body-builder.php:982
-#: inc/classes/class-updatronix-settings.php:455
+#: inc/classes/class-updatronix-export-body-builder.php:986
+#: inc/classes/class-updatronix-settings.php:456
 #: assets/src/js/components/activityLog/constants.js:28
 msgid "Disabled"
 msgstr ""
 
-#: inc/classes/class-updatronix-export-body-builder.php:983
-#: inc/classes/class-updatronix-settings.php:456
+#: inc/classes/class-updatronix-export-body-builder.php:987
+#: inc/classes/class-updatronix-settings.php:457
 #: assets/src/js/components/activityLog/constants.js:29
 msgid "Auto-updates disabled by Safe Mode"
 msgstr ""
 
-#: inc/classes/class-updatronix-export-body-builder.php:996
+#: inc/classes/class-updatronix-export-body-builder.php:1000
 msgid "CORE"
 msgstr ""
 
-#: inc/classes/class-updatronix-export-body-builder.php:997
+#: inc/classes/class-updatronix-export-body-builder.php:1001
 msgid "PLUGINS"
 msgstr ""
 
-#: inc/classes/class-updatronix-export-body-builder.php:998
+#: inc/classes/class-updatronix-export-body-builder.php:1002
 msgid "THEMES"
 msgstr ""
 
-#: inc/classes/class-updatronix-export-body-builder.php:999
+#: inc/classes/class-updatronix-export-body-builder.php:1003
 msgid "TRANSLATIONS"
 msgstr ""
 
-#: inc/classes/class-updatronix-settings.php:402
-#: inc/classes/class-updatronix-settings.php:558
+#: inc/classes/class-updatronix-settings.php:403
+#: inc/classes/class-updatronix-settings.php:559
 msgid "The requested log entry could not be found."
 msgstr ""
 
-#: inc/classes/class-updatronix-settings.php:438
+#: inc/classes/class-updatronix-settings.php:439
 msgid "Automatic"
 msgstr ""
 
-#: inc/classes/class-updatronix-settings.php:440
+#: inc/classes/class-updatronix-settings.php:441
 msgid "File upload"
 msgstr ""
 
-#: inc/classes/class-updatronix-settings.php:442
+#: inc/classes/class-updatronix-settings.php:443
 msgid "Manual"
 msgstr ""
 
-#: inc/classes/class-updatronix-settings.php:462
+#: inc/classes/class-updatronix-settings.php:463
 #: assets/src/js/components/activityLog/logFilters.js:81
 #: assets/src/js/components/activityLog/utils.js:93
 msgid "Bulk action"
 msgstr ""
 
-#: inc/classes/class-updatronix-settings.php:464
+#: inc/classes/class-updatronix-settings.php:465
 #: assets/src/js/components/activityLog/logFilters.js:85
 #: assets/src/js/components/activityLog/utils.js:96
 msgid "Single action"
 msgstr ""
 
-#: inc/classes/class-updatronix-settings.php:466
-#: inc/classes/class-updatronix-settings.php:516
-#: inc/classes/class-updatronix-settings.php:544
+#: inc/classes/class-updatronix-settings.php:467
+#: inc/classes/class-updatronix-settings.php:517
+#: inc/classes/class-updatronix-settings.php:545
 msgid "—"
 msgstr ""
 
 #. translators: 1: item name, 2: version number
-#: inc/classes/class-updatronix-settings.php:494
+#: inc/classes/class-updatronix-settings.php:495
 #: assets/src/js/components/activityLog/utils.js:138
 #, php-format,js-format
 msgid "Language pack updated for %1$s %2$s"
 msgstr ""
 
 #. translators: %s: item name
-#: inc/classes/class-updatronix-settings.php:502
+#: inc/classes/class-updatronix-settings.php:503
 #: assets/src/js/components/activityLog/utils.js:146
 #, php-format,js-format
 msgid "Language pack updated for %s"
 msgstr ""
 
 #. translators: %s: version number
-#: inc/classes/class-updatronix-settings.php:513
-#: inc/classes/class-updatronix-settings.php:531
-#: inc/classes/class-updatronix-settings.php:539
+#: inc/classes/class-updatronix-settings.php:514
+#: inc/classes/class-updatronix-settings.php:532
+#: inc/classes/class-updatronix-settings.php:540
 #: assets/src/js/components/activityLog/utils.js:155
 #: assets/src/js/components/activityLog/utils.js:171
 #: assets/src/js/components/activityLog/utils.js:178
@@ -524,38 +524,38 @@ msgid "v%s"
 msgstr ""
 
 #. translators: 1: previous version number, 2: new version number
-#: inc/classes/class-updatronix-settings.php:522
+#: inc/classes/class-updatronix-settings.php:523
 #: assets/src/js/components/activityLog/utils.js:163
 #, php-format,js-format
 msgid "v%1$s → v%2$s"
 msgstr ""
 
-#: inc/classes/class-updatronix-settings.php:564
+#: inc/classes/class-updatronix-settings.php:565
 #: assets/src/js/components/activityLog/ActivityLogPanel.js:277
 msgid "The log entry could not be deleted. Try again or check your database connection."
 msgstr ""
 
-#: inc/classes/class-updatronix-settings.php:666
+#: inc/classes/class-updatronix-settings.php:667
 msgid "Automatic updates are disabled on this site via the AUTOMATIC_UPDATER_DISABLED constant in your wp-config.php file."
 msgstr ""
 
-#: inc/classes/class-updatronix-settings.php:675
+#: inc/classes/class-updatronix-settings.php:676
 msgid "File modifications are not allowed on this site via the DISALLOW_FILE_MODS constant in your wp-config.php file."
 msgstr ""
 
-#: inc/classes/class-updatronix-settings.php:702
+#: inc/classes/class-updatronix-settings.php:703
 msgid "The core auto-update setting is controlled by a constant in your wp-config.php file and cannot be changed here."
 msgstr ""
 
-#: inc/classes/class-updatronix-settings.php:730
+#: inc/classes/class-updatronix-settings.php:731
 msgid "This plugin was not found on your site. It may have been removed."
 msgstr ""
 
-#: inc/classes/class-updatronix-settings.php:758
+#: inc/classes/class-updatronix-settings.php:759
 msgid "This theme was not found on your site. It may have been removed."
 msgstr ""
 
-#: inc/classes/class-updatronix-settings.php:801
+#: inc/classes/class-updatronix-settings.php:802
 msgid "That constant is not recognised by Updatronix."
 msgstr ""
 
@@ -584,31 +584,31 @@ msgid "Core update to WordPress %s"
 msgstr ""
 
 #. translators: 1: item name (plugin or theme), 2: version number
-#: inc/classes/class-updatronix-update-logger.php:1775
+#: inc/classes/class-updatronix-update-logger.php:1776
 #, php-format
 msgid "Installed %1$s %2$s"
 msgstr ""
 
 #. translators: 1: item name (plugin or theme), 2: version number
-#: inc/classes/class-updatronix-update-logger.php:1779
+#: inc/classes/class-updatronix-update-logger.php:1780
 #, php-format
 msgid "Uninstalled %1$s %2$s"
 msgstr ""
 
 #. translators: 1: item name (plugin or theme), 2: version number
-#: inc/classes/class-updatronix-update-logger.php:1783
+#: inc/classes/class-updatronix-update-logger.php:1784
 #, php-format
 msgid "Rolled back %1$s to %2$s"
 msgstr ""
 
 #. translators: 1: item name (plugin or theme), 2: version number
-#: inc/classes/class-updatronix-update-logger.php:1787
+#: inc/classes/class-updatronix-update-logger.php:1788
 #, php-format
 msgid "Reinstalled %1$s %2$s (same version)"
 msgstr ""
 
 #. translators: 1: item name (plugin or theme), 2: version number
-#: inc/classes/class-updatronix-update-logger.php:1791
+#: inc/classes/class-updatronix-update-logger.php:1792
 #, php-format
 msgid "Updated %1$s to %2$s"
 msgstr ""
