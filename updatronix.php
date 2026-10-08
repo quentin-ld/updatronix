@@ -10,7 +10,7 @@
  *
  * Plugin Name: Updatronix - Update Manager Enhanced
  * Description: Enhanced Update Manager for WordPress. Monitor every change, control all updates, and fine-tune your website maintenance flow.
- * Version: 1.1.6
+ * Version: 1.2.0
  * Plugin URI: https://wordpress.org/plugins/updatronix/
  * Author: --Q--
  * Author URI: https://profiles.wordpress.org/quentinldd/
@@ -39,7 +39,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /** Plugin version (must match Version header above; used for DB schema version). */
-define( 'UPDATRONIX_VERSION', '1.1.6' );
+define( 'UPDATRONIX_VERSION', '1.2.0' );
 
 define( 'UPDATRONIX_PLUGIN_FILE', __FILE__ ); // Absolute path to this file.
 define( 'UPDATRONIX_PLUGIN_DIR', plugin_dir_path( __FILE__ ) ); // Plugin root directory with trailing slash.

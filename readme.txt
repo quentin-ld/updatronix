@@ -4,7 +4,7 @@ Donate link: https://buymeacoffee.com/quentinld
 Tags: updates, auto-update, maintenance, security, audit-log
 Requires at least: 6.2
 Tested up to: 7.1
-Stable tag: 1.1.6
+Stable tag: 1.2.0
 Requires PHP: 8.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -131,6 +131,11 @@ Up to you. In **Settings**, set the retention window between 1 and 365 days. The
 Yes. Network-activate Updatronix and manage everything as a Super Admin from the Network Admin. Settings, schedule, email controls, and update history are shared across every site in one unified log.
 
 == Changelog ==
+
+= 1.2.0 =
+* Security: Harden security.
+* Dev: Harden WordPress Coding Standards.
+* Improvement: Update interface components.
 
 = 1.1.6 =
 * Fix: Builded JS not delivered.
