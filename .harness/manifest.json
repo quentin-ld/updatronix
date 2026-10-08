@@ -1,5 +1,5 @@
 {
-  "commit": "ff91a88",
+  "commit": "6848bb5",
   "files": {
     ".agents/docs/DISTILLATION.md": {
       "class": "owned",
@@ -219,7 +219,7 @@
     },
     ".config/phpcs.xml": {
       "class": "owned",
-      "sha256": "5960f3b1a6f519eae97ba2b827359008280ca406f8b1f8c1e631435eae4941e2"
+      "sha256": "bc9963d2c15cd85dd8c673dc81e342691a9630f77bf234eba0fcfdd553ab03d0"
     },
     ".config/phpstan-project.neon": {
       "class": "seed",
