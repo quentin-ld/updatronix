@@ -5,7 +5,7 @@
  * @package   updatronix
  * @link      https://github.com/quentin-ld/updatronix/
  * @author    Quentin Le Duff (--Q--)
- * @copyright 2024-2026 Quentin Le Duff (--Q--)
+ * @copyright 2024-2027 Quentin Le Duff (--Q--)
  * @license   GPL v2 or later
  *
  * Plugin Name: Updatronix - Update Manager Enhanced
