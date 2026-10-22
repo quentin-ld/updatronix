@@ -93,7 +93,7 @@ final class Updatronix_Cron {
 			return false;
 		}
 		if ( is_admin() ) {
-			return true;
+			return current_user_can( UPDATRONIX_CAP_MANAGE );
 		}
 		if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			return true;
@@ -253,8 +253,12 @@ final class Updatronix_Cron {
 	 * @return void
 	 */
 	private static function suppress_redundant_core_update_crons(): void {
-		wp_clear_scheduled_hook( 'wp_update_plugins' );
-		wp_clear_scheduled_hook( 'wp_update_themes' );
+		if ( false !== wp_next_scheduled( 'wp_update_plugins' ) ) {
+			wp_clear_scheduled_hook( 'wp_update_plugins' );
+		}
+		if ( false !== wp_next_scheduled( 'wp_update_themes' ) ) {
+			wp_clear_scheduled_hook( 'wp_update_themes' );
+		}
 	}
 
 	/**
@@ -381,7 +385,18 @@ final class Updatronix_Cron {
 			return $pre;
 		}
 
-		if ( ! isset( $event->hook ) || self::HOOK_WP_CRON_CORE_VERSION_CHECK !== $event->hook ) {
+		if ( ! isset( $event->hook ) ) {
+			return $pre;
+		}
+
+		// When the unified schedule owns update checks, Core's separate
+		// wp_update_plugins / wp_update_themes events are redundant. Block them
+		// before they are written instead of clearing them again on every init.
+		if ( in_array( $event->hook, array( 'wp_update_plugins', 'wp_update_themes' ), true ) ) {
+			return false;
+		}
+
+		if ( self::HOOK_WP_CRON_CORE_VERSION_CHECK !== $event->hook ) {
 			return $pre;
 		}
 

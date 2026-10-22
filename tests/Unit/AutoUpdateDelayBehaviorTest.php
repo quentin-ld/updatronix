@@ -633,4 +633,49 @@ final class AutoUpdateDelayBehaviorTest extends TestCase {
 			'a false decision must come back as false, not as the delay verdict'
 		);
 	}
+
+	/**
+	 * Traversal, absolute, and backslash plugin paths resolve as unknown.
+	 *
+	 * The guard runs before get_plugin_data(), so a hostile update transient
+	 * cannot make the logger read a file outside the plugins directory.
+	 *
+	 * @return void
+	 */
+	public function test_resolve_offer_dimensions_rejects_path_traversal(): void {
+		$method = new ReflectionMethod( Updatronix_AutoUpdateDelay::class, 'resolve_offer_dimensions' );
+		$method->setAccessible( true );
+
+		$paths = array(
+			'parent traversal' => '../wp-config.php',
+			'absolute path'    => '/etc/passwd',
+			'backslash path'   => 'dir\\file.php',
+			'mixed traversal'  => '/..\\file.php',
+		);
+
+		foreach ( $paths as $label => $path ) {
+			$result = $method->invoke(
+				null,
+				'plugin',
+				(object) array(
+					'plugin'      => $path,
+					'new_version' => '9.9',
+				)
+			);
+
+			$this->assertSame( 'Unknown plugin', $result[0], $label );
+			$this->assertSame( '', $result[1], $label );
+			$this->assertSame( '9.9', $result[3], $label );
+		}
+
+		$non_string_version = $method->invoke(
+			null,
+			'plugin',
+			(object) array(
+				'plugin'      => '../wp-config.php',
+				'new_version' => 99,
+			)
+		);
+		$this->assertSame( '99', $non_string_version[3], 'The version field must be returned as a string.' );
+	}
 }

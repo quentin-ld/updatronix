@@ -4,7 +4,7 @@ Donate link: https://buymeacoffee.com/quentinld
 Tags: updates, auto-update, maintenance, security, audit-log
 Requires at least: 6.2
 Tested up to: 7.1
-Stable tag: 1.2.0
+Stable tag: 1.3.0
 Requires PHP: 8.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -131,6 +131,18 @@ Up to you. In **Settings**, set the retention window between 1 and 365 days. The
 Yes. Network-activate Updatronix and manage everything as a Super Admin from the Network Admin. Settings, schedule, email controls, and update history are shared across every site in one unified log.
 
 == Changelog ==
+
+= 1.3.0 =
+* Fix: Chunked exports no longer return HTTP 500 and discard their transient on a continuation request.
+* Fix: Chunked exports advance past unrenderable rows, enforce a server-side chunk cap, and honour the wall-clock limit.
+* Fix: Log redaction covers license_key and api_key parameters, Bearer tokens, and short log fields.
+* Fix: A pre-install callback no longer raises a TypeError when WordPress passes a WP_Error.
+* Fix: Cron self-heal no longer runs on unauthenticated admin-ajax requests, and unified scheduling no longer rewrites the cron option on every request.
+* Fix: Multisite uninstall only destroys network data from the Network Admin or WP-CLI.
+* Fix: The subsite activation notice is only consumed by a network administrator.
+* Fix: Capability migration no longer writes role state on unauthenticated front-end requests.
+* Fix: Log messages strip markup after decoding entities, and redirect-based failure logging requires the real update-core.php path.
+* Dev: The logs table check escapes LIKE wildcards, caches per blog, and only records the schema version when the table exists.
 
 = 1.2.0 =
 * Security: Harden security.

@@ -339,6 +339,53 @@ if (!function_exists('delete_option')) {
     }
 }
 
+if (!function_exists('get_user_meta')) {
+    /**
+     * Global test user-meta store backing get_user_meta() in unit tests.
+     *
+     * @var array<int, array<string, mixed>>
+     */
+    $GLOBALS['updatronix_test_user_meta'] = [];
+
+    /**
+     * Stub for get_user_meta used in unit tests.
+     *
+     * @param int    $user_id User ID.
+     * @param string $key     Meta key.
+     * @param bool   $single  Whether to return a single value.
+     * @return mixed
+     */
+    function get_user_meta(int $user_id, string $key, bool $single = false) {
+        $value = $GLOBALS['updatronix_test_user_meta'][ $user_id ][ $key ] ?? '';
+
+        return $single ? $value : ( '' === $value ? [] : [ $value ] );
+    }
+}
+
+if (!function_exists('update_user_meta')) {
+    /**
+     * Stub for update_user_meta used in unit tests.
+     *
+     * Mirrors WordPress: returns false when the stored value is unchanged.
+     *
+     * @param int    $user_id    User ID.
+     * @param string $key        Meta key.
+     * @param mixed  $value      New value.
+     * @param mixed  $prev_value Previous value to match.
+     * @return int|bool Meta ID on success, false when unchanged or failed.
+     */
+    function update_user_meta(int $user_id, string $key, $value, $prev_value = '') {
+        $current = $GLOBALS['updatronix_test_user_meta'][ $user_id ][ $key ] ?? null;
+        if (null !== $current && $current === $value) {
+            return false;
+        }
+
+        $GLOBALS['updatronix_test_user_meta'][ $user_id ][ $key ] = $value;
+
+        return 1;
+    }
+}
+
 if (!function_exists('delete_site_option')) {
     /**
      * Stub for delete_site_option used in unit tests (single-site semantics).
@@ -431,6 +478,20 @@ if (!function_exists('set_site_transient')) {
      */
     function set_site_transient(string $key, $value, int $expiration = 0): bool {
         $GLOBALS['updatronix_test_site_transients'][$key] = $value;
+
+        return true;
+    }
+}
+
+if (!function_exists('delete_site_transient')) {
+    /**
+     * Stub for delete_site_transient used in unit tests.
+     *
+     * @param string $key Transient key.
+     * @return bool
+     */
+    function delete_site_transient(string $key): bool {
+        unset( $GLOBALS['updatronix_test_site_transients'][ $key ] );
 
         return true;
     }

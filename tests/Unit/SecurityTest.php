@@ -60,7 +60,7 @@ final class SecurityTest extends TestCase {
 	public static function provide_auth_false_positive(): array {
 		return array(
 			'author param'         => array( '?author=John' ),
-			'authorization param'  => array( '?authorization=Bearer x' ),
+			'authorization param'  => array( '?authorization=basic' ),
 			'authorize param'      => array( '?authorize=true' ),
 			'authentication param' => array( '?authentication=basic' ),
 		);
@@ -84,6 +84,44 @@ final class SecurityTest extends TestCase {
 	public function test_redact_sensitive_text_redacts_email(): void {
 		$result = Updatronix_Security::sanitize_trace( 'user@example.com' );
 		$this->assertStringContainsString( '[redacted-email]', $result );
+	}
+
+	/**
+	 * License and API keys are redacted even when the parameter name does not
+	 * start with a known secret word.
+	 *
+	 * @return array<string, array{string}>
+	 */
+	public static function provide_prefixed_secret_redaction(): array {
+		return array(
+			'license_key' => array( '?license_key=abc123' ),
+			'api_key'     => array( '?api_key=abc123' ),
+			'apikey'      => array( '?apikey=abc123' ),
+			'password'    => array( '?password=abc123' ),
+			'secret'      => array( '?secret=abc123' ),
+		);
+	}
+
+	/**
+	 * Prefixed secret parameter names are redacted.
+	 *
+	 * @dataProvider provide_prefixed_secret_redaction
+	 *
+	 * @param string $input Raw trace input.
+	 */
+	public function test_redact_sensitive_text_redacts_prefixed_secret_names( string $input ): void {
+		$result = Updatronix_Security::sanitize_trace( $input );
+		$this->assertStringContainsString( '[redacted]', $result );
+		$this->assertStringNotContainsString( 'abc123', $result );
+	}
+
+	/**
+	 * Bearer tokens are redacted.
+	 */
+	public function test_redact_sensitive_text_redacts_bearer_tokens(): void {
+		$result = Updatronix_Security::sanitize_trace( 'Authorization: Bearer abc.def.ghi' );
+		$this->assertStringContainsString( 'Bearer [redacted]', $result );
+		$this->assertStringNotContainsString( 'abc.def.ghi', $result );
 	}
 
 	/**
@@ -182,6 +220,16 @@ final class SecurityTest extends TestCase {
 		$result = Updatronix_Security::sanitize_message( 'He said &quot;stop&quot;' );
 
 		$this->assertSame( 'He said "stop"', $result );
+	}
+
+	/**
+	 * Encoded markup is decoded before tags are stripped, so no tag survives.
+	 */
+	public function test_sanitize_message_strips_encoded_markup(): void {
+		$result = Updatronix_Security::sanitize_message( '&lt;img src=x onerror=alert(1)&gt;' );
+
+		$this->assertStringNotContainsString( '<', $result );
+		$this->assertStringNotContainsString( '>', $result );
 	}
 
 	// --- sanitize_trace ---
@@ -456,6 +504,16 @@ final class SecurityTest extends TestCase {
 	public function test_sanitize_string_truncates_to_custom_max(): void {
 		$result = Updatronix_Security::sanitize_string( str_repeat( 'a', 300 ), 10 );
 		$this->assertSame( 10, mb_strlen( $result ) );
+	}
+
+	/**
+	 * Short string fields are redacted as well as messages and traces.
+	 */
+	public function test_sanitize_string_redacts_secret_parameters(): void {
+		$result = Updatronix_Security::sanitize_string( 'pkg?license_key=secret' );
+
+		$this->assertStringContainsString( '[redacted]', $result );
+		$this->assertStringNotContainsString( 'secret', $result );
 	}
 
 	/**

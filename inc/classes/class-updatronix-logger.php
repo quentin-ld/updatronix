@@ -79,6 +79,10 @@ final class Updatronix_Logger {
 		string $update_context = '',
 		string $event_key = ''
 	): int|false {
+		if ( ! updatronix_get_settings()['logging_enabled'] ) {
+			return false;
+		}
+
 		if ( ! Updatronix_Database::table_exists() ) {
 			return false;
 		}

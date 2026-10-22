@@ -489,6 +489,10 @@ final class Updatronix_AutoUpdateDelay {
 					require_once ABSPATH . 'wp-admin/includes/plugin.php';
 				}
 
+				if ( str_contains( $file, '..' ) || str_starts_with( $file, '/' ) || str_contains( $file, '\\' ) ) {
+					return array( __( 'Unknown plugin', 'updatronix' ), '', '', (string) ( $item->new_version ?? '' ) );
+				}
+
 				$data  = get_plugin_data( \WP_PLUGIN_DIR . '/' . $file, false );
 				$title = trim( (string) $data['Name'] );
 

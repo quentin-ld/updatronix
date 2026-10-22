@@ -117,6 +117,7 @@ final class Updatronix_Security {
 	 */
 	public static function sanitize_string( string $value, int $max_length = 255 ): string {
 		$value = sanitize_text_field( $value );
+		$value = self::redact_sensitive_text( $value );
 
 		return mb_substr( $value, 0, $max_length );
 	}
@@ -128,8 +129,8 @@ final class Updatronix_Security {
 	 * @return string
 	 */
 	public static function sanitize_message( string $value ): string {
-		$value = wp_strip_all_tags( wp_unslash( $value ) );
-		$value = html_entity_decode( $value, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+		$value = html_entity_decode( wp_unslash( $value ), ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+		$value = wp_strip_all_tags( $value );
 		$value = self::redact_sensitive_text( $value );
 
 		return mb_substr( $value, 0, 65535 );
@@ -168,10 +169,16 @@ final class Updatronix_Security {
 	 * @return string
 	 */
 	private static function redact_sensitive_text( string $value ): string {
-		$redacted = preg_replace( '/([?&](?:token|signature|sig|key|access_token|auth(?![a-zA-Z]))[^=\s]*=)[^&\s]+/i', '$1[redacted]', $value );
-		$value    = (bool) $redacted ? $redacted : $value;
+		$redacted = preg_replace(
+			'/([?&](?:[^=&\s]*(?:token|key|secret|password|passwd|pwd|signature|sig)[^=&\s]*|auth|auth_[^=&\s]*|[^=&\s]*_auth)=)[^&\s]+/i',
+			'$1[redacted]',
+			$value
+		);
+		$value    = null !== $redacted ? $redacted : $value;
+		$redacted = preg_replace( '/(\bBearer\s+)[A-Za-z0-9._~+\/=\-]+/i', '$1[redacted]', $value );
+		$value    = null !== $redacted ? $redacted : $value;
 		$redacted = preg_replace( '/([A-Z0-9._%+\-]+)@([A-Z0-9.\-]+\.[A-Z]{2,})/i', '[redacted-email]', $value );
-		$value    = (bool) $redacted ? $redacted : $value;
+		$value    = null !== $redacted ? $redacted : $value;
 
 		// Redact server paths so internal filesystem layout is not exposed in log entries.
 		$path_prefixes = array();

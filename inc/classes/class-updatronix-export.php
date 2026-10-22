@@ -20,6 +20,7 @@ final class Updatronix_Export {
 	public const MAX_BYTES_PER_CHUNK = 1048576;
 	public const MAX_BYTES_TOTAL     = 8388608;
 	public const HARD_TIME_SECONDS   = 15;
+	public const MAX_CHUNKS          = 100;
 	public const TRANSIENT_TTL       = 900;
 
 	/**
@@ -323,6 +324,13 @@ final class Updatronix_Export {
 
 			$row_count_fetched = count( $rows );
 			$partial_batch     = $row_count_fetched > $rows_emitted;
+
+			// Rows whose log_type is outside the render allowlist are dropped by
+			// the body builder. Advance past them so a continuation cannot repeat
+			// the same query forever.
+			if ( 0 === $rows_emitted && $row_count_fetched > 0 ) {
+				$offset += $row_count_fetched;
+			}
 		}
 
 		$glue            = ( '' !== $accumulated_body && '' !== $chunk_delta ) ? "\n" : '';
@@ -342,6 +350,18 @@ final class Updatronix_Export {
 			&& $total_rows_scanned < $row_cap_job
 			&& strlen( $new_accumulated ) < self::MAX_BYTES_TOTAL
 			&& ( $more_in_db || $partial_batch );
+
+		if ( $needs_continue && ( microtime( true ) - $started ) > self::HARD_TIME_SECONDS ) {
+			$truncated         = true;
+			$truncation_reason = 'time';
+			$needs_continue    = false;
+		}
+
+		if ( $needs_continue && $issued_cursor_tokens >= self::MAX_CHUNKS ) {
+			$truncated         = true;
+			$truncation_reason = 'chunk_cap';
+			$needs_continue    = false;
+		}
 
 		$filters_fp   = hash( 'sha256', (bool) wp_json_encode( $validated['fingerprint_source'] ?? array() ) ? wp_json_encode( $validated['fingerprint_source'] ?? array() ) : '' );
 		$generated_at = time();

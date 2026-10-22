@@ -275,30 +275,49 @@ final class Updatronix_ErrorHandler {
 	 * @return string Unchanged location.
 	 */
 	public static function capture_redirect_error( string $location, int $status ): string {
-		if ( $status >= 400 && str_contains( $location, 'update-core.php' ) ) {
-			$performed_as = Updatronix_Update_Logger::is_automatic_update() ? 'automatic' : 'manual';
-			$event_key    = Updatronix_UpdateLogState::find_pending_event_key( 'core', 'core' );
-			Updatronix_Logger::log(
-				'core',
-				'failed',
-				'WordPress',
-				'core',
-				'',
-				'',
-				'error',
-				sprintf(
-					/* translators: %d: HTTP status code */
-					__( 'The core update encountered a redirect error (HTTP %d). Check your server configuration.', 'updatronix' ),
-					$status
-				),
-				self::capture_trace(),
-				$performed_as,
-				'',
-				$event_key
-			);
-			if ( '' !== $event_key ) {
-				Updatronix_UpdateLogState::mark_finalized( $event_key );
-			}
+		if ( $status < 400 ) {
+			return $location;
+		}
+
+		$parse = static function ( string $url, int $component ) {
+			return function_exists( 'wp_parse_url' ) ? wp_parse_url( $url, $component ) : parse_url( $url, $component ); // phpcs:ignore WordPress.WP.AlternativeFunctions.parse_url_parse_url -- wp_parse_url is preferred when WordPress is loaded.
+		};
+
+		$location_path = $parse( $location, PHP_URL_PATH );
+		$target_path   = $parse( admin_url( 'update-core.php' ), PHP_URL_PATH );
+
+		if ( ! is_string( $location_path ) || ! is_string( $target_path ) || $location_path !== $target_path ) {
+			return $location;
+		}
+
+		$location_host = $parse( $location, PHP_URL_HOST );
+		$site_host     = $parse( admin_url(), PHP_URL_HOST );
+		if ( is_string( $location_host ) && is_string( $site_host ) && strtolower( $location_host ) !== strtolower( $site_host ) ) {
+			return $location;
+		}
+
+		$performed_as = Updatronix_Update_Logger::is_automatic_update() ? 'automatic' : 'manual';
+		$event_key    = Updatronix_UpdateLogState::find_pending_event_key( 'core', 'core' );
+		Updatronix_Logger::log(
+			'core',
+			'failed',
+			'WordPress',
+			'core',
+			'',
+			'',
+			'error',
+			sprintf(
+				/* translators: %d: HTTP status code */
+				__( 'The core update encountered a redirect error (HTTP %d). Check your server configuration.', 'updatronix' ),
+				$status
+			),
+			self::capture_trace(),
+			$performed_as,
+			'',
+			$event_key
+		);
+		if ( '' !== $event_key ) {
+			Updatronix_UpdateLogState::mark_finalized( $event_key );
 		}
 
 		return $location;

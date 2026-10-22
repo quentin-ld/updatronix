@@ -82,11 +82,16 @@ final class Updatronix_Export_Transient_Manager {
 			return new WP_Error( 'internal', '', array( 'status' => 500 ) );
 		}
 
-		$updated = update_user_meta( $user_id, self::POINTER_META_KEY, $new_key );
-		if ( false === $updated ) {
-			updatronix_delete_plugin_transient( $new_key );
+		// Continuation chunks reuse the same transient key, and update_user_meta()
+		// returns false when the stored value is unchanged. Treat that as a success:
+		// the pointer already names the transient we just wrote.
+		if ( $prior !== $new_key ) {
+			$updated = update_user_meta( $user_id, self::POINTER_META_KEY, $new_key );
+			if ( false === $updated ) {
+				updatronix_delete_plugin_transient( $new_key );
 
-			return new WP_Error( 'internal', '', array( 'status' => 500 ) );
+				return new WP_Error( 'internal', '', array( 'status' => 500 ) );
+			}
 		}
 
 		// Best-effort cleanup of the prior transient. The old one expires

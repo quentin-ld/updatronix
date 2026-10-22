@@ -21,6 +21,14 @@ final class Updatronix_Uninstall {
 	 * @return void
 	 */
 	public static function run(): void {
+		// On Multisite, only a network administrator (or WP-CLI) may destroy
+		// network-scoped data. A subsite administrator can reach delete_plugins()
+		// from the subsite Plugins screen; uninstall.php runs before the files are
+		// removed, so without this guard that request would wipe the network log.
+		if ( is_multisite() && ! is_network_admin() && ! ( defined( 'WP_CLI' ) && WP_CLI ) && is_admin() ) {
+			return;
+		}
+
 		if ( is_multisite() ) {
 			self::clear_subsite_artifacts();
 		}
@@ -85,6 +93,7 @@ final class Updatronix_Uninstall {
 		require_once updatronix_PLUGIN_DIR . 'inc/settings/options.php';
 		updatronix_delete_plugin_option( UPDATRONIX_OPTION_NETWORK_SCHEDULE );
 		updatronix_delete_plugin_option( 'updatronix_network_storage_migrated' );
+		updatronix_delete_plugin_option( 'updatronix_activation_subsite_skipped' );
 	}
 
 	/**

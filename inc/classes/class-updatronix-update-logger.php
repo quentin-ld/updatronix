@@ -852,11 +852,11 @@ final class Updatronix_Update_Logger {
 	/**
 	 * Store current core/plugin/theme versions before upgrade runs. For core, also hook update_feedback to collect process.
 	 *
-	 * @param bool                 $result     Whether the install was successful (filter pass-through).
+	 * @param bool|\WP_Error       $result     Whether the install was successful, or a WP_Error (filter pass-through).
 	 * @param array<string, mixed> $hook_extra Extra args (type, plugin, theme).
-	 * @return bool
+	 * @return bool|\WP_Error
 	 */
-	public static function store_core_version_before( bool $result, array $hook_extra = array() ): bool {
+	public static function store_core_version_before( bool|\WP_Error $result, array $hook_extra = array() ): bool|\WP_Error {
 		$type = $hook_extra['type'] ?? '';
 		if ( 'core' === $type && '' === updatronix_get_plugin_option( self::OPTION_CORE_VERSION_BEFORE, '' ) ) {
 			updatronix_update_plugin_option( self::OPTION_CORE_VERSION_BEFORE, get_bloginfo( 'version' ) );

@@ -5,7 +5,7 @@
 [![WordPress tested](https://img.shields.io/badge/WordPress%20tested-7.1-21759b)](https://wordpress.org/plugins/updatronix/)
 [![WordPress requires](https://img.shields.io/badge/WordPress%20requires-6.2%2B-21759b)](https://wordpress.org/plugins/updatronix/)
 [![PHP](https://img.shields.io/badge/PHP-8.1%2B-8892BF)](https://www.php.net/)
-[![Version](https://img.shields.io/badge/version-1.2.0-2E77BC)](https://wordpress.org/plugins/updatronix/)
+[![Version](https://img.shields.io/badge/version-1.3.0-2E77BC)](https://wordpress.org/plugins/updatronix/)
 [![License](https://img.shields.io/badge/license-GPL--2.0--or--later-brightgreen)](https://www.gnu.org/licenses/gpl-2.0.html)
 [![WordPress downloads](https://img.shields.io/wordpress/plugin/dt/updatronix)](https://wordpress.org/plugins/updatronix/)
 
@@ -62,7 +62,7 @@ Set how long the log is kept, route WordPress update emails to the right address
 <!-- harness:compat:start -->
 - WordPress **6.2+** (tested up to **7.1**)
 - PHP **8.1+**
-- Version **1.2.0**
+- Version **1.3.0**
 <!-- harness:compat:end -->
 
 ### License

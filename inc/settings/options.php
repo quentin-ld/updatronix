@@ -290,6 +290,9 @@ function updatronix_maybe_grant_manage_cap(): void {
 	if ( is_multisite() ) {
 		return;
 	}
+	if ( ! current_user_can( 'manage_options' ) ) {
+		return;
+	}
 	if ( get_option( 'updatronix_cap_migrated', '' ) === '1' ) {
 		return;
 	}
