@@ -538,3 +538,24 @@ The export modal still uses the legacy `Modal` and core controls. It works and k
 1. `P6`: roadmap gates.
 2. Free `F5`/`F6`.
 3. `P4-04`: flow execution.
+
+## 2026-10-24 · Roadmap gates (P6)
+
+### What landed
+
+- `D-14` is confirmed as the final decision for all three roadmap features:
+  Queue list lives inside Update Shield, Advanced exports in the Update logs
+  export dialog, and Development tools under Documentation.
+- The three briefs now say “Deferred under `D-14`” with the reason and the
+  missing backend contract. No separate rail screens or code were added.
+
+### Verification
+
+- The documentation check passes; no code or tests changed.
+- `G-P6` is closed as three explicit deferrals rather than silently dropped
+  features.
+
+### Next
+
+1. Free `F5`/`F6`.
+2. `P4-04`: flow execution.

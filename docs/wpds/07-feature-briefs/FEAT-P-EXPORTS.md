@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | Edition | Pro |
-| Status | Partial. Free exports a formatted report; the machine-readable formats do not exist. |
+| Status | Deferred under `D-14`. Lives in the Update logs export dialog; CSV/XML/JSON formats and limits are not in this release. |
 | Rail | Inside Update logs, in the export dialog |
 | Design | Export dialog in [`../reference/screens/src/screens/UpdateLog.jsx`](../reference/screens/src/screens/UpdateLog.jsx) |
 | Plan task | `P6-02` (gate); implementation after approval |

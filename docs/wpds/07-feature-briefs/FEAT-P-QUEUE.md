@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | Edition | Pro |
-| Status | Idea. No backend, no screen. Design-gated. |
+| Status | Deferred under `D-14`. Lives inside Update Shield; no separate rail screen; backend contract not in this release. |
 | Rail | Inside Update Shield until a screen exists |
 | Design | None |
 | Plan tasks | `P6-01` (gate); implementation after approval |

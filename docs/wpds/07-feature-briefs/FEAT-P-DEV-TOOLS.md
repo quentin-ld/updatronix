@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | Edition | Pro |
-| Status | Idea. No backend, no screen. Design-gated. |
+| Status | Deferred under `D-14`. Lives inside Documentation; the public hooks and REST contract are not in this release. |
 | Rail | Documentation until a screen exists |
 | Design | None |
 | Plan task | `P6-03` (gate); implementation after approval |

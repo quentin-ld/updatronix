@@ -275,6 +275,12 @@ draft, and no user input reaches an unsanitized sink.
 
 ## P6 — Roadmap gates
 
+**Status:** Done as gates on 2026-10-24. All three features are explicitly
+deferred under `D-14`: Queue list lives inside Update Shield, Advanced exports
+in the Update logs export dialog, and Development tools under Documentation.
+No separate rail screens or backend contracts are added in this release. See
+[`11-implementation-log.md`](11-implementation-log.md).
+
 These three features have no screen. Each task produces an approved brief and a
 decision, not code.
 

@@ -34,6 +34,7 @@ document that owns its contract. Use this table to open one `/architect` or
 | `P3` | Done. Protection, update queue, recently blocked, expanded settings, and the license-aware shield API. |
 | `P4` | Partial. Chain storage, validation, REST, and the reference page; execution integration (`P4-04`) remains. |
 | `P5` | Done. Brand, colors, logo upload, replacement switches, previews, reset, and admin/rail branding. |
+| `P6` | Done as gates. Queue list, Advanced exports, and Development tools are explicitly deferred under `D-14`; no separate screens. |
 
 ## Free
 
