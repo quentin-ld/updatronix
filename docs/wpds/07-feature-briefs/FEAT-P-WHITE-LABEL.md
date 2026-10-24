@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | Edition | Pro |
-| Status | Design only. No backend. |
+| Status | Implemented. Brand, colors, logo upload, replacement switches, previews, reset, admin menu label, rail brand, and email brand filter. |
 | Rail | Automations · `white-label` |
 | Design | [`../reference/screens/src/screens/WhiteLabel.jsx`](../reference/screens/src/screens/WhiteLabel.jsx) |
 | Plan tasks | `P5-01` to `P5-04` |

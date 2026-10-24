@@ -20,6 +20,8 @@ const settings =
 		? window.updatronixSettings
 		: {};
 
+const brand = settings.brand || {};
+
 /**
  * Render the grouped destination links.
  *
@@ -143,15 +145,17 @@ export default function Rail( { destinations, current, onNavigate } ) {
 						navigateFromDrawer( 'logs' );
 					} }
 				>
-					{ settings.logoUrl && (
+					{ ( brand.logoUrl || settings.logoUrl ) && (
 						<img
-							src={ settings.logoUrl }
+							src={ brand.logoUrl || settings.logoUrl }
 							alt=""
 							width="24"
 							height="24"
 						/>
 					) }
-					<span>{ __( 'Updatronix', 'updatronix' ) }</span>
+					<span>
+						{ brand.name || __( 'Updatronix', 'updatronix' ) }
+					</span>
 				</a>
 				<span className="updatronix-mobile-current">
 					{ current?.label }
@@ -212,9 +216,9 @@ export default function Rail( { destinations, current, onNavigate } ) {
 						onNavigate( 'logs' );
 					} }
 				>
-					{ settings.logoUrl && (
+					{ ( brand.logoUrl || settings.logoUrl ) && (
 						<img
-							src={ settings.logoUrl }
+							src={ brand.logoUrl || settings.logoUrl }
 							alt=""
 							width="32"
 							height="32"
@@ -222,7 +226,7 @@ export default function Rail( { destinations, current, onNavigate } ) {
 					) }
 					<span className="updatronix-rail-brand-text">
 						<span className="updatronix-rail-name">
-							{ __( 'Updatronix', 'updatronix' ) }
+							{ brand.name || __( 'Updatronix', 'updatronix' ) }
 						</span>
 						<Text
 							variant="body-sm"

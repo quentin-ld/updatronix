@@ -23,16 +23,18 @@ if ( is_multisite() ) {
  * @return void
  */
 function updatronix_add_option_page(): void {
+	$label = (string) apply_filters( 'updatronix_admin_menu_label', __( 'Updatronix', 'updatronix' ) );
+
 	add_management_page(
-		__( 'Updatronix', 'updatronix' ),
-		__( 'Updatronix', 'updatronix' ),
+		$label,
+		$label,
 		UPDATRONIX_CAP_MANAGE,
 		'updatronix',
 		'updatronix_options_page'
 	);
 	add_submenu_page(
 		'index.php',
-		__( 'Updatronix', 'updatronix' ),
+		$label,
 		__( 'Update logs', 'updatronix' ),
 		UPDATRONIX_CAP_MANAGE,
 		'updatronix',
@@ -52,9 +54,11 @@ function updatronix_add_network_option_page(): void {
 		return;
 	}
 
+	$label = (string) apply_filters( 'updatronix_admin_menu_label', __( 'Updatronix', 'updatronix' ) );
+
 	add_menu_page(
-		__( 'Updatronix', 'updatronix' ),
-		__( 'Updatronix', 'updatronix' ),
+		$label,
+		$label,
 		UPDATRONIX_CAP_MANAGE,
 		'updatronix',
 		'updatronix_options_page',

@@ -312,6 +312,7 @@ function updatronix_localize_settings( string $admin_page ): void {
 	$options    = updatronix_get_settings();
 	$tabs       = updatronix_get_admin_tabs();
 	$active_tab = updatronix_get_active_tab( $tabs );
+	$logo_url   = plugins_url( 'assets/img/logo-60x60.png', updatronix_PLUGIN_FILE );
 
 	wp_localize_script(
 		'updatronix-scripts',
@@ -326,7 +327,17 @@ function updatronix_localize_settings( string $admin_page ): void {
 			'tabs'                   => $tabs,
 			'activeTab'              => $active_tab,
 			'version'                => UPDATRONIX_VERSION,
-			'logoUrl'                => plugins_url( 'assets/img/logo-60x60.png', updatronix_PLUGIN_FILE ),
+			'logoUrl'                => $logo_url,
+			'brand'                  => apply_filters(
+				'updatronix_admin_brand',
+				array(
+					'name'       => __( 'Updatronix', 'updatronix' ),
+					'menu_label' => __( 'Updatronix', 'updatronix' ),
+					'logoUrl'    => $logo_url,
+					'color'      => '#3858E9',
+					'menuColor'  => '#1E1E1E',
+				)
+			),
 			'isPro'                  => defined( 'UPDATRONIX_PRO_VERSION' ),
 			'canManagePro'           => (bool) apply_filters( 'updatronix_can_manage_pro', false ),
 			// Global window property populated by Pro's admin JS for the panel registry; Free reads it via ProTabPanel.

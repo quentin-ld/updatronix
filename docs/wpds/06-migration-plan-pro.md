@@ -229,6 +229,11 @@ cycle cannot be saved. A failed run is visible in the log.
 
 ## P5 — White label
 
+**Status:** Done on 2026-10-24. Option schema and sanitization, the reference
+page, previews, reset, admin menu label, rail brand, and the plugin email brand
+filter are implemented. Native WordPress emails are not re-templated. See
+[`11-implementation-log.md`](11-implementation-log.md).
+
 ### P5-01 · Options and sanitization
 
 - **Change.** Define the option shape: brand name, menu label, logo attachment

@@ -14,6 +14,12 @@ import { getTabUrl } from './routes';
 
 const { Badge } = wpds.ui;
 
+const settings =
+	typeof window !== 'undefined' && window.updatronixSettings
+		? window.updatronixSettings
+		: {};
+const brandName = settings.brand?.name || __( 'Updatronix', 'updatronix' );
+
 /**
  * Render the page header.
  *
@@ -36,9 +42,7 @@ export default function PageHeader( { destination, meta = [], actions } ) {
 				className="updatronix-breadcrumb"
 				aria-label={ __( 'Breadcrumb', 'updatronix' ) }
 			>
-				<a href={ getTabUrl( 'logs' ) }>
-					{ __( 'Updatronix', 'updatronix' ) }
-				</a>
+				<a href={ getTabUrl( 'logs' ) }>{ brandName }</a>
 				<span aria-hidden="true">/</span>
 				<span aria-current="page">{ destination.label }</span>
 			</nav>

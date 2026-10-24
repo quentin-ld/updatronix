@@ -502,3 +502,39 @@ The export modal still uses the legacy `Modal` and core controls. It works and k
 1. `P4-04`: run chains before the regular update check, stop on failure, and
    record each step in the log.
 2. `P5`: White label.
+
+## 2026-10-24 · White label (P5)
+
+### What landed
+
+- Pro stores the network-wide white label option and exposes
+  `GET/POST /white-label`. Text, hex colors, the attachment ID, and the two
+  switches are sanitized server-side; the route is gated by the Pro
+  capability, Super Admin on Multisite, and an active license or dev mode.
+- The White label page follows the reference composition: Brand, Colors,
+  Replace, and Preview, with logo upload/removal, brand and menu colors,
+  replacement and email switches, the admin/email previews, reset
+  confirmation, and one manual save with `Ctrl+S`.
+- Free localizes the brand from `updatronix_admin_brand` and uses it for the
+  admin menu label, the rail wordmark, and the page breadcrumb. Pro filters
+  the menu label and the plugin-generated email brand name. Native WordPress
+  update emails are not re-templated.
+
+### Verification
+
+- Pro ESLint, Stylelint, and build pass; PHPStan is clean; 200 PHPUnit tests
+  and 612 assertions pass.
+- Free ESLint, build, and 213 PHPUnit tests pass; PHPStan is clean.
+- Browser pass with a temporary local license: the page rendered, `Acme
+  Studio` and `Site updates` were saved and read back, the admin menu label
+  changed to `Site updates`, and the rail wordmark changed to `Acme Studio`.
+  The temporary license and white label option were removed afterwards.
+- The logo upload and reset confirmation are code-reviewed but were not
+  exercised in the browser. The rail brand and menu label were verified; the
+  breadcrumb uses the same setting.
+
+### Next
+
+1. `P6`: roadmap gates.
+2. Free `F5`/`F6`.
+3. `P4-04`: flow execution.
