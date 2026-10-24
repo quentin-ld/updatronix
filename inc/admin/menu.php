@@ -15,6 +15,29 @@ if ( is_multisite() ) {
 	add_action( 'admin_menu', 'updatronix_add_option_page' );
 }
 
+add_filter( 'admin_body_class', 'updatronix_admin_body_class' );
+
+/**
+ * Add a body class on the Updatronix admin page.
+ *
+ * The shell owns the full content area. The class lets the stylesheet remove
+ * the wp-admin bottom padding and footer only on this page.
+ *
+ * @since 2.0.0
+ *
+ * @param string $classes Existing body classes.
+ * @return string Body classes.
+ */
+function updatronix_admin_body_class( string $classes ): string {
+	$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+
+	if ( null !== $screen && false !== strpos( $screen->id, 'updatronix' ) ) {
+		$classes .= ' updatronix-admin-page';
+	}
+
+	return $classes;
+}
+
 /**
  * Registers **Tools → Updatronix** and **Dashboard → Update logs**, both opening the same app shell.
  *
@@ -86,9 +109,8 @@ function updatronix_options_page(): void {
 	$active_tab = updatronix_get_active_tab( $tabs );
 	?>
 	<div class="updatronix-dashboard-wrap">
-		<div class="updatronix-page">
-			<main id="updatronix-settings" class="updatronix-settings">
-				<div class="updatronix-loading card">
+		<div id="updatronix-settings" class="updatronix-settings">
+			<div class="updatronix-loading card">
 					<div class="updatronix-loading-body">
 						<p class="updatronix-loading-text">
 							<?php echo esc_html__( 'Loading your Updatronix settings…', 'updatronix' ); ?>

@@ -9,17 +9,6 @@
 
 .updatronix {
 
-	&-page {
-		position: relative;
-		margin-left: -20px;
-		background: transparent;
-		margin-bottom: -55px;
-
-		@media screen and (max-width: 1281px) {
-			margin-bottom: -25px;
-		}
-	}
-
 	&-dashboard-wrap {
 
 		* {

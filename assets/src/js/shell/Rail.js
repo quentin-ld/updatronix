@@ -87,13 +87,17 @@ function RailNav( { destinations, currentSlug, onNavigate, className = '' } ) {
 									<span className="updatronix-rail-link-label">
 										{ item.label }
 									</span>
-									{ item.edition === 'pro' && (
-										<span className="updatronix-rail-pro">
-											<Badge intent="draft">
-												{ __( 'Pro', 'updatronix' ) }
-											</Badge>
-										</span>
-									) }
+									{ item.slug === 'updatronix-3000' &&
+										item.edition === 'pro' && (
+											<span className="updatronix-rail-pro">
+												<Badge intent="draft">
+													{ __(
+														'Pro',
+														'updatronix'
+													) }
+												</Badge>
+											</span>
+										) }
 								</a>
 							);
 						} ) }
@@ -117,7 +121,7 @@ export default function Rail( { destinations, current, onNavigate } ) {
 	const [ navOpen, setNavOpen ] = useState( false );
 
 	useEffect( () => {
-		const desktop = window.matchMedia( '(min-width: 901px)' );
+		const desktop = window.matchMedia( '(min-width: 961px)' );
 		const closeOnDesktop = () => {
 			if ( desktop.matches ) {
 				setNavOpen( false );

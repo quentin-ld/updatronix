@@ -62,53 +62,55 @@ export default function AppShell( {
 				className="updatronix-shell-main"
 				tabIndex={ -1 }
 			>
-				{ ! hideHeader && (
-					<header className="updatronix-page-header">
-						<nav
-							className="updatronix-breadcrumb"
-							aria-label={ __( 'Breadcrumb', 'updatronix' ) }
-						>
-							<a
-								href={ getTabUrl( 'logs' ) }
-								onClick={ ( event ) => {
-									event.preventDefault();
-									onNavigate( 'logs' );
-								} }
+				<div className="updatronix-page">
+					{ ! hideHeader && (
+						<header className="updatronix-page-header">
+							<nav
+								className="updatronix-breadcrumb"
+								aria-label={ __( 'Breadcrumb', 'updatronix' ) }
 							>
-								{ __( 'Updatronix', 'updatronix' ) }
-							</a>
-							<span aria-hidden="true">/</span>
-							<span aria-current="page">
-								{ destination.label }
-							</span>
-						</nav>
-
-						<div className="updatronix-page-headrow">
-							<div className="updatronix-page-heading">
-								<h1
-									className="updatronix-page-title"
-									ref={ titleRef }
-									tabIndex={ -1 }
+								<a
+									href={ getTabUrl( 'logs' ) }
+									onClick={ ( event ) => {
+										event.preventDefault();
+										onNavigate( 'logs' );
+									} }
 								>
+									{ __( 'Updatronix', 'updatronix' ) }
+								</a>
+								<span aria-hidden="true">/</span>
+								<span aria-current="page">
 									{ destination.label }
-								</h1>
-								{ destination.description && (
-									<p className="updatronix-page-description">
-										{ destination.description }
-									</p>
+								</span>
+							</nav>
+
+							<div className="updatronix-page-headrow">
+								<div className="updatronix-page-heading">
+									<h1
+										className="updatronix-page-title"
+										ref={ titleRef }
+										tabIndex={ -1 }
+									>
+										{ destination.label }
+									</h1>
+									{ destination.description && (
+										<p className="updatronix-page-description">
+											{ destination.description }
+										</p>
+									) }
+								</div>
+
+								{ actions && (
+									<div className="updatronix-page-actions">
+										{ actions }
+									</div>
 								) }
 							</div>
+						</header>
+					) }
 
-							{ actions && (
-								<div className="updatronix-page-actions">
-									{ actions }
-								</div>
-							) }
-						</div>
-					</header>
-				) }
-
-				{ children }
+					{ children }
+				</div>
 			</main>
 		</div>
 	);

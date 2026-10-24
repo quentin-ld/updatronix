@@ -31,8 +31,14 @@ const brandName = settings.brand?.name || __( 'Updatronix', 'updatronix' );
  */
 export default function PageHeader( { destination, meta = [], actions } ) {
 	const titleRef = useRef( null );
+	const firstRender = useRef( true );
 
 	useEffect( () => {
+		if ( firstRender.current ) {
+			firstRender.current = false;
+			return;
+		}
+
 		titleRef.current?.focus();
 	}, [ destination.slug ] );
 
