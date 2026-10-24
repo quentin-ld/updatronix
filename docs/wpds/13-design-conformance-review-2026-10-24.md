@@ -33,6 +33,11 @@ out. The candidate puts a sticky bar at the bottom of three Free screens and
 puts plain inline Save buttons on the Pro screens, so Save disappears when the
 Pro page scrolls.
 
+Transient feedback is also different: the reference uses a fixed black snackbar
+at the bottom center for save, copy, delete, and error feedback. The candidate
+puts WordPress notice boxes at the top of the page, or only updates an
+off-screen live region.
+
 The result is not a small spacing pass. The shell, the single-header rule, and
 the save model need to be corrected first; per-screen deltas will then be
 re-checked against the rendered Open Design screens.
@@ -446,6 +451,148 @@ The reference `Note` is a body-sm `Text` with `surface-note` (max 80ch, muted)
   break the full-height composition (SHELL-07).
 - **ACC-06** The mobile save action is only at the bottom; the reference top bar
   is missing at mobile widths too (SAVE-08/SHELL-08).
+
+## UX — Micro-interactions and feedback
+
+These are the interaction-level mismatches that the first pass missed. The
+reference is not only a layout; it has a specific feedback model.
+
+### UX-01 — The save/action snackbar is missing
+
+**Reference:** `SnackbarProvider` keeps local notices, auto-dismisses each after
+4500 ms, and renders `SnackbarList` in a fixed `.app-snackbar` at the bottom
+center of the viewport (`ui.jsx:19-56`; `app.css:1453-1469`). That produces the
+black centered toast the user sees after a save, copy, delete, or error. It is
+dismissible and has a spoken message.
+
+**Current:** `Notices` renders `NoticeList` from the WordPress notices store in
+`.updatronix-notices`, at the top of the app content
+(`components/Notices.js:1-21`; `SettingsPage.js:268`;
+`_shell.scss:351-360`). `SnackbarList` is exposed in the shared runtime but is
+not used (`shell/wpds.js:56,172`). Save success notices are created with
+`createSuccessNotice` in the Free hooks and Pro panels, so they appear as
+WordPress notice boxes at the top, not as the reference black snackbar.
+
+**Impact:** the save confirmation does not appear where the design says, does
+not have the reference dark styling, and is not a transient global toast. This
+is the exact example the user called out.
+
+### UX-02 — No auto-dismiss, stacking, or toast timing
+
+The reference removes each snackbar after 4.5 seconds and supports multiple
+snackbars in the fixed list. The current notices store has no equivalent
+4.5-second lifecycle; notices remain until dismissed or the store is cleared.
+There is also no global bottom-center stacking container; notices render inside
+the page content and can be pushed by the page layout.
+
+### UX-03 — Save feedback is duplicated and split
+
+Free screens currently show a top notice after save and also change the bottom
+SaveBar to "All changes saved" (`SaveBar.js:99-134`). Pro screens show a top
+notice and leave the body Save button in place. The reference shows one
+snackbar and the scroll-triggered SaveBar; it does not duplicate the success
+message in two places.
+
+### UX-04 — Export copy is silent to sighted users
+
+`ExportLogsModal.copyExport()` writes a message only to an off-screen live
+region (`ExportLogsModal.js:303-340`). The reference action feedback is a
+visible snackbar. A copy action that only announces to assistive technology
+leaves sighted users without confirmation.
+
+### UX-05 — Save, copy, delete, recheck, activation, and reset use different feedback paths
+
+The candidate mixes three models:
+
+- WordPress notices store (`createSuccessNotice`/`createErrorNotice`) on Free
+  hooks and Pro pages.
+- Local inline `Notice.Root` blocks for page-level errors.
+- A live region for clipboard copy.
+
+The reference uses one `useSnackbar` path for transient feedback. A single
+surface can therefore show feedback in the wrong place, or not at all.
+
+### UX-06 — SaveBar and snackbar states are not coordinated
+
+The reference SaveBar appears only while the header SaveButton is out of view;
+the snackbar appears after the save. The candidate's bottom bar is always
+present and its status text changes, while a top notice is added. There is no
+single source of truth for "saving", "saved", and "failed" feedback.
+
+### UX-07 — Shortcut discoverability is incomplete
+
+The reference SaveButton includes the `Ctrl+S`/`⌘S` hint in the header and in
+the SaveBar (`ui.jsx:120-133,201-215`). The candidate has the hint only in the
+bottom Free SaveBar; Pro body save buttons have no hint, and the License page
+has no save shortcut because it has no save action.
+
+### UX-08 — Dialog focus, escape, and return need a formal pass
+
+The candidate uses WPDS `Dialog.Root`/`AlertDialog.Root` in the log, export,
+flow, shield, and white-label surfaces. The reference uses the same family, but
+the review did not confirm focus trap, Escape close, return focus to the
+trigger, or scroll lock on every dialog. Register these as tests, not assumed
+passes.
+
+### UX-09 — Destructive confirmations need target names and focus return
+
+The reference names the chain in the delete dialog and uses an irreversible
+AlertDialog. The candidate does this for chains and logs; the white-label reset
+and license deactivation also need the same target-specific copy, focus return,
+and snackbar after completion. Verify each one.
+
+### UX-10 — Row action affordance differs
+
+The reference log row exposes an `Actions` menu button (`update-log.html`
+rendered snapshot; `UpdateLog.jsx` row actions). The candidate uses the
+DataViews actions rendering. Keyboard opening, menu focus, and the details
+action must be compared; this is a micro-interaction, not only a column layout.
+
+### UX-11 — Toast accessibility is not specified
+
+The reference snackbar supplies `spokenMessage` and a dismiss button
+(`ui.jsx:22-35,43-45`). The candidate's notice list and live region do not
+prove the same announcement timing. Register a screen-reader test for save,
+error, copy, and delete.
+
+### UX-12 — Rail hover/current/focus and mobile drawer
+
+The reference has a white 2px current marker, a white focus outline on the dark
+rail, and a mobile drawer with its own focus/escape path (`app.css:79-82,
+132-162`). The candidate is missing the marker, uses the general focus token,
+and puts the mobile bar inside the content. These are interaction/visual
+details, not only colors.
+
+## Micro-interaction test register
+
+Each test compares the candidate against the rendered Open Design screen at
+desktop width and at 390px. "Candidate status" is the current review evidence,
+not a claim that the test was executed.
+
+| ID | Scenario | Reference expectation | Candidate status |
+|---|---|---|---|
+| UX-T01 | Save Settings | Black snackbar bottom center; message; close; auto-dismiss after 4.5s | Top `NoticeList`; bottom SaveBar status; no snackbar. **Mismatch.** |
+| UX-T02 | Save Auto updates | Same snackbar; header SaveButton + scroll SaveBar | Top notice; bottom SaveBar. **Mismatch.** |
+| UX-T03 | Save Schedule | Same snackbar; header Save + Run a check | Top notice; bottom SaveBar. **Mismatch.** |
+| UX-T04 | Save Update Shield | Header Save + scroll SaveBar; snackbar | Body-top Save; top notice; no scroll bar. **Mismatch.** |
+| UX-T05 | Save Update Flow | Header Save + scroll SaveBar; snackbar | Body-top Save; top notice; no scroll bar. **Mismatch.** |
+| UX-T06 | Save White label | Header Reset/Save + scroll SaveBar; snackbar | Body-top Reset/Save; top notice; no scroll bar. **Mismatch.** |
+| UX-T07 | Save failure | Error snackbar; draft preserved; no false success | Top error notice; bottom status; inspect. **Needs test.** |
+| UX-T08 | Copy export | Snackbar "Copied"; clipboard content | Live region only. **Mismatch for sighted users.** |
+| UX-T09 | Delete log entry | AlertDialog names entry; focus returns; snackbar | Dialog exists; feedback path top notice. **Needs test.** |
+| UX-T10 | License activate/deactivate | Snackbar; header description changes; masked key | Top notice; header static. **Mismatch.** |
+| UX-T11 | Health run/retry | Loading state; snackbar; retry queue visible | Top notice; loading exists. **Needs test.** |
+| UX-T12 | Flow create/update/delete | Snackbar; dialog focus/return; dependency check | Top notice; editor dialog exists. **Needs test.** |
+| UX-T13 | White label reset/upload error | Reset confirmation; snackbar; inline upload error | AlertDialog exists; top notice; upload error inline. **Needs test.** |
+| UX-T14 | Ctrl+S on every saved screen | Saves; shortcut hint visible in header and bar | Free bottom hint; Pro no hint. **Mismatch.** |
+| UX-T15 | Scroll after header save | Top SaveBar appears at the main surface top; disappears at header | No top bar; bottom bar only. **Mismatch.** |
+| UX-T16 | Open/close dialog | Focus trap; Escape; focus returns to trigger | WPDS components used; not verified. **Needs test.** |
+| UX-T17 | Destructive dialog | Target-specific title; irreversible style; focus return | Existing AlertDialogs; verify all. **Needs test.** |
+| UX-T18 | Mobile drawer | Full-width dark bar; drawer focus/escape; content card | Mobile bar inside content; no top save. **Mismatch.** |
+| UX-T19 | Screen reader save/error/copy | Spoken message; dismiss; no duplicate announcement | NoticeList/live region; not verified. **Needs test.** |
+| UX-T20 | Multiple feedback messages | Snackbars stack bottom center; each auto-dismisses | Top notices stack in content; no timer. **Mismatch.** |
+| UX-T21 | Row action menu | Actions menu opens by keyboard; details action works | DataViews action; needs comparison. **Needs test.** |
+| UX-T22 | Loading and empty states | No layout jump; empty state remains centered in card | Current spinners/empty states exist; verify. **Needs test.** |
 
 ## What is already close
 
