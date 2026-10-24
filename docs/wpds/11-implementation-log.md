@@ -432,3 +432,38 @@ The export modal still uses the legacy `Modal` and core controls. It works and k
 ### Next
 
 1. `P3`: Update Shield.
+
+## 2026-10-24 · Update Shield (P3)
+
+### What landed
+
+- The shield option gains `incompatible_behavior`, `re_enable`,
+  `notify_email`, `queue_enabled`, and `flag_abandoned`, with defaults,
+  partial-merge support, and sanitizers. Existing installs migrate
+  `notify_email` from `notify_on_block`, and the two keys stay in sync.
+- The dedicated Update Shield page renders Protection, Update queue, and
+  Recently blocked from the reference composition. It has one manual save,
+  a dirty state, `Ctrl+S`, the recheck action, and the compatibility note.
+- `GET /shield/blocked` reads the existing Free log table, keeps the
+  safe-mode action types from the last 30 days, and returns item, type,
+  version, reason, date, and a link to the matching log entry.
+- All shield REST routes now use `check_shield_permission()`: capability,
+  Super Admin on Multisite, and an active license or dev mode. The UI mirrors
+  that gate.
+- Safe Mode now reads `notify_email`, falling back to the legacy
+  `notify_on_block` value.
+
+### Verification
+
+- Pro ESLint, Stylelint, and build pass; PHPStan is clean; 191 PHPUnit tests
+  and 582 assertions pass.
+- Browser pass with a temporary local license: the form rendered, the queue
+  toggle produced the dirty state, Save persisted `queue_enabled: false`,
+  and a second save restored `true`. The Recent updates table showed its
+  empty state. The temporary license option was removed afterwards.
+- WPCS reports only the pre-existing unused-parameter warnings in Safe Mode
+  and the license REST class.
+
+### Next
+
+1. `P4`: Update Flow.

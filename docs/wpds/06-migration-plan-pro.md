@@ -143,6 +143,10 @@ no error state is silent; the key is never rendered in full.
 
 ## P3 — Update Shield
 
+**Status:** Done on 2026-10-24. The reference layout, five new settings, the
+blocked history endpoint, and the server-side license gate are in place. See
+[`11-implementation-log.md`](11-implementation-log.md).
+
 ### P3-01 · Shield page layout
 
 - **Change.** Implement Protection, Update queue, and Recently blocked. One

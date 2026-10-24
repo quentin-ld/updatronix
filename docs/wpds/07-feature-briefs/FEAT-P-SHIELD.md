@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | Edition | Pro |
-| Status | Backend partial. Existing settings and safe-mode filters; the target fields and the blocked table are new. |
+| Status | Implemented. Protection, update queue, recently blocked, expanded fields, and the license-aware shield API. |
 | Rail | Automations · `update-shield` |
 | Design | [`../reference/screens/src/screens/UpdateShield.jsx`](../reference/screens/src/screens/UpdateShield.jsx) |
 | Plan tasks | `P3-01` to `P3-04` |
