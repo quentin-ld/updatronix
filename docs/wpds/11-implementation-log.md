@@ -53,3 +53,38 @@ The manual pass used a local administrator and the DDEV site `https://updatronix
 2. `F2-01` to `F2-04` build the shared page header, surface, save model, and dialogs.
 3. `F3-01` migrates the update log to the target DataViews surface.
 4. `P0-01` to `P0-03` move Pro onto the shared runtime and the component registry.
+
+## 2026-10-24 · F2 patterns and the first two screen migrations
+
+### What landed
+
+| Area | Change |
+|---|---|
+| Section | `assets/src/js/shell/Section.js` wraps the WPDS card with a heading and description. |
+| Save model | `assets/src/js/shell/SaveBar.js` adds a sticky bar, dirty state, `Ctrl+S` / `Cmd+S`, a `beforeunload` guard, and Discard. |
+| Save override | `usePluginSettings.saveSettings()` accepts an optional settings override, so a page can save its local draft without mutating the parent state on every keystroke. |
+| Schedule | Migrated to two WPDS sections, `SelectControl`, `InputControl`, `SwitchControl`, `Notice`, and the new save bar. Dirty state covers the schedule subtree only. |
+| Settings | Migrated to Logging and Email notifications sections with `SwitchControl`, `InputControl`, `Fieldset`, `CheckboxControl`, `Notice`, and the save bar. Clearing logs uses `AlertDialog` with `intent="irreversible"`. The Data card is deferred until the backend has an uninstall option. |
+| Dialogs | The destructive clear-logs action uses `AlertDialog` and names the object; Cancel is focused on open. |
+
+### Verification
+
+| Check | Result |
+|---|---|
+| `npm run lint` | Pass. |
+| `npm run lint:css` | Pass. |
+| `npm run build` | Pass. Entry 333 KiB; lazy page chunk 2.01 MiB. |
+| `npm test` | 12 tests pass. |
+| Manual browser pass | Schedule: change hour, dirty state, save, next-run update, revert. Settings: dirty state, `Ctrl+S`, discard, conditional email fields, `AlertDialog` open and cancel. No console errors. |
+
+### Known gaps after this wave
+
+1. The Settings Data card is not shipped: the backend has no uninstall-deletion option. The route description now says “Logging, retention, and email routing.”
+2. The update log, auto updates, and their dialogs still use the legacy panels.
+3. The page chunk remains 2.01 MiB; F6-03 owns the budget.
+
+### Next
+
+1. `F3-01` and `F3-02`: migrate the update log to DataViews and its details, export, and delete dialogs.
+2. `F3-03`: migrate auto updates to cards and one manual save.
+3. `F5-01`: remove the legacy shell styles and the now-unused `Tabs` component.

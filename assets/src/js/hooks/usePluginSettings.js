@@ -119,107 +119,121 @@ export function usePluginSettings() {
 	const [ scheduleMeta, setScheduleMeta ] = useState( initial.scheduleMeta );
 	const [ saving, setSaving ] = useState( false );
 
-	const saveSettings = useCallback( async () => {
-		setSaving( true );
-		try {
-			const payload = {
-				logging_enabled: settings.logging_enabled,
-				retention_days: settings.retention_days,
-				notifications_mode: settings.notificationsMode,
-				notify_enabled: settings.notify_enabled,
-				notify_emails: settings.notify_emails,
-				notify_on: settings.notifyOn,
-				schedule: settings.schedule,
-			};
-			const response = await apiFetch( {
-				path: 'updatronix/v1/settings',
-				method: 'PUT',
-				data: payload,
-			} );
-			if ( response?.options ) {
-				const {
-					notify_on: notifyOnFromApi,
-					notifications_mode: notificationsModeFromApi,
-					...rest
-				} = response.options;
-				const nextSchedule =
-					response.options.schedule &&
-					typeof response.options.schedule === 'object'
-						? {
-								update_check: {
-									recurrence: String(
-										response.options.schedule.update_check
-											?.recurrence ?? ''
-									),
-									time: String(
-										response.options.schedule.update_check
-											?.time ??
-											DEFAULT_SCHEDULE.update_check.time
-									),
-								},
-								delay_updates: {
-									enabled:
-										!! response.options.schedule
-											.delay_updates?.enabled,
-									delay_value:
-										Number(
-											response.options.schedule
-												.delay_updates?.delay_value
-										) || 0,
-								},
-							}
-						: settings.schedule;
-				setSettings( {
-					...rest,
-					notificationsMode:
-						notificationsModeFromApi === 'disabled'
-							? 'disabled'
-							: 'default',
-					notifyOn: notifyOnFromApi,
-					schedule: nextSchedule,
-					auto_update_translations:
-						!! response.options.auto_update_translations,
-					dismissed_constants: Array.isArray(
-						response.options.dismissed_constants
-					)
-						? response.options.dismissed_constants
-						: [],
+	const saveSettings = useCallback(
+		async ( overrides = null ) => {
+			const source =
+				overrides && typeof overrides === 'object'
+					? overrides
+					: settings;
+
+			setSaving( true );
+			try {
+				const payload = {
+					logging_enabled: source.logging_enabled,
+					retention_days: source.retention_days,
+					notifications_mode: source.notificationsMode,
+					notify_enabled: source.notify_enabled,
+					notify_emails: source.notify_emails,
+					notify_on: source.notifyOn,
+					schedule: source.schedule,
+				};
+				const response = await apiFetch( {
+					path: 'updatronix/v1/settings',
+					method: 'PUT',
+					data: payload,
 				} );
-				if ( response.schedule_meta ) {
-					setScheduleMeta( {
-						...DEFAULT_SCHEDULE_META,
-						...response.schedule_meta,
+				if ( response?.options ) {
+					const {
+						notify_on: notifyOnFromApi,
+						notifications_mode: notificationsModeFromApi,
+						...rest
+					} = response.options;
+					const nextSchedule =
+						response.options.schedule &&
+						typeof response.options.schedule === 'object'
+							? {
+									update_check: {
+										recurrence: String(
+											response.options.schedule
+												.update_check?.recurrence ?? ''
+										),
+										time: String(
+											response.options.schedule
+												.update_check?.time ??
+												DEFAULT_SCHEDULE.update_check
+													.time
+										),
+									},
+									delay_updates: {
+										enabled:
+											!! response.options.schedule
+												.delay_updates?.enabled,
+										delay_value:
+											Number(
+												response.options.schedule
+													.delay_updates?.delay_value
+											) || 0,
+									},
+								}
+							: source.schedule;
+					setSettings( {
+						...rest,
+						notificationsMode:
+							notificationsModeFromApi === 'disabled'
+								? 'disabled'
+								: 'default',
+						notifyOn: notifyOnFromApi,
+						schedule: nextSchedule,
+						auto_update_translations:
+							!! response.options.auto_update_translations,
+						dismissed_constants: Array.isArray(
+							response.options.dismissed_constants
+						)
+							? response.options.dismissed_constants
+							: [],
 					} );
+					if ( response.schedule_meta ) {
+						setScheduleMeta( {
+							...DEFAULT_SCHEDULE_META,
+							...response.schedule_meta,
+						} );
+					}
+					createSuccessNotice(
+						__( 'Settings saved.', 'updatronix' ),
+						{
+							id: 'updatronix-settings-save',
+						}
+					);
+				} else {
+					createWarningNotice(
+						__(
+							'Your settings were saved, but the server did not return the updated values. Refresh the page to confirm.',
+							'updatronix'
+						),
+						{ id: 'updatronix-settings-save' }
+					);
 				}
-				createSuccessNotice( __( 'Settings saved.', 'updatronix' ), {
+			} catch ( e ) {
+				const message =
+					e?.message ||
+					__(
+						'Your settings could not be saved. Check your connection and try again.',
+						'updatronix'
+					);
+				createErrorNotice( message, {
 					id: 'updatronix-settings-save',
 				} );
-			} else {
-				createWarningNotice(
-					__(
-						'Your settings were saved, but the server did not return the updated values. Refresh the page to confirm.',
-						'updatronix'
-					),
-					{ id: 'updatronix-settings-save' }
-				);
+			} finally {
+				setSaving( false );
 			}
-		} catch ( e ) {
-			const message =
-				e?.message ||
-				__(
-					'Your settings could not be saved. Check your connection and try again.',
-					'updatronix'
-				);
-			createErrorNotice( message, { id: 'updatronix-settings-save' } );
-		} finally {
-			setSaving( false );
-		}
-	}, [
-		settings,
-		createSuccessNotice,
-		createErrorNotice,
-		createWarningNotice,
-	] );
+		},
+		[
+			settings,
+			createSuccessNotice,
+			createErrorNotice,
+			createWarningNotice,
+		]
+	);
 
 	const wpConfigConstants = useMemo( () => {
 		if ( typeof window === 'undefined' ) {

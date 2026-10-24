@@ -164,7 +164,6 @@ export const SettingsPage = () => {
 						scheduleMeta={ scheduleMeta }
 						wpConfigConstants={ wpConfigConstants }
 						onDismissConstantNotice={ dismissConstantNotice }
-						showIntro={ false }
 					/>
 				);
 			case 'settings':
@@ -175,7 +174,6 @@ export const SettingsPage = () => {
 						saveSettings={ saveSettings }
 						saving={ saving }
 						onLogsCleared={ handleLogsCleared }
-						showIntro={ false }
 					/>
 				);
 			case 'health':

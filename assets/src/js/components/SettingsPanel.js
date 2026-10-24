@@ -1,31 +1,33 @@
 /**
- * Settings panel — logging and notification configuration.
- * Uses Gutenberg components: NumberControl, TextControl, ToggleControl, CheckboxControl.
+ * Settings destination: logging, retention, and email notifications.
+ *
+ * One manual save for the whole surface. The draft is local until Save.
  */
 
-import { memo, useState } from '@wordpress/element';
-import {
-	Button,
-	Card,
-	CardBody,
-	Icon,
-	ToggleControl,
-	TextControl,
-	CheckboxControl,
-	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
-	__experimentalNumberControl as NumberControl,
-	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
-	__experimentalText as Text,
-} from '@wordpress/components';
-import { bellUnread, seen } from '@wordpress/icons';
+import { memo, useEffect, useRef, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+
+import SaveBar from '../shell/SaveBar';
+import Section from '../shell/Section';
+import wpds from '../shell/wpds';
 import { useLogs } from '../hooks/useLogs';
+
+const {
+	AlertDialog,
+	Button,
+	CheckboxControl,
+	Fieldset,
+	InputControl,
+	Notice,
+	Stack,
+	SwitchControl,
+} = wpds.ui;
 
 const NOTIFY_TYPES = [
 	{
 		key: 'core',
 		label: __( 'Core updates', 'updatronix' ),
-		help: __(
+		description: __(
 			'WordPress core update emails: success, failure, manual, and critical.',
 			'updatronix'
 		),
@@ -33,7 +35,7 @@ const NOTIFY_TYPES = [
 	{
 		key: 'plugin_theme',
 		label: __( 'Plugin and theme updates', 'updatronix' ),
-		help: __(
+		description: __(
 			'WordPress sends one combined email for plugin and theme auto-updates (success, failure, or mixed).',
 			'updatronix'
 		),
@@ -41,7 +43,7 @@ const NOTIFY_TYPES = [
 	{
 		key: 'debug',
 		label: __( 'Debug email (detailed report)', 'updatronix' ),
-		help: __(
+		description: __(
 			'Development-style report with core, plugin, theme, and translation results. WordPress normally sends this only on development versions; enable here to receive it on any site.',
 			'updatronix'
 		),
@@ -49,7 +51,7 @@ const NOTIFY_TYPES = [
 	{
 		key: 'technical',
 		label: __( 'Recovery mode (technical email)', 'updatronix' ),
-		help: __(
+		description: __(
 			'Sent when your site enters recovery mode after a fatal error.',
 			'updatronix'
 		),
@@ -57,16 +59,36 @@ const NOTIFY_TYPES = [
 ];
 
 /**
- * Render the logging and notification settings form.
+ * Build the comparable signature of the fields this surface edits.
  *
- * @param {Object}                     props                  Component props.
- * @param {Object}                     props.settings         Current settings.
- * @param {(settings: Object) => void} props.setSettings      Setter for settings.
- * @param {() => Promise<void>}        props.saveSettings     Async save to REST API.
- * @param {boolean}                    props.saving           Whether save is in progress.
- * @param {() => void}                 props.onLogsCleared    Callback after successful clear.
- * @param {boolean}                    [props.showIntro=true] Whether to render the panel heading and description.
- * @return {import('react').JSX.Element} The settings form.
+ * Other settings keys are carried through the draft but do not mark the
+ * surface dirty.
+ *
+ * @param {Object} settings Settings object.
+ * @return {string} Stable signature.
+ */
+function editableSignature( settings ) {
+	return JSON.stringify( {
+		logging_enabled: !! settings.logging_enabled,
+		retention_days: Number( settings.retention_days ) || 90,
+		notificationsMode:
+			settings.notificationsMode === 'disabled' ? 'disabled' : 'default',
+		notify_enabled: !! settings.notify_enabled,
+		notify_emails: String( settings.notify_emails || '' ),
+		notifyOn: [ ...( settings.notifyOn || [] ) ].sort(),
+	} );
+}
+
+/**
+ * Render the Settings destination.
+ *
+ * @param {Object}                              props               Component props.
+ * @param {Object}                              props.settings      Current settings.
+ * @param {(settings: Object) => void}          props.setSettings   Setter for settings.
+ * @param {(settings: Object) => Promise<void>} props.saveSettings  Async save.
+ * @param {boolean}                             props.saving        Whether save is in progress.
+ * @param {() => void}                          props.onLogsCleared Callback after a successful clear.
+ * @return {import('react').JSX.Element} Settings screen.
  */
 export const SettingsPanel = memo( function SettingsPanelForm( {
 	settings,
@@ -74,24 +96,24 @@ export const SettingsPanel = memo( function SettingsPanelForm( {
 	saveSettings,
 	saving,
 	onLogsCleared,
-	showIntro = true,
 } ) {
 	const { clearAllLogs } = useLogs();
+	const [ draft, setDraft ] = useState( settings );
 	const [ clearing, setClearing ] = useState( false );
+	const [ confirmClear, setConfirmClear ] = useState( false );
+	const savedRef = useRef( settings );
+
+	useEffect( () => {
+		savedRef.current = settings;
+		setDraft( settings );
+	}, [ settings ] );
+
+	const isDirty =
+		editableSignature( draft ) !== editableSignature( savedRef.current );
+	const emailsFullyDisabled = draft.notificationsMode === 'disabled';
 
 	const handleClearLogs = async () => {
-		if (
-			// eslint-disable-next-line no-alert
-			! window.confirm(
-				__(
-					'Are you sure you want to clear all update logs? This action cannot be undone.',
-					'updatronix'
-				)
-			)
-		) {
-			return;
-		}
-
+		setConfirmClear( false );
 		setClearing( true );
 		const ok = await clearAllLogs();
 		setClearing( false );
@@ -102,218 +124,240 @@ export const SettingsPanel = memo( function SettingsPanelForm( {
 	};
 
 	const handleNotifyChange = ( key, checked ) => {
-		setSettings( ( prev ) => ( {
-			...prev,
-			notifyOn: checked
-				? [ ...prev.notifyOn.filter( ( x ) => x !== key ), key ]
-				: prev.notifyOn.filter( ( x ) => x !== key ),
+		setDraft( ( previous ) => {
+			const next = new Set( previous.notifyOn || [] );
+			if ( checked ) {
+				next.add( key );
+			} else {
+				next.delete( key );
+			}
+
+			return { ...previous, notifyOn: [ ...next ] };
+		} );
+	};
+
+	const handleSave = async () => {
+		const nextSettings = { ...draft };
+		setSettings( nextSettings );
+		await saveSettings( nextSettings );
+	};
+
+	const handleDiscard = () => {
+		setDraft( savedRef.current );
+	};
+
+	const handleRetentionChange = ( event ) => {
+		const value = Number( event.target.value );
+		const retention = Number.isFinite( value )
+			? Math.max( 1, Math.min( 365, value ) )
+			: 90;
+
+		setDraft( ( previous ) => ( {
+			...previous,
+			retention_days: retention,
 		} ) );
 	};
 
-	const emailsFullyDisabled = settings.notificationsMode === 'disabled';
+	const notifyDisabled = ! draft.notify_enabled || emailsFullyDisabled;
 
 	return (
-		<div className="updatronix-settings-form">
-			{ showIntro && (
-				<>
-					<h2 className="updatronix-panel-title">
-						{ __( 'Settings', 'updatronix' ) }
-					</h2>
-					<Text variant="muted">
-						{ __(
-							'Set up logging, choose how long to keep records, and manage email notifications.',
-							'updatronix'
-						) }
-					</Text>
-				</>
-			) }
-			<div className="updatronix-settings-section">
-				<h3 className="updatronix-settings-section-title">
-					<Icon icon={ seen } size={ 24 } />
-					{ __( 'Update logging', 'updatronix' ) }
-				</h3>
-				<ToggleControl
-					__nextHasNoMarginBottom
-					label={ __( 'Record all updates', 'updatronix' ) }
-					help={ __(
-						'Keep a record of all core, plugin, theme, and translation updates.',
+		<>
+			<div className="updatronix-settings-destination">
+				<Section
+					title={ __( 'Logging', 'updatronix' ) }
+					description={ __(
+						'Keep a record of every update, and choose how long it stays.',
 						'updatronix'
 					) }
-					checked={ settings.logging_enabled }
-					onChange={ ( value ) =>
-						setSettings( ( prev ) => ( {
-							...prev,
-							logging_enabled: value,
-						} ) )
-					}
-				/>
-				<fieldset
-					disabled={ ! settings.logging_enabled }
-					className="updatronix-settings-fieldset"
 				>
-					<NumberControl
-						__next40pxDefaultSize
-						label={ __( 'Keep logs for (days)', 'updatronix' ) }
-						help={ __(
-							'Logs older than this number of days are automatically removed once a day.',
-							'updatronix'
-						) }
-						min={ 1 }
-						max={ 365 }
-						value={ settings.retention_days }
-						onChange={ ( value ) => {
-							const n = Number( value );
-							const clamped = Math.max(
-								1,
-								Math.min( 365, Number.isFinite( n ) ? n : 90 )
-							);
-							setSettings( ( prev ) => ( {
-								...prev,
-								retention_days: clamped,
-							} ) );
-						} }
-					/>
-					<div className="updatronix-settings-clear-logs">
-						<Button
-							variant="secondary"
-							isDestructive
-							onClick={ handleClearLogs }
-							isBusy={ clearing }
-							disabled={ clearing }
-							__next40pxDefaultSize
-						>
-							{ clearing
-								? __( 'Clearing…', 'updatronix' )
-								: __( 'Clear all logs', 'updatronix' ) }
-						</Button>
-					</div>
-				</fieldset>
-			</div>
-			<div className="updatronix-settings-section">
-				<h3 className="updatronix-settings-section-title">
-					<Icon icon={ bellUnread } size={ 24 } />
-					{ __( 'Update notifications', 'updatronix' ) }
-				</h3>
-				<ToggleControl
-					__nextHasNoMarginBottom
-					label={ __( 'Manage update notifications', 'updatronix' ) }
-					help={ __(
-						'When enabled, WordPress sends notification emails to the address below. Use the boxes to choose which update types send mail.',
-						'updatronix'
-					) }
-					checked={ settings.notify_enabled }
-					disabled={ emailsFullyDisabled }
-					onChange={ ( value ) =>
-						setSettings( ( prev ) => ( {
-							...prev,
-							notify_enabled: value,
-						} ) )
-					}
-				/>
-				<fieldset
-					disabled={
-						! settings.notify_enabled || emailsFullyDisabled
-					}
-					className="updatronix-settings-fieldset"
-				>
-					<TextControl
-						__nextHasNoMarginBottom
-						__next40pxDefaultSize
-						label={ __(
-							'Send notification emails to',
-							'updatronix'
-						) }
-						help={ __(
-							'Update notification emails are sent to this address instead of the default admin email.',
-							'updatronix'
-						) }
-						type="email"
-						value={ settings.notify_emails }
-						onChange={ ( value ) =>
-							setSettings( ( prev ) => ( {
-								...prev,
-								notify_emails: value || '',
-							} ) )
-						}
-						placeholder={ __( 'admin@example.com', 'updatronix' ) }
-					/>
-					<div className="updatronix-settings-checkboxes">
-						<h4 className="updatronix-settings-label">
-							{ __( 'Notification types', 'updatronix' ) }
-						</h4>
-						<p className="updatronix-settings-help">
-							{ __(
-								'Choose which kinds of updates trigger email. For each run, WordPress sends one email: the detailed report when available, otherwise the usual summary. These options mirror WordPress’s default behavior.',
+					<Stack direction="column" gap="md">
+						<SwitchControl
+							label={ __( 'Keep an update log', 'updatronix' ) }
+							description={ __(
+								'Records every installed, failed, and skipped update for WordPress core, plugins, themes, and translations.',
 								'updatronix'
 							) }
-						</p>
-						{ NOTIFY_TYPES.map(
-							( { key, label, help: itemHelp } ) => (
-								<CheckboxControl
-									key={ key }
-									__nextHasNoMarginBottom
-									label={ label }
-									help={ itemHelp }
-									checked={ settings.notifyOn.includes(
-										key
-									) }
-									onChange={ ( checked ) =>
-										handleNotifyChange( key, checked )
-									}
-								/>
-							)
-						) }
-					</div>
-				</fieldset>
-				<Card
-					className="updatronix-notifications-disable-card"
-					isBorderless
-				>
-					<CardBody>
-						<div className="updatronix-notifications-disable-card__inner">
-							<ToggleControl
-								__nextHasNoMarginBottom
-								label={ __(
-									'Disable all update notification emails',
-									'updatronix'
-								) }
-								help={ __(
-									"Only enable this option if you actively monitor this site's updates elsewhere and do not want WordPress to send update notification emails. Recovery mode is not affected.",
-									'updatronix'
-								) }
-								checked={ emailsFullyDisabled }
-								onChange={ ( value ) =>
-									setSettings( ( prev ) => ( {
-										...prev,
-										notificationsMode: value
-											? 'disabled'
-											: 'default',
-									} ) )
-								}
-							/>
-							<Text as="p">
-								{ __(
-									'Recovery mode still emails the site administrator after a fatal error so you can regain access.',
-									'updatronix'
-								) }
-							</Text>
+							checked={ draft.logging_enabled }
+							onCheckedChange={ ( checked ) =>
+								setDraft( ( previous ) => ( {
+									...previous,
+									logging_enabled: !! checked,
+								} ) )
+							}
+						/>
+
+						<InputControl
+							label={ __(
+								'Retention period (days)',
+								'updatronix'
+							) }
+							description={ __(
+								'Between 1 and 365 days. A daily cleanup removes older entries.',
+								'updatronix'
+							) }
+							type="number"
+							min="1"
+							max="365"
+							value={ String( draft.retention_days || 90 ) }
+							disabled={ ! draft.logging_enabled }
+							onChange={ handleRetentionChange }
+						/>
+
+						<div className="updatronix-settings-clear">
+							<Button
+								variant="outline"
+								tone="neutral"
+								onClick={ () => setConfirmClear( true ) }
+								disabled={ clearing }
+							>
+								{ clearing
+									? __( 'Clearing…', 'updatronix' )
+									: __( 'Clear all logs', 'updatronix' ) }
+							</Button>
 						</div>
-					</CardBody>
-				</Card>
-			</div>
-			<div className="updatronix-actions">
-				<Button
-					variant="primary"
-					onClick={ saveSettings }
-					isBusy={ saving }
-					disabled={ saving }
-					__next40pxDefaultSize
+					</Stack>
+				</Section>
+
+				<Section
+					title={ __( 'Email notifications', 'updatronix' ) }
+					description={ __(
+						'Route WordPress update emails and choose which events send them.',
+						'updatronix'
+					) }
 				>
-					{ saving
-						? __( 'Saving…', 'updatronix' )
-						: __( 'Save Changes', 'updatronix' ) }
-				</Button>
+					<Stack direction="column" gap="md">
+						<SwitchControl
+							label={ __(
+								'Manage update notifications',
+								'updatronix'
+							) }
+							description={ __(
+								'When enabled, WordPress sends notification emails to the address below.',
+								'updatronix'
+							) }
+							checked={ draft.notify_enabled }
+							disabled={ emailsFullyDisabled }
+							onCheckedChange={ ( checked ) =>
+								setDraft( ( previous ) => ( {
+									...previous,
+									notify_enabled: !! checked,
+								} ) )
+							}
+						/>
+
+						<InputControl
+							label={ __(
+								'Send notification emails to',
+								'updatronix'
+							) }
+							description={ __(
+								'Update notification emails are sent to this address instead of the default admin email.',
+								'updatronix'
+							) }
+							type="email"
+							value={ draft.notify_emails }
+							disabled={ notifyDisabled }
+							placeholder={ __(
+								'admin@example.com',
+								'updatronix'
+							) }
+							onChange={ ( event ) =>
+								setDraft( ( previous ) => ( {
+									...previous,
+									notify_emails: event.target.value || '',
+								} ) )
+							}
+						/>
+
+						<Fieldset.Root>
+							<Fieldset.Legend>
+								{ __( 'Notify me about', 'updatronix' ) }
+							</Fieldset.Legend>
+							<Stack direction="column" gap="sm">
+								{ NOTIFY_TYPES.map(
+									( { key, label, description } ) => (
+										<CheckboxControl
+											key={ key }
+											label={ label }
+											description={ description }
+											checked={ (
+												draft.notifyOn || []
+											).includes( key ) }
+											disabled={ notifyDisabled }
+											onCheckedChange={ ( checked ) =>
+												handleNotifyChange(
+													key,
+													checked
+												)
+											}
+										/>
+									)
+								) }
+							</Stack>
+						</Fieldset.Root>
+
+						<SwitchControl
+							label={ __(
+								'Disable all update notification emails',
+								'updatronix'
+							) }
+							description={ __(
+								'Silences every update email except recovery mode.',
+								'updatronix'
+							) }
+							checked={ emailsFullyDisabled }
+							onCheckedChange={ ( checked ) =>
+								setDraft( ( previous ) => ( {
+									...previous,
+									notificationsMode: checked
+										? 'disabled'
+										: 'default',
+								} ) )
+							}
+						/>
+
+						<Notice.Root intent="warning">
+							<Notice.Title>
+								{ __(
+									'Recovery mode emails stay on',
+									'updatronix'
+								) }
+							</Notice.Title>
+							<Notice.Description>
+								{ __(
+									'They contain the recovery link. Do not disable them, or you could lock yourself out of the site.',
+									'updatronix'
+								) }
+							</Notice.Description>
+						</Notice.Root>
+					</Stack>
+				</Section>
+
+				<SaveBar
+					isDirty={ isDirty }
+					isSaving={ saving }
+					onSave={ handleSave }
+					onDiscard={ handleDiscard }
+					title={ __( 'Settings', 'updatronix' ) }
+				/>
 			</div>
-		</div>
+
+			<AlertDialog.Root
+				open={ confirmClear }
+				onOpenChange={ setConfirmClear }
+				onConfirm={ handleClearLogs }
+			>
+				<AlertDialog.Popup
+					intent="irreversible"
+					title={ __( 'Clear all logs', 'updatronix' ) }
+					description={ __(
+						'This permanently removes every update record. The installed versions are not affected.',
+						'updatronix'
+					) }
+					confirmButtonText={ __( 'Clear all logs', 'updatronix' ) }
+					cancelButtonText={ __( 'Cancel', 'updatronix' ) }
+				/>
+			</AlertDialog.Root>
+		</>
 	);
 } );

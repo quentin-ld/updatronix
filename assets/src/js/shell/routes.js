@@ -111,7 +111,7 @@ export const DESTINATIONS = [
 		slug: 'settings',
 		label: __( 'Settings', 'updatronix' ),
 		description: __(
-			'Logging, retention, email routing, and uninstall data.',
+			'Logging, retention, and email routing.',
 			'updatronix'
 		),
 		group: 'system',
