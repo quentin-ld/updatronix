@@ -34,6 +34,7 @@ const UPDATRONIX_SETTINGS_DEFAULTS = array(
 	'notify_on'                => array(),
 	'auto_update_translations' => true,
 	'dismissed_constants'      => array(),
+	'delete_data_on_uninstall' => false,
 );
 
 /**
@@ -328,7 +329,7 @@ function updatronix_register_settings(): void {
  * see one canonical settings array. The Schedule subtree is read from the network site option via
  * {@see updatronix_get_network_schedule()}.
  *
- * @return array{logging_enabled: bool, retention_days: int, notifications_mode: string, notify_enabled: bool, notify_emails: string, notify_on: array<string>, auto_update_translations: bool, dismissed_constants: array<string>, schedule: array{update_check: array{recurrence: string, time: string}, delay_updates: array{enabled: bool, delay_value: int}}}
+ * @return array{logging_enabled: bool, retention_days: int, notifications_mode: string, notify_enabled: bool, notify_emails: string, notify_on: array<string>, auto_update_translations: bool, dismissed_constants: array<string>, delete_data_on_uninstall: bool, schedule: array{update_check: array{recurrence: string, time: string}, delay_updates: array{enabled: bool, delay_value: int}}}
  */
 function updatronix_get_settings(): array {
 	$raw     = updatronix_get_plugin_option( UPDATRONIX_OPTION_SETTINGS, '' );
@@ -353,6 +354,7 @@ function updatronix_get_settings(): array {
 		'notify_on'                => updatronix_normalize_notify_on( $decoded['notify_on'] ?? $defaults['notify_on'] ),
 		'auto_update_translations' => isset( $decoded['auto_update_translations'] ) ? (bool) $decoded['auto_update_translations'] : $defaults['auto_update_translations'],
 		'dismissed_constants'      => updatronix_sanitize_dismissed_constants( $raw_dismissed ),
+		'delete_data_on_uninstall' => isset( $decoded['delete_data_on_uninstall'] ) ? (bool) $decoded['delete_data_on_uninstall'] : $defaults['delete_data_on_uninstall'],
 		'schedule'                 => updatronix_get_network_schedule(),
 	);
 
@@ -447,6 +449,7 @@ function updatronix_sanitize_settings_json( mixed $value ): string {
 		'notify_on'                => updatronix_normalize_notify_on( $value['notify_on'] ?? array() ),
 		'auto_update_translations' => (bool) ( $value['auto_update_translations'] ?? true ),
 		'dismissed_constants'      => updatronix_sanitize_dismissed_constants( $raw_dismissed ),
+		'delete_data_on_uninstall' => (bool) ( $value['delete_data_on_uninstall'] ?? false ),
 	);
 	$encoded       = wp_json_encode( $out );
 

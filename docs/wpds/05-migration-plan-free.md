@@ -243,10 +243,12 @@ start P0 and P1.
 
 ### F3-05 · Settings
 
-- **Change.** Three cards: Logging, Email notifications, Data. Recovery warning.
-  Uninstall opt-in. Manual save. No sub-tabs.
+- **Change.** Three cards: Logging, Email notifications, Data. Recipients are
+  chips; the Data switch persists `delete_data_on_uninstall`; recovery warning;
+  closing notes. Manual save. No sub-tabs.
 - **Verification.** Retention 1 to 365; recipients validation; recovery mode
-  always on; uninstall off by default; successful save notice.
+  always on; uninstall off by default and honored by `uninstall.php`; successful
+  save notice.
 - **Depends on.** `F2-03`.
 
 **Gate `G-F3`.** All four existing screens pass the twelve-item checklist and

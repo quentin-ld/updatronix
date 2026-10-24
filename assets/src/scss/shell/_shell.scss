@@ -221,6 +221,21 @@ $updatronix-rail-muted: #a7adb3;
 	gap: var(--wpds-dimension-gap-lg);
 }
 
+.updatronix-recipient-field {
+	width: 100%;
+}
+
+.updatronix-form-error {
+	color: var(--wpds-color-foreground-content-error);
+}
+
+.updatronix-surface-note {
+	background: var(--wpds-color-background-surface-neutral-weak);
+	border: 1px solid var(--wpds-color-stroke-surface-neutral-weak);
+	border-radius: 8px;
+	padding: var(--wpds-dimension-padding-md);
+}
+
 .updatronix-split {
 	align-items: start;
 	display: grid;

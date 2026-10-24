@@ -93,6 +93,7 @@ export function usePluginSettings() {
 					)
 						? opts.dismissed_constants
 						: [],
+					delete_data_on_uninstall: !! opts.delete_data_on_uninstall,
 					schedule,
 				}
 			: {
@@ -104,6 +105,7 @@ export function usePluginSettings() {
 					notifyOn,
 					auto_update_translations: true,
 					dismissed_constants: [],
+					delete_data_on_uninstall: false,
 					schedule,
 				};
 
@@ -135,6 +137,8 @@ export function usePluginSettings() {
 					notify_enabled: source.notify_enabled,
 					notify_emails: source.notify_emails,
 					notify_on: source.notifyOn,
+					delete_data_on_uninstall:
+						!! source.delete_data_on_uninstall,
 					schedule: source.schedule,
 				};
 				const response = await apiFetch( {

@@ -29,6 +29,10 @@ final class Updatronix_Uninstall {
 			return;
 		}
 
+		if ( ! self::should_delete_data() ) {
+			return;
+		}
+
 		if ( is_multisite() ) {
 			self::clear_subsite_artifacts();
 		}
@@ -39,6 +43,21 @@ final class Updatronix_Uninstall {
 			}
 		);
 		self::delete_network_options();
+	}
+
+	/**
+	 * Whether the site opted into deleting data on uninstall.
+	 *
+	 * The Data card stores this opt-in. It is off by default so a reinstall
+	 * keeps the logs, settings, and schedule.
+	 *
+	 * @return bool
+	 */
+	private static function should_delete_data(): bool {
+		require_once updatronix_PLUGIN_DIR . 'inc/settings/options.php';
+		$settings = updatronix_get_settings();
+
+		return (bool) ( $settings['delete_data_on_uninstall'] ?? false );
 	}
 
 	/**

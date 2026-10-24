@@ -1,5 +1,5 @@
 /**
- * Settings destination: logging, retention, and email notifications.
+ * Settings destination: logging, retention, email routing, and uninstall data.
  *
  * One manual save for the whole surface. The draft is local until Save.
  */
@@ -7,57 +7,61 @@
 import { memo, useEffect, useRef, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 
-import SaveBar from '../shell/SaveBar';
 import PageHeader from '../shell/PageHeader';
+import SaveBar from '../shell/SaveBar';
 import Section from '../shell/Section';
 import wpds from '../shell/wpds';
-import { useLogs } from '../hooks/useLogs';
 
 const {
-	AlertDialog,
 	Button,
 	CheckboxControl,
 	Fieldset,
 	InputControl,
 	Notice,
+	SearchableChipSelectControl,
 	Stack,
 	SwitchControl,
+	Text,
 } = wpds.ui;
 
 const NOTIFY_TYPES = [
-	{
-		key: 'core',
-		label: __( 'Core updates', 'updatronix' ),
-		description: __(
-			'WordPress core update emails: success, failure, manual, and critical.',
-			'updatronix'
-		),
-	},
+	{ key: 'core', label: __( 'Core updates', 'updatronix' ) },
 	{
 		key: 'plugin_theme',
 		label: __( 'Plugin and theme updates', 'updatronix' ),
-		description: __(
-			'WordPress sends one combined email for plugin and theme auto-updates (success, failure, or mixed).',
-			'updatronix'
-		),
 	},
-	{
-		key: 'debug',
-		label: __( 'Debug email (detailed report)', 'updatronix' ),
-		description: __(
-			'Development-style report with core, plugin, theme, and translation results. WordPress normally sends this only on development versions; enable here to receive it on any site.',
-			'updatronix'
-		),
-	},
-	{
-		key: 'technical',
-		label: __( 'Recovery mode (technical email)', 'updatronix' ),
-		description: __(
-			'Sent when your site enters recovery mode after a fatal error.',
-			'updatronix'
-		),
-	},
+	{ key: 'debug', label: __( 'Debug summary', 'updatronix' ) },
+	{ key: 'technical', label: __( 'Technical alerts', 'updatronix' ) },
 ];
+
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+/**
+ * Parse the comma-separated recipient string into chip items.
+ *
+ * @param {string} value Stored recipients.
+ * @return {Array<{label: string, value: string}>} Chip items.
+ */
+function parseRecipients( value ) {
+	return String( value || '' )
+		.split( ',' )
+		.map( ( item ) => item.trim() )
+		.filter( Boolean )
+		.map( ( email ) => ( { label: email, value: email } ) );
+}
+
+/**
+ * Serialize chip items into the stored recipient string.
+ *
+ * @param {Array<{value: string}>} items Chip items.
+ * @return {string} Comma-separated recipients.
+ */
+function serializeRecipients( items ) {
+	return items
+		.map( ( item ) => item.value )
+		.filter( Boolean )
+		.join( ', ' );
+}
 
 /**
  * Build the comparable signature of the fields this surface edits.
@@ -77,19 +81,19 @@ function editableSignature( settings ) {
 		notify_enabled: !! settings.notify_enabled,
 		notify_emails: String( settings.notify_emails || '' ),
 		notifyOn: [ ...( settings.notifyOn || [] ) ].sort(),
+		delete_data_on_uninstall: !! settings.delete_data_on_uninstall,
 	} );
 }
 
 /**
  * Render the Settings destination.
  *
- * @param {Object}                              props               Component props.
- * @param {Object}                              props.destination   Active destination.
- * @param {Object}                              props.settings      Current settings.
- * @param {(settings: Object) => void}          props.setSettings   Setter for settings.
- * @param {(settings: Object) => Promise<void>} props.saveSettings  Async save.
- * @param {boolean}                             props.saving        Whether save is in progress.
- * @param {() => void}                          props.onLogsCleared Callback after a successful clear.
+ * @param {Object}                              props              Component props.
+ * @param {Object}                              props.destination  Active destination.
+ * @param {Object}                              props.settings     Current settings.
+ * @param {(settings: Object) => void}          props.setSettings  Setter for settings.
+ * @param {(settings: Object) => Promise<void>} props.saveSettings Async save.
+ * @param {boolean}                             props.saving       Whether save is in progress.
  * @return {import('react').JSX.Element} Settings screen.
  */
 export const SettingsPanel = memo( function SettingsPanelForm( {
@@ -98,12 +102,11 @@ export const SettingsPanel = memo( function SettingsPanelForm( {
 	setSettings,
 	saveSettings,
 	saving,
-	onLogsCleared,
 } ) {
-	const { clearAllLogs } = useLogs();
 	const [ draft, setDraft ] = useState( settings );
-	const [ clearing, setClearing ] = useState( false );
-	const [ confirmClear, setConfirmClear ] = useState( false );
+	const [ recipientQuery, setRecipientQuery ] = useState( '' );
+	const [ recipientError, setRecipientError ] = useState( '' );
+	const [ recipientOpen, setRecipientOpen ] = useState( false );
 	const savedRef = useRef( settings );
 
 	useEffect( () => {
@@ -113,17 +116,27 @@ export const SettingsPanel = memo( function SettingsPanelForm( {
 
 	const isDirty =
 		editableSignature( draft ) !== editableSignature( savedRef.current );
-	const emailsFullyDisabled = draft.notificationsMode === 'disabled';
+	const emailsOff =
+		! draft.notify_enabled || draft.notificationsMode === 'disabled';
+	const recipients = parseRecipients( draft.notify_emails );
+	const query = recipientQuery.trim();
+	const isDuplicate = recipients.some(
+		( item ) => item.value.toLowerCase() === query.toLowerCase()
+	);
+	const canCreate = EMAIL_PATTERN.test( query ) && ! isDuplicate;
+	const recipientItems = canCreate
+		? [
+				...recipients,
+				{
+					label: `Add “${ query }”`,
+					value: query,
+					creatable: true,
+				},
+			]
+		: recipients;
 
-	const handleClearLogs = async () => {
-		setConfirmClear( false );
-		setClearing( true );
-		const ok = await clearAllLogs();
-		setClearing( false );
-
-		if ( ok && onLogsCleared ) {
-			onLogsCleared();
-		}
+	const setDraftValue = ( key, value ) => {
+		setDraft( ( previous ) => ( { ...previous, [ key ]: value } ) );
 	};
 
 	const handleNotifyChange = ( key, checked ) => {
@@ -137,6 +150,50 @@ export const SettingsPanel = memo( function SettingsPanelForm( {
 
 			return { ...previous, notifyOn: [ ...next ] };
 		} );
+	};
+
+	const addRecipient = () => {
+		if ( ! query ) {
+			return;
+		}
+		if ( ! EMAIL_PATTERN.test( query ) ) {
+			setRecipientError(
+				__(
+					'Enter a valid email address, like name@example.com.',
+					'updatronix'
+				)
+			);
+			return;
+		}
+		if ( isDuplicate ) {
+			setRecipientError(
+				__( 'This email address is already added.', 'updatronix' )
+			);
+			return;
+		}
+		setDraft( ( previous ) => ( {
+			...previous,
+			notify_emails: serializeRecipients( [
+				...parseRecipients( previous.notify_emails ),
+				{ label: query, value: query },
+			] ),
+		} ) );
+		setRecipientQuery( '' );
+		setRecipientError( '' );
+		setRecipientOpen( false );
+	};
+
+	const handleRecipientKeyDown = ( event ) => {
+		if (
+			event.key !== 'Enter' ||
+			event.nativeEvent.isComposing ||
+			! query
+		) {
+			return;
+		}
+		event.preventDefault();
+		event.stopPropagation();
+		addRecipient();
 	};
 
 	const handleSave = async () => {
@@ -155,13 +212,8 @@ export const SettingsPanel = memo( function SettingsPanelForm( {
 			? Math.max( 1, Math.min( 365, value ) )
 			: 90;
 
-		setDraft( ( previous ) => ( {
-			...previous,
-			retention_days: retention,
-		} ) );
+		setDraftValue( 'retention_days', retention );
 	};
-
-	const notifyDisabled = ! draft.notify_enabled || emailsFullyDisabled;
 
 	return (
 		<>
@@ -180,128 +232,122 @@ export const SettingsPanel = memo( function SettingsPanelForm( {
 					</Button>
 				}
 			/>
-			<div className="updatronix-settings-destination">
-				<Section
-					title={ __( 'Logging', 'updatronix' ) }
-					description={ __(
-						'Keep a record of every update, and choose how long it stays.',
-						'updatronix'
-					) }
-				>
-					<Stack direction="column" gap="md">
-						<SwitchControl
-							label={ __( 'Keep an update log', 'updatronix' ) }
-							description={ __(
-								'Records every installed, failed, and skipped update for WordPress core, plugins, themes, and translations.',
-								'updatronix'
-							) }
-							checked={ draft.logging_enabled }
-							onCheckedChange={ ( checked ) =>
-								setDraft( ( previous ) => ( {
-									...previous,
-									logging_enabled: !! checked,
-								} ) )
-							}
-						/>
 
-						<InputControl
-							label={ __(
-								'Retention period (days)',
-								'updatronix'
-							) }
-							description={ __(
-								'Between 1 and 365 days. A daily cleanup removes older entries.',
-								'updatronix'
-							) }
-							type="number"
-							min="1"
-							max="365"
-							value={ String( draft.retention_days || 90 ) }
-							disabled={ ! draft.logging_enabled }
-							onChange={ handleRetentionChange }
-						/>
+			<div className="updatronix-page-body">
+				<div className="updatronix-split">
+					<Section
+						title={ __( 'Logging', 'updatronix' ) }
+						description={ __( 'Update history.', 'updatronix' ) }
+					>
+						<Stack direction="column" gap="lg">
+							<SwitchControl
+								label={ __(
+									'Keep an update log',
+									'updatronix'
+								) }
+								description={ __(
+									'Records every installed, failed, and skipped update.',
+									'updatronix'
+								) }
+								checked={ draft.logging_enabled }
+								onCheckedChange={ ( checked ) =>
+									setDraftValue(
+										'logging_enabled',
+										!! checked
+									)
+								}
+							/>
 
-						<div className="updatronix-settings-clear">
-							<Button
-								variant="outline"
-								tone="neutral"
-								onClick={ () => setConfirmClear( true ) }
-								disabled={ clearing }
+							<InputControl
+								label={ __(
+									'Retention period (days)',
+									'updatronix'
+								) }
+								description={ __(
+									'Between 1 and 365 days. A daily cleanup removes older entries.',
+									'updatronix'
+								) }
+								type="number"
+								min="1"
+								max="365"
+								value={ String( draft.retention_days || 90 ) }
+								disabled={ ! draft.logging_enabled }
+								onChange={ handleRetentionChange }
+							/>
+						</Stack>
+					</Section>
+
+					<Section
+						title={ __( 'Email notifications', 'updatronix' ) }
+						description={ __(
+							'WordPress update emails.',
+							'updatronix'
+						) }
+					>
+						<Stack direction="column" gap="lg">
+							<div
+								className="updatronix-recipient-field"
+								onKeyDownCapture={ handleRecipientKeyDown }
 							>
-								{ clearing
-									? __( 'Clearing…', 'updatronix' )
-									: __( 'Clear all logs', 'updatronix' ) }
-							</Button>
-						</div>
-					</Stack>
-				</Section>
+								<SearchableChipSelectControl
+									label={ __(
+										'Email addresses',
+										'updatronix'
+									) }
+									description={ __(
+										'Type an email and press Enter. Add as many addresses as you need.',
+										'updatronix'
+									) }
+									searchPlaceholder="name@example.com"
+									clearButtonLabel={ __(
+										'Remove all recipients',
+										'updatronix'
+									) }
+									items={ recipientItems }
+									value={ recipients }
+									inputValue={ recipientQuery }
+									open={ recipientOpen }
+									onOpenChange={ setRecipientOpen }
+									onInputValueChange={ ( nextValue ) => {
+										setRecipientQuery( nextValue );
+										setRecipientError( '' );
+									} }
+									onValueChange={ ( nextValue ) => {
+										setDraft( ( previous ) => ( {
+											...previous,
+											notify_emails:
+												serializeRecipients(
+													nextValue
+												),
+										} ) );
+										setRecipientError( '' );
+									} }
+									details={
+										recipientError ? (
+											<Text
+												variant="body-sm"
+												className="updatronix-form-error"
+											>
+												{ recipientError }
+											</Text>
+										) : undefined
+									}
+								/>
+							</div>
 
-				<Section
-					title={ __( 'Email notifications', 'updatronix' ) }
-					description={ __(
-						'Route WordPress update emails and choose which events send them.',
-						'updatronix'
-					) }
-				>
-					<Stack direction="column" gap="md">
-						<SwitchControl
-							label={ __(
-								'Manage update notifications',
-								'updatronix'
-							) }
-							description={ __(
-								'When enabled, WordPress sends notification emails to the address below.',
-								'updatronix'
-							) }
-							checked={ draft.notify_enabled }
-							disabled={ emailsFullyDisabled }
-							onCheckedChange={ ( checked ) =>
-								setDraft( ( previous ) => ( {
-									...previous,
-									notify_enabled: !! checked,
-								} ) )
-							}
-						/>
-
-						<InputControl
-							label={ __(
-								'Send notification emails to',
-								'updatronix'
-							) }
-							description={ __(
-								'Update notification emails are sent to this address instead of the default admin email.',
-								'updatronix'
-							) }
-							type="email"
-							value={ draft.notify_emails }
-							disabled={ notifyDisabled }
-							placeholder={ __(
-								'admin@example.com',
-								'updatronix'
-							) }
-							onChange={ ( event ) =>
-								setDraft( ( previous ) => ( {
-									...previous,
-									notify_emails: event.target.value || '',
-								} ) )
-							}
-						/>
-
-						<Fieldset.Root>
-							<Fieldset.Legend>
-								{ __( 'Notify me about', 'updatronix' ) }
-							</Fieldset.Legend>
-							<Stack direction="column" gap="sm">
-								{ NOTIFY_TYPES.map(
-									( { key, label, description } ) => (
+							<Fieldset.Root>
+								<Fieldset.Legend>
+									{ __( 'Notify me about', 'updatronix' ) }
+								</Fieldset.Legend>
+								<Stack direction="column" gap="sm">
+									{ NOTIFY_TYPES.map( ( { key, label } ) => (
 										<CheckboxControl
 											key={ key }
 											label={ label }
-											description={ description }
 											checked={ (
 												draft.notifyOn || []
 											).includes( key ) }
-											disabled={ notifyDisabled }
+											disabled={ emailsOff }
 											onCheckedChange={ ( checked ) =>
 												handleNotifyChange(
 													key,
@@ -309,73 +355,118 @@ export const SettingsPanel = memo( function SettingsPanelForm( {
 												)
 											}
 										/>
-									)
-								) }
-							</Stack>
-						</Fieldset.Root>
+									) ) }
+									<CheckboxControl
+										label={ __(
+											'Recovery mode',
+											'updatronix'
+										) }
+										description={ __(
+											'Always on. Recovery emails contain the recovery link.',
+											'updatronix'
+										) }
+										checked
+										disabled
+									/>
+								</Stack>
+							</Fieldset.Root>
 
-						<SwitchControl
-							label={ __(
-								'Disable all update notification emails',
-								'updatronix'
-							) }
-							description={ __(
-								'Silences every update email except recovery mode.',
-								'updatronix'
-							) }
-							checked={ emailsFullyDisabled }
-							onCheckedChange={ ( checked ) =>
-								setDraft( ( previous ) => ( {
-									...previous,
-									notificationsMode: checked
-										? 'disabled'
-										: 'default',
-								} ) )
-							}
-						/>
-
-						<Notice.Root intent="warning">
-							<Notice.Title>
-								{ __(
-									'Recovery mode emails stay on',
+							<SwitchControl
+								label={ __(
+									'Disable all update emails',
 									'updatronix'
 								) }
-							</Notice.Title>
-							<Notice.Description>
-								{ __(
-									'They contain the recovery link. Do not disable them, or you could lock yourself out of the site.',
+								description={ __(
+									'Silences every update email except recovery mode.',
 									'updatronix'
 								) }
-							</Notice.Description>
-						</Notice.Root>
-					</Stack>
-				</Section>
+								checked={ emailsOff }
+								onCheckedChange={ ( checked ) =>
+									setDraft( ( previous ) => ( {
+										...previous,
+										notify_enabled: ! checked,
+										notificationsMode: checked
+											? 'disabled'
+											: 'default',
+									} ) )
+								}
+							/>
+						</Stack>
+					</Section>
+				</div>
 
-				<SaveBar
-					isDirty={ isDirty }
-					isSaving={ saving }
-					onSave={ handleSave }
-					onDiscard={ handleDiscard }
-					title={ __( 'Settings', 'updatronix' ) }
-				/>
-			</div>
+				<Notice.Root intent="warning">
+					<Notice.Title>
+						{ __( 'Recovery mode emails stay on', 'updatronix' ) }
+					</Notice.Title>
+					<Notice.Description>
+						{ __(
+							'They contain the recovery link. Do not disable them, or you could lock yourself out of the site.',
+							'updatronix'
+						) }
+					</Notice.Description>
+				</Notice.Root>
 
-			<AlertDialog.Root
-				open={ confirmClear }
-				onOpenChange={ setConfirmClear }
-				onConfirm={ handleClearLogs }
-			>
-				<AlertDialog.Popup
-					intent="irreversible"
-					title={ __( 'Clear all logs', 'updatronix' ) }
+				<Section
+					title={ __( 'Data', 'updatronix' ) }
 					description={ __(
-						'This permanently removes every update record. The installed versions are not affected.',
+						'Choose what happens when Updatronix is deleted.',
 						'updatronix'
 					) }
-					confirmButtonText={ __( 'Clear all logs', 'updatronix' ) }
-					cancelButtonText={ __( 'Cancel', 'updatronix' ) }
-				/>
-			</AlertDialog.Root>
+				>
+					<SwitchControl
+						label={ __(
+							'Delete all data on uninstall',
+							'updatronix'
+						) }
+						description={ __(
+							'Removes update logs, settings, and schedules when the plugin is uninstalled.',
+							'updatronix'
+						) }
+						details={
+							draft.delete_data_on_uninstall
+								? __(
+										'Uninstalling permanently deletes all Updatronix data. This cannot be undone.',
+										'updatronix'
+									)
+								: __(
+										'Off by default so reinstalling keeps your data.',
+										'updatronix'
+									)
+						}
+						checked={ !! draft.delete_data_on_uninstall }
+						onCheckedChange={ ( checked ) =>
+							setDraftValue(
+								'delete_data_on_uninstall',
+								!! checked
+							)
+						}
+					/>
+				</Section>
+
+				<div className="updatronix-surface-note">
+					<Text variant="body-sm">
+						{ __(
+							'One save for the whole surface. Toggles are staged until you choose Save changes, and nothing is persisted on this page.',
+							'updatronix'
+						) }
+					</Text>
+				</div>
+				<Text variant="body-sm" className="updatronix-muted">
+					{ __(
+						'Email delivery is handled by WordPress; Updatronix only changes who receives update emails.',
+						'updatronix'
+					) }
+				</Text>
+			</div>
+
+			<SaveBar
+				isDirty={ isDirty }
+				isSaving={ saving }
+				onSave={ handleSave }
+				onDiscard={ handleDiscard }
+				title={ __( 'Settings', 'updatronix' ) }
+			/>
 		</>
 	);
 } );

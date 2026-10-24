@@ -149,6 +149,7 @@ final class Updatronix_Settings {
 					'permission_callback' => array( self::class, 'rest_can_manage_logs' ),
 					'args'                => array(
 						'logging_enabled'    => array( 'type' => 'boolean' ),
+						'delete_data_on_uninstall' => array( 'type' => 'boolean' ),
 						'retention_days'     => array(
 							'type'    => 'integer',
 							'minimum' => 1,
@@ -627,6 +628,7 @@ final class Updatronix_Settings {
 				: $current['notify_on'],
 			'auto_update_translations' => $current['auto_update_translations'],
 			'dismissed_constants'      => $current['dismissed_constants'],
+			'delete_data_on_uninstall' => $request->has_param( 'delete_data_on_uninstall' ) ? (bool) $request->get_param( 'delete_data_on_uninstall' ) : $current['delete_data_on_uninstall'],
 			'schedule'                 => $schedule_in_request
 				? updatronix_merge_partial_schedule_into( (array) $request->get_param( 'schedule' ), $current['schedule'] )
 				: $current['schedule'],

@@ -136,7 +136,7 @@ Every screen task must now begin and end with a reference comparison:
 |---|---|---|
 | R1 | Partial | The log, Schedule, and Settings screens render their own `PageHeader` with meta and actions. Documentation, Support, Health, and the Pro screens still use the shell header. |
 | R2 | Done | Schedule matches the reference composition: Update checks, Next run, What the hold does, the 0–30 hold field, the preferred-time select, header meta/actions, and `POST /run-check`. |
-| R3 | Pending | Settings still uses a text recipient field and lacks the Data card, always-on recovery row, and notes. |
+| R3 | Done | Settings matches the reference: three cards, chip recipients, five notification rows, the always-on recovery warning, the Data opt-in, and the closing notes. |
 | R4 | Pending | The log is still a table; the activity layout and preview aside remain. |
 | R5 | Pending | Auto updates, Health, and the Pro screens. |
 

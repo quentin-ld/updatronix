@@ -183,3 +183,35 @@ The export modal still uses the legacy `Modal` and core controls. It works and k
 1. `R3`: rewrite Settings with chip recipients, the five notification rows,
    the Data card, the notes, and the uninstall option.
 2. `R4`: restore the Update log activity layout, day grouping, and preview.
+
+## 2026-10-24 · Settings conformance (R3)
+
+### What landed
+
+- Settings now has the reference composition: Logging and Email notifications
+  in a split, the recovery warning, Data, and the closing notes.
+- Recipients use `SearchableChipSelectControl`. The comma-separated
+  `notify_emails` value is parsed into chips and serialized back on save.
+- The notification rows are Core updates, Plugin and theme updates, Debug
+  summary, Technical alerts, and the always-on Recovery mode row.
+- The Data card persists `delete_data_on_uninstall` (off by default).
+  `Updatronix_Uninstall::run()` now returns early when the opt-in is off.
+- Removed the old `Manage update notifications` switch and the `Clear all logs`
+  action, which the reference does not have. The REST payload whitelist now
+  includes `delete_data_on_uninstall`.
+
+### Verification
+
+- `npm run lint`, `npm run lint:css`, `npm run build`, and `npm test` (12/12)
+  pass.
+- `bin/harness composer run verify:php`: PHPStan clean; PHPUnit 213 tests,
+  415 assertions.
+- Browser pass: adding `qa@example.com` creates a chip and enables Save; the
+  saved option contains the address. Toggling the Data switch and saving stores
+  `"delete_data_on_uninstall":true`; toggling it back stores `false`.
+
+### Next
+
+1. `R4`: restore the Update log activity layout, day grouping, Section wrapper,
+   and preview aside.
+2. `R5`: Auto updates, Documentation/Support meta, Health, and the Pro screens.

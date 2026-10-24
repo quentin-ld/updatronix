@@ -269,10 +269,40 @@ final class MultisiteNetworkOnlyTest extends WP_UnitTestCase {
 			)
 		);
 		self::assertNotSame( '', get_site_option( UPDATRONIX_OPTION_NETWORK_SCHEDULE, '' ) );
+		updronix_save_settings_array( array( 'delete_data_on_uninstall' => true ) );
 
 		require_once updatronix_PLUGIN_DIR . 'inc/classes/class-updatronix-uninstall.php';
 		Updatronix_Uninstall::run();
 
 		self::assertFalse( get_site_option( UPDATRONIX_OPTION_NETWORK_SCHEDULE, false ) );
+	}
+
+	/**
+	 * Uninstall keeps the network schedule when the Data opt-in is off.
+	 *
+	 * @return void
+	 */
+	public function test_uninstall_keeps_network_schedule_when_delete_data_is_off(): void {
+		updronix_save_network_schedule(
+			array(
+				'update_check'  => array(
+					'recurrence' => 'daily',
+					'time'       => '03:00',
+				),
+				'delay_updates' => array(
+					'enabled'     => false,
+					'delay_value' => 0,
+				),
+			)
+		);
+		updronix_save_settings_array( array( 'delete_data_on_uninstall' => false ) );
+
+		require_once updatronix_PLUGIN_DIR . 'inc/classes/class-updatronix-uninstall.php';
+		Updatronix_Uninstall::run();
+
+		self::assertNotFalse(
+			get_site_option( UPDATRONIX_OPTION_NETWORK_SCHEDULE, false ),
+			'Uninstall must keep the schedule when the Data opt-in is off.'
+		);
 	}
 }

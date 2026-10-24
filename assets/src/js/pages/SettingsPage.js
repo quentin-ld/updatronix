@@ -61,11 +61,6 @@ export const SettingsPage = () => {
 		dismissConstantNotice,
 	} = usePluginSettings();
 
-	const [ logsVersion, setLogsVersion ] = useState( 0 );
-	const handleLogsCleared = useCallback( () => {
-		setLogsVersion( ( value ) => value + 1 );
-	}, [] );
-
 	const syncDismissedConstants = useCallback(
 		( dismissed ) => {
 			setSettings( ( previous ) => ( {
@@ -145,7 +140,6 @@ export const SettingsPage = () => {
 					<ActivityLogPanel
 						destination={ destination }
 						loggingEnabled={ pluginSettings.logging_enabled }
-						logsVersion={ logsVersion }
 						retentionDays={ retentionDays }
 					/>
 				);
@@ -180,7 +174,6 @@ export const SettingsPage = () => {
 						setSettings={ setSettings }
 						saveSettings={ saveSettings }
 						saving={ saving }
-						onLogsCleared={ handleLogsCleared }
 					/>
 				);
 			case 'health':

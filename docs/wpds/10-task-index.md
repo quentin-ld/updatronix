@@ -24,9 +24,9 @@ document that owns its contract. Use this table to open one `/architect` or
 | `F3-01` | Implemented as a DataViews table; not conformant. R4 restores the reference activity layout. |
 | `F3-02` | Done. Details, delete, and export use WPDS dialogs. |
 | `F3-04` | Done. Schedule matches the reference composition and includes `POST /run-check`. |
-| `F3-05` | Implemented partially; not conformant. R3 rewrites Settings (chips, Data card, notes). |
+| `F3-05` | Done. Three cards, chip recipients, Data opt-in, and closing notes match the reference. |
 | `F3-03` | Not started. |
-| `R1` to `R5` | R1 partial (three screens), R2 done; R3–R5 pending. See `12-design-conformance-audit.md`. |
+| `R1` to `R5` | R1 partial (three screens), R2 and R3 done; R4–R5 pending. See `12-design-conformance-audit.md`. |
 | `F5`, `F6` | Not started. |
 | `P0` to `P7` | Not started. Pro still bundles its own WPDS copy. |
 
