@@ -14,6 +14,7 @@ import {
 	useRef,
 } from '@wordpress/element';
 import { DataViews, filterSortAndPaginate } from '@wordpress/dataviews';
+import { dateI18n } from '@wordpress/date';
 import { __, sprintf } from '@wordpress/i18n';
 
 import wpds from '../../shell/wpds';
@@ -139,11 +140,7 @@ function formatDay( value ) {
 		return value;
 	}
 
-	return date.toLocaleDateString( undefined, {
-		day: 'numeric',
-		month: 'long',
-		year: 'numeric',
-	} );
+	return dateI18n( 'j F Y', date );
 }
 
 /**
@@ -161,10 +158,7 @@ function formatTime( value ) {
 		return value;
 	}
 
-	return date.toLocaleTimeString( undefined, {
-		hour: '2-digit',
-		minute: '2-digit',
-	} );
+	return dateI18n( 'H:i', date );
 }
 
 /**
