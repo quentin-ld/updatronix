@@ -130,6 +130,7 @@ export const SettingsPage = () => {
 		'auto-updates',
 		'documentation',
 		'support',
+		'health',
 	].includes( destination.slug );
 	const retentionDays = Number( pluginSettings.retention_days ) || 90;
 
@@ -182,7 +183,12 @@ export const SettingsPage = () => {
 					/>
 				);
 			case 'health':
-				return <HealthPage onNavigate={ navigate } />;
+				return (
+					<HealthPage
+						destination={ destination }
+						onNavigate={ navigate }
+					/>
+				);
 			case 'documentation':
 				return (
 					<DocumentationPage

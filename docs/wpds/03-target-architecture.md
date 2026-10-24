@@ -287,6 +287,8 @@ they edit data.
 - REST namespace `updatronix/v1` (Free) and `updatronix-pro/v1` (Pro).
 - `POST /run-check` (Free) starts a manual core, plugin, theme, and translation
   update check without changing the saved schedule.
+- Health routes: `GET /health` (5-minute cached snapshot), `POST /health/check`,
+  `POST /health/retry` (queued), and `GET /health/diagnostics`.
 - The Schedule hold is 0–30 in the UI. The backend sanitizer keeps the wider
   1–365 range for compatibility with existing saved values.
 - `apiFetch` with the `wp_rest` nonce from `window.updatronixSettings.nonce`.

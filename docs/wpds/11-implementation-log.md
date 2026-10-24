@@ -297,3 +297,39 @@ The export modal still uses the legacy `Modal` and core controls. It works and k
 
 1. `F4-01`: Health.
 2. `P2`–`P5`: the Pro screens.
+
+## 2026-10-24 · Health (F4-01)
+
+### What landed
+
+- `Updatronix_Health` builds a five-minute cached snapshot from six checks:
+  WordPress version, PHP version, disk space, WP-Cron, update locks, and
+  automatic retries.
+- Open issues are derived from failed log rows in the last 30 days, grouped by
+  item with an attempt count. Recently resolved is derived from a success that
+  follows a failure. No new table was added.
+- Diagnostics returns an environment summary without filesystem paths.
+- The retry flow validates the log entry, capability, a per-item lock, and a
+  three-per-hour rate limit, then queues a WP-Cron event. Plugin and theme
+  retries run through the native upgrader and record the result. Core and
+  translation retries are rejected with a link to the WordPress Updates screen.
+- REST routes: `GET /health`, `POST /health/check`, `POST /health/retry`, and
+  `GET /health/diagnostics`.
+- `HealthPage` implements the reference composition: readiness summary, six
+  checks, open-issue rows, details and retry dialogs, resolved table, and the
+  diagnostics dialog with copy and download.
+
+### Verification
+
+- PHPStan clean; PHPUnit 213 tests, 415 assertions.
+- `npm run lint`, `npm run lint:css`, `npm run build`, and `npm test`
+  (12/12) pass.
+- Browser pass: the all-clear state, six checks, Run check, and diagnostics all
+  work. A temporary failed log produced the attention summary, open issue,
+  details dialog, and retry dialog; deleting the row and running the check
+  returned the page to zero open issues.
+
+### Next
+
+1. `P0`: the Pro shared runtime and package alignment.
+2. `P2`–`P5`: the Pro screens.

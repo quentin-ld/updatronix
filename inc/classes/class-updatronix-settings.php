@@ -311,6 +311,53 @@ final class Updatronix_Settings {
 				'permission_callback' => array( self::class, 'rest_can_manage_logs' ),
 			)
 		);
+
+		register_rest_route(
+			self::REST_NAMESPACE,
+			'/health',
+			array(
+				'methods'             => \WP_REST_Server::READABLE,
+				'callback'            => array( self::class, 'rest_get_health' ),
+				'permission_callback' => array( self::class, 'rest_can_manage_logs' ),
+			)
+		);
+
+		register_rest_route(
+			self::REST_NAMESPACE,
+			'/health/check',
+			array(
+				'methods'             => \WP_REST_Server::CREATABLE,
+				'callback'            => array( self::class, 'rest_run_health_check' ),
+				'permission_callback' => array( self::class, 'rest_can_manage_logs' ),
+			)
+		);
+
+		register_rest_route(
+			self::REST_NAMESPACE,
+			'/health/retry',
+			array(
+				'methods'             => \WP_REST_Server::CREATABLE,
+				'callback'            => array( self::class, 'rest_retry_health' ),
+				'permission_callback' => array( self::class, 'rest_can_manage_logs' ),
+				'args'                => array(
+					'log_id' => array(
+						'type'     => 'integer',
+						'required' => true,
+						'minimum'  => 1,
+					),
+				),
+			)
+		);
+
+		register_rest_route(
+			self::REST_NAMESPACE,
+			'/health/diagnostics',
+			array(
+				'methods'             => \WP_REST_Server::READABLE,
+				'callback'            => array( self::class, 'rest_get_health_diagnostics' ),
+				'permission_callback' => array( self::class, 'rest_can_manage_logs' ),
+			)
+		);
 	}
 
 	/**
@@ -849,6 +896,58 @@ final class Updatronix_Settings {
 			),
 			200
 		);
+	}
+
+	/**
+	 * REST: Get the cached Health snapshot.
+	 *
+	 * @return WP_REST_Response
+	 */
+	public static function rest_get_health(): WP_REST_Response {
+		return new WP_REST_Response( Updatronix_Health::get_snapshot(), 200 );
+	}
+
+	/**
+	 * REST: Recompute and cache the Health snapshot.
+	 *
+	 * @return WP_REST_Response
+	 */
+	public static function rest_run_health_check(): WP_REST_Response {
+		return new WP_REST_Response( Updatronix_Health::get_snapshot( true ), 200 );
+	}
+
+	/**
+	 * REST: Queue a retry for one failed log entry.
+	 *
+	 * @param \WP_REST_Request $request Request.
+	 * @return WP_REST_Response
+	 */
+	public static function rest_retry_health( \WP_REST_Request $request ): WP_REST_Response {
+		$result = Updatronix_Health::queue_retry( (int) $request->get_param( 'log_id' ) );
+
+		if ( is_wp_error( $result ) ) {
+			$data   = $result->get_error_data();
+			$status = is_array( $data ) && isset( $data['status'] ) ? (int) $data['status'] : 400;
+
+			return new WP_REST_Response(
+				array(
+					'code'    => $result->get_error_code(),
+					'message' => $result->get_error_message(),
+				),
+				$status
+			);
+		}
+
+		return new WP_REST_Response( $result, 200 );
+	}
+
+	/**
+	 * REST: Get the diagnostics summary.
+	 *
+	 * @return WP_REST_Response
+	 */
+	public static function rest_get_health_diagnostics(): WP_REST_Response {
+		return new WP_REST_Response( Updatronix_Health::get_diagnostics(), 200 );
 	}
 
 	/**

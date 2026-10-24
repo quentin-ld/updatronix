@@ -19,14 +19,14 @@ document that owns its contract. Use this table to open one `/architect` or
 | `F1-01`, `F1-02`, `F1-03`, `F1-04`, `F1-06` | Done. Rail, responsive drawer, registry, routing, and a11y basics are in place. |
 | `F1-05` | Partial. The Pro badge and upgrade state exist; the Pro React contract is still P0/P1 work. |
 | `F4-02`, `F4-03`, `F4-04` | Done. Documentation and Support are implemented; the hub decision is recorded. |
-| `F4-01` | Placeholder. Health is an explicit empty state until the backend lands. |
+| `F4-01` | Done. Six readiness checks, open issues with a queued retry, resolved archive, and diagnostics. |
 | `F2-01` to `F2-04` | Done in substance. The shell page header, the `Section` primitive, the `SaveBar`, and the `AlertDialog` pattern are in place. |
 | `F3-01` | Done. The update log uses the reference activity feed grouped by day, with the preview aside. |
 | `F3-02` | Done. Details, delete, and export use WPDS dialogs. |
 | `F3-04` | Done. Schedule matches the reference composition and includes `POST /run-check`. |
 | `F3-05` | Done. Three cards, chip recipients, Data opt-in, and closing notes match the reference. |
 | `F3-03` | Done. Auto updates uses the reference cards and one manual Save action. |
-| `R1` to `R5` | R1 partial (three screens), R2–R4 done; R5 partial (Auto updates, Documentation, Support). See `12-design-conformance-audit.md`. |
+| `R1` to `R5` | R1 partial (three screens), R2–R4 done; R5 done for Free (Auto updates, Documentation, Support, Health). Pro screens remain. See `12-design-conformance-audit.md`. |
 | `F5`, `F6` | Not started. |
 | `P0` to `P7` | Not started. Pro still bundles its own WPDS copy. |
 

@@ -29,6 +29,7 @@ final class Updatronix_Bootstrap {
 		Updatronix_Update_Logger::register();
 		Updatronix_ErrorHandler::register();
 		Updatronix_Settings::register();
+		Updatronix_Health::register();
 		Updatronix_Export::register();
 		Updatronix_Notifications::register();
 		Updatronix_AutoUpdates::register();
@@ -59,6 +60,7 @@ final class Updatronix_Bootstrap {
 			'class-updatronix-update-logger.php',
 			'class-updatronix-notifications.php',
 			'class-updatronix-settings.php',
+			'class-updatronix-health.php',
 			'class-updatronix-autoupdates.php',
 			'class-updatronix-autoupdatedelay.php',
 			'class-updatronix-export.php',

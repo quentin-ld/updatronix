@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | Edition | Free |
-| Status | Design only. Backend is partial: failures are logged, but there is no readiness surface. |
+| Status | Implemented. Six readiness checks, open issues with a queued retry, resolved archive, and diagnostics. |
 | Rail | System · `health` |
 | Design | [`../reference/screens/src/screens/Errors.jsx`](../reference/screens/src/screens/Errors.jsx) |
 | Plan tasks | `F4-01`, with `F3-01` as the log dependency |
