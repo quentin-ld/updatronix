@@ -477,6 +477,13 @@ WordPress notice boxes at the top, not as the reference black snackbar.
 not have the reference dark styling, and is not a transient global toast. This
 is the exact example the user called out.
 
+**MCP check:** WPDS `Snackbar` is native in `@wordpress/components`; it
+auto-dismisses after 6 seconds, or 10 with actions, and exposes `spokenMessage`,
+`politeness`, `explicitDismiss`, and `actions`. The reference provider's
+4.5-second dismissal and fixed bottom-center list are custom. The candidate's
+runtime exposes `SnackbarList` but not `Snackbar`, and the app uses
+`NoticeList`.
+
 ### UX-02 — No auto-dismiss, stacking, or toast timing
 
 The reference removes each snackbar after 4.5 seconds and supports multiple
