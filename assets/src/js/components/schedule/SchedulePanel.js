@@ -1,11 +1,13 @@
 /**
- * Schedule destination: update timing and delay preferences.
+ * Schedule destination.
  *
+ * Reference composition: Update checks, Next run, What the hold does.
  * One manual save for the whole surface. The draft is local until Save.
  */
 
+import apiFetch from '@wordpress/api-fetch';
 import { memo, useEffect, useMemo, useRef, useState } from '@wordpress/element';
-import { __, sprintf } from '@wordpress/i18n';
+import { __, _n, sprintf } from '@wordpress/i18n';
 
 import SaveBar from '../../shell/SaveBar';
 import PageHeader from '../../shell/PageHeader';
@@ -13,8 +15,7 @@ import Section from '../../shell/Section';
 import wpds from '../../shell/wpds';
 import { ConstantNotices } from '../autoUpdates/ConstantNotices';
 
-const { Button, InputControl, Notice, SelectControl, Stack, SwitchControl } =
-	wpds.ui;
+const { Button, InputControl, Notice, SelectControl, Stack, Text } = wpds.ui;
 
 const SCHED_FALLBACK = {
 	update_check: {
@@ -27,46 +28,17 @@ const SCHED_FALLBACK = {
 	},
 };
 
-/** Recurrences that show the preferred time fields (site wall clock). */
-const RECURRENCES_WITH_PREFERRED_TIME = [ 'daily', 'twicedaily', 'weekly' ];
+const MAX_HOLD_DAYS = 30;
 
-/**
- * Split H:mm into picker parts.
- *
- * @param {string} hi Canonical site wall time.
- * @return {{hours: number, minutes: number}} Hour and minute parts (24h).
- */
-function hiToParts( hi ) {
-	const normalized = /^([01]?[0-9]|2[0-3]):([0-5][0-9])$/.test( hi )
-		? hi
-		: '03:00';
-	const parts = normalized.split( ':' );
-	const hours = Math.min(
-		23,
-		Math.max( 0, parseInt( parts[ 0 ], 10 ) || 0 )
-	);
-	const minutes = Math.min(
-		59,
-		Math.max( 0, parseInt( parts[ 1 ], 10 ) || 0 )
-	);
+const FREQUENCIES = [
+	{ value: 'daily', label: __( 'Daily', 'updatronix' ) },
+	{ value: 'twicedaily', label: __( 'Twice daily', 'updatronix' ) },
+	{ value: 'hourly', label: __( 'Hourly', 'updatronix' ) },
+	{ value: 'weekly', label: __( 'Weekly', 'updatronix' ) },
+	{ value: '', label: __( 'WordPress default', 'updatronix' ) },
+];
 
-	return { hours, minutes };
-}
-
-/**
- * Serialize hour/minute parts to H:i strings.
- *
- * @param {{hours: number, minutes: number}} value Hour and minute parts.
- * @return {string} Two-digit hour and minute separated by a colon.
- */
-function partsToHi( value ) {
-	const hours = Math.min( 23, Math.max( 0, value.hours ?? 0 ) );
-	const minutes = Math.min( 59, Math.max( 0, value.minutes ?? 0 ) );
-
-	return `${ String( hours ).padStart( 2, '0' ) }:${ String(
-		minutes
-	).padStart( 2, '0' ) }`;
-}
+const PREFERRED_TIMES = [ '03:00', '06:00', '12:00', '21:00' ];
 
 /**
  * Read the schedule subtree with a safe fallback.
@@ -76,6 +48,18 @@ function partsToHi( value ) {
  */
 function getSchedule( settings ) {
 	return settings?.schedule ?? SCHED_FALLBACK;
+}
+
+/**
+ * Read the hold in days from the schedule subtree.
+ *
+ * @param {Object} schedule Schedule subtree.
+ * @return {number} Hold days, 0 when disabled.
+ */
+function getHoldDays( schedule ) {
+	return schedule.delay_updates.enabled
+		? Math.max( 0, Number( schedule.delay_updates.delay_value ) || 0 )
+		: 0;
 }
 
 /**
@@ -107,6 +91,8 @@ export const SchedulePanel = memo( function SchedulePanelComponent( {
 		[ settings ]
 	);
 	const [ draft, setDraft ] = useState( () => getSchedule( settings ) );
+	const [ running, setRunning ] = useState( false );
+	const [ runState, setRunState ] = useState( null );
 	const savedRef = useRef( savedSchedule );
 
 	useEffect( () => {
@@ -116,29 +102,25 @@ export const SchedulePanel = memo( function SchedulePanelComponent( {
 
 	const isDirty =
 		JSON.stringify( draft ) !== JSON.stringify( savedRef.current );
-	const recurrence = draft.update_check.recurrence ?? '';
-	const showClock = RECURRENCES_WITH_PREFERRED_TIME.includes( recurrence );
-	const timeParts = hiToParts( draft.update_check.time ?? '' );
+	const hold = getHoldDays( draft );
 
-	const intervalOptions = useMemo( () => {
-		const fromServer =
-			scheduleMeta.cron_schedule_labels?.map( ( { slug, label } ) => ( {
-				label,
-				value: slug,
-			} ) ) ?? [];
+	const timeItems = useMemo( () => {
+		const current = draft.update_check.time || '03:00';
+		const values = PREFERRED_TIMES.includes( current )
+			? PREFERRED_TIMES
+			: [ ...PREFERRED_TIMES, current ].sort();
 
-		return [
-			{
-				label: __( 'Use WordPress default schedule', 'updatronix' ),
-				value: '',
-			},
-			...fromServer,
-		];
-	}, [ scheduleMeta.cron_schedule_labels ] );
+		return values.map( ( value ) => ( { value, label: value } ) );
+	}, [ draft.update_check.time ] );
 
-	const selectedInterval =
-		intervalOptions.find( ( item ) => item.value === recurrence ) ||
-		intervalOptions[ 0 ];
+	const selectedFrequency =
+		FREQUENCIES.find(
+			( item ) => item.value === ( draft.update_check.recurrence ?? '' )
+		) || FREQUENCIES[ 0 ];
+	const selectedTime =
+		timeItems.find(
+			( item ) => item.value === ( draft.update_check.time || '03:00' )
+		) || timeItems[ 0 ];
 
 	const updateSchedule = ( updater ) => {
 		setDraft( ( previous ) => updater( previous ) );
@@ -150,65 +132,65 @@ export const SchedulePanel = memo( function SchedulePanelComponent( {
 			update_check: {
 				...previous.update_check,
 				recurrence: value,
-				time:
-					value === 'hourly'
-						? ''
-						: previous.update_check.time || '03:00',
+				time: previous.update_check.time || '03:00',
 			},
 		} ) );
 	};
 
-	const setTime = ( hours, minutes ) => {
+	const setTime = ( value ) => {
 		updateSchedule( ( previous ) => ( {
 			...previous,
 			update_check: {
 				...previous.update_check,
-				time: partsToHi( { hours, minutes } ),
+				time: value,
 			},
 		} ) );
 	};
 
-	const handleHourChange = ( event ) => {
-		const value = Number( event.target.value );
-		const hours = Number.isFinite( value )
-			? Math.min( 23, Math.max( 0, value ) )
-			: timeParts.hours;
-		setTime( hours, timeParts.minutes );
-	};
-
-	const handleMinuteChange = ( event ) => {
-		const value = Number( event.target.value );
-		const minutes = Number.isFinite( value )
-			? Math.min( 59, Math.max( 0, value ) )
-			: timeParts.minutes;
-		setTime( timeParts.hours, minutes );
-	};
-
-	const setDelayEnabled = ( checked ) => {
-		updateSchedule( ( previous ) => ( {
-			...previous,
-			delay_updates: {
-				enabled: !! checked,
-				delay_value: checked
-					? Math.max( previous.delay_updates.delay_value || 1, 1 )
-					: 0,
-			},
-		} ) );
-	};
-
-	const handleDelayValueChange = ( event ) => {
-		const value = Number( event.target.value );
-		const delayValue = Number.isFinite( value )
-			? Math.max( 1, Math.min( 365, value ) )
-			: 7;
+	const handleHoldChange = ( event ) => {
+		const parsed = Number( event.target.value );
+		const nextHold = Number.isFinite( parsed )
+			? Math.max( 0, Math.min( MAX_HOLD_DAYS, Math.trunc( parsed ) ) )
+			: 0;
 
 		updateSchedule( ( previous ) => ( {
 			...previous,
 			delay_updates: {
-				...previous.delay_updates,
-				delay_value: delayValue,
+				enabled: nextHold > 0,
+				delay_value: nextHold,
 			},
 		} ) );
+	};
+
+	const handleRunCheck = async () => {
+		setRunning( true );
+		setRunState( null );
+
+		try {
+			await apiFetch( {
+				path: '/updatronix/v1/run-check',
+				method: 'POST',
+			} );
+			setRunState( {
+				status: 'success',
+				message: __(
+					'Update check started. This can take a minute.',
+					'updatronix'
+				),
+			} );
+		} catch ( error ) {
+			setRunState( {
+				status: 'error',
+				message:
+					error?.message ||
+					__(
+						'The update check could not be started.',
+						'updatronix'
+					),
+			} );
+		} finally {
+			setRunning( false );
+		}
 	};
 
 	const handleSave = async () => {
@@ -221,162 +203,255 @@ export const SchedulePanel = memo( function SchedulePanelComponent( {
 		setDraft( savedRef.current );
 	};
 
-	const scheduleDriver = scheduleMeta.schedule_driver ?? 'WordPress';
-	let nextScheduledCopy;
+	const nextCheckLabel = scheduleMeta.update_check_next_human
+		? sprintf(
+				/* translators: %s: next scheduled check date/time. */
+				__( 'Next check: %s', 'updatronix' ),
+				scheduleMeta.update_check_next_human
+			)
+		: __( 'Next check: not scheduled', 'updatronix' );
 
-	if (
-		scheduleMeta.update_check_next_scheduled !== false &&
-		scheduleMeta.update_check_next_human &&
-		scheduleDriver === 'updatronix'
-	) {
-		nextScheduledCopy = sprintf(
-			/* translators: %s: localized date/time of the next scheduled automatic update check. */
-			__( 'Next automatic update check: %s', 'updatronix' ),
-			scheduleMeta.update_check_next_human
-		);
-	} else if ( scheduleDriver === 'WordPress' ) {
-		nextScheduledCopy = __(
-			'WordPress picks when update checks and automatic updates run.',
-			'updatronix'
-		);
-	} else {
-		nextScheduledCopy = __(
-			'Schedule information is not yet available.',
-			'updatronix'
-		);
-	}
+	const nextRunCopy =
+		scheduleMeta.update_check_next_human ||
+		__( 'WordPress picks when update checks run.', 'updatronix' );
+
+	const holdCopy =
+		hold > 0
+			? sprintf(
+					/* translators: %d: number of days. */
+					_n(
+						'The %d-day hold applies after a release is detected.',
+						'The %d-day hold applies after a release is detected.',
+						hold,
+						'updatronix'
+					),
+					hold
+				)
+			: __(
+					'No hold is applied. New releases install on the next automatic run.',
+					'updatronix'
+				);
 
 	return (
 		<div className="updatronix-schedule">
 			<PageHeader
 				destination={ destination }
-				meta={
-					scheduleMeta.update_check_next_human
-						? [
-								{
-									label: sprintf(
-										/* translators: %s: next scheduled check date/time. */
-										__( 'Next check: %s', 'updatronix' ),
-										scheduleMeta.update_check_next_human
-									),
-								},
-							]
-						: []
-				}
+				meta={ [ { label: nextCheckLabel } ] }
 				actions={
-					<Button
-						variant="solid"
-						tone="brand"
-						onClick={ handleSave }
-						disabled={ ! isDirty || saving }
-					>
-						{ saving
-							? __( 'Saving…', 'updatronix' )
-							: __( 'Save changes', 'updatronix' ) }
-					</Button>
+					<>
+						<Button
+							variant="outline"
+							tone="neutral"
+							onClick={ handleRunCheck }
+							disabled={ running }
+						>
+							{ running
+								? __( 'Checking…', 'updatronix' )
+								: __( 'Run a check now', 'updatronix' ) }
+						</Button>
+						<Button
+							variant="solid"
+							tone="brand"
+							onClick={ handleSave }
+							disabled={ ! isDirty || saving }
+						>
+							{ saving
+								? __( 'Saving…', 'updatronix' )
+								: __( 'Save changes', 'updatronix' ) }
+						</Button>
+					</>
 				}
 			/>
 
-			<Section
-				title={ __( 'Update checks', 'updatronix' ) }
-				description={ __(
-					'How often WordPress checks for updates, and when the automatic run starts.',
-					'updatronix'
-				) }
-			>
-				<Stack direction="column" gap="md">
-					<ConstantNotices
-						constants={ wpConfigConstants }
-						sections={ [ 'schedule' ] }
-						dismissibleOnly
-						dismissed={ settings.dismissed_constants ?? [] }
-						onDismiss={ onDismissConstantNotice }
-					/>
-
-					<SelectControl
-						label={ __( 'How often', 'updatronix' ) }
-						description={ __(
-							'Sets how often WordPress checks for updates and runs automatic updates. WordPress default keeps Core timing. Daily, twice daily, and weekly schedules use the preferred time below.',
-							'updatronix'
-						) }
-						value={ selectedInterval }
-						items={ intervalOptions }
-						onValueChange={ ( item ) =>
-							setRecurrence( item.value )
+			<div className="updatronix-page-body">
+				{ runState && (
+					<Notice.Root
+						intent={
+							runState.status === 'error' ? 'error' : 'success'
 						}
-					/>
-
-					{ showClock && (
-						<Stack direction="row" gap="md" wrap="wrap">
-							<InputControl
-								label={ __( 'Hour', 'updatronix' ) }
-								type="number"
-								min="0"
-								max="23"
-								value={ String( timeParts.hours ) }
-								onChange={ handleHourChange }
-							/>
-							<InputControl
-								label={ __( 'Minute', 'updatronix' ) }
-								type="number"
-								min="0"
-								max="59"
-								value={ String( timeParts.minutes ) }
-								onChange={ handleMinuteChange }
-							/>
-						</Stack>
-					) }
-
-					<Notice.Root intent="info">
+					>
 						<Notice.Title>
-							{ __(
-								'Next automatic update check',
-								'updatronix'
-							) }
+							{ __( 'Update check', 'updatronix' ) }
 						</Notice.Title>
 						<Notice.Description>
-							{ nextScheduledCopy }
+							{ runState.message }
 						</Notice.Description>
 					</Notice.Root>
-				</Stack>
-			</Section>
-
-			<Section
-				title={ __( 'Delay updates', 'updatronix' ) }
-				description={ __(
-					'Hold new releases before they install.',
-					'updatronix'
 				) }
-			>
-				<Stack direction="column" gap="md">
-					<SwitchControl
-						label={ __( 'Delay updates', 'updatronix' ) }
+
+				<div className="updatronix-split">
+					<Section
+						title={ __( 'Update checks', 'updatronix' ) }
+						description={ __( 'WordPress cron.', 'updatronix' ) }
+					>
+						<Stack direction="column" gap="lg">
+							<ConstantNotices
+								constants={ wpConfigConstants }
+								sections={ [ 'schedule' ] }
+								dismissibleOnly
+								dismissed={ settings.dismissed_constants ?? [] }
+								onDismiss={ onDismissConstantNotice }
+							/>
+
+							<SelectControl
+								label={ __( 'Frequency', 'updatronix' ) }
+								description={ __(
+									'Sets how often WordPress checks for updates and runs automatic updates.',
+									'updatronix'
+								) }
+								value={ selectedFrequency }
+								items={ FREQUENCIES }
+								onValueChange={ ( item ) =>
+									setRecurrence( item.value )
+								}
+							/>
+
+							<SelectControl
+								label={ __( 'Preferred time', 'updatronix' ) }
+								description={ __(
+									'The check runs on the next cron tick after this time. Twice daily runs again 12 hours later.',
+									'updatronix'
+								) }
+								value={ selectedTime }
+								items={ timeItems }
+								onValueChange={ ( item ) =>
+									setTime( item.value )
+								}
+							/>
+
+							<InputControl
+								label={ __(
+									'Hold new releases for (days)',
+									'updatronix'
+								) }
+								description={ __(
+									'Updates stay automatic; they are deferred so unstable builds can be fixed first.',
+									'updatronix'
+								) }
+								type="number"
+								min="0"
+								max={ String( MAX_HOLD_DAYS ) }
+								value={ String( hold ) }
+								onChange={ handleHoldChange }
+							/>
+						</Stack>
+					</Section>
+
+					<Section
+						title={ __( 'Next run', 'updatronix' ) }
 						description={ __(
-							'When enabled, installs wait your chosen full days after WordPress first sees each update. Core, plugins, themes, and translations count separately.',
+							'Computed from the saved schedule.',
 							'updatronix'
 						) }
-						checked={ draft.delay_updates.enabled }
-						onCheckedChange={ setDelayEnabled }
-					/>
+					>
+						<Stack direction="column" gap="md">
+							<Text variant="heading-lg">{ nextRunCopy }</Text>
+							<Text
+								variant="body-md"
+								className="updatronix-muted"
+							>
+								{ holdCopy }
+							</Text>
+							<Notice.Root intent="info">
+								<Notice.Title>
+									{ __( 'Cron is shared', 'updatronix' ) }
+								</Notice.Title>
+								<Notice.Description>
+									{ __(
+										'If another plugin delays WP-Cron, the check runs on the next available tick rather than exactly at the selected time.',
+										'updatronix'
+									) }
+								</Notice.Description>
+							</Notice.Root>
+						</Stack>
+					</Section>
+				</div>
 
-					{ draft.delay_updates.enabled && (
-						<InputControl
-							label={ __( 'Days to wait', 'updatronix' ) }
-							description={ __(
-								'Enter a number from 1 to 365.',
-								'updatronix'
-							) }
-							type="number"
-							min="1"
-							max="365"
-							value={ String(
-								draft.delay_updates.delay_value || 1
-							) }
-							onChange={ handleDelayValueChange }
-						/>
+				<Section
+					title={ __( 'What the hold does', 'updatronix' ) }
+					description={ __(
+						'Applies to automatic updates only.',
+						'updatronix'
 					) }
-				</Stack>
-			</Section>
+				>
+					<div className="updatronix-table-scroll">
+						<table className="updatronix-ref-table">
+							<thead>
+								<tr>
+									<th scope="col">
+										{ __( 'Update type', 'updatronix' ) }
+									</th>
+									<th scope="col">
+										{ __( 'With a hold', 'updatronix' ) }
+									</th>
+									<th scope="col">
+										{ __( 'Manual action', 'updatronix' ) }
+									</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td>
+										{ __(
+											'Core security releases',
+											'updatronix'
+										) }
+									</td>
+									<td>
+										{ __(
+											'Installed immediately, the hold is ignored',
+											'updatronix'
+										) }
+									</td>
+									<td>{ __( 'Optional', 'updatronix' ) }</td>
+								</tr>
+								<tr>
+									<td>
+										{ __(
+											'Minor core releases',
+											'updatronix'
+										) }
+									</td>
+									<td>
+										{ __(
+											'Deferred by the selected number of days',
+											'updatronix'
+										) }
+									</td>
+									<td>{ __( 'Optional', 'updatronix' ) }</td>
+								</tr>
+								<tr>
+									<td>
+										{ __(
+											'Plugin and theme updates',
+											'updatronix'
+										) }
+									</td>
+									<td>
+										{ __(
+											'Deferred by the selected number of days',
+											'updatronix'
+										) }
+									</td>
+									<td>
+										{ __(
+											'Available from the update log',
+											'updatronix'
+										) }
+									</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</Section>
+
+				<Text variant="body-sm" className="updatronix-muted">
+					{ __(
+						'The hold applies after a release is detected. Core security releases skip the hold.',
+						'updatronix'
+					) }
+				</Text>
+			</div>
 
 			<SaveBar
 				isDirty={ isDirty }

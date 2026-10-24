@@ -300,6 +300,16 @@ final class Updatronix_Settings {
 				),
 			)
 		);
+
+		register_rest_route(
+			self::REST_NAMESPACE,
+			'/run-check',
+			array(
+				'methods'             => \WP_REST_Server::CREATABLE,
+				'callback'            => array( self::class, 'rest_run_check' ),
+				'permission_callback' => array( self::class, 'rest_can_manage_logs' ),
+			)
+		);
 	}
 
 	/**
@@ -806,6 +816,37 @@ final class Updatronix_Settings {
 		}
 
 		return new WP_REST_Response( Updatronix_AutoUpdates::get_data(), 200 );
+	}
+
+	/**
+	 * REST: Start a manual update check.
+	 *
+	 * Refreshes core, plugin, theme, and (when available) translation update
+	 * data. The schedule itself is unchanged; the caller stays on the current
+	 * page while WordPress runs the check.
+	 *
+	 * @since 2.0.0
+	 * @return WP_REST_Response
+	 */
+	public static function rest_run_check(): WP_REST_Response {
+		if ( ! function_exists( 'wp_update_plugins' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/update.php';
+		}
+
+		wp_version_check();
+		wp_update_plugins();
+		wp_update_themes();
+
+		if ( function_exists( 'wp_update_translations' ) ) {
+			wp_update_translations();
+		}
+
+		return new WP_REST_Response(
+			array(
+				'message' => __( 'Update check started.', 'updatronix' ),
+			),
+			200
+		);
 	}
 
 	/**

@@ -23,10 +23,10 @@ document that owns its contract. Use this table to open one `/architect` or
 | `F2-01` to `F2-04` | Done in substance. The shell page header, the `Section` primitive, the `SaveBar`, and the `AlertDialog` pattern are in place. |
 | `F3-01` | Implemented as a DataViews table; not conformant. R4 restores the reference activity layout. |
 | `F3-02` | Done. Details, delete, and export use WPDS dialogs. |
-| `F3-04` | Implemented; not conformant. R2 rewrites Schedule to the reference composition. |
+| `F3-04` | Done. Schedule matches the reference composition and includes `POST /run-check`. |
 | `F3-05` | Implemented partially; not conformant. R3 rewrites Settings (chips, Data card, notes). |
 | `F3-03` | Not started. |
-| `R1` to `R5` | Design-conformance remediation waves. See `12-design-conformance-audit.md`. |
+| `R1` to `R5` | R1 partial (three screens), R2 done; R3–R5 pending. See `12-design-conformance-audit.md`. |
 | `F5`, `F6` | Not started. |
 | `P0` to `P7` | Not started. Pro still bundles its own WPDS copy. |
 

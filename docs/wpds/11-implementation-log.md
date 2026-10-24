@@ -150,3 +150,36 @@ The export modal still uses the legacy `Modal` and core controls. It works and k
 2. `R2`: rewrite Schedule to the reference composition.
 3. `R3`: rewrite Settings, including the uninstall option.
 4. `R4`: restore the Update log activity layout and preview.
+
+## 2026-10-24 · Schedule conformance (R2)
+
+### What landed
+
+- Schedule now matches the reference composition: `Update checks` and
+  `Next run` in a two-column split, then `What the hold does` with the
+  reference table and closing note.
+- Frequency is a select with the reference labels plus Weekly and WordPress
+  default for backward compatibility. Preferred time is a select, and the
+  saved time is preserved when it is not one of the four reference times.
+- `Hold new releases for (days)` is a single 0–30 field. It maps to
+  `delay_updates.enabled = hold > 0` and `delay_value = hold`.
+- The page header has the `Next check` meta badge plus `Run a check now` and
+  `Save changes` actions.
+- `POST /updatronix/v1/run-check` refreshes core, plugin, theme, and
+  translation update data. It requires the manage capability.
+
+### Verification
+
+- `npm run lint`, `npm run lint:css`, `npm run build`, and `npm test`
+  (12/12) pass.
+- `bin/harness composer run verify:php`: PHPStan clean; PHPUnit 213 tests,
+  415 assertions.
+- Browser pass: the three sections render, `Run a check now` returns the
+  success notice, changing the hold to 2 enables the header Save, and the
+  saved option is `{"enabled":true,"delay_value":2}`.
+
+### Next
+
+1. `R3`: rewrite Settings with chip recipients, the five notification rows,
+   the Data card, the notes, and the uninstall option.
+2. `R4`: restore the Update log activity layout, day grouping, and preview.

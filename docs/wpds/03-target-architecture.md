@@ -285,6 +285,10 @@ they edit data.
 ## 5. Data layer
 
 - REST namespace `updatronix/v1` (Free) and `updatronix-pro/v1` (Pro).
+- `POST /run-check` (Free) starts a manual core, plugin, theme, and translation
+  update check without changing the saved schedule.
+- The Schedule hold is 0–30 in the UI. The backend sanitizer keeps the wider
+  1–365 range for compatibility with existing saved values.
 - `apiFetch` with the `wp_rest` nonce from `window.updatronixSettings.nonce`.
 - Permission callbacks use `UPDATRONIX_CAP_MANAGE` (Free) and
   `UPDATRONIX_PRO_CAP_MANAGE` plus super-admin checks on multisite (Pro).

@@ -231,10 +231,14 @@ start P0 and P1.
 
 ### F3-04 · Schedule
 
-- **Change.** One card with frequency, time, hold, next-run summary, and
-  explanations. Manual save.
-- **Verification.** Next run uses saved values; hold validates 0 to 30; WP-Cron
-  disabled notice; timezone label.
+- **Change.** Three sections: `Update checks` (frequency, preferred time,
+  hold days), `Next run` (saved next run and the shared-cron notice), and
+  `What the hold does` (the reference table). One manual save. `Run a check
+  now` calls `POST /run-check`.
+- **Verification.** Hold persists as `delay_updates.enabled` plus
+  `delay_value` (0–30 in the UI); the run-check endpoint refreshes core,
+  plugin, theme, and translation data; next run uses saved values; WP-Cron
+  shared notice; timezone label.
 - **Depends on.** `F2-03`.
 
 ### F3-05 · Settings
