@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | Edition | Pro |
-| Status | Backend shipped. UI exists inside the Updatronix 3000 tab and needs migration. |
+| Status | Implemented. Inactive and active states, six features, development mode, decryption recovery, activation and deactivation. |
 | Rail | Automations · `updatronix-3000` |
 | Design | [`../reference/screens/src/screens/License.jsx`](../reference/screens/src/screens/License.jsx) |
 | Plan tasks | `P2-01`, `P2-02` |

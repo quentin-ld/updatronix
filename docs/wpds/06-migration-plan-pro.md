@@ -109,6 +109,10 @@ upgrade path still works.
 
 ## P2 — Updatronix 3000
 
+**Status:** Done on 2026-10-24. The license page has inactive and active states,
+the six features, development mode, decryption recovery, and activation and
+deactivation. See [`11-implementation-log.md`](11-implementation-log.md).
+
 ### P2-01 · License page shell
 
 - **Change.** Implement the empty and active states, the six-feature list, the

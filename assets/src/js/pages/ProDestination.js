@@ -7,9 +7,9 @@
  * migration.
  */
 
-import { useEffect, useRef, useState } from '@wordpress/element';
+import { Component, useEffect, useRef, useState } from '@wordpress/element';
 import { useDispatch } from '@wordpress/data';
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { store as noticesStore } from '@wordpress/notices';
 
 import wpds from '../shell/wpds';
@@ -71,6 +71,81 @@ function LegacyPanelMount( { slug, registry } ) {
 }
 
 /**
+ * Keep a Pro panel error inside the destination.
+ */
+class ProPanelErrorBoundary extends Component {
+	/**
+	 * @param {Object} props Component props.
+	 */
+	constructor( props ) {
+		super( props );
+		this.state = { error: null };
+		this.handleRetry = this.handleRetry.bind( this );
+	}
+
+	/**
+	 * @param {Error} error Render error.
+	 * @return {{error: Error}} Next state.
+	 */
+	static getDerivedStateFromError( error ) {
+		return { error };
+	}
+
+	/**
+	 * @param {Error} error Render error.
+	 * @return {void}
+	 */
+	componentDidCatch( error ) {
+		// eslint-disable-next-line no-console
+		console.error( 'Updatronix Pro panel error:', error );
+	}
+
+	/**
+	 * @return {void}
+	 */
+	handleRetry() {
+		this.setState( { error: null } );
+	}
+
+	/**
+	 * @return {import('react').JSX.Element} Children or the fallback.
+	 */
+	render() {
+		if ( this.state.error ) {
+			return (
+				<>
+					<Notice.Root intent="error">
+						<Notice.Title>
+							{ sprintf(
+								/* translators: %s: Pro panel name. */
+								__( '%s could not be loaded.', 'updatronix' ),
+								this.props.label
+							) }
+						</Notice.Title>
+						<Notice.Description>
+							{ this.state.error?.message ||
+								__(
+									'Reload the page or try again.',
+									'updatronix'
+								) }
+						</Notice.Description>
+					</Notice.Root>
+					<Button
+						variant="outline"
+						tone="neutral"
+						onClick={ this.handleRetry }
+					>
+						{ __( 'Try again', 'updatronix' ) }
+					</Button>
+				</>
+			);
+		}
+
+		return this.props.children;
+	}
+}
+
+/**
  * Render a Pro destination.
  *
  * @param {Object}                 props             Component props.
@@ -101,20 +176,24 @@ export default function ProDestination( {
 			const Panel = panel;
 
 			return (
-				<Panel
-					destination={ destination }
-					wpds={ wpds }
-					notify={ notify }
-					navigate={ onNavigate }
-				/>
+				<ProPanelErrorBoundary label={ destination.label }>
+					<Panel
+						destination={ destination }
+						wpds={ wpds }
+						notify={ notify }
+						navigate={ onNavigate }
+					/>
+				</ProPanelErrorBoundary>
 			);
 		}
 
 		return (
-			<LegacyPanelMount
-				slug={ destination.panel || destination.slug }
-				registry={ registry }
-			/>
+			<ProPanelErrorBoundary label={ destination.label }>
+				<LegacyPanelMount
+					slug={ destination.panel || destination.slug }
+					registry={ registry }
+				/>
+			</ProPanelErrorBoundary>
 		);
 	}
 

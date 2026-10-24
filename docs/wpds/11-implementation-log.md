@@ -373,3 +373,36 @@ The export modal still uses the legacy `Modal` and core controls. It works and k
 
 1. `P1`: rail and destination contracts for the Pro screens.
 2. `P2`–`P5`: license, Shield, Flow, White label.
+
+## 2026-10-24 · Pro license page (P2)
+
+### What landed
+
+- The Updatronix 3000 destination is now a dedicated license page. It renders
+  the inactive empty state, the active state with the masked key, and the six
+  Pro features.
+- Activation uses the existing encrypted storage and REST service. A malformed
+  key is rejected inline; server and network errors appear inline with a retry.
+  Deactivation is confirmed before the license is cleared.
+- Development mode and a decryption failure have distinct states. The status
+  endpoint now returns `dev_mode` and `decryption_error` flags.
+- Update Shield no longer shares the license destination. It returns as its own
+  destination in P3.
+- Every Pro panel is wrapped in the Free error boundary. A render failure names
+  the panel and offers a retry without taking down the rail.
+- The `updatronix-3000` destination description now says “Manage your
+  Updatronix 3000 license and Pro tools.” so it stays accurate when active.
+
+### Verification
+
+- Pro ESLint, Stylelint, and build pass; PHPStan is clean; 189 PHPUnit tests and
+  565 assertions pass.
+- Free ESLint and build pass; 12/12 JS tests pass.
+- Browser pass: the inactive license page renders inside the Free shell, the six
+  features are visible, and a malformed key produces the inline format error.
+  The active/deactivation path was not exercised without a real license key.
+
+### Next
+
+1. `P1-03`: multisite capability routing.
+2. `P3`: Update Shield.

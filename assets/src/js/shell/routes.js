@@ -56,7 +56,7 @@ export const DESTINATIONS = [
 		slug: 'updatronix-3000',
 		label: __( 'Updatronix 3000', 'updatronix' ),
 		description: __(
-			'Activate your Updatronix 3000 license for this site.',
+			'Manage your Updatronix 3000 license and Pro tools.',
 			'updatronix'
 		),
 		group: 'automations',
