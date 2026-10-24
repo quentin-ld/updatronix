@@ -4,6 +4,8 @@
 
 import { useCallback, useMemo, useState } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
+import { useDispatch } from '@wordpress/data';
+import { store as noticesStore } from '@wordpress/notices';
 import { __, sprintf } from '@wordpress/i18n';
 import wpds from '../../shell/wpds';
 import { normalizeViewForExport, summarizeView } from './logFilters';
@@ -76,6 +78,7 @@ export function ExportLogsModal( {
 	logs,
 	exportTriggerRef,
 } ) {
+	const { createSuccessNotice } = useDispatch( noticesStore );
 	const storedPrefs = useMemo( () => loadExportPreferences(), [] );
 	const [ merge, setMerge ] = useState( storedPrefs.merge );
 	const [ columns, setColumns ] = useState( storedPrefs.columns );
@@ -312,7 +315,7 @@ export function ExportLogsModal( {
 				} else {
 					await copyFormattedToClipboard( body );
 				}
-				setLiveRegion(
+				const message =
 					mode === 'plain'
 						? __(
 								'Plain export copied to the clipboard.',
@@ -321,8 +324,12 @@ export function ExportLogsModal( {
 						: __(
 								'Formatted export copied to the clipboard.',
 								'updatronix'
-							)
-				);
+							);
+
+				setLiveRegion( message );
+				createSuccessNotice( message, {
+					id: 'updatronix-export-copy',
+				} );
 			} catch {
 				setNotice( {
 					status: 'error',
@@ -333,7 +340,7 @@ export function ExportLogsModal( {
 				} );
 			}
 		},
-		[ body ]
+		[ body, createSuccessNotice ]
 	);
 
 	const hasExportBody = body.trim() !== '';

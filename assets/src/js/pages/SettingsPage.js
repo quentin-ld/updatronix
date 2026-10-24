@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 
-import { Notices } from '../components/Notices';
+import SnackbarHost from '../components/SnackbarHost';
 import { ActivityLogPanel } from '../components/activityLog';
 import { AutoUpdatesPanel } from '../components/autoUpdates';
 import { SchedulePanel } from '../components/schedule';
@@ -291,16 +291,16 @@ export const SettingsPage = () => {
 	};
 
 	return (
-		<AppShell
-			destination={ destination }
-			destinations={ destinations }
-			onNavigate={ navigate }
-			hideHeader={ hideHeader }
-		>
-			<div className="updatronix-notices">
-				<Notices />
-			</div>
-			{ renderDestination() }
-		</AppShell>
+		<>
+			<AppShell
+				destination={ destination }
+				destinations={ destinations }
+				onNavigate={ navigate }
+				hideHeader={ hideHeader }
+			>
+				{ renderDestination() }
+			</AppShell>
+			<SnackbarHost />
+		</>
 	);
 };

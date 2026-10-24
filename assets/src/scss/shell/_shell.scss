@@ -436,15 +436,36 @@ body.updatronix-admin-page {
 	border-radius: var(--wpds-border-radius-lg);
 }
 
-.updatronix-notices {
+.updatronix-snackbar {
+	bottom: var(--wpds-dimension-padding-lg);
 	display: flex;
 	flex-direction: column;
 	gap: var(--wpds-dimension-gap-sm);
-	margin-bottom: var(--wpds-dimension-gap-md);
+	left: 50%;
+	pointer-events: none;
+	position: fixed;
+	transform: translateX(-50%);
+	width: min(calc(100% - (2 * var(--wpds-dimension-padding-lg))), 480px);
+	z-index: 100000;
+}
 
-	&:empty {
-		display: none;
-	}
+.updatronix-snackbar:empty {
+	display: none;
+}
+
+.updatronix-snackbar .components-snackbar-list {
+	display: flex;
+	flex-direction: column;
+	gap: var(--wpds-dimension-gap-sm);
+	inset: auto;
+	max-width: 100%;
+	pointer-events: auto;
+	position: static;
+	width: 100%;
+}
+
+.updatronix-snackbar .components-snackbar {
+	margin: 0 auto;
 }
 
 /* Documentation */
