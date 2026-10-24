@@ -1,0 +1,458 @@
+// Application shell.
+// The rail is a documented brand asset from the WordPress Design System
+// field guide. The pinned token snapshot has no inverse foreground token,
+// so the rail carries its own documented pair.
+
+$updatronix-rail-bg: #25292b;
+$updatronix-rail-bg-raised: #2e3336;
+$updatronix-rail-text: #f0f0f1;
+$updatronix-rail-muted: #a7adb3;
+
+.updatronix-shell {
+	display: grid;
+	grid-template-columns: 264px minmax(0, 1fr);
+	gap: var(--wpds-dimension-gap-lg);
+	align-items: start;
+}
+
+.updatronix-skip-link {
+	position: absolute;
+	inset-inline-start: -9999px;
+	top: 0;
+	z-index: 100000;
+	padding: var(--wpds-dimension-padding-sm) var(--wpds-dimension-padding-md);
+	background: var(--wpds-color-background-surface-neutral);
+	color: var(--wpds-color-foreground-content-neutral);
+	border-radius: var(--wpds-border-radius-sm);
+
+	&:focus {
+		inset-inline-start: 0;
+	}
+}
+
+/* Rail */
+
+.updatronix-rail {
+	position: sticky;
+	top: calc(32px + var(--wpds-dimension-padding-md));
+	display: flex;
+	flex-direction: column;
+	gap: var(--wpds-dimension-gap-lg);
+	max-height: calc(100vh - 32px - (2 * var(--wpds-dimension-padding-md)));
+	overflow-y: auto;
+	padding: var(--wpds-dimension-padding-lg) var(--wpds-dimension-padding-md);
+	background: $updatronix-rail-bg;
+	color: $updatronix-rail-text;
+	border-radius: var(--wpds-border-radius-lg);
+}
+
+.updatronix-rail-brand {
+	display: flex;
+	align-items: center;
+	gap: var(--wpds-dimension-gap-sm);
+	color: inherit;
+	text-decoration: none;
+
+	img {
+		display: block;
+		border-radius: var(--wpds-border-radius-sm);
+	}
+
+	&:focus-visible {
+		outline: 2px solid var(--wpds-color-stroke-focus);
+		outline-offset: 2px;
+	}
+}
+
+.updatronix-rail-brand-text {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	min-width: 0;
+}
+
+.updatronix-rail-name {
+	font-size: var(--wpds-typography-font-size-md);
+	font-weight: var(--wpds-typography-font-weight-emphasis);
+	line-height: var(--wpds-typography-line-height-md);
+}
+
+.updatronix-rail-muted {
+	color: $updatronix-rail-muted;
+}
+
+.updatronix-rail-nav {
+	display: flex;
+	flex-direction: column;
+	gap: var(--wpds-dimension-gap-lg);
+}
+
+.updatronix-rail-group {
+	display: flex;
+	flex-direction: column;
+	gap: var(--wpds-dimension-gap-xs);
+}
+
+.updatronix-rail-label {
+	margin: 0;
+	padding-inline: var(--wpds-dimension-padding-sm);
+	color: $updatronix-rail-muted;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+}
+
+.updatronix-rail-link {
+	display: flex;
+	align-items: center;
+	gap: var(--wpds-dimension-gap-sm);
+	min-height: 36px;
+	padding: var(--wpds-dimension-padding-xs) var(--wpds-dimension-padding-sm);
+	color: $updatronix-rail-text;
+	text-decoration: none;
+	border-radius: var(--wpds-border-radius-sm);
+
+	&:hover {
+		background: $updatronix-rail-bg-raised;
+		color: $updatronix-rail-text;
+	}
+
+	&:focus-visible {
+		outline: 2px solid var(--wpds-color-stroke-focus);
+		outline-offset: 2px;
+	}
+
+	&.is-current {
+		background: $updatronix-rail-bg-raised;
+		color: $updatronix-rail-text;
+		font-weight: var(--wpds-typography-font-weight-emphasis);
+	}
+}
+
+.updatronix-rail-link-label {
+	flex: 1;
+	min-width: 0;
+}
+
+.updatronix-rail-pro {
+	margin-inline-start: auto;
+}
+
+.updatronix-rail-foot {
+	margin-top: auto;
+	padding-top: var(--wpds-dimension-padding-md);
+	border-top: 1px solid $updatronix-rail-bg-raised;
+}
+
+/* Content frame */
+
+.updatronix-shell-main {
+	min-width: 0;
+}
+
+.updatronix-breadcrumb {
+	display: flex;
+	align-items: center;
+	gap: var(--wpds-dimension-gap-xs);
+	color: var(--wpds-color-foreground-content-neutral-weak);
+	font-size: var(--wpds-typography-font-size-sm);
+
+	a {
+		color: inherit;
+		text-decoration: none;
+	}
+
+	a:hover {
+		text-decoration: underline;
+	}
+}
+
+.updatronix-page-header {
+	margin-bottom: var(--wpds-dimension-gap-lg);
+}
+
+.updatronix-page-headrow {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: var(--wpds-dimension-gap-md);
+	margin-top: var(--wpds-dimension-gap-sm);
+}
+
+.updatronix-page-heading {
+	min-width: 0;
+}
+
+.updatronix-page-title {
+	margin: 0;
+	font-family: var(--wpds-typography-font-family-heading);
+	font-size: var(--wpds-typography-font-size-xl);
+	font-weight: var(--wpds-typography-font-weight-emphasis);
+	line-height: var(--wpds-typography-line-height-xl);
+	color: var(--wpds-color-foreground-content-neutral);
+
+	&:focus {
+		outline: none;
+	}
+}
+
+.updatronix-page-description {
+	max-width: 720px;
+	margin: var(--wpds-dimension-gap-xs) 0 0;
+	color: var(--wpds-color-foreground-content-neutral-weak);
+}
+
+.updatronix-page-actions {
+	display: flex;
+	align-items: center;
+	gap: var(--wpds-dimension-gap-sm);
+	flex-shrink: 0;
+}
+
+.updatronix-surface {
+	padding: var(--wpds-dimension-padding-lg);
+	background: var(--wpds-color-background-surface-neutral);
+	border: 1px solid var(--wpds-color-stroke-surface-neutral);
+	border-radius: var(--wpds-border-radius-lg);
+}
+
+.updatronix-notices {
+	display: flex;
+	flex-direction: column;
+	gap: var(--wpds-dimension-gap-sm);
+	margin-bottom: var(--wpds-dimension-gap-md);
+
+	&:empty {
+		display: none;
+	}
+}
+
+/* Documentation */
+
+.updatronix-doc-grid {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: var(--wpds-dimension-gap-md);
+}
+
+.updatronix-doc-card {
+	color: inherit;
+	text-decoration: none;
+
+	&:focus-visible {
+		outline: 2px solid var(--wpds-color-stroke-focus);
+		outline-offset: 2px;
+	}
+}
+
+.updatronix-doc-head {
+	display: flex;
+	align-items: center;
+	gap: var(--wpds-dimension-gap-sm);
+	margin-bottom: var(--wpds-dimension-gap-sm);
+}
+
+.updatronix-doc-kicker {
+	flex: 1;
+	color: var(--wpds-color-foreground-content-neutral-weak);
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+}
+
+.updatronix-doc-title {
+	display: block;
+	margin-bottom: var(--wpds-dimension-gap-xs);
+	font-weight: var(--wpds-typography-font-weight-emphasis);
+}
+
+.updatronix-doc-description {
+	display: block;
+	color: var(--wpds-color-foreground-content-neutral-weak);
+}
+
+.updatronix-doc-pro {
+	display: inline-block;
+	margin-top: var(--wpds-dimension-gap-sm);
+	color: var(--wpds-color-foreground-interactive-brand);
+}
+
+/* Support */
+
+.updatronix-support-layout {
+	max-width: 760px;
+}
+
+.updatronix-support-heading {
+	display: flex;
+	align-items: center;
+	gap: var(--wpds-dimension-gap-sm);
+	margin-bottom: var(--wpds-dimension-gap-md);
+}
+
+.updatronix-support-title {
+	font-weight: var(--wpds-typography-font-weight-emphasis);
+}
+
+.updatronix-support-steps {
+	display: flex;
+	flex-direction: column;
+	gap: var(--wpds-dimension-gap-md);
+	margin: 0;
+	padding: 0;
+	list-style: none;
+
+	li {
+		display: flex;
+		align-items: flex-start;
+		gap: var(--wpds-dimension-gap-sm);
+	}
+}
+
+.updatronix-support-step-title {
+	display: block;
+	font-weight: var(--wpds-typography-font-weight-emphasis);
+}
+
+.updatronix-support-step-description {
+	display: block;
+	color: var(--wpds-color-foreground-content-neutral-weak);
+}
+
+.updatronix-support-actions {
+	display: flex;
+	align-items: center;
+	gap: var(--wpds-dimension-gap-md);
+	margin-top: var(--wpds-dimension-gap-lg);
+}
+
+/* Health placeholder */
+
+.updatronix-health-placeholder {
+	display: flex;
+	flex-direction: column;
+	gap: var(--wpds-dimension-gap-lg);
+}
+
+/* Pro panels */
+
+.updatronix-pro-panel {
+	min-width: 0;
+}
+
+.updatronix-extension-empty {
+	margin: 0;
+	color: var(--wpds-color-foreground-content-neutral-weak);
+}
+
+/* Mobile */
+
+.updatronix-mobile-bar {
+	display: none;
+}
+
+@media (max-width: 900px) {
+
+	.updatronix-shell {
+		display: block;
+	}
+
+	.updatronix-rail {
+		display: none;
+	}
+
+	.updatronix-mobile-bar {
+		display: flex;
+		align-items: center;
+		gap: var(--wpds-dimension-gap-sm);
+		margin-bottom: var(--wpds-dimension-gap-md);
+		padding: var(--wpds-dimension-padding-sm);
+		background: $updatronix-rail-bg;
+		color: $updatronix-rail-text;
+		border-radius: var(--wpds-border-radius-md);
+	}
+
+	.updatronix-mobile-brand {
+		display: flex;
+		align-items: center;
+		gap: var(--wpds-dimension-gap-xs);
+		color: inherit;
+		text-decoration: none;
+		font-weight: var(--wpds-typography-font-weight-emphasis);
+	}
+
+	.updatronix-mobile-current {
+		flex: 1;
+		min-width: 0;
+		color: $updatronix-rail-muted;
+		text-align: end;
+	}
+
+	.updatronix-mobile-menu {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 36px;
+		height: 36px;
+		padding: 0;
+		color: inherit;
+		background: transparent;
+		border: 0;
+		border-radius: var(--wpds-border-radius-sm);
+		cursor: pointer;
+
+		&:focus-visible {
+			outline: 2px solid var(--wpds-color-stroke-focus);
+			outline-offset: 2px;
+		}
+	}
+
+	.updatronix-page-headrow {
+		flex-direction: column;
+	}
+
+	.updatronix-doc-grid {
+		grid-template-columns: 1fr;
+	}
+
+	.updatronix-surface {
+		padding: var(--wpds-dimension-padding-md);
+	}
+}
+
+.updatronix-nav-drawer {
+	background: $updatronix-rail-bg;
+	color: $updatronix-rail-text;
+}
+
+.updatronix-nav-drawer-head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--wpds-dimension-gap-sm);
+}
+
+.updatronix-nav-drawer-title {
+	font-weight: var(--wpds-typography-font-weight-emphasis);
+}
+
+.updatronix-nav-drawer-body {
+	display: flex;
+	flex-direction: column;
+	gap: var(--wpds-dimension-gap-lg);
+	padding: var(--wpds-dimension-padding-md);
+}
+
+.updatronix-nav-drawer-version {
+	margin-top: auto;
+}
+
+/* The legacy page styles color every link in the dashboard wrapper with the
+   admin accent. The rail keeps its inverse palette. */
+#updatronix-settings {
+
+	.updatronix-rail a,
+	.updatronix-rail a:visited,
+	.updatronix-mobile-bar a,
+	.updatronix-mobile-bar a:visited {
+		color: $updatronix-rail-text;
+	}
+}

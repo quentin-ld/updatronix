@@ -59,12 +59,13 @@ const NOTIFY_TYPES = [
 /**
  * Render the logging and notification settings form.
  *
- * @param {Object}                     props               Component props.
- * @param {Object}                     props.settings      Current settings.
- * @param {(settings: Object) => void} props.setSettings   Setter for settings.
- * @param {() => Promise<void>}        props.saveSettings  Async save to REST API.
- * @param {boolean}                    props.saving        Whether save is in progress.
- * @param {() => void}                 props.onLogsCleared Callback after successful clear.
+ * @param {Object}                     props                  Component props.
+ * @param {Object}                     props.settings         Current settings.
+ * @param {(settings: Object) => void} props.setSettings      Setter for settings.
+ * @param {() => Promise<void>}        props.saveSettings     Async save to REST API.
+ * @param {boolean}                    props.saving           Whether save is in progress.
+ * @param {() => void}                 props.onLogsCleared    Callback after successful clear.
+ * @param {boolean}                    [props.showIntro=true] Whether to render the panel heading and description.
  * @return {import('react').JSX.Element} The settings form.
  */
 export const SettingsPanel = memo( function SettingsPanelForm( {
@@ -73,6 +74,7 @@ export const SettingsPanel = memo( function SettingsPanelForm( {
 	saveSettings,
 	saving,
 	onLogsCleared,
+	showIntro = true,
 } ) {
 	const { clearAllLogs } = useLogs();
 	const [ clearing, setClearing ] = useState( false );
@@ -112,15 +114,19 @@ export const SettingsPanel = memo( function SettingsPanelForm( {
 
 	return (
 		<div className="updatronix-settings-form">
-			<h2 className="updatronix-panel-title">
-				{ __( 'Settings', 'updatronix' ) }
-			</h2>
-			<Text variant="muted">
-				{ __(
-					'Set up logging, choose how long to keep records, and manage email notifications.',
-					'updatronix'
-				) }
-			</Text>
+			{ showIntro && (
+				<>
+					<h2 className="updatronix-panel-title">
+						{ __( 'Settings', 'updatronix' ) }
+					</h2>
+					<Text variant="muted">
+						{ __(
+							'Set up logging, choose how long to keep records, and manage email notifications.',
+							'updatronix'
+						) }
+					</Text>
+				</>
+			) }
 			<div className="updatronix-settings-section">
 				<h3 className="updatronix-settings-section-title">
 					<Icon icon={ seen } size={ 24 } />

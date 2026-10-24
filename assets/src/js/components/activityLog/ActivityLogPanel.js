@@ -54,9 +54,14 @@ const DELETE_MODAL_STYLE = {
  * @param {Object}  props                       Component props.
  * @param {boolean} [props.loggingEnabled=true] Whether update logging is enabled.
  * @param {number}  [props.logsVersion=0]       Incremented to trigger a logs refetch.
+ * @param {boolean} [props.showIntro=true]      Whether to render the panel heading and description.
  * @return {import('react').JSX.Element} The activity log panel UI.
  */
-export function ActivityLogPanel( { loggingEnabled = true, logsVersion = 0 } ) {
+export function ActivityLogPanel( {
+	loggingEnabled = true,
+	logsVersion = 0,
+	showIntro = true,
+} ) {
 	const { logs, loading, error, fetchLogs, fetchLogDetails, deleteLog } =
 		useLogs();
 	const [ announcement, setAnnouncement ] = useState( {
@@ -371,15 +376,19 @@ export function ActivityLogPanel( { loggingEnabled = true, logsVersion = 0 } ) {
 			>
 				{ announcement.message }
 			</div>
-			<h2 className="updatronix-panel-title">
-				{ __( 'Update logs', 'updatronix' ) }
-			</h2>
-			<Text variant="muted">
-				{ __(
-					'Review recent updates to WordPress core, plugins, themes, and translations.',
-					'updatronix'
-				) }
-			</Text>
+			{ showIntro && (
+				<>
+					<h2 className="updatronix-panel-title">
+						{ __( 'Update logs', 'updatronix' ) }
+					</h2>
+					<Text variant="muted">
+						{ __(
+							'Review recent updates to WordPress core, plugins, themes, and translations.',
+							'updatronix'
+						) }
+					</Text>
+				</>
+			) }
 			<DataViews
 				getItemId={ ( item ) => String( item.id ) }
 				view={ view }

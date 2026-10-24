@@ -325,6 +325,8 @@ function updatronix_localize_settings( string $admin_page ): void {
 			'constants'              => Updatronix_AutoUpdates::get_constants(),
 			'tabs'                   => $tabs,
 			'activeTab'              => $active_tab,
+			'version'                => UPDATRONIX_VERSION,
+			'logoUrl'                => plugins_url( 'assets/img/logo-60x60.png', updatronix_PLUGIN_FILE ),
 			'isPro'                  => defined( 'UPDATRONIX_PRO_VERSION' ),
 			// Global window property populated by Pro's admin JS for the panel registry; Free reads it via ProTabPanel.
 			'proPanelRegistryGlobal' => 'updatronixProPanelRegistry',

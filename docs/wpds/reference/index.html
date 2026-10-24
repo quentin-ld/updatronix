@@ -1,0 +1,2325 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>WordPress Design System â€” Updatronix Field Guide</title>
+	<meta name="description" content="A working reference for rebuilding the Updatronix WordPress plugin on the WordPress Design System, separating the legacy admin layer from the new token and component system.">
+	<link rel="icon" href="assets/img/updatronix-logo-blue.png" type="image/png">
+	<link rel="stylesheet" href="assets/css/wpds-tokens.css">
+	<link rel="stylesheet" href="assets/css/guide.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
+	<symbol id="wpds-post-list" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+		<path d="M7 10H8.5M10 10H17M7 14H8.5M10 14H17M6 19.25H18C18.6904 19.25 19.25 18.6904 19.25 18V6C19.25 5.30964 18.6904 4.75 18 4.75H6C5.30964 4.75 4.75 5.30964 4.75 6V18C4.75 18.6904 5.30964 19.25 6 19.25Z" />
+	</symbol>
+	<symbol id="wpds-update" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+		<path d="M12 5.5L17.7929 11.2929C18.1834 11.6834 18.1834 12.3166 17.7929 12.7071L16 14.5M16 5.5H12V9.5M12 18.5L6.20711 12.7071C5.81658 12.3166 5.81658 11.6834 6.20711 11.2929L8 9.5M8 18.5H12V14.5" />
+	</symbol>
+	<symbol id="wpds-calendar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+		<path d="M4.75 7.25L4.75 18C4.75 18.6904 5.30964 19.25 6 19.25H18C18.6904 19.25 19.25 18.6904 19.25 18V7.25V6C19.25 5.30964 18.6904 4.75 18 4.75H6C5.30964 4.75 4.75 5.30964 4.75 6V7.25ZM19.25 7.25H4.75M7.25 10.75H9.25M11 10.75H13M14.75 10.75H16.75M7.25 14.5H9.25M11 14.5H13M14.75 14.5H16.75" />
+		<path d="M18 4.75H6C5.30964 4.75 4.75 5.30964 4.75 6V7.25H19.25V6C19.25 5.30964 18.6904 4.75 18 4.75Z" fill="currentColor" />
+	</symbol>
+	<symbol id="wpds-settings" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+		<path d="M5 8H19M19 16H5M10.75 8C10.75 8.82843 10.0784 9.5 9.25 9.5C8.42157 9.5 7.75 8.82843 7.75 8C7.75 7.17157 8.42157 6.5 9.25 6.5C10.0784 6.5 10.75 7.17157 10.75 8ZM16.25 16C16.25 16.8284 15.5784 17.5 14.75 17.5C13.9216 17.5 13.25 16.8284 13.25 16C13.25 15.1716 13.9216 14.5 14.75 14.5C15.5784 14.5 16.25 15.1716 16.25 16Z" />
+	</symbol>
+	<symbol id="wpds-star-filled" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+		<path d="M12 5.71576L13.6106 8.97924C13.7563 9.27438 14.0379 9.47895 14.3636 9.52628L17.965 10.0496L15.359 12.5899C15.1233 12.8196 15.0157 13.1506 15.0714 13.475L15.6866 17.0619L12.4653 15.3684C12.174 15.2152 11.826 15.2152 11.5347 15.3684L8.31341 17.0619L8.92861 13.475C8.98425 13.1506 8.8767 12.8196 8.64102 12.5899L6.03497 10.0496L9.63644 9.52628C9.96215 9.47895 10.2437 9.27438 10.3894 8.97924L12 5.71576Z" fill="currentColor" />
+	</symbol>
+	<symbol id="wpds-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+		<path d="M5 19L9.28769 14.7123M18.25 11C18.25 13.8995 15.8995 16.25 13 16.25C10.1005 16.25 7.75 13.8995 7.75 11C7.75 8.10051 10.1005 5.75 13 5.75C15.8995 5.75 18.25 8.10051 18.25 11Z" />
+	</symbol>
+	<symbol id="wpds-filter" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+		<path d="M12 5.5L5.25 18.25H18.75L12 5.5Z" />
+		<path d="M11.25 18.25H5.25L11.25 6.91666V18.25Z" fill="currentColor" />
+	</symbol>
+	<symbol id="wpds-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+		<path d="M12 3V16M6 10.5L12 16L17.5 10.5M4.75 15V19.25H19.25V15" />
+	</symbol>
+	<symbol id="wpds-chevron-down" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+		<path d="M7 11L12 15L17 11" />
+	</symbol>
+	<symbol id="wpds-close-small" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+		<path d="M7.75 16.25L16.25 7.75M16.25 16.25L7.75 7.75" />
+	</symbol>
+	<symbol id="wpds-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+		<path d="M7 12L10 15L17 8" />
+	</symbol>
+	<symbol id="wpds-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+		<path d="M12 16V11M12 9.5V8M19.25 12C19.25 16.0041 16.0041 19.25 12 19.25C7.99594 19.25 4.75 16.0041 4.75 12C4.75 7.99594 7.99594 4.75 12 4.75C16.0041 4.75 19.25 7.99594 19.25 12Z" stroke-linejoin="round" />
+	</symbol>
+	<symbol id="wpds-caution" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+		<path d="M12 8L12 13M12 14.5L12 16M4.75 12C4.75 7.99593 7.99594 4.75 12 4.75C16.0041 4.75 19.25 7.99594 19.25 12C19.25 16.0041 16.0041 19.25 12 19.25C7.99594 19.25 4.75 16.0041 4.75 12Z" stroke-linejoin="round" />
+	</symbol>
+	<symbol id="wpds-cancel-circle-filled" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+		<path d="M12 4C16.4183 4 20 7.58172 20 12C20 16.4183 16.4183 20 12 20C7.58172 20 4 16.4183 4 12C4 7.58172 7.58172 4 12 4ZM8.22656 9.28711L10.9395 12L8.22656 14.7119L9.28711 15.7734L12 13.0596L14.7119 15.7734L15.7734 14.7129L13.0605 12L15.7734 9.28809L14.7129 8.22754L12 10.9385L9.28809 8.22656L8.22656 9.28711Z" fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" stroke="none" />
+		<path d="M4.75 12C4.75 7.99593 7.99594 4.75 12 4.75C16.0041 4.75 19.25 7.99594 19.25 12C19.25 16.0041 16.0041 19.25 12 19.25C7.99594 19.25 4.75 16.0041 4.75 12Z" stroke-linejoin="round" />
+	</symbol>
+	<symbol id="wpds-arrow-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+		<path d="M4 12L19 12M14 17L19 12L14 7" />
+	</symbol>
+	<symbol id="wpds-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+		<path d="M20.25 6.75V19C20.25 19.6904 19.6904 20.25 19 20.25H6.75" />
+		<path d="M3.75 5C3.75 4.30964 4.30964 3.75 5 3.75H16C16.6904 3.75 17.25 4.30964 17.25 5V16C17.25 16.6904 16.6904 17.25 16 17.25H5C4.30964 17.25 3.75 16.6904 3.75 16V5Z" />
+	</symbol>
+	<symbol id="wpds-menu" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+		<path d="M5 12H19M5 18.25H19M5 5.75H19" />
+	</symbol>
+	<symbol id="wpds-page" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+		<path d="M8.5 8.25H15.5M8.5 11.75H15.5M8.5 15.25H15.5M18.25 18V6C18.25 5.30964 17.6904 4.75 17 4.75H7C6.30964 4.75 5.75 5.30964 5.75 6L5.75 18C5.75 18.6904 6.30964 19.25 7 19.25H17C17.6904 19.25 18.25 18.6904 18.25 18Z" />
+	</symbol>
+	<symbol id="wpds-lifesaver" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+		<path d="M16.0659 6.51992L15.0052 8.28769L15.7123 8.9948L17.4801 7.93414L16.0659 6.51992Z" fill="currentColor" stroke="none" />
+		<path d="M7.93414 17.4801L8.9948 15.7123L8.28769 15.0052L6.51992 16.0659L7.93414 17.4801Z" fill="currentColor" stroke="none" />
+		<path d="M17.4801 16.0659L15.7123 15.0052L15.0052 15.7123L16.0659 17.4801L17.4801 16.0659Z" fill="currentColor" stroke="none" />
+		<path d="M6.51992 7.93414L8.28769 8.9948L8.9948 8.28769L7.93414 6.51992L6.51992 7.93414Z" fill="currentColor" stroke="none" />
+		<path d="M4.75 12C4.75 7.99593 7.99594 4.75 12 4.75C16.0041 4.75 19.25 7.99594 19.25 12C19.25 16.0041 16.0041 19.25 12 19.25C7.99593 19.25 4.75 16.0041 4.75 12Z" />
+		<path d="M7.75 12C7.75 9.65279 9.65279 7.75 12 7.75C14.3472 7.75 16.25 9.65279 16.25 12C16.25 14.3472 14.3472 16.25 12 16.25C9.65279 16.25 7.75 14.3472 7.75 12Z" />
+		<path d="M16.0659 6.51992L15.0052 8.28769L15.7123 8.9948L17.4801 7.93414L16.0659 6.51992Z" />
+		<path d="M7.93414 17.4801L8.9948 15.7123L8.28769 15.0052L6.51992 16.0659L7.93414 17.4801Z" />
+		<path d="M17.4801 16.0659L15.7123 15.0052L15.0052 15.7123L16.0659 17.4801L17.4801 16.0659Z" />
+		<path d="M6.51992 7.93414L8.28769 8.9948L8.9948 8.28769L7.93414 6.51992L6.51992 7.93414Z" />
+	</symbol>
+	<symbol id="wpds-stack" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+		<path d="M7.25 20L7.25 15C7.25 14.3096 7.80965 13.75 8.5 13.75L15.5 13.75C16.1904 13.75 16.75 14.3096 16.75 15L16.75 20M16.75 4L16.75 9C16.75 9.69035 16.1904 10.25 15.5 10.25L8.5 10.25C7.80964 10.25 7.25 9.69036 7.25 9L7.25 4" />
+	</symbol>
+	<symbol id="wpds-brush" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+		<path d="M17 15.25L17.5858 14.6642C18.3668 13.8832 18.3668 12.6168 17.5858 11.8358L16.7071 10.9571C16.3166 10.5666 16.3166 9.93342 16.7071 9.54289L20 6.25C20.5523 5.69772 20.5523 4.80228 20 4.25C19.4477 3.69772 18.5523 3.69771 18 4.25L14.7071 7.54289C14.3166 7.93342 13.6834 7.93342 13.2929 7.54289L12.4142 6.66421C11.6332 5.88316 10.3668 5.88316 9.58579 6.66421L9 7.25M17 15.25L14.1213 18.1287C12.9497 19.3003 11.0503 19.3003 9.87868 18.1287L8 16.25M17 15.25L9 7.25M9 7.25L4 12.25L6 14.25M6 14.25L8 12.25M6 14.25L8 16.25M8 16.25L10 14.25" />
+	</symbol>
+	<symbol id="wpds-typography" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+		<path d="M4.5 17.5V17.2027L5.62821 13.9324M5.62821 13.9324L8.19231 6.5H8.80769L11.3718 13.9324L12.5 17.2027V17.5M11.3718 13.9324H5.62821" />
+		<path d="M19.5 13.8097V11.0001M19.5 13.8097C19.5 15.4844 18.1304 16.9603 16.5576 16.9603C14.9848 16.9603 14.5586 15.9414 14.4922 15.4844C14.4258 15.0273 14.4545 14.2521 15.1207 13.6609C15.7868 13.0696 16.6425 12.9616 17.4007 12.8201C18.1589 12.6786 19.5 12.2501 19.5 11.0001M19.5 13.8097V17.5M19.5 11.0001C19.5 9.75009 18.4545 9.25 17.3189 9.25C15.3174 9.25 14.5 11.0001 14.5 11.0001" />
+	</symbol>
+	<symbol id="wpds-sides-all" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+		<path d="M7.5 18.5H16.5M18.5 16.5V7.5M16.5 5.5H7.5M5.5 7.5V16.5" />
+	</symbol>
+	<symbol id="wpds-replay" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+		<path d="M5.72351 15.6312C6.97795 17.7948 9.31903 19.25 12 19.25C16.0041 19.25 19.25 16.0041 19.25 12C19.25 7.99594 16.0041 4.75 12 4.75C9.99797 4.75 8.18547 5.56148 6.87348 6.87348L4.5 9.5M4.5 6V9.5H8" />
+		<path d="M11.25 13.5V10.5L13.25 12L11.25 13.5Z" fill="currentColor" />
+	</symbol>
+	<symbol id="wpds-dashboard" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+		<path d="M18 6L12.5303 11.4697M12.5303 11.4697C12.3946 11.3339 12.2071 11.25 12 11.25C11.5858 11.25 11.25 11.5858 11.25 12C11.25 12.4142 11.5858 12.75 12 12.75C12.4142 12.75 12.75 12.4142 12.75 12C12.75 11.7929 12.6661 11.6054 12.5303 11.4697ZM18.2798 8.37444C18.8968 9.44094 19.25 10.6792 19.25 12C19.25 14.002 18.4385 15.8145 17.1266 17.1265M15.6256 5.72029C14.5591 5.1032 13.3208 4.75 12 4.75C7.99594 4.75 4.75 7.99594 4.75 12C4.75 14.002 5.5615 15.8146 6.87351 17.1266" stroke-linejoin="round" />
+	</symbol>
+	<symbol id="wpds-grid" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+		<path d="M12 4.75H6C5.30964 4.75 4.75 5.30964 4.75 6V12M12 4.75H18C18.6904 4.75 19.25 5.30964 19.25 6V12M12 4.75V19.25M12 19.25H18C18.6904 19.25 19.25 18.6904 19.25 18V12M12 19.25H6C5.30964 19.25 4.75 18.6904 4.75 18V12M19.25 12H4.75" />
+	</symbol>
+	<symbol id="wpds-code" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+		<path d="M7.99997 7L3.70708 11.2929C3.31655 11.6834 3.31655 12.3166 3.70708 12.7071L7.99997 17M16 17L20.2929 12.7071C20.6834 12.3166 20.6834 11.6834 20.2929 11.2929L16 7" stroke-linejoin="round" />
+	</symbol>
+	<symbol id="wpds-external" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+		<path d="M9.5 6.25H6.5C5.80964 6.25 5.25 6.80964 5.25 7.5V17.5C5.25 18.1904 5.80964 18.75 6.5 18.75H16.5C17.1904 18.75 17.75 18.1904 17.75 17.5V14.5M11.5 12.5L18.75 5.25M12.5 5.25H18.75V11.5" />
+	</symbol>
+	<symbol id="wpds-trash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+		<path d="M5 7.5H7M19 7.5H17M17 7.5L16.1588 17.1733C16.069 18.2068 15.2038 19 14.1664 19H9.83363C8.79622 19 7.93102 18.2068 7.84115 17.1733L7 7.5M17 7.5H14.9897M7 7.5H9.01027M14.9897 7.5C14.8627 5.96012 13.5727 4.75 12 4.75C10.4273 4.75 9.13731 5.96012 9.01027 7.5M14.9897 7.5H9.01027" />
+	</symbol>
+	<symbol id="wpds-seen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+		<path d="M20.0645 13C18.5918 10.0366 15.5337 8 12 8C8.46631 8 5.40825 10.0366 3.93555 13" />
+		<circle cx="12" cy="12.5" r="3" fill="currentColor" />
+	</symbol>
+	<symbol id="wpds-plugins" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+		<path d="M15.3995 11.5711L12.2175 8.38909L10.273 6.44454L7.67678 9.04074C7.3017 9.41581 7.09099 9.92452 7.09099 10.455L7.09099 13.455C7.09099 13.7202 6.98563 13.9745 6.7981 14.1621L5.14645 15.8137C4.95118 16.009 4.95118 16.3256 5.14645 16.5208L7.26777 18.6421C7.46303 18.8374 7.77961 18.8374 7.97487 18.6421L9.62652 16.9905C9.81406 16.8029 10.0684 16.6976 10.3336 16.6976H13.3336C13.8641 16.6976 14.3728 16.4869 14.7478 16.1118L17.344 13.5156L15.3995 11.5711ZM12.2175 8.38909L16.1066 4.5M15.3995 11.5711L19.2886 7.68198" />
+	</symbol>
+	<symbol id="wpds-language" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+		<path d="M3 6H9.5M16 6H13.5M9.5 6V3M9.5 6H13.5M13.5 6C13.0477 7.24386 11.7361 9.79194 9.44037 12.5512M5.5 16.5C7.04336 15.2139 8.35238 13.8588 9.44037 12.5512M6.5 8C6.9232 8.9522 7.93743 10.7507 9.44037 12.5512M12.5 15.5C11.3314 14.6235 10.305 13.587 9.44037 12.5512" />
+		<path d="M13.75 20V19.75L14.6667 17M14.6667 17L16.75 10.75H17.25L19.3333 17L20.25 19.75V20M19.3333 17H14.6667" />
+	</symbol>
+	<symbol id="wpds-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+		<path d="M18 6.75V10.5C18 14.4187 15.4956 17.7524 12 18.9879C8.50442 17.7524 6 14.4187 6 10.5V6.75L12 4L18 6.75Z" />
+	</symbol>
+	<symbol id="wpds-scheduled" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+		<path d="M12 19.25C16.0041 19.25 19.25 16.0041 19.25 12C19.25 7.99594 16.0041 4.75 12 4.75C7.99594 4.75 4.75 7.99594 4.75 12C4.75 16.0041 7.99594 19.25 12 19.25Z" stroke-linejoin="round" />
+		<path d="M9.5 12.25H12.25V8" />
+	</symbol>
+</svg>
+
+<div class="app">
+	<aside class="sidebar" id="sidebar">
+		<div class="sidebar-brand">
+			<img src="assets/img/updatronix-logo-blue.png" width="32" height="32" alt="">
+			<div class="sidebar-brand-copy">
+				<strong>Updatronix</strong>
+				<span>Design system field guide</span>
+			</div>
+			<button class="nav-toggle" type="button" id="nav-toggle" aria-expanded="false" aria-controls="side-nav" aria-label="Open guide contents">
+				<svg class="icon" aria-hidden="true"><use href="#wpds-menu"/></svg>
+			</button>
+		</div>
+
+		<nav class="side-nav" id="side-nav" aria-label="Guide contents">
+			<div class="nav-group">
+				<p class="nav-label">Start here</p>
+				<a href="#overview">Overview</a>
+				<a href="#systems">The two systems</a>
+				<a href="#rules">Separation rules</a>
+			</div>
+			<div class="nav-group">
+				<p class="nav-label">Foundations</p>
+				<a href="#color">Color</a>
+				<a href="#type">Typography</a>
+				<a href="#dimension">Spacing and sizes</a>
+				<a href="#shape">Shape and elevation</a>
+				<a href="#motion">Motion and cursor</a>
+			</div>
+			<div class="nav-group">
+				<p class="nav-label">Theme</p>
+				<a href="#theme">Theme provider</a>
+				<a href="#seeds">Seeds and presets</a>
+			</div>
+			<div class="nav-group">
+				<p class="nav-label">Components</p>
+				<a href="#inventory">Inventory</a>
+				<a href="#controls">Controls</a>
+				<a href="#feedback">Feedback</a>
+				<a href="#overlays">Overlays</a>
+				<a href="#dataviews">Data views</a>
+			</div>
+			<div class="nav-group">
+				<p class="nav-label">Patterns</p>
+				<a href="#destructive">Destructive actions</a>
+				<a href="#errors">Error messages</a>
+				<a href="#save">Save and submit</a>
+				<a href="#icons">Icons</a>
+			</div>
+			<div class="nav-group">
+				<p class="nav-label">Layout</p>
+				<a href="#areas">Page areas</a>
+				<a href="#shell-layout">App shell</a>
+			</div>
+			<div class="nav-group">
+				<p class="nav-label">Applied</p>
+				<a href="#upd-shell">Updatronix shell</a>
+				<a href="#screens">Screen map</a>
+				<a href="#before">Before gallery</a>
+				<a href="#migration">Migration checklist</a>
+				<a href="#sources">Sources</a>
+			</div>
+		</nav>
+
+		<div class="sidebar-foot">
+			<strong>Draft reference</strong><br>
+			Prepared for Updatronix 1.2.0<br>
+			Reviewed 23 October 2026
+		</div>
+	</aside>
+
+	<div class="main">
+		<header class="page-head">
+			<div class="page-head-inner">
+				<nav aria-label="Breadcrumb">
+					<ol class="page-breadcrumb">
+						<li><a href="#overview">Field guide</a></li>
+						<li>WordPress Design System</li>
+					</ol>
+				</nav>
+				<p class="page-kicker"><svg class="icon icon--sm" aria-hidden="true"><use href="#wpds-stack"/></svg> Updatronix interface rework</p>
+				<h1 class="page-title">Build Updatronix on the WordPress Design System</h1>
+				<p class="page-lede">A reference for separating the legacy WordPress admin layer from the modern design system, choosing the right tokens and components, and moving Updatronix to a column-based shell with its sections in the dark navigation rail.</p>
+				<div class="page-meta">
+					<span class="meta-chip"><span class="dot"></span> Gutenberg trunk</span>
+					<span class="meta-chip"><code>@wordpress/ui</code> 0.25.0</span>
+					<span class="meta-chip">Reviewed 23 Oct 2026</span>
+					<span class="meta-chip">12 app screens reviewed</span>
+				</div>
+				<div class="page-actions">
+					<a class="btn btn--primary" href="#upd-shell">Open the Updatronix shell <svg class="icon" aria-hidden="true"><use href="#wpds-arrow-right"/></svg></a>
+					<a class="btn btn--secondary" href="assets/css/wpds-tokens.css" download>Download tokens.css <svg class="icon" aria-hidden="true"><use href="#wpds-download"/></svg></a>
+				</div>
+			</div>
+		</header>
+
+		<main id="main" tabindex="-1">
+			<section class="section" id="overview" aria-labelledby="overview-title">
+				<div class="section-inner">
+					<p class="eyebrow">Start here</p>
+					<h2 id="overview-title">One project, three visual layers</h2>
+					<p class="lede">Updatronix works on WordPressâ€™s update engine. Its interface currently borrows from three places at once: native wp-admin, a custom blue header, and a mix of WordPress components. The rework needs a single contract before any screen is redrawn.</p>
+					<div class="prose">
+						<p>This guide is that contract. It names what is legacy, what is current, and what is target. It then fixes the foundations, component choices, and page structure used by the app screens.</p>
+					</div>
+
+					<div class="layer-stack" role="group" aria-label="Three visual layers in the project">
+						<div class="layer">
+							<div class="layer-index">A</div>
+							<div>
+								<strong>Legacy WordPress admin</strong>
+								<p>wp-admin chrome and <code>@wordpress/components</code>: the dark admin menu, the #2271b1 admin blue, 13px UI text, <code>.button</code> and <code>.notice</code> styles, and the admin color schemes.</p>
+							</div>
+							<span class="layer-tag">Inherited</span>
+						</div>
+						<div class="layer">
+							<div class="layer-index">B</div>
+							<div>
+								<strong>Current Updatronix</strong>
+								<p>A hybrid surface: a gradient blue header, a white secondary navigation column, custom log rows and modals, and a settings form built on WordPress controls.</p>
+							</div>
+							<span class="layer-tag">Being replaced</span>
+						</div>
+						<div class="layer layer--target">
+							<div class="layer-index">C</div>
+							<div>
+								<strong>WordPress Design System</strong>
+								<p><code>@wordpress/theme</code>, <code>@wordpress/ui</code>, and <code>@wordpress/icons</code> as the foundations; <code>@wordpress/admin-ui</code> and <code>@wordpress/dataviews</code> for page and data composition.</p>
+							</div>
+							<span class="layer-tag">Target</span>
+						</div>
+					</div>
+
+					<div class="callout callout--info">
+						<svg class="icon" aria-hidden="true"><use href="#wpds-info"/></svg>
+						<div>
+							<p class="callout-title">What this guide decides</p>
+							<p>It fixes the visual contract used by every screen. The screen set lives in the dark rail, the gradient bar is gone, and each working surface is built from WPDS tokens and components. UI copy stays in English.</p>
+						</div>
+					</div>
+
+					<div class="grid-3">
+						<div class="panel">
+							<h3>Foundations</h3>
+							<p>Exact token values, token grammar, contrast pairs, type scale, spacing, radius, motion, and cursor rules.</p>
+						</div>
+						<div class="panel">
+							<h3>Component decisions</h3>
+							<p>Which package owns which control, what to use for logs, settings, modals, and destructive actions, and what not to mix.</p>
+						</div>
+						<div class="panel">
+							<h3>Applied structure</h3>
+							<p>A working preview of the eleven-destination shell in the dark rail, plus the screens hub, with the page header, content card, toolbar, and table patterns, a screen map, and a migration checklist.</p>
+						</div>
+					</div>
+
+					<div class="callout callout--warning">
+						<svg class="icon" aria-hidden="true"><use href="#wpds-caution"/></svg>
+						<div>
+							<p class="callout-title">Status of the component package</p>
+							<p><code>@wordpress/ui</code> is explicitly experimental in its own README. Pin the version you test against, expect breaking changes, and check the WordPress runtime version rather than assuming the npm package is what a site loads.</p>
+						</div>
+					</div>
+				</div>
+			</section>
+
+			<section class="section" id="systems" aria-labelledby="systems-title">
+				<div class="section-inner">
+					<p class="eyebrow">The two systems</p>
+					<h2 id="systems-title">Legacy admin is not a theme of the new design system</h2>
+					<p class="lede">They share a family resemblance because both are WordPress. Underneath, they are different contracts: different distribution, different tokens, different component APIs, and different assumptions about color and theming.</p>
+
+					<div class="table-wrap">
+						<table>
+							<caption>Comparison of the legacy WordPress admin layer and the current WordPress Design System.</caption>
+							<thead>
+								<tr>
+									<th scope="col">Dimension</th>
+									<th scope="col">Legacy admin + <code>@wordpress/components</code></th>
+									<th scope="col">WordPress Design System</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td><strong>Scope</strong></td>
+									<td>wp-admin screens and a large, organically grown component collection.</td>
+									<td>A cohesive system for admin interfaces, built from tokens upward.</td>
+								</tr>
+								<tr>
+									<td><strong>Distribution</strong></td>
+									<td>WordPress scripts on <code>window.wp</code>; versions follow WordPress.</td>
+									<td>Versioned npm packages with semver. <code>@wordpress/ui</code> is not on <code>window.wp</code>.</td>
+								</tr>
+								<tr>
+									<td><strong>Tokens</strong></td>
+									<td>Admin palette and legacy <code>--wp-components-*</code> aliases.</td>
+									<td>Semantic <code>--wpds-*</code> custom properties in <code>@wordpress/theme</code>.</td>
+								</tr>
+								<tr>
+									<td><strong>Color</strong></td>
+									<td>#1d2327 menu, #2c3338 submenu, #2271b1 primary, #f0f0f1 canvas, #dcdcde borders.</td>
+									<td>Seed-driven ramps; default primary #3858e9, canvas #fcfcfc, content #1e1e1e.</td>
+								</tr>
+								<tr>
+									<td><strong>Type</strong></td>
+									<td>13px admin base on the system font stack.</td>
+									<td>Token scale from 11px to 32px, same system font stack, two weights.</td>
+								</tr>
+								<tr>
+									<td><strong>Shape</strong></td>
+									<td>Mixed 3â€“4px radii, or square depending on the control.</td>
+									<td>Four radius presets; the default <code>subtle</code> maps 1 / 2 / 4 / 8 / 12px.</td>
+								</tr>
+								<tr>
+									<td><strong>Theming</strong></td>
+									<td>Admin color schemes applied through body classes.</td>
+									<td><code>ThemeProvider</code> seeds, generated ramps, nested providers, and per-document roots.</td>
+								</tr>
+								<tr>
+									<td><strong>Composition</strong></td>
+									<td>Mostly ad hoc per screen.</td>
+									<td><code>admin-ui</code> for page structure; <code>dataviews</code> for lists and forms.</td>
+								</tr>
+								<tr>
+									<td><strong>Status in Updatronix</strong></td>
+									<td>Native WordPress chrome outside the plugin surface only.</td>
+									<td>The single system for every Updatronix screen.</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+
+					<div class="callout callout--danger">
+						<svg class="icon" aria-hidden="true"><use href="#wpds-cancel-circle-filled"/></svg>
+						<div>
+							<p class="callout-title">Do not blend the two</p>
+							<p>One surface belongs to one system. Do not put legacy admin blue on a WPDS component, do not skin WPDS controls with <code>.button</code> or <code>.notice</code> classes, and do not mix legacy and new tokens in the same component. If a legacy component is still required, isolate it and document why.</p>
+						</div>
+					</div>
+
+					<div class="prose">
+						<h3>A note on versions</h3>
+						<p>The npm packages and the WordPress runtime can move at different speeds. The versions used for this guide are <code>@wordpress/theme</code> 3.0.0, <code>@wordpress/ui</code> 0.25.0, <code>@wordpress/components</code> 43.0.0, <code>@wordpress/dataviews</code> 21.0.0, <code>@wordpress/admin-ui</code> 3.0.0, and <code>@wordpress/icons</code> 19.0.0. Check the WordPress version Updatronix supports before relying on a runtime API.</p>
+					</div>
+				</div>
+			</section>
+
+			<section class="section" id="rules" aria-labelledby="rules-title">
+				<div class="section-inner">
+					<p class="eyebrow">Separation rules</p>
+					<h2 id="rules-title">Six rules for every Updatronix screen</h2>
+					<p class="lede">These are the non-negotiables for the rework. They are short on purpose: they should be checkable in review, not reinterpreted per screen.</p>
+
+					<div class="grid-2">
+						<div class="panel">
+							<h3>1. One system per surface</h3>
+							<p>A screen is either WPDS or legacy. There is no mixed mode inside a card, form, or table.</p>
+						</div>
+						<div class="panel">
+							<h3>2. Tokens, never hex</h3>
+							<p>Use <code>--wpds-*</code> for color, spacing, type, radius, and motion. A hardcoded value is a bug unless it is a documented brand asset.</p>
+						</div>
+						<div class="panel">
+							<h3>3. One page header</h3>
+							<p>Each screen has one page title, one short description, and one primary action. Breadcrumbs replace the old cross-links row.</p>
+						</div>
+						<div class="panel">
+							<h3>4. Navigation lives in the rail</h3>
+							<p>The eleven destinations are sidebar items in four groups. Nested tabs stay inside the page, not in a second horizontal bar.</p>
+						</div>
+						<div class="panel">
+							<h3>5. One save model</h3>
+							<p>One save model per surface, applied to every field. Updatronix uses manual save on Settings, Schedule, and Auto updates.</p>
+						</div>
+						<div class="panel">
+							<h3>6. Native chrome stays native</h3>
+							<p>The WordPress admin menu, footer, and global notices are outside the plugin surface. Do not restyle them.</p>
+						</div>
+					</div>
+
+					<div class="callout callout--success">
+						<svg class="icon" aria-hidden="true"><use href="#wpds-check"/></svg>
+						<div>
+							<p class="callout-title">Target structure in one sentence</p>
+							<p>A dark navigation column holds the eleven Updatronix destinations; the content frame holds one page header and one working surface, with tabs only where a page genuinely has sub-views.</p>
+						</div>
+					</div>
+
+					<h3>The blue bar decision</h3>
+					<div class="prose">
+						<p>The current header is a gradient sampled from the supplied screenshots: roughly <code>#3549ac</code> on the left, falling to <code>#24242f</code> on the right. It is decorative, not a token, and it competes with the WordPress admin menu for attention.</p>
+						<p>Remove it. Do not recolor it, shrink it, or turn it into a dark bar. Its functions move: the product identity and version move to the dark rail; Upgrade becomes a Pro item in the rail; the page title and description move into the page header. Documentation and Support get their own Help group in the rail instead of floating in the header.</p>
+					</div>
+
+					<div class="table-wrap">
+						<table>
+							<caption>Where the current header content goes.</caption>
+							<thead>
+								<tr>
+									<th scope="col">Current element</th>
+									<th scope="col">New home</th>
+									<th scope="col">Rule</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td>Logo, product name, tagline</td>
+									<td>Top of the dark rail</td>
+									<td>Small lockup; no gradient, no marketing line in the rail.</td>
+								</tr>
+								<tr>
+									<td>Documentation, Changelog, Support</td>
+									<td>Documentation and Support in a Help group; Changelog in the product docs</td>
+									<td>Keep help reachable from the rail, but do not mix it into the update workflow.</td>
+								</tr>
+								<tr>
+									<td>Upgrade to Pro</td>
+									<td>â€œUpdatronix 3000â€ rail item with a Pro badge</td>
+									<td>The destination is a page, not a header banner.</td>
+								</tr>
+								<tr>
+									<td>Version 1.2.0</td>
+									<td>Rail footer or page header meta</td>
+									<td>Muted, small, and not repeated on every screen.</td>
+								</tr>
+								<tr>
+									<td>Tabs: Update log, Auto updates, Schedule, Settings</td>
+									<td>Dark rail navigation</td>
+									<td>One active item; no white secondary nav column.</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</section>
+
+			<section class="section" id="color" aria-labelledby="color-title">
+				<div class="section-inner">
+					<p class="eyebrow">Foundations Â· Color</p>
+					<h2 id="color-title">Color is a role, not a hex value</h2>
+					<p class="lede">The semantic tokens describe what a color is for. That is what makes theming and contrast auditing possible. Read the name before choosing the value.</p>
+
+					<div class="prose">
+						<p>A color token follows the pattern <code>--wpds-color-&lt;property&gt;-&lt;target&gt;-&lt;tone&gt;[-&lt;emphasis&gt;][-&lt;state&gt;]</code>. Take <code>--wpds-color-background-interactive-brand-strong-active</code>: it is a <strong>background</strong> for an <strong>interactive</strong> control, with <strong>brand</strong> tone, <strong>strong</strong> emphasis, in the <strong>active</strong> state.</p>
+					</div>
+
+					<div class="table-wrap">
+						<table>
+							<caption>Decoding the four role segments that matter most.</caption>
+							<thead>
+								<tr>
+									<th scope="col">Segment</th>
+									<th scope="col">Values</th>
+									<th scope="col">What it answers</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td><strong>Property</strong></td>
+									<td><code>background</code>, <code>foreground</code>, <code>stroke</code></td>
+									<td>Which CSS property is being set.</td>
+								</tr>
+								<tr>
+									<td><strong>Target</strong></td>
+									<td><code>surface</code>, <code>interactive</code>, <code>content</code>, <code>track</code>, <code>thumb</code></td>
+									<td>Whether it is a container, a control, static text, or a track-and-thumb part.</td>
+								</tr>
+								<tr>
+									<td><strong>Tone</strong></td>
+									<td><code>neutral</code>, <code>brand</code>, <code>success</code>, <code>info</code>, <code>caution</code>, <code>warning</code>, <code>error</code></td>
+									<td>The semantic intent. Caution is guidance; warning is action-needed; error is blocking.</td>
+								</tr>
+								<tr>
+									<td><strong>Emphasis / state</strong></td>
+									<td><code>strong</code>, <code>weak</code> / <code>active</code>, <code>disabled</code></td>
+									<td>How loud it is, and which interaction state it belongs to.</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+
+					<h3>Default palette</h3>
+					<p class="small muted">Values from the default <code>design-tokens.css</code> shipped with <code>@wordpress/theme</code> 3.0.0. They change when the provider generates a new ramp.</p>
+					<div class="swatch-grid">
+						<div class="swatch">
+							<div class="swatch-color" style="background:#fcfcfc"></div>
+							<div class="swatch-copy">
+								<span class="swatch-name">Surface</span>
+								<span class="swatch-value">#fcfcfc Â· neutral</span>
+							</div>
+						</div>
+						<div class="swatch">
+							<div class="swatch-color" style="background:#ffffff;border-bottom:1px solid #ececec"></div>
+							<div class="swatch-copy">
+								<span class="swatch-name">Surface strong</span>
+								<span class="swatch-value">#ffffff Â· neutral-strong</span>
+							</div>
+						</div>
+						<div class="swatch">
+							<div class="swatch-color" style="background:#f4f4f4"></div>
+							<div class="swatch-copy">
+								<span class="swatch-name">Surface weak</span>
+								<span class="swatch-value">#f4f4f4 Â· neutral-weak</span>
+							</div>
+						</div>
+						<div class="swatch">
+							<div class="swatch-color" style="background:#1e1e1e"></div>
+							<div class="swatch-copy">
+								<span class="swatch-name">Content</span>
+								<span class="swatch-value">#1e1e1e Â· neutral</span>
+							</div>
+						</div>
+						<div class="swatch">
+							<div class="swatch-color" style="background:#707070"></div>
+							<div class="swatch-copy">
+								<span class="swatch-name">Content weak</span>
+								<span class="swatch-value">#707070 Â· neutral-weak</span>
+							</div>
+						</div>
+						<div class="swatch">
+							<div class="swatch-color" style="background:#dbdbdb"></div>
+							<div class="swatch-copy">
+								<span class="swatch-name">Surface stroke</span>
+								<span class="swatch-value">#dbdbdb Â· neutral</span>
+							</div>
+						</div>
+						<div class="swatch">
+							<div class="swatch-color" style="background:#3858e9"></div>
+							<div class="swatch-copy">
+								<span class="swatch-name">Brand</span>
+								<span class="swatch-value">#3858e9 Â· interactive</span>
+							</div>
+						</div>
+						<div class="swatch">
+							<div class="swatch-color" style="background:#2e49d9"></div>
+							<div class="swatch-copy">
+								<span class="swatch-name">Brand active</span>
+								<span class="swatch-value">#2e49d9 Â· strong-active</span>
+							</div>
+						</div>
+						<div class="swatch">
+							<div class="swatch-color" style="background:#ecf0fa"></div>
+							<div class="swatch-copy">
+								<span class="swatch-name">Brand surface</span>
+								<span class="swatch-value">#ecf0fa Â· surface-brand</span>
+							</div>
+						</div>
+						<div class="swatch">
+							<div class="swatch-color" style="background:#cc1818"></div>
+							<div class="swatch-copy">
+								<span class="swatch-name">Error</span>
+								<span class="swatch-value">#cc1818 Â· interactive</span>
+							</div>
+						</div>
+						<div class="swatch">
+							<div class="swatch-color" style="background:#deebfa"></div>
+							<div class="swatch-copy">
+								<span class="swatch-name">Info surface</span>
+								<span class="swatch-value">#deebfa Â· surface-info</span>
+							</div>
+						</div>
+						<div class="swatch">
+							<div class="swatch-color" style="background:#c2f8ca"></div>
+							<div class="swatch-copy">
+								<span class="swatch-name">Success surface</span>
+								<span class="swatch-value">#c2f8ca Â· surface-success</span>
+							</div>
+						</div>
+					</div>
+
+					<h3>Contrast pairs</h3>
+					<p class="small muted">Ratios are approximate, computed from the default values. The providerâ€™s <code>onColorWarnings</code> callback is the runtime check when a seed changes.</p>
+					<div class="table-wrap">
+						<table>
+							<caption>Default foreground and background pairs used by the system.</caption>
+							<thead>
+								<tr>
+									<th scope="col">Pair</th>
+									<th scope="col">Sample</th>
+									<th scope="col">Ratio</th>
+									<th scope="col">Use</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td><code>foreground-content-neutral</code> on <code>background-surface-neutral</code></td>
+									<td><span style="color:#1e1e1e;background:#fcfcfc;padding:2px 6px;border:1px solid #dbdbdb">Update log</span></td>
+									<td>â‰ˆ 16.3:1</td>
+									<td>Body and headings</td>
+								</tr>
+								<tr>
+									<td><code>foreground-content-neutral-weak</code> on <code>background-surface-neutral</code></td>
+									<td><span style="color:#707070;background:#fcfcfc;padding:2px 6px;border:1px solid #dbdbdb">Retention period</span></td>
+									<td>â‰ˆ 4.8:1</td>
+									<td>Secondary text</td>
+								</tr>
+								<tr>
+									<td><code>foreground-interactive-brand-strong</code> on <code>background-interactive-brand-strong</code></td>
+									<td><span style="color:#eff0f2;background:#3858e9;padding:2px 6px">Save changes</span></td>
+									<td>â‰ˆ 4.9:1</td>
+									<td>Primary button label</td>
+								</tr>
+								<tr>
+									<td><code>foreground-interactive-brand</code> on <code>background-surface-neutral-strong</code></td>
+									<td><span style="color:#3858e9;background:#ffffff;padding:2px 6px;border:1px solid #dbdbdb">View details</span></td>
+									<td>â‰ˆ 5.6:1</td>
+									<td>Links and brand icons</td>
+								</tr>
+								<tr>
+									<td><code>foreground-content-info</code> on <code>background-surface-info</code></td>
+									<td><span style="color:#001b4f;background:#deebfa;padding:2px 6px">Scheduled</span></td>
+									<td>â‰ˆ 13.7:1</td>
+									<td>Info notice</td>
+								</tr>
+								<tr>
+									<td><code>foreground-content-error</code> on <code>background-surface-error</code></td>
+									<td><span style="color:#470000;background:#fae5e1;padding:2px 6px">Update failed</span></td>
+									<td>â‰ˆ 13.7:1</td>
+									<td>Error notice</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+
+					<div class="token-list" role="group" aria-label="Core color tokens">
+						<button class="token" type="button" data-copy="--wpds-color-background-surface-neutral">--wpds-color-background-surface-neutral</button>
+						<button class="token" type="button" data-copy="--wpds-color-background-surface-neutral-weak">--wpds-color-background-surface-neutral-weak</button>
+						<button class="token" type="button" data-copy="--wpds-color-foreground-content-neutral">--wpds-color-foreground-content-neutral</button>
+						<button class="token" type="button" data-copy="--wpds-color-foreground-content-neutral-weak">--wpds-color-foreground-content-neutral-weak</button>
+						<button class="token" type="button" data-copy="--wpds-color-stroke-surface-neutral">--wpds-color-stroke-surface-neutral</button>
+						<button class="token" type="button" data-copy="--wpds-color-background-interactive-brand-strong">--wpds-color-background-interactive-brand-strong</button>
+						<button class="token" type="button" data-copy="--wpds-color-stroke-focus">--wpds-color-stroke-focus</button>
+						<button class="token" type="button" data-copy="--wpds-color-background-surface-error">--wpds-color-background-surface-error</button>
+					</div>
+
+					<div class="callout callout--info">
+						<svg class="icon" aria-hidden="true"><use href="#wpds-info"/></svg>
+						<div>
+							<p class="callout-title">Reading size is intentionally larger here</p>
+							<p>WPDS uses 13px as the admin UI base, which is dense by design. This guide uses 15px (<code>body-lg</code>) for long-form reading and keeps specimens at the 11â€“15px UI scale so they match the product.</p>
+						</div>
+					</div>
+				</div>
+			</section>
+
+			<section class="section" id="type" aria-labelledby="type-title">
+				<div class="section-inner">
+					<p class="eyebrow">Foundations Â· Typography</p>
+					<h2 id="type-title">One family, two weights, a small scale</h2>
+					<p class="lede">The system uses the operating systemâ€™s UI font for both headings and body. The hierarchy comes from size, weight, and spacing, not from a second typeface.</p>
+
+					<div class="table-wrap">
+						<table>
+							<caption>Type scale from the default tokens.</caption>
+							<thead>
+								<tr>
+									<th scope="col">Token</th>
+									<th scope="col">Size / line height</th>
+									<th scope="col">Typical use</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr><td><code>font-size-xs</code></td><td>11 / 16px</td><td>Meta, badges, helper labels</td></tr>
+								<tr><td><code>font-size-sm</code></td><td>12 / 20px</td><td>Descriptions, secondary table cells</td></tr>
+								<tr><td><code>font-size-md</code></td><td>13 / 24px</td><td>Default admin body, controls, table cells</td></tr>
+								<tr><td><code>font-size-lg</code></td><td>15 / 28px</td><td>Reading text and emphasized content</td></tr>
+								<tr><td><code>font-size-xl</code></td><td>20 / 32px</td><td>Section headings</td></tr>
+								<tr><td><code>font-size-2xl</code></td><td>32 / 40px</td><td>Page title, used sparingly</td></tr>
+							</tbody>
+						</table>
+					</div>
+
+					<div class="specimen">
+						<div class="specimen-head">
+							<strong>Type scale</strong>
+							<span>System font stack Â· weights 400 and 600</span>
+						</div>
+						<div class="specimen-body specimen-body--compact">
+							<div class="type-sample"><span class="type-sample-text type-2xl">Update log</span><span class="type-sample-meta">32 / 40 Â· 2xl</span></div>
+							<div class="type-sample"><span class="type-sample-text type-xl">Automatic updates</span><span class="type-sample-meta">20 / 32 Â· xl</span></div>
+							<div class="type-sample"><span class="type-sample-text type-lg">Every change, with the version before and after.</span><span class="type-sample-meta">15 / 28 Â· lg</span></div>
+							<div class="type-sample"><span class="type-sample-text type-md">Retention period â€” 90 days. Older entries are removed daily.</span><span class="type-sample-meta">13 / 24 Â· md</span></div>
+							<div class="type-sample"><span class="type-sample-text type-sm">Recovery mode emails are always sent to the admin address.</span><span class="type-sample-meta">12 / 20 Â· sm</span></div>
+							<div class="type-sample"><span class="type-sample-text type-xs">SUCCESS Â· 23 OCT 2026, 10:42</span><span class="type-sample-meta">11 / 16 Â· xs</span></div>
+						</div>
+					</div>
+
+					<div class="prose">
+						<ul>
+							<li>Use <code>md</code> for controls, tables, and dense admin copy; <code>lg</code> when a paragraph is meant to be read rather than scanned.</li>
+							<li>Use only 400 and 600. There is no 700 in the scale; emphasis is a weight step, not a new size.</li>
+							<li>Keep headings at <code>2xl</code> or below inside admin surfaces. A 48px display title belongs on a marketing page, not above a log table.</li>
+							<li>Apply a small negative tracking only at <code>xl</code> and above. Never track body text.</li>
+						</ul>
+					</div>
+
+					<div class="token-list" role="group" aria-label="Typography tokens">
+						<button class="token" type="button" data-copy="--wpds-typography-font-family-body">--wpds-typography-font-family-body</button>
+						<button class="token" type="button" data-copy="--wpds-typography-font-family-heading">--wpds-typography-font-family-heading</button>
+						<button class="token" type="button" data-copy="--wpds-typography-font-size-md">--wpds-typography-font-size-md</button>
+						<button class="token" type="button" data-copy="--wpds-typography-line-height-md">--wpds-typography-line-height-md</button>
+						<button class="token" type="button" data-copy="--wpds-typography-font-weight-emphasis">--wpds-typography-font-weight-emphasis</button>
+					</div>
+				</div>
+			</section>
+
+			<section class="section" id="dimension" aria-labelledby="dimension-title">
+				<div class="section-inner">
+					<p class="eyebrow">Foundations Â· Spacing and sizes</p>
+					<h2 id="dimension-title">Build on a 4px rhythm, then use the named steps</h2>
+					<p class="lede">The spacing tokens are not a free-form scale. Padding and gap have their own sequences, and they diverge above <code>lg</code>. Pick by role, not by arithmetic.</p>
+
+					<h3>Padding and gap</h3>
+					<div class="scale-row"><span class="scale-label">xs</span><span class="scale-bar" style="width:4px"></span><span class="scale-value">4px</span></div>
+					<div class="scale-row"><span class="scale-label">sm</span><span class="scale-bar" style="width:8px"></span><span class="scale-value">8px</span></div>
+					<div class="scale-row"><span class="scale-label">md</span><span class="scale-bar" style="width:12px"></span><span class="scale-value">12px</span></div>
+					<div class="scale-row"><span class="scale-label">lg</span><span class="scale-bar" style="width:16px"></span><span class="scale-value">16px</span></div>
+					<div class="scale-row"><span class="scale-label">xl</span><span class="scale-bar" style="width:20px"></span><span class="scale-value">padding 20 Â· gap 24</span></div>
+					<div class="scale-row"><span class="scale-label">2xl</span><span class="scale-bar" style="width:24px"></span><span class="scale-value">padding 24 Â· gap 32</span></div>
+					<div class="scale-row"><span class="scale-label">3xl</span><span class="scale-bar" style="width:32px"></span><span class="scale-value">padding 32 Â· gap 40</span></div>
+
+					<div class="table-wrap">
+						<table>
+							<caption>Sizes and surface widths from the default tokens.</caption>
+							<thead>
+								<tr>
+									<th scope="col">Family</th>
+									<th scope="col">Values</th>
+									<th scope="col">Use</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr><td><strong>Control size</strong></td><td>32px compact Â· 40px default</td><td>Buttons, inputs, selects</td></tr>
+								<tr><td><strong>Icon size</strong></td><td>16 Â· 20 Â· 24px</td><td>Checkbox marks, inline icons, navigation icons</td></tr>
+								<tr><td><strong>Marker size</strong></td><td>4 Â· 8 Â· 12px</td><td>Status dots, resize handles, small markers</td></tr>
+								<tr><td><strong>Surface width</strong></td><td>240 Â· 320 Â· 400 Â· 560 Â· 720 Â· 960px</td><td>Dialogs, forms, content frames, wide tables</td></tr>
+							</tbody>
+						</table>
+					</div>
+
+					<div class="prose">
+						<p>Use 24â€“32px page padding, 16â€“24px card padding, and an 8â€“12px gap between related controls. A settings form should stay near 640px wide; a log table can use the full content frame. Do not invent intermediate values such as 14px or 18px.</p>
+					</div>
+				</div>
+			</section>
+
+			<section class="section" id="shape" aria-labelledby="shape-title">
+				<div class="section-inner">
+					<p class="eyebrow">Foundations Â· Shape and elevation</p>
+					<h2 id="shape-title">Soft enough to group, sharp enough to stay administrative</h2>
+					<p class="lede">The default radius preset is <code>subtle</code>. It is deliberately restrained: controls are almost square, cards are softly rounded, and the app shell gets the largest radius.</p>
+
+					<div class="table-wrap">
+						<table>
+							<caption>Radius presets. Each row is the full token family for that preset.</caption>
+							<thead>
+								<tr>
+									<th scope="col">Preset</th>
+									<th scope="col">xs</th>
+									<th scope="col">sm</th>
+									<th scope="col">md</th>
+									<th scope="col">lg</th>
+									<th scope="col">xl</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr><td><strong>none</strong></td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+								<tr><td><strong>subtle</strong> (default)</td><td>1px</td><td>2px</td><td>4px</td><td>8px</td><td>12px</td></tr>
+								<tr><td><strong>moderate</strong></td><td>6px</td><td>8px</td><td>12px</td><td>16px</td><td>20px</td></tr>
+								<tr><td><strong>pronounced</strong></td><td>18px</td><td>20px</td><td>22px</td><td>24px</td><td>26px</td></tr>
+							</tbody>
+						</table>
+					</div>
+
+					<div class="radius-demo" role="group" aria-label="Subtle radius scale">
+						<div class="radius-box" style="border-radius:1px">1px</div>
+						<div class="radius-box" style="border-radius:2px">2px</div>
+						<div class="radius-box" style="border-radius:4px">4px</div>
+						<div class="radius-box" style="border-radius:8px">8px</div>
+						<div class="radius-box" style="border-radius:12px">12px</div>
+					</div>
+
+					<div class="prose">
+						<p>Use <code>xs</code> for an element nested inside a control, <code>sm</code> for standalone buttons and inputs, <code>md</code> for menus and popovers, <code>lg</code> for cards and dialogs, and <code>xl</code> for the app shell. A childâ€™s radius must be smaller than its containerâ€™s; never nest a larger radius inside a smaller one.</p>
+					</div>
+
+					<h3>Borders and focus</h3>
+					<div class="table-wrap">
+						<table>
+							<thead>
+								<tr>
+									<th scope="col">Token</th>
+									<th scope="col">Value</th>
+									<th scope="col">Use</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr><td><code>--wpds-border-width-xs</code></td><td>1px</td><td>Default control and surface border</td></tr>
+								<tr><td><code>--wpds-border-width-sm</code></td><td>2px</td><td>Selected or emphasized border</td></tr>
+								<tr><td><code>--wpds-border-width-md</code></td><td>4px</td><td>Rare structural emphasis</td></tr>
+								<tr><td><code>--wpds-border-width-focus</code></td><td>2px Â· 1.5px on high DPI</td><td>Focus ring width</td></tr>
+								<tr><td><code>--wpds-color-stroke-focus</code></td><td>#3858e9</td><td>Focus ring color</td></tr>
+							</tbody>
+						</table>
+					</div>
+
+					<p class="small muted">The focus ring is a visible, non-color-only state: 2px outline with a 2px offset. Do not remove it; do not replace it with a border color change alone.</p>
+
+					<h3>Elevation</h3>
+					<div class="table-wrap">
+						<table>
+							<caption>Four elevation levels and their intended components.</caption>
+							<thead>
+								<tr>
+									<th scope="col">Level</th>
+									<th scope="col">Use</th>
+									<th scope="col">Examples</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr><td><strong>Extra small</strong></td><td>Large containers that group related content and may overlap without disruption.</td><td>Content frame, preview frame</td></tr>
+								<tr><td><strong>Small</strong></td><td>Contextual feedback that should not interrupt.</td><td>Tooltip, snackbar</td></tr>
+								<tr><td><strong>Medium</strong></td><td>Contextual actions that need to separate from the page.</td><td>Menu, command palette</td></tr>
+								<tr><td><strong>Large</strong></td><td>Decisions and confirmations that demand attention.</td><td>Modal, dialog</td></tr>
+							</tbody>
+						</table>
+					</div>
+
+					<div class="callout callout--warning">
+						<svg class="icon" aria-hidden="true"><use href="#wpds-caution"/></svg>
+						<div>
+							<p class="callout-title">No elevation custom properties yet</p>
+							<p>The public <code>--wpds-*</code> reference lists color, dimension, border, typography, motion, and cursor tokens, but not elevation. The elevation guidance still points to the base-styles SCSS tokens. Do not invent <code>--wpds-elevation-*</code> names. Prefer a border or a surface shift for grouping, and reserve shadow for true overlays.</p>
+						</div>
+					</div>
+				</div>
+			</section>
+
+			<section class="section" id="motion" aria-labelledby="motion-title">
+				<div class="section-inner">
+					<p class="eyebrow">Foundations Â· Motion and cursor</p>
+					<h2 id="motion-title">Motion confirms a change, then gets out of the way</h2>
+					<p class="lede">The system provides five durations and three easing intents. Use the shortest duration that still makes the change legible; never animate for decoration.</p>
+
+					<div class="grid-2">
+						<div class="panel">
+							<h3>Durations</h3>
+							<ul>
+								<li><code>xs</code> 50ms â€” transition offsets and micro-delays</li>
+								<li><code>sm</code> 100ms â€” hover, focus ring, color changes</li>
+								<li><code>md</code> 200ms â€” menus, popovers, standard transitions</li>
+								<li><code>lg</code> 300ms â€” slides and reveals</li>
+								<li><code>xl</code> 400ms â€” complex, multi-step transitions</li>
+							</ul>
+						</div>
+						<div class="panel">
+							<h3>Easings</h3>
+							<ul>
+								<li><code>subtle</code> â€” near-imperceptible hover and color transitions</li>
+								<li><code>balanced</code> â€” resizing, morphing, layout shifts</li>
+								<li><code>expressive</code> â€” enter and exit for menus, popovers, dialogs, drawers</li>
+							</ul>
+						</div>
+					</div>
+
+					<div class="prose">
+						<p>Hover and focus feedback belongs at <code>sm</code>. Opening a menu or a dialog belongs at <code>md</code> with <code>expressive</code>. A drawer or a large panel can use <code>lg</code>. Exits should be faster than entrances, generally 60â€“70% of the entrance duration.</p>
+						<p>Every non-essential transition must be wrapped in <code>@media not (prefers-reduced-motion)</code> or otherwise disabled when the user requests reduced motion. The tokens give you the values; the component still owns the behavior.</p>
+					</div>
+
+					<h3>Cursor</h3>
+					<p class="prose"><code>--wpds-cursor-control</code> defaults to <code>pointer</code> for buttons, checkboxes, and toggles. A desktop-style app can set <code>cursor.control</code> to <code>default</code> through the provider. Links keep the pointer regardless. Do not use a custom cursor to signal state; use the controlâ€™s visual state and focus ring.</p>
+
+					<div class="token-list" role="group" aria-label="Motion and cursor tokens">
+						<button class="token" type="button" data-copy="--wpds-motion-duration-sm">--wpds-motion-duration-sm</button>
+						<button class="token" type="button" data-copy="--wpds-motion-duration-md">--wpds-motion-duration-md</button>
+						<button class="token" type="button" data-copy="--wpds-motion-easing-balanced">--wpds-motion-easing-balanced</button>
+						<button class="token" type="button" data-copy="--wpds-motion-easing-expressive">--wpds-motion-easing-expressive</button>
+						<button class="token" type="button" data-copy="--wpds-cursor-control">--wpds-cursor-control</button>
+					</div>
+				</div>
+			</section>
+
+			<section class="section" id="theme" aria-labelledby="theme-title">
+				<div class="section-inner">
+					<p class="eyebrow">Theme</p>
+					<h2 id="theme-title">ThemeProvider turns two seeds into the whole palette</h2>
+					<p class="lede">You do not hand-pick a palette. You give the provider a primary and a background seed, and it generates ramps and semantic pairs that meet its contrast targets.</p>
+
+					<div class="snippet">
+						<div class="snippet-head">
+							<span>Application root</span>
+							<button class="copy-button" type="button" data-copy-target="snippet-theme"><svg class="icon" aria-hidden="true"><use href="#wpds-copy"/></svg> Copy</button>
+						</div>
+						<pre id="snippet-theme"><code>import '@wordpress/theme/design-tokens.css';
+import { ThemeProvider } from '@wordpress/theme';
+
+export function App() {
+  return (
+    &lt;ThemeProvider
+      color={{ primary: '#3858e9', background: '#fcfcfc' }}
+      cornerRadius="subtle"
+      isRoot
+    &gt;
+      &lt;Admin /&gt;
+    &lt;/ThemeProvider&gt;
+  );
+}</code></pre>
+					</div>
+
+					<div class="prose">
+						<p>The static stylesheet defines every default at <code>:root</code>. The provider adds per-subtree overrides on top. Inside WordPress admin and the editor, the stylesheet is registered as the <code>wp-theme</code> style handle; a plugin that renders its own app shell or iframe must enqueue it in that document instead of bundling a second copy.</p>
+					</div>
+
+					<h3>Seeds, not palettes</h3>
+					<div class="table-wrap">
+						<table>
+							<thead>
+								<tr>
+									<th scope="col">Input</th>
+									<th scope="col">Default</th>
+									<th scope="col">What it controls</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr><td><code>color.primary</code></td><td>#3858e9</td><td>The accent ramp and brand roles. The generated value may shift in lightness to meet contrast.</td></tr>
+								<tr><td><code>color.background</code></td><td>#fcfcfc</td><td>The neutral ramp and the light or dark orientation of the generated surfaces.</td></tr>
+								<tr><td><code>cornerRadius</code></td><td><code>subtle</code></td><td>The whole radius family for the subtree. Not an individual token.</td></tr>
+								<tr><td><code>cursor.control</code></td><td><code>pointer</code></td><td>The cursor for non-link controls.</td></tr>
+							</tbody>
+						</table>
+					</div>
+
+					<div class="callout callout--info">
+						<svg class="icon" aria-hidden="true"><use href="#wpds-info"/></svg>
+						<div>
+							<p class="callout-title">Seeds are not guaranteed to appear unchanged</p>
+							<p>The ramp builder may adjust the seedâ€™s lightness to satisfy contrast. That is the point. Do not assert that the primary token equals the seed; assert the role and the contrast pair.</p>
+						</div>
+					</div>
+
+					<h3>Nesting, portals, and iframes</h3>
+					<div class="prose">
+						<ul>
+							<li>Nest providers to theme a subtree. A dark sidebar can sit inside a light application, with its own background seed.</li>
+							<li>Tokens inherit through the CSS cascade, not the React tree. A portal outside the providerâ€™s DOM subtree will not inherit its overrides.</li>
+							<li>Use <code>isRoot</code> on the top-level provider so overlays portalled to the document pick up the overrides. Use at most one root provider per document.</li>
+							<li>An iframe needs the tokens stylesheet in its own <code>&lt;head&gt;</code> and the component styles registered in that document, usually through the experimental <code>__experimentalStyleProvider</code> from <code>@wordpress/components</code>.</li>
+						</ul>
+					</div>
+
+					<h3>Match the userâ€™s admin color scheme</h3>
+					<p class="prose"><code>getAdminThemeColors()</code> from <code>@wordpress/admin-ui</code> reads the active <code>admin-color-*</code> body class and returns primary and background seeds. Feed those into the provider so Updatronix follows the userâ€™s chosen admin scheme instead of forcing a blue that clashes with it. This is the correct replacement for the old fixed header color.</p>
+
+					<div class="snippet">
+						<div class="snippet-head">
+							<span>Admin-aware provider</span>
+							<button class="copy-button" type="button" data-copy-target="snippet-admin-theme"><svg class="icon" aria-hidden="true"><use href="#wpds-copy"/></svg> Copy</button>
+						</div>
+						<pre id="snippet-admin-theme"><code>import { getAdminThemeColors } from '@wordpress/admin-ui';
+import { ThemeProvider } from '@wordpress/theme';
+
+const adminColors = getAdminThemeColors();
+
+&lt;ThemeProvider color={adminColors} cornerRadius="subtle" isRoot&gt;
+  &lt;App /&gt;
+&lt;/ThemeProvider&gt;</code></pre>
+					</div>
+
+					<h3>Page shell</h3>
+					<p class="prose">Use <code>Page</code> from <code>@wordpress/admin-ui</code> for the content frame. It supplies the page header, the labelled region, and optional padding. When you pass <code>breadcrumbs</code>, let the last breadcrumb item be the page title; do not also pass <code>title</code>, or the page will render two <code>h1</code> elements. Because <code>Page</code> derives its region label from <code>title</code>, pass <code>ariaLabel</code> as well when the title comes from the breadcrumbs.</p>
+
+					<div class="snippet">
+						<div class="snippet-head">
+							<span>Admin page shell</span>
+							<button class="copy-button" type="button" data-copy-target="snippet-page"><svg class="icon" aria-hidden="true"><use href="#wpds-copy"/></svg> Copy</button>
+						</div>
+						<pre id="snippet-page"><code>import { Breadcrumbs, Page } from '@wordpress/admin-ui';
+import { Button } from '@wordpress/ui';
+
+&lt;Page
+  breadcrumbs={
+    &lt;Breadcrumbs
+      items={[
+        { label: 'Updatronix', to: '/updatronix' },
+        { label: 'Update logs' },
+      ]}
+    /&gt;
+  }
+  subTitle="Every update, with the version before and after."
+  actions={&lt;Button variant="solid"&gt;Export logs&lt;/Button&gt;}
+  ariaLabel="Update logs"
+  hasPadding
+&gt;
+  &lt;DataViews /&gt;
+&lt;/Page&gt;</code></pre>
+					</div>
+				</div>
+			</section>
+
+			<section class="section" id="seeds" aria-labelledby="seeds-title">
+				<div class="section-inner">
+					<p class="eyebrow">Theme Â· Seeds and presets</p>
+					<h2 id="seeds-title">Choose a seed, then let the system do the rest</h2>
+					<p class="lede">Four sidebar presets: the design system default, plus Fresh, Blue, and Ectoplasm from the WordPress admin color schemes. They demonstrate nested theming; they are not a brand proposal for Updatronix.</p>
+
+					<div class="table-wrap">
+						<table>
+							<caption>Preset seed values. Fresh, Blue, and Ectoplasm are WordPress admin color schemes read by <code>getAdminThemeColors()</code>.</caption>
+							<thead>
+								<tr>
+									<th scope="col">Preset</th>
+									<th scope="col">Primary seed</th>
+									<th scope="col">Background seed</th>
+									<th scope="col">Effect</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr><td><strong>Default</strong></td><td>#3858e9</td><td>#25292b</td><td>The design system blue on a near-black rail.</td></tr>
+								<tr><td><strong>Fresh</strong></td><td>#007cba</td><td>#25292b</td><td>Classic WordPress admin blue on a near-black rail.</td></tr>
+								<tr><td><strong>Blue</strong></td><td>#437aa8</td><td>#3876a8</td><td>A monochrome blue rail. Useful to test seed-generated ramps.</td></tr>
+								<tr><td><strong>Ectoplasm</strong></td><td>#646c3e</td><td>#4f386e</td><td>A deliberate clash used to prove that every component follows the provider.</td></tr>
+							</tbody>
+						</table>
+					</div>
+
+					<div class="grid-2">
+						<div class="panel">
+							<h3>Recommendation for Updatronix</h3>
+							<p>Start with Default, the design system blue (<code>#3858e9</code>) on a near-black rail. It keeps Updatronix aligned with the rest of the admin and lets the provider match the userâ€™s admin color scheme when that is preferred. The Fresh preset keeps the classic WordPress admin blue for sites that want it.</p>
+						</div>
+						<div class="panel">
+							<h3>If brand continuity matters</h3>
+							<p>The current header samples near <code>#3549ac</code>. It can be tested as a primary seed, but the generated ramp will adjust it. Judge the result on contrast and coherence, not on exact hue preservation.</p>
+						</div>
+					</div>
+
+					<div class="callout callout--success">
+						<svg class="icon" aria-hidden="true"><use href="#wpds-check"/></svg>
+						<div>
+							<p class="callout-title">Try the presets on the applied shell</p>
+							<p>The <a href="#upd-shell">Updatronix shell preview</a> below has four preset buttons. Default uses the design system seeds; the other three use WordPress admin scheme seeds. In production the same values would be passed to the nested provider that owns the rail.</p>
+						</div>
+					</div>
+				</div>
+			</section>
+
+			<section class="section" id="inventory" aria-labelledby="inventory-title">
+				<div class="section-inner">
+					<p class="eyebrow">Components Â· Inventory</p>
+					<h2 id="inventory-title">Know which package owns the control</h2>
+					<p class="lede">The design system is layered. Foundational components are flexible and low-level; compositional packages solve common admin jobs. Choosing the wrong layer is how a screen becomes inconsistent.</p>
+
+					<div class="table-wrap">
+						<table>
+							<caption>Package roles in the design system.</caption>
+							<thead>
+								<tr>
+									<th scope="col">Layer</th>
+									<th scope="col">Package</th>
+									<th scope="col">What it provides</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr><td rowspan="3"><strong>Foundations</strong></td><td><code>@wordpress/theme</code></td><td>Tokens, <code>ThemeProvider</code>, color ramp generation, radius and cursor presets.</td></tr>
+								<tr><td><code>@wordpress/ui</code></td><td>Buttons, inputs, tabs, cards, dialogs, notices, menus, badges, layout primitives, and more.</td></tr>
+								<tr><td><code>@wordpress/icons</code></td><td>The shared SVG icon library.</td></tr>
+								<tr><td rowspan="2"><strong>Composition</strong></td><td><code>@wordpress/dataviews</code></td><td><code>DataViews</code>, <code>DataViewsPicker</code>, <code>DataForm</code>, field and action APIs, table/grid/list layouts.</td></tr>
+								<tr><td><code>@wordpress/admin-ui</code></td><td><code>Page</code>, <code>Breadcrumbs</code>, <code>NavigableRegion</code>, and admin color scheme helpers.</td></tr>
+							</tbody>
+						</table>
+					</div>
+
+					<h3>Foundational components available in <code>@wordpress/ui</code></h3>
+					<div class="token-list" role="group" aria-label="WordPress UI components">
+						<span class="token">AlertDialog primitives</span><span class="token">Avatar</span><span class="token">Badge</span><span class="token">Breadcrumb</span><span class="token">Button</span><span class="token">ButtonLink</span><span class="token">Calendar</span><span class="token">Card</span><span class="token">Collapsible</span><span class="token">CollapsibleCard</span><span class="token">Dialog</span><span class="token">Drawer</span><span class="token">EmptyState</span><span class="token">Form controls</span><span class="token">Icon</span><span class="token">IconButton</span><span class="token">Link</span><span class="token">Menu</span><span class="token">Meter</span><span class="token">Notice</span><span class="token">Popover</span><span class="token">Progress</span><span class="token">Skeleton</span><span class="token">Spinner</span><span class="token">Stack</span><span class="token">Tabs</span><span class="token">Text</span><span class="token">Tooltip</span><span class="token">VisuallyHidden</span>
+					</div>
+
+					<div class="callout callout--warning">
+						<svg class="icon" aria-hidden="true"><use href="#wpds-caution"/></svg>
+						<div>
+							<p class="callout-title">Legacy components are still valid in specific cases</p>
+							<p><code>@wordpress/ui</code> does not yet replace every component in <code>@wordpress/components</code>. Check the projectâ€™s recommended-components rule at the version you pin. When a legacy component is still the recommendation, keep it inside a WPDS-themed surface and document the exception.</p>
+							<p>Two cases matter for Updatronix. <code>Snackbar</code> is still a <code>@wordpress/components</code> component. For permanent actions, compose the <code>@wordpress/ui</code> <code>AlertDialog</code> primitives (<code>Root</code>, <code>Popup</code>) with <code>intent="irreversible"</code>; that supplies the destructive confirm button and blocks dismissal. Do not hand-roll a third dialog.</p>
+						</div>
+					</div>
+				</div>
+			</section>
+
+			<section class="section" id="controls" aria-labelledby="controls-title">
+				<div class="section-inner">
+					<p class="eyebrow">Components Â· Controls</p>
+					<h2 id="controls-title">Buttons, inputs, tabs, and badges</h2>
+					<p class="lede">Controls carry the interaction contract. They must have a visible focus state, a disabled state, and a label that survives translation.</p>
+
+					<h3>Buttons</h3>
+					<div class="specimen">
+						<div class="specimen-head">
+							<strong>Button variants</strong>
+							<span>One primary action per view</span>
+						</div>
+						<div class="specimen-body">
+							<p class="specimen-label">Default and compact</p>
+							<div class="specimen-row">
+								<button class="btn btn--primary" type="button">Save changes</button>
+								<button class="btn btn--secondary" type="button">Cancel</button>
+								<button class="btn btn--tertiary" type="button">View details</button>
+								<button class="btn btn--danger" type="button">Delete log entry</button>
+								<button class="btn btn--primary" type="button" disabled>Save changes</button>
+							</div>
+							<p class="specimen-label" style="margin-top:22px">Compact, for toolbars and table rows</p>
+							<div class="specimen-row">
+								<button class="btn btn--secondary btn--compact" type="button">Filters</button>
+								<button class="btn btn--secondary btn--compact" type="button">View</button>
+								<button class="btn btn--primary btn--compact" type="button">Export logs</button>
+							</div>
+						</div>
+					</div>
+					<p class="small muted">The primary button is the single committing action on the surface. Secondary is for an alternative or a safe exit. Tertiary is for a low-emphasis action inside content. Destructive is reserved for an irreversible action and must name the object.</p>
+
+					<h3>Inputs</h3>
+					<div class="specimen">
+						<div class="specimen-head">
+							<strong>Field anatomy</strong>
+							<span>Label, control, description, error</span>
+						</div>
+						<div class="specimen-body">
+							<div class="field">
+								<label for="demo-email">Notification email</label>
+								<input class="input" id="demo-email" type="email" value="admin@example.com">
+								<p class="description">Update emails are sent here. Recovery mode emails always go to the admin address.</p>
+							</div>
+							<div class="field" style="margin-top:22px">
+								<label for="demo-retention">Retention period</label>
+								<input class="input input--error" id="demo-retention" type="text" value="0" aria-invalid="true" aria-describedby="demo-retention-error">
+								<p class="error" id="demo-retention-error"><svg class="icon icon--sm" aria-hidden="true"><use href="#wpds-cancel-circle-filled"/></svg> Enter a number between 1 and 365.</p>
+							</div>
+							<div class="field" style="margin-top:22px">
+								<label for="demo-search">Search logs</label>
+								<div class="input-wrap">
+									<svg class="icon" aria-hidden="true"><use href="#wpds-search"/></svg>
+									<input class="input input--search" id="demo-search" type="search" placeholder="Search by item or version">
+								</div>
+							</div>
+						</div>
+					</div>
+					<p class="small muted">Place the error next to the field, keep the entered value, and state what will work. A description is persistent help; an error is a specific correction.</p>
+
+					<h3>Tabs</h3>
+					<div class="specimen">
+						<div class="specimen-head">
+							<strong>Minimal tabs</strong>
+							<span>For sub-views inside a page, not for primary navigation</span>
+						</div>
+						<div class="specimen-body">
+							<div class="tabs" role="tablist" aria-label="Example tabs">
+								<button class="tab" type="button" role="tab" id="example-tab-1" aria-selected="true" aria-controls="example-panel-1">General</button>
+								<button class="tab" type="button" role="tab" id="example-tab-2" aria-selected="false" aria-controls="example-panel-2" tabindex="-1">Advanced</button>
+							</div>
+							<div class="tab-panel" role="tabpanel" id="example-panel-1" aria-labelledby="example-tab-1">
+								<p class="small">The default settings for retention and email routing.</p>
+							</div>
+							<div class="tab-panel" role="tabpanel" id="example-panel-2" aria-labelledby="example-tab-2" hidden>
+								<p class="small">Technical options for logging, cleanup, and data removal.</p>
+							</div>
+							<p class="specimen-label" style="margin-top:22px">Segmented variant</p>
+							<div class="segmented" role="group" data-segmented aria-label="Density">
+								<button type="button" aria-pressed="true">Comfortable</button>
+								<button type="button" aria-pressed="false">Compact</button>
+							</div>
+						</div>
+					</div>
+							<p class="small muted">Use tabs only when the views are peers and the user can switch without losing work. The Updatronix screens are not tabs in the page; they are navigation in the rail.</p>
+
+					<h3>Badges</h3>
+					<div class="specimen">
+						<div class="specimen-head">
+							<strong>Status badges</strong>
+							<span>Text carries the meaning; color reinforces it</span>
+						</div>
+						<div class="specimen-body">
+							<div class="specimen-row">
+								<span class="badge badge--neutral">Draft</span>
+								<span class="badge badge--info">Scheduled</span>
+								<span class="badge badge--success">Success</span>
+								<span class="badge badge--warning">Held</span>
+								<span class="badge badge--error">Failed</span>
+							</div>
+						</div>
+					</div>
+					<p class="small muted">Never use a badge as the only signal. The label must say what the state is, especially for success, warning, and error.</p>
+				</div>
+			</section>
+
+			<section class="section" id="feedback" aria-labelledby="feedback-title">
+				<div class="section-inner">
+					<p class="eyebrow">Components Â· Feedback</p>
+					<h2 id="feedback-title">Notices and cards</h2>
+					<p class="lede">Feedback is placed where the user needs it: next to the failure, at the top of the screen, or in a modal when a decision is required. A notice is not a decoration.</p>
+
+					<h3>Notices</h3>
+					<div class="specimen">
+						<div class="specimen-head">
+							<strong>Notice intents</strong>
+							<span>Each has a title, a short body, and an icon</span>
+						</div>
+						<div class="specimen-body">
+							<div class="notice notice--info">
+								<svg class="icon" aria-hidden="true"><use href="#wpds-info"/></svg>
+								<div>
+									<p class="notice-title">Next check is scheduled</p>
+									<p>WordPress will look for updates on 24 October at 03:00. The two-day hold applies after a release is detected.</p>
+								</div>
+							</div>
+							<div class="notice notice--success">
+								<svg class="icon" aria-hidden="true"><use href="#wpds-check"/></svg>
+								<div>
+									<p class="notice-title">Update completed</p>
+									<p>Akismet Anti-spam was updated from 5.3.1 to 5.3.2. The log entry was saved.</p>
+								</div>
+							</div>
+							<div class="notice notice--warning">
+								<svg class="icon" aria-hidden="true"><use href="#wpds-caution"/></svg>
+								<div>
+									<p class="notice-title">A release is being held</p>
+									<p>WooCommerce 10.0.0 is available. Your two-day hold ends on 25 October.</p>
+								</div>
+							</div>
+							<div class="notice notice--error">
+								<svg class="icon" aria-hidden="true"><use href="#wpds-cancel-circle-filled"/></svg>
+								<div>
+									<p class="notice-title">Update failed</p>
+									<p>Contact Form 7 could not be updated because the filesystem is not writable. Check the file permissions, then try again.</p>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<h3>Cards</h3>
+					<div class="specimen">
+						<div class="specimen-head">
+							<strong>Card</strong>
+							<span>Group related settings, not every section</span>
+						</div>
+						<div class="specimen-body">
+							<div class="card" style="max-width:520px">
+								<div class="card-header">
+									<h4>Log retention</h4>
+									<p>How long Updatronix keeps update history.</p>
+								</div>
+								<div class="card-body">
+									<p>Entries older than the retention window are removed by the daily cleanup. The default is 90 days; the valid range is 1 to 365.</p>
+									<p><a href="#save">Read the save model for this surface</a></p>
+								</div>
+							</div>
+						</div>
+					</div>
+					<p class="small muted">Grouping is the job. A card is not a container for a single toggle unless the toggle needs its own explanation and save behavior.</p>
+				</div>
+			</section>
+
+			<section class="section" id="overlays" aria-labelledby="overlays-title">
+				<div class="section-inner">
+					<p class="eyebrow">Components Â· Overlays</p>
+					<h2 id="overlays-title">Dialogs and menus</h2>
+					<p class="lede">Overlays interrupt the page, so they must earn it. Use a dialog for a decision or a focused task; use a menu for a short list of contextual actions.</p>
+
+					<h3>Dialog anatomy</h3>
+					<div class="specimen">
+						<div class="specimen-head">
+							<strong>Destructive dialog</strong>
+							<span>Static anatomy; controls are illustrative</span>
+						</div>
+						<div class="specimen-body specimen-body--stage">
+							<div class="dialog">
+								<div class="dialog-header">
+									<p class="dialog-title">Delete log entry</p>
+								</div>
+								<div class="dialog-body">
+									<p>This removes the entry for WooCommerce 9.9.0 â†’ 10.0.0. It cannot be undone.</p>
+								</div>
+								<div class="dialog-footer">
+									<span class="btn btn--tertiary">Cancel</span>
+									<span class="btn btn--danger">Delete permanently</span>
+								</div>
+							</div>
+						</div>
+					</div>
+					<p class="small muted">A permanent deletion uses a destructive primary button and an explicit label. The pattern for irreversible actions also removes dismiss-on-escape and dismiss-on-outside-click, so the user must choose.</p>
+
+					<h3>Menu</h3>
+					<div class="specimen">
+						<div class="specimen-head">
+							<strong>Row actions</strong>
+							<span>Short, contextual, keyboard reachable</span>
+						</div>
+						<div class="specimen-body">
+							<div class="menu" role="presentation">
+								<span class="menu-item"><svg class="icon icon--sm" aria-hidden="true"><use href="#wpds-seen"/></svg> View details</span>
+								<span class="menu-sep"></span>
+								<span class="menu-item menu-item--danger"><svg class="icon icon--sm" aria-hidden="true"><use href="#wpds-trash"/></svg> Delete entry</span>
+							</div>
+						</div>
+					</div>
+					<p class="small muted">Icon-only triggers need an accessible name. Menu items are verbs; destructive items are separated and labelled with the object.</p>
+				</div>
+			</section>
+
+			<section class="section" id="dataviews" aria-labelledby="dataviews-title">
+				<div class="section-inner">
+					<p class="eyebrow">Components Â· Data views</p>
+					<h2 id="dataviews-title">The update log is a data surface, not a card list</h2>
+					<p class="lede"><code>DataViews</code> is the right composition for the log: it provides table, grid, and list layouts, search, filters, sorting, pagination, and row actions from one field definition.</p>
+
+					<div class="table-wrap">
+						<table>
+							<caption>The DataViews pieces Updatronix needs.</caption>
+							<thead>
+								<tr>
+									<th scope="col">Capability</th>
+									<th scope="col">API</th>
+									<th scope="col">Updatronix use</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr><td><strong>Dataset</strong></td><td><code>data</code>, <code>getItemId</code></td><td>One row per update event, with a stable id.</td></tr>
+								<tr><td><strong>Columns</strong></td><td><code>fields</code></td><td>Item, type, version before/after, trigger, status, date.</td></tr>
+								<tr><td><strong>View state</strong></td><td><code>view</code>, <code>onChangeView</code></td><td>Search, filters, sort, page, visible fields, layout.</td></tr>
+								<tr><td><strong>Actions</strong></td><td><code>actions</code></td><td>View details and delete with a confirmation dialog.</td></tr>
+								<tr><td><strong>Pagination</strong></td><td><code>paginationInfo</code></td><td>Total items and pages from the log query.</td></tr>
+								<tr><td><strong>Editing</strong></td><td><code>DataForm</code></td><td>Future settings surface when the form becomes React-driven.</td></tr>
+							</tbody>
+						</table>
+					</div>
+
+					<div class="specimen">
+						<div class="specimen-head">
+							<strong>Log table surface</strong>
+							<span>Static preview of the target composition</span>
+						</div>
+						<div class="specimen-body specimen-body--compact">
+							<div class="toolbar">
+								<div class="input-wrap grow">
+									<svg class="icon" aria-hidden="true"><use href="#wpds-search"/></svg>
+									<input class="input input--search" type="search" placeholder="Search by item or version" aria-label="Search logs">
+								</div>
+								<button class="btn btn--secondary btn--compact" type="button">Filters</button>
+								<button class="btn btn--secondary btn--compact" type="button">View</button>
+								<button class="btn btn--primary btn--compact" type="button">Export logs</button>
+							</div>
+							<div style="overflow-x:auto">
+								<table class="data-table">
+									<thead>
+										<tr>
+											<th scope="col">Item</th>
+											<th scope="col">Type</th>
+											<th scope="col">Version</th>
+											<th scope="col">Trigger</th>
+											<th scope="col">Status</th>
+											<th scope="col">Date</th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr>
+											<td><span class="cell-title">Akismet Anti-spam</span><span class="cell-sub">plugin Â· active</span></td>
+											<td>Plugin</td>
+											<td class="nowrap">5.3.1 â†’ 5.3.2</td>
+											<td>Automatic</td>
+											<td><span class="badge badge--success">Success</span></td>
+											<td class="nowrap">23 Oct, 10:42</td>
+										</tr>
+										<tr>
+											<td><span class="cell-title">WooCommerce</span><span class="cell-sub">plugin Â· active</span></td>
+											<td>Plugin</td>
+											<td class="nowrap">9.9.0 â†’ 10.0.0</td>
+											<td>Manual</td>
+											<td><span class="badge badge--success">Success</span></td>
+											<td class="nowrap">23 Oct, 09:18</td>
+										</tr>
+										<tr>
+											<td><span class="cell-title">Twenty Twenty-Five</span><span class="cell-sub">theme Â· active</span></td>
+											<td>Theme</td>
+											<td class="nowrap">1.2 â†’ 1.3</td>
+											<td>Automatic</td>
+											<td><span class="badge badge--success">Success</span></td>
+											<td class="nowrap">22 Oct, 18:05</td>
+										</tr>
+										<tr>
+											<td><span class="cell-title">WordPress core</span><span class="cell-sub">core</span></td>
+											<td>Core</td>
+											<td class="nowrap">7.1 â†’ 7.1.1</td>
+											<td>Automatic</td>
+											<td><span class="badge badge--warning">Warning</span></td>
+											<td class="nowrap">22 Oct, 03:00</td>
+										</tr>
+										<tr>
+											<td><span class="cell-title">Contact Form 7</span><span class="cell-sub">plugin Â· active</span></td>
+											<td>Plugin</td>
+											<td class="nowrap">6.1.4 â†’ 6.1.5</td>
+											<td>Automatic</td>
+											<td><span class="badge badge--error">Failed</span></td>
+											<td class="nowrap">21 Oct, 22:14</td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+						</div>
+					</div>
+
+					<div class="prose">
+						<p>Keep the row title as the primary field, put the version change in a dedicated column, and use a badge only for the outcome. Dates are labels, so keep them left-aligned. Align numbers and currency to the end; align text, codes, labels, and dates to the start.</p>
+					</div>
+
+					<div class="snippet">
+						<div class="snippet-head">
+							<span>Minimal DataViews configuration</span>
+							<button class="copy-button" type="button" data-copy-target="snippet-dataviews"><svg class="icon" aria-hidden="true"><use href="#wpds-copy"/></svg> Copy</button>
+						</div>
+						<pre id="snippet-dataviews"><code>import { DataViews } from '@wordpress/dataviews';
+
+const fields = [
+  { id: 'item', type: 'text', label: 'Item', enableHiding: false },
+  { id: 'type', type: 'text', label: 'Type', elements: updateTypes },
+  { id: 'version', type: 'text', label: 'Version' },
+  { id: 'trigger', type: 'text', label: 'Trigger', elements: triggers },
+  { id: 'status', type: 'text', label: 'Status', elements: statuses },
+  { id: 'date', type: 'datetime', label: 'Date' },
+];
+
+&lt;DataViews
+  data={entries}
+  fields={fields}
+  view={view}
+  onChangeView={setView}
+  paginationInfo={paginationInfo}
+  defaultLayouts={{ table: { density: 'comfortable' } }}
+/&gt;</code></pre>
+					</div>
+				</div>
+			</section>
+
+			<section class="section" id="destructive" aria-labelledby="destructive-title">
+				<div class="section-inner">
+					<p class="eyebrow">Patterns Â· Destructive actions</p>
+					<h2 id="destructive-title">Match the confirmation to the reversibility</h2>
+					<p class="lede">Not every destructive action needs a red dialog. The design systemâ€™s decision tree asks two questions: does the action have an immediate visible result, and can it be undone?</p>
+
+					<div class="grid-3">
+						<div class="panel">
+							<h3>No confirmation</h3>
+							<p>No immediate visible result, or a standard undo exists. Use normal trigger styling and keep undo available.</p>
+							<p class="small muted" style="margin-top:8px">Example: deleting a block in the editor.</p>
+						</div>
+						<div class="panel">
+							<h3>Confirm dialog</h3>
+							<p>Visible result but easily undone. Confirm, then show a snackbar (still from <code>@wordpress/components</code>) with Undo. The confirm button is primary, not destructive.</p>
+							<p class="small muted" style="margin-top:8px">Example: moving a post to trash.</p>
+						</div>
+						<div class="panel">
+							<h3>Irreversible AlertDialog</h3>
+							<p>Permanent result. Use <code>intent="irreversible"</code> and no dismiss on escape or outside click. The primary button is destructive and names the object.</p>
+							<p class="small muted" style="margin-top:8px">Example: deleting a log entry or a dependency chain.</p>
+						</div>
+					</div>
+
+					<div class="callout callout--danger">
+						<svg class="icon" aria-hidden="true"><use href="#wpds-trash"/></svg>
+						<div>
+							<p class="callout-title">Updatronix: deletion is permanent</p>
+							<p>Use an <code>AlertDialog</code>, not a confirm popover. Name the object and the consequence: â€œDelete log entryâ€ / â€œDelete permanentlyâ€, or â€œDelete chainâ€ / â€œDelete chainâ€. Do not make â€œDeleteâ€ the ambiguous default. After success, show a snackbar confirming what was removed.</p>
+						</div>
+					</div>
+				</div>
+			</section>
+
+			<section class="section" id="errors" aria-labelledby="errors-title">
+				<div class="section-inner">
+					<p class="eyebrow">Patterns Â· Error messages</p>
+					<h2 id="errors-title">What happened, why, and what now</h2>
+					<p class="lede">An error is the only conversation a user has with the software when something breaks. It should turn a dead end into a next step.</p>
+
+					<div class="grid-3">
+						<div class="panel">
+							<h3>1. What happened</h3>
+							<p>State the outcome plainly. Name the specific item, not â€œsomethingâ€.</p>
+						</div>
+						<div class="panel">
+							<h3>2. Why</h3>
+							<p>Give the cause if it is known. If it is not, say so; do not invent a plausible reason.</p>
+						</div>
+						<div class="panel">
+							<h3>3. What now</h3>
+							<p>Offer at least one next step: a permission to fix, a format that works, a retry.</p>
+						</div>
+					</div>
+
+					<div class="table-wrap">
+						<table>
+							<caption>Where the message belongs.</caption>
+							<thead>
+								<tr>
+									<th scope="col">Situation</th>
+									<th scope="col">Pattern</th>
+									<th scope="col">Behavior</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr><td>No decision required</td><td>Snackbar (legacy)</td><td>Clears after a short delay; use explicit dismiss if the timer is wrong.</td></tr>
+								<tr><td>Failure has a known location</td><td>Inline notice in that block, panel, or row</td><td>Persists until resolved or dismissed.</td></tr>
+								<tr><td>Whole screen is affected</td><td>Notice at the top, below the toolbar</td><td>Persists; do not stack success and error.</td></tr>
+								<tr><td>Must be resolved before continuing</td><td>Modal</td><td>Blocks the flow and names the decision.</td></tr>
+							</tbody>
+						</table>
+					</div>
+
+					<p class="prose">For Updatronix, an update failure belongs next to the log entry or in its details. A failed settings save belongs next to the field. A license activation failure belongs inline under the license key, with the reason and a link to the account page.</p>
+				</div>
+			</section>
+
+			<section class="section" id="save" aria-labelledby="save-title">
+				<div class="section-inner">
+					<p class="eyebrow">Patterns Â· Save and submit</p>
+					<h2 id="save-title">Save once, from anywhere</h2>
+					<p class="lede">Settings, Schedule, and Auto updates share one manual save model. Every change on a surface is staged until the primary â€œSave changesâ€ action commits it, so a radio or switch never quietly persists on its own.</p>
+
+					<div class="grid-2">
+						<div class="panel">
+							<h3>Manual save</h3>
+							<p>The right choice when changes are interdependent and saving has side effects, like rescheduling a cron event or changing what the next update run will install.</p>
+							<ul>
+								<li>One primary â€œSave changesâ€ action per surface.</li>
+								<li>Toggles, radios, and text fields stage until save.</li>
+								<li>Guard against leaving with unsaved edits.</li>
+							</ul>
+						</div>
+						<div class="panel">
+							<h3>Sticky save bar</h3>
+							<p>When the header action scrolls out of view, a compact bar appears at the top of the content area, repeating the surface title and â€œSave changesâ€.</p>
+							<ul>
+								<li>Appears only after the header button leaves the viewport.</li>
+								<li>Runs the same action as the header, never a second save model.</li>
+								<li><code>Ctrl+S</code> on Windows and Linux, <code>âŒ˜S</code> on macOS.</li>
+							</ul>
+						</div>
+					</div>
+
+					<div class="callout callout--success">
+						<svg class="icon" aria-hidden="true"><use href="#wpds-check"/></svg>
+						<div>
+							<p class="callout-title">Auto updates is manual too</p>
+							<p>Turning auto-updates on does not install anything immediately. Core mode, translations, and each theme or plugin switch are saved together; the next scheduled check uses the new settings. A snackbar at the bottom of the screen confirms the save.</p>
+						</div>
+					</div>
+
+					<div class="prose">
+						<p>A switch still implies future effect, not instant effect. On Auto updates, make that timing explicit: the next check uses these settings after you save. Do not mix autosave and manual save on one surface.</p>
+					</div>
+				</div>
+			</section>
+
+			<section class="section" id="icons" aria-labelledby="icons-title">
+				<div class="section-inner">
+					<p class="eyebrow">Patterns Â· Icons</p>
+					<h2 id="icons-title">One family, one grid, one optical size</h2>
+					<p class="lede"><code>@wordpress/icons</code> is the only icon source for the app and this guide. It draws on a 24px grid and mixes filled and stroked shapes, so match the shipped icon rather than forcing one stroke style. Give every icon-only control an accessible name.</p>
+
+					<div class="icon-grid" role="group" aria-label="Icons used in the app">
+						<div class="icon-tile"><svg class="icon" aria-hidden="true"><use href="#wpds-post-list"/></svg><span>Update logs</span></div>
+						<div class="icon-tile"><svg class="icon" aria-hidden="true"><use href="#wpds-update"/></svg><span>Auto updates</span></div>
+						<div class="icon-tile"><svg class="icon" aria-hidden="true"><use href="#wpds-calendar"/></svg><span>Schedule</span></div>
+						<div class="icon-tile"><svg class="icon" aria-hidden="true"><use href="#wpds-star-filled"/></svg><span>Updatronix 3000</span></div>
+						<div class="icon-tile"><svg class="icon" aria-hidden="true"><use href="#wpds-shield"/></svg><span>Update Shield</span></div>
+						<div class="icon-tile"><svg class="icon" aria-hidden="true"><use href="#wpds-scheduled"/></svg><span>Update Flow</span></div>
+						<div class="icon-tile"><svg class="icon" aria-hidden="true"><use href="#wpds-brush"/></svg><span>White label</span></div>
+						<div class="icon-tile"><svg class="icon" aria-hidden="true"><use href="#wpds-dashboard"/></svg><span>Health</span></div>
+						<div class="icon-tile"><svg class="icon" aria-hidden="true"><use href="#wpds-settings"/></svg><span>Settings</span></div>
+						<div class="icon-tile"><svg class="icon" aria-hidden="true"><use href="#wpds-page"/></svg><span>Documentation</span></div>
+						<div class="icon-tile"><svg class="icon" aria-hidden="true"><use href="#wpds-lifesaver"/></svg><span>Support</span></div>
+						<div class="icon-tile"><svg class="icon" aria-hidden="true"><use href="#wpds-search"/></svg><span>Search</span></div>
+					</div>
+
+					<div class="prose">
+						<ul>
+							<li>Default size is 24px; inline icons are 20px; compact controls can use 16px. Keep one size per hierarchy level.</li>
+							<li>Never use emoji or a locally drawn icon. Import the React export from <code>@wordpress/icons</code>; the tiles above use that package&rsquo;s SVG geometry and are previews, not a second icon set.</li>
+							<li>An icon button needs <code>aria-label</code> or a visible label. A decorative icon is <code>aria-hidden="true"</code>.</li>
+							<li>Do not put an icon beside every heading. Icons earn their place when they speed recognition.</li>
+						</ul>
+					</div>
+				</div>
+			</section>
+
+			<section class="section" id="areas" aria-labelledby="areas-title">
+				<div class="section-inner">
+					<p class="eyebrow">Layout Â· Page areas</p>
+					<h2 id="areas-title">Sidebar, content frame, preview frame</h2>
+					<p class="lede">WordPress admin pages are described as areas. Updatronix needs a sidebar and one content frame; a preview frame is not part of the current product.</p>
+
+					<div class="area-map" role="group" aria-label="Page area diagram">
+						<div class="area area--sidebar">Sidebar<br>Primary navigation</div>
+						<div class="area area--content">Content frame<br>Page header and working surface</div>
+						<div class="area area--preview">Preview frame<br>Not used in Updatronix</div>
+					</div>
+					<ul class="area-caption">
+						<li><span class="swatch-dot swatch-dot--dark"></span> Sidebar: persistent navigation, left in LTR and flipped in RTL. Use logical properties so the rail follows the document direction.</li>
+						<li><span class="swatch-dot swatch-dot--content"></span> Content frame: data views, forms, settings.</li>
+						<li><span class="swatch-dot"></span> Preview frame: optional, for site or post previews.</li>
+					</ul>
+
+					<div class="prose">
+							<p>The sidebar is the primary navigation. It holds the eleven Updatronix destinations in four groups, plus a version footer. The content frame owns the page header, the toolbar, and the working surface. A second navigation column is what the current UI adds; it should disappear.</p>
+					</div>
+				</div>
+			</section>
+
+			<section class="section" id="shell-layout" aria-labelledby="shell-layout-title">
+				<div class="section-inner">
+					<p class="eyebrow">Layout Â· App shell</p>
+					<h2 id="shell-layout-title">A dark rail, one header, one working surface</h2>
+					<p class="lede">The shell is a two-column grid. The rail is fixed-width and dark; the content column is fluid and light. This is the same structure as the official example application, adapted to Updatronix.</p>
+
+					<div class="table-wrap">
+						<table>
+							<caption>Shell measurements and behavior.</caption>
+							<thead>
+								<tr>
+									<th scope="col">Region</th>
+									<th scope="col">Width</th>
+									<th scope="col">Behavior</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr><td><strong>Dark rail</strong></td><td>264px</td><td>Full height, scrolls independently. Contains the brand, eleven rail items in four groups, and a version footer.</td></tr>
+								<tr><td><strong>Content frame</strong></td><td>Fluid, max 960px</td><td>A rounded content card with its own scroll. Page header, toolbar, table or form. Horizontal scroll only for wide tables.</td></tr>
+								<tr><td><strong>Settings form</strong></td><td>Max 640px</td><td>Single reading column; does not stretch to the full content width.</td></tr>
+								<tr><td><strong>Dialog</strong></td><td>400â€“560px</td><td>Centered; larger dialogs become drawers or full-height panels on narrow screens.</td></tr>
+							</tbody>
+						</table>
+					</div>
+
+
+					<div class="prose">
+						<h3>Where the tabs go</h3>
+						<p>Update logs, Auto updates, Schedule, Health, Settings, and Updatronix 3000 are the task rail items. Update Shield, Update Flow, and White label follow in the same Automations group, each with its own panel. Documentation and Support sit in a Help group. The active section is the page you are on. Settings does not need General and Advanced sub-tabs: its logging, retention, recipient, notification, and uninstall-data settings fit in three cards. Keep tabs only if a genuine sub-view emerges later.</p>
+						<h3>Responsive behavior</h3>
+						<ul>
+							<li>Below 900px, the rail becomes a top bar with a menu button. The nav opens as a panel, not as a squeezed column.</li>
+							<li>The page header stacks: title, description, then actions.</li>
+							<li>Tables scroll horizontally; in production, never shrink text below 12px to make a table fit.</li>
+							<li>Dialogs become drawers or full-height sheets when the viewport is narrow.</li>
+						</ul>
+					</div>
+				</div>
+			</section>
+
+			<section class="section" id="upd-shell" aria-labelledby="upd-shell-title">
+				<div class="section-inner">
+					<p class="eyebrow">Applied Â· Updatronix shell</p>
+					<h2 id="upd-shell-title">Eleven destinations in four groups, in the dark rail</h2>
+					<p class="lede">This is a structural preview, not the final screen set. The dark rail, page header, toolbar, table, and card surface are real; the content is representative. The rail switches the five applied panels in place; Health, Documentation, and Support open their full screens. Use the preset buttons to test the rail seeds.</p>
+
+					<div class="shell-presets" role="group" aria-label="Sidebar theme presets">
+						<span class="shell-presets-label">Sidebar theme</span>
+						<button class="preset" type="button" data-preset="default" data-primary="#3858e9" data-sidebar="#25292b" aria-pressed="true">
+							<span class="preset-swatches" aria-hidden="true"><span style="background:#3858e9"></span><span style="background:#25292b"></span></span>
+							Default
+						</button>
+						<button class="preset" type="button" data-preset="fresh" data-primary="#007cba" data-sidebar="#25292b" aria-pressed="false">
+							<span class="preset-swatches" aria-hidden="true"><span style="background:#007cba"></span><span style="background:#25292b"></span></span>
+							Fresh
+						</button>
+						<button class="preset" type="button" data-preset="blue" data-primary="#437aa8" data-sidebar="#3876a8" aria-pressed="false">
+							<span class="preset-swatches" aria-hidden="true"><span style="background:#437aa8"></span><span style="background:#3876a8"></span></span>
+							Blue
+						</button>
+						<button class="preset" type="button" data-preset="ectoplasm" data-primary="#646c3e" data-sidebar="#4f386e" aria-pressed="false">
+							<span class="preset-swatches" aria-hidden="true"><span style="background:#646c3e"></span><span style="background:#4f386e"></span></span>
+							Ectoplasm
+						</button>
+					</div>
+
+					<div class="shell-stage">
+						<div class="shell" id="upd-shell-demo">
+							<div class="shell-sidebar">
+								<div class="shell-brand">
+									<img src="assets/img/updatronix-logo-blue.png" width="32" height="32" alt="">
+									<div>
+										<strong>Updatronix</strong>
+										<span>Update manager</span>
+									</div>
+								</div>
+								<nav class="shell-nav" aria-label="Updatronix sections" data-shell-nav>
+									<div class="shell-group">
+										<p class="shell-nav-label">Updates</p>
+										<button class="shell-tab" type="button" id="upd-tab-log" aria-current="page" aria-controls="upd-panel-log">
+											<svg class="icon" aria-hidden="true"><use href="#wpds-post-list"/></svg> Update logs
+										</button>
+										<button class="shell-tab" type="button" id="upd-tab-auto" aria-controls="upd-panel-auto">
+											<svg class="icon" aria-hidden="true"><use href="#wpds-update"/></svg> Auto updates
+										</button>
+										<button class="shell-tab" type="button" id="upd-tab-schedule" aria-controls="upd-panel-schedule">
+											<svg class="icon" aria-hidden="true"><use href="#wpds-calendar"/></svg> Schedule
+										</button>
+									</div>
+									<div class="shell-group">
+										<p class="shell-nav-label">Automations</p>
+										<button class="shell-tab" type="button" id="upd-tab-pro" aria-controls="upd-panel-pro">
+											<svg class="icon" aria-hidden="true"><use href="#wpds-star-filled"/></svg> Updatronix 3000 <span class="pro-badge">Pro</span>
+										</button>
+										<a class="shell-tab" href="screens/update-shield.html">
+											<svg class="icon" aria-hidden="true"><use href="#wpds-shield"/></svg> Update Shield
+										</a>
+										<a class="shell-tab" href="screens/update-flow.html">
+											<svg class="icon" aria-hidden="true"><use href="#wpds-scheduled"/></svg> Update Flow
+										</a>
+										<a class="shell-tab" href="screens/white-label.html">
+											<svg class="icon" aria-hidden="true"><use href="#wpds-brush"/></svg> White label
+										</a>
+									</div>
+									<div class="shell-group">
+										<p class="shell-nav-label">System</p>
+										<a class="shell-tab" href="screens/errors.html">
+											<svg class="icon" aria-hidden="true"><use href="#wpds-dashboard"/></svg> Health
+										</a>
+										<button class="shell-tab" type="button" id="upd-tab-settings" aria-controls="upd-panel-settings">
+											<svg class="icon" aria-hidden="true"><use href="#wpds-settings"/></svg> Settings
+										</button>
+									</div>
+									<div class="shell-group">
+										<p class="shell-nav-label">Help</p>
+										<a class="shell-tab" href="screens/documentation.html">
+											<svg class="icon" aria-hidden="true"><use href="#wpds-page"/></svg> Documentation
+										</a>
+										<a class="shell-tab" href="screens/support.html">
+											<svg class="icon" aria-hidden="true"><use href="#wpds-lifesaver"/></svg> Support
+										</a>
+									</div>
+								</nav>
+								<div class="shell-sidebar-foot">
+									<span>Version 1.2.0</span>
+								</div>
+							</div>
+
+							<div class="shell-main">
+								<div class="shell-panel" id="upd-panel-log">
+									<div class="shell-pagehead">
+										<nav class="shell-breadcrumb" aria-label="Update logs breadcrumb">Updatronix <span aria-hidden="true">/</span> Update logs</nav>
+										<div class="shell-headrow">
+											<div>
+												<h3 class="shell-title">Update logs</h3>
+												<p class="shell-sub">Every core, plugin, theme, and translation update, with the version before and after.</p>
+												<div class="shell-headmeta">
+													<span class="badge badge--neutral">Retention 90 days</span>
+												</div>
+											</div>
+											<div class="shell-actions">
+												<button class="btn btn--primary" type="button">Export logs</button>
+											</div>
+										</div>
+									</div>
+									<div class="shell-body">
+										<div class="shell-card">
+											<div class="shell-card-head">
+												<div>
+													<strong>Recent updates</strong>
+													<span style="display:block">Search and filter the history, then open a record for the full process details.</span>
+												</div>
+											</div>
+											<div class="shell-card-body" style="padding:0">
+												<div style="padding:16px 16px 0">
+													<div class="shell-toolbar">
+														<div class="input-wrap grow">
+															<svg class="icon" aria-hidden="true"><use href="#wpds-search"/></svg>
+															<input class="input input--search" type="search" placeholder="Search by item or version" aria-label="Search update log">
+														</div>
+														<button class="btn btn--secondary" type="button"><svg class="icon icon--sm" aria-hidden="true"><use href="#wpds-filter"/></svg> Filters</button>
+														<button class="btn btn--secondary" type="button"><svg class="icon icon--sm" aria-hidden="true"><use href="#wpds-grid"/></svg> View</button>
+													</div>
+												</div>
+												<div style="overflow-x:auto">
+													<table class="shell-table">
+												<caption class="visually-hidden">Update log entries</caption>
+												<thead>
+													<tr>
+														<th scope="col">Item</th>
+														<th scope="col">Type</th>
+														<th scope="col">Version</th>
+														<th scope="col">Trigger</th>
+														<th scope="col">Status</th>
+														<th scope="col">Date</th>
+														<th scope="col"><span class="visually-hidden">Actions</span></th>
+													</tr>
+												</thead>
+												<tbody>
+													<tr>
+														<td><span class="cell-title">Akismet Anti-spam</span><span class="cell-sub">plugin Â· active</span></td>
+														<td>Plugin</td>
+														<td class="nowrap">5.3.1 â†’ 5.3.2</td>
+														<td>Automatic</td>
+														<td><span class="badge badge--success">Success</span></td>
+														<td class="nowrap">23 Oct, 10:42</td>
+														<td class="nowrap"><span class="row-actions"><button class="icon-button" type="button" aria-label="View details for Akismet Anti-spam"><svg class="icon icon--sm" aria-hidden="true"><use href="#wpds-seen"/></svg></button><button class="icon-button icon-button--danger" type="button" aria-label="Delete Akismet Anti-spam log entry"><svg class="icon icon--sm" aria-hidden="true"><use href="#wpds-trash"/></svg></button></span></td>
+													</tr>
+													<tr>
+														<td><span class="cell-title">WooCommerce</span><span class="cell-sub">plugin Â· active</span></td>
+														<td>Plugin</td>
+														<td class="nowrap">9.9.0 â†’ 10.0.0</td>
+														<td>Manual</td>
+														<td><span class="badge badge--success">Success</span></td>
+														<td class="nowrap">23 Oct, 09:18</td>
+														<td class="nowrap"><span class="row-actions"><button class="icon-button" type="button" aria-label="View details for WooCommerce"><svg class="icon icon--sm" aria-hidden="true"><use href="#wpds-seen"/></svg></button><button class="icon-button icon-button--danger" type="button" aria-label="Delete WooCommerce log entry"><svg class="icon icon--sm" aria-hidden="true"><use href="#wpds-trash"/></svg></button></span></td>
+													</tr>
+													<tr>
+														<td><span class="cell-title">Twenty Twenty-Five</span><span class="cell-sub">theme Â· active</span></td>
+														<td>Theme</td>
+														<td class="nowrap">1.2 â†’ 1.3</td>
+														<td>Automatic</td>
+														<td><span class="badge badge--success">Success</span></td>
+														<td class="nowrap">22 Oct, 18:05</td>
+														<td class="nowrap"><span class="row-actions"><button class="icon-button" type="button" aria-label="View details for Twenty Twenty-Five"><svg class="icon icon--sm" aria-hidden="true"><use href="#wpds-seen"/></svg></button><button class="icon-button icon-button--danger" type="button" aria-label="Delete Twenty Twenty-Five log entry"><svg class="icon icon--sm" aria-hidden="true"><use href="#wpds-trash"/></svg></button></span></td>
+													</tr>
+													<tr>
+														<td><span class="cell-title">WordPress core</span><span class="cell-sub">core</span></td>
+														<td>Core</td>
+														<td class="nowrap">7.1 â†’ 7.1.1</td>
+														<td>Automatic</td>
+														<td><span class="badge badge--warning">Warning</span></td>
+														<td class="nowrap">22 Oct, 03:00</td>
+														<td class="nowrap"><span class="row-actions"><button class="icon-button" type="button" aria-label="View details for WordPress core"><svg class="icon icon--sm" aria-hidden="true"><use href="#wpds-seen"/></svg></button><button class="icon-button icon-button--danger" type="button" aria-label="Delete WordPress core log entry"><svg class="icon icon--sm" aria-hidden="true"><use href="#wpds-trash"/></svg></button></span></td>
+													</tr>
+													<tr>
+														<td><span class="cell-title">Contact Form 7</span><span class="cell-sub">plugin Â· active</span></td>
+														<td>Plugin</td>
+														<td class="nowrap">6.1.4 â†’ 6.1.5</td>
+														<td>Automatic</td>
+														<td><span class="badge badge--error">Failed</span></td>
+														<td class="nowrap">21 Oct, 22:14</td>
+														<td class="nowrap"><span class="row-actions"><button class="icon-button" type="button" aria-label="View details for Contact Form 7"><svg class="icon icon--sm" aria-hidden="true"><use href="#wpds-seen"/></svg></button><button class="icon-button icon-button--danger" type="button" aria-label="Delete Contact Form 7 log entry"><svg class="icon icon--sm" aria-hidden="true"><use href="#wpds-trash"/></svg></button></span></td>
+													</tr>
+													<tr>
+														<td><span class="cell-title">French translations</span><span class="cell-sub">translations</span></td>
+														<td>Translation</td>
+														<td class="nowrap">2026.10 â†’ 2026.11</td>
+														<td>Automatic</td>
+														<td><span class="badge badge--success">Success</span></td>
+														<td class="nowrap">21 Oct, 04:02</td>
+														<td class="nowrap"><span class="row-actions"><button class="icon-button" type="button" aria-label="View details for French translations"><svg class="icon icon--sm" aria-hidden="true"><use href="#wpds-seen"/></svg></button><button class="icon-button icon-button--danger" type="button" aria-label="Delete French translations log entry"><svg class="icon icon--sm" aria-hidden="true"><use href="#wpds-trash"/></svg></button></span></td>
+													</tr>
+												</tbody>
+											</table>
+										</div>
+										<div class="shell-pagination" style="margin-top:0;padding:12px 16px 16px;border-top:1px solid var(--g-border-weak)">
+											<span>1â€“6 of 248 entries</span>
+											<span class="pager">
+												<button type="button" aria-label="Previous page">â€¹</button>
+												<button type="button" aria-current="page">1</button>
+												<button type="button">2</button>
+												<button type="button">3</button>
+												<button type="button" aria-label="Next page">â€º</button>
+											</span>
+										</div>
+											</div>
+										</div>
+									</div>
+								</div>
+
+								<div class="shell-panel" id="upd-panel-auto" hidden>
+									<div class="shell-pagehead">
+										<nav class="shell-breadcrumb" aria-label="Auto updates breadcrumb">Updatronix <span aria-hidden="true">/</span> Auto updates</nav>
+										<div class="shell-headrow">
+											<div>
+												<h3 class="shell-title">Auto updates</h3>
+												<p class="shell-sub">Core, translation, theme, and plugin settings in one place.</p>
+											</div>
+											<div class="shell-actions"><button class="btn btn--primary" type="button">Save changes</button></div>
+										</div>
+									</div>
+									<div class="shell-body">
+										<div class="shell-card">
+											<div class="shell-card-head"><strong id="core-mode-label">Core update mode</strong><span>Applies to WordPress core</span></div>
+											<div class="shell-card-body" role="radiogroup" aria-labelledby="core-mode-label">
+												<div class="shell-radio-row"><input type="radio" name="core-mode" id="core-minor" checked><label for="core-minor">Minor releases only, such as 7.1 â†’ 7.1.1</label></div>
+												<div class="shell-radio-row"><input type="radio" name="core-mode" id="core-all"><label for="core-all">All releases, including major versions</label></div>
+												<div class="shell-radio-row"><input type="radio" name="core-mode" id="core-off"><label for="core-off">Manual updates only</label></div>
+											</div>
+										</div>
+										<div class="shell-card">
+											<div class="shell-card-head"><strong>Translations</strong><span>Update language files automatically</span></div>
+											<div class="shell-card-body">
+												<div class="shell-toggle-row" style="border-bottom:0;padding:0">
+													<span>Translation auto-updates</span>
+													<button class="shell-switch" type="button" role="switch" aria-checked="true" aria-label="Translation auto-updates"></button>
+												</div>
+											</div>
+										</div>
+										<div class="shell-card">
+											<div class="shell-card-head"><strong>Themes</strong><span>Per-theme control</span></div>
+											<div class="shell-card-body" style="padding:0">
+												<table class="shell-table" style="border:0">
+													<caption class="visually-hidden">Themes and their auto-update state</caption>
+													<thead>
+														<tr><th scope="col">Auto-update</th><th scope="col">Item</th><th scope="col">Version</th><th scope="col">Item status</th></tr>
+													</thead>
+													<tbody>
+														<tr><td><button class="shell-switch" type="button" role="switch" aria-checked="true" aria-label="Auto-update Twenty Twenty-Five"></button></td><td><span class="cell-title">Twenty Twenty-Five</span><span class="cell-sub">active theme</span></td><td>1.3</td><td><span class="badge badge--success">Active</span></td></tr>
+													</tbody>
+												</table>
+											</div>
+										</div>
+										<div class="shell-card">
+											<div class="shell-card-head"><strong>Plugins</strong><span>Per-plugin control</span></div>
+											<div class="shell-card-body" style="padding:0">
+												<table class="shell-table" style="border:0">
+													<caption class="visually-hidden">Plugins and their auto-update state</caption>
+													<thead>
+														<tr><th scope="col">Auto-update</th><th scope="col">Item</th><th scope="col">Version</th><th scope="col">Item status</th></tr>
+													</thead>
+													<tbody>
+														<tr><td><button class="shell-switch" type="button" role="switch" aria-checked="true" aria-label="Auto-update WooCommerce"></button></td><td><span class="cell-title">WooCommerce</span><span class="cell-sub">plugin Â· active</span></td><td>10.0.0</td><td><span class="badge badge--success">Active</span></td></tr>
+														<tr><td><button class="shell-switch" type="button" role="switch" aria-checked="false" aria-label="Auto-update Contact Form 7"></button></td><td><span class="cell-title">Contact Form 7</span><span class="cell-sub">plugin Â· active</span></td><td>6.1.4</td><td><span class="badge badge--success">Active</span></td></tr>
+														<tr><td><button class="shell-switch" type="button" role="switch" aria-checked="true" aria-label="Auto-update Akismet"></button></td><td><span class="cell-title">Akismet Anti-spam</span><span class="cell-sub">plugin Â· active</span></td><td>5.3.2</td><td><span class="badge badge--success">Active</span></td></tr>
+													</tbody>
+												</table>
+											</div>
+										</div>
+										<p class="shell-note">Radio and switch changes are staged. Save changes commits them together, and the next scheduled check uses the new settings.</p>
+									</div>
+								</div>
+
+								<div class="shell-panel" id="upd-panel-schedule" hidden>
+									<div class="shell-pagehead">
+										<nav class="shell-breadcrumb" aria-label="Schedule breadcrumb">Updatronix <span aria-hidden="true">/</span> Schedule</nav>
+										<div class="shell-headrow">
+											<div>
+												<h3 class="shell-title">Schedule</h3>
+												<p class="shell-sub">Choose how often WordPress checks for updates, and how long new releases are held.</p>
+												<div class="shell-headmeta"><span class="badge badge--neutral">Next check: 24 Oct, 03:00</span></div>
+											</div>
+											<div class="shell-actions"><button class="btn btn--primary" type="button">Save changes</button></div>
+										</div>
+									</div>
+									<div class="shell-body">
+										<div class="shell-card">
+											<div class="shell-card-head"><strong>Update checks</strong><span>WordPress cron</span></div>
+											<div class="shell-card-body">
+												<div class="shell-field">
+													<label for="sched-frequency">Frequency</label>
+													<select class="select" id="sched-frequency"><option>Daily</option><option>Twice daily</option><option>Hourly</option></select>
+												</div>
+												<div class="shell-field">
+													<label for="sched-time">Preferred time</label>
+													<select class="select" id="sched-time" aria-describedby="sched-time-help"><option>03:00</option><option>06:00</option><option>12:00</option><option>21:00</option></select>
+													<p class="description" id="sched-time-help">The check runs on the next cron tick after this time. Twice daily runs again 12 hours later.</p>
+												</div>
+												<div class="shell-field" style="margin-bottom:0">
+													<label for="sched-delay">Hold new releases for (days)</label>
+													<input class="input" id="sched-delay" type="number" min="0" max="30" value="2" aria-describedby="sched-delay-help">
+													<p class="description" id="sched-delay-help">Updates stay automatic; they are deferred so unstable builds can be fixed first.</p>
+												</div>
+											</div>
+										</div>
+										<div class="notice notice--info" style="margin-top:12px">
+											<svg class="icon" aria-hidden="true"><use href="#wpds-info"/></svg>
+											<div>
+												<p class="notice-title">Next run</p>
+												<p>24 October 2026 at 03:00. The two-day hold applies after a release is detected.</p>
+											</div>
+										</div>
+									</div>
+								</div>
+
+								<div class="shell-panel" id="upd-panel-settings" hidden>
+									<div class="shell-pagehead">
+										<nav class="shell-breadcrumb" aria-label="Settings breadcrumb">Updatronix <span aria-hidden="true">/</span> Settings</nav>
+										<div class="shell-headrow">
+											<div>
+												<h3 class="shell-title">Settings</h3>
+												<p class="shell-sub">Logging, retention, email routing, and uninstall data.</p>
+											</div>
+											<div class="shell-actions"><button class="btn btn--primary" type="button">Save changes</button></div>
+										</div>
+									</div>
+									<div class="shell-body">
+										<div class="shell-card">
+											<div class="shell-card-head"><strong>Logging</strong><span>Update history</span></div>
+											<div class="shell-card-body">
+												<div class="shell-radio-row" style="padding-top:0">
+													<input type="checkbox" id="settings-logging" checked><label for="settings-logging">Keep an update log</label>
+												</div>
+												<div class="shell-field" style="margin-top:10px;margin-bottom:0">
+													<label for="settings-retention">Retention period (days)</label>
+													<input class="input" id="settings-retention" type="number" min="1" max="365" value="90" aria-describedby="settings-retention-help">
+													<p class="description" id="settings-retention-help">Between 1 and 365 days. A daily cleanup removes older entries.</p>
+												</div>
+											</div>
+										</div>
+										<div class="shell-card">
+											<div class="shell-card-head"><strong>Email notifications</strong><span>WordPress update emails</span></div>
+											<div class="shell-card-body">
+												<div class="shell-field">
+													<label for="settings-recipients">Email addresses</label>
+													<input class="input" id="settings-recipients" type="text" value="admin@example.com" aria-describedby="settings-recipients-help">
+													<p class="description" id="settings-recipients-help">Comma-separated. WordPress sends update emails to these addresses.</p>
+												</div>
+												<fieldset class="shell-fieldset">
+													<legend>Notify me about</legend>
+													<div class="shell-radio-row"><input type="checkbox" id="notify-core" checked><label for="notify-core">Core updates</label></div>
+													<div class="shell-radio-row"><input type="checkbox" id="notify-extensions" checked><label for="notify-extensions">Plugin and theme updates</label></div>
+													<div class="shell-radio-row"><input type="checkbox" id="notify-debug"><label for="notify-debug">Debug summary</label></div>
+													<div class="shell-radio-row"><input type="checkbox" id="notify-technical"><label for="notify-technical">Technical alerts</label></div>
+													<div class="shell-radio-row"><input type="checkbox" id="notify-recovery" checked disabled><label for="notify-recovery">Recovery mode <span class="shell-lock">Always on</span></label></div>
+												</fieldset>
+												<div class="shell-radio-row" style="padding-bottom:0">
+													<input type="checkbox" id="settings-disable-emails" aria-describedby="settings-disable-help"><label for="settings-disable-emails">Disable all update emails</label>
+												</div>
+												<p class="description" id="settings-disable-help">Silences every update email except recovery mode.</p>
+											</div>
+										</div>
+										<div class="notice notice--warning">
+											<svg class="icon" aria-hidden="true"><use href="#wpds-caution"/></svg>
+											<div>
+												<p class="notice-title">Recovery mode emails stay on</p>
+												<p>They are the message that contains the recovery link. Do not disable them, or you could lock yourself out of the site.</p>
+											</div>
+										</div>
+										<div class="shell-card">
+											<div class="shell-card-head"><strong>Data</strong><span>Uninstall behavior</span></div>
+											<div class="shell-card-body">
+												<div class="shell-radio-row" style="padding-top:0">
+													<input type="checkbox" id="settings-delete-data" aria-describedby="settings-delete-help"><label for="settings-delete-data">Delete all data on uninstall</label>
+												</div>
+												<p class="description" id="settings-delete-help">Removes update logs, settings, and schedules when the plugin is uninstalled. Off by default so reinstalling keeps your data.</p>
+											</div>
+										</div>
+									</div>
+								</div>
+
+								<div class="shell-panel" id="upd-panel-pro" hidden>
+									<div class="shell-pagehead">
+										<nav class="shell-breadcrumb" aria-label="Updatronix 3000 breadcrumb">Updatronix <span aria-hidden="true">/</span> Updatronix 3000</nav>
+										<div class="shell-headrow">
+											<div>
+												<h3 class="shell-title">Updatronix 3000</h3>
+												<p class="shell-sub">Activate your Updatronix 3000 license for this site.</p>
+												</div>
+										</div>
+									</div>
+									<div class="shell-body">
+										<div class="shell-empty">
+											<img src="assets/img/updatronix-logo-blue.png" width="40" height="40" alt="">
+											<h4>Activate your license</h4>
+											<p>Enter the license key from your Updatronix account to enable Update Shield and the other Pro tools.</p>
+											<div class="shell-field" style="max-width:320px;margin:0 auto 10px;text-align:left">
+												<label for="license-key">License key</label>
+												<input class="input" id="license-key" type="text" placeholder="XXXX-XXXX-XXXX-XXXX" aria-describedby="license-key-help">
+											</div>
+											<button class="btn btn--primary" type="button">Activate license</button>
+											<p class="shell-note" id="license-key-help">Your key is in your Updatronix account.</p>
+										</div>
+										<div class="shell-card" style="margin-top:12px">
+											<div class="shell-card-head"><strong>What Updatronix 3000 adds</strong><span>Included with your license</span></div>
+											<div class="shell-card-body">
+												<div class="shell-toggle-row"><span>Update Shield - compatibility checks, an automatic-update queue, and version control locks before every automatic update</span></div>
+												<div class="shell-toggle-row"><span>Update Flow - dependency chains for plugins and themes</span></div>
+												<div class="shell-toggle-row"><span>White label - your name, mark, and colors in the admin</span></div>
+												<div class="shell-toggle-row"><span>Queue list - chains updates to avoid server timeouts</span></div>
+												<div class="shell-toggle-row"><span>Advanced exports - CSV, XML, and JSON logs</span></div>
+												<div class="shell-toggle-row" style="border-bottom:0"><span>Development tools - hooks, functions, and a REST API</span></div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<p class="shell-note">Structural preview only. The rail buttons, links, and sidebar presets are interactive; the table and form controls are illustrative and do not persist data. Health, Update Shield, Update Flow, White label, Documentation, and Support open their full screens. Scroll horizontally on a narrow screen.</p>
+				</div>
+			</section>
+
+			<section class="section" id="screens" aria-labelledby="screens-title">
+				<div class="section-inner">
+					<p class="eyebrow">Applied Â· Screen map</p>
+					<h2 id="screens-title">What changes on each section</h2>
+					<p class="lede">The app has a screens hub plus eleven rail destinations. Documentation and Support sit in the Help group. The rework is not a pixel-for-pixel reskin; each section gets a single page header, a clearer working surface, and the right component composition.</p>
+
+					<div class="table-wrap">
+						<table>
+							<caption>Current section to target composition.</caption>
+							<thead>
+								<tr>
+									<th scope="col">Section</th>
+									<th scope="col">Current</th>
+									<th scope="col">Target</th>
+									<th scope="col">Key components</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td><strong>Screens hub</strong></td>
+									<td>Index page outside the rail.</td>
+									<td>A product header and a two-column card grid for every rail destination, with short descriptions and badges naming each surface type. Cards open the full screens.</td>
+									<td>Card, Badge, Icon, Stack, Text</td>
+								</tr>
+								<tr>
+									<td><strong>Update logs</strong></td>
+									<td>Card-like rows, custom filter bar, calendar popover, custom export and detail modals, delete confirmation.</td>
+									<td>One DataViews table with search, filters, sorting, pagination, and row actions. Details open in a dialog or drawer; delete uses a confirmation dialog. Export is a dialog with a report preview.</td>
+									<td>DataViews, AlertDialog, Dialog, Notice, Badge, Button, CheckboxControl</td>
+								</tr>
+								<tr>
+									<td><strong>Auto updates</strong></td>
+									<td>Separate core, theme, and plugin tables with custom toggles and a white sub-navigation.</td>
+									<td>Card sections for core mode and translations, then separate theme and plugin tables. One manual save for the whole surface; changes apply to the next scheduled check.</td>
+									<td>Card, RadioGroupControl, SwitchControl, Badge, Link</td>
+								</tr>
+								<tr>
+									<td><strong>Schedule</strong></td>
+									<td>Recurrence, time, next-run preview, and delay settings in one long form.</td>
+									<td>One card with frequency, time, hold duration, and a next-run summary. Manual save.</td>
+									<td>Card, SelectControl, InputControl, Notice, Stack, Button</td>
+								</tr>
+								<tr>
+									<td><strong>Health</strong></td>
+									<td>Errors page focused on failed updates, with severity, retry, diagnostics, and a resolved archive.</td>
+									<td>Readiness summary and six environment checks above the open-issue retry flow and resolved archive. Run check and diagnostics actions, with the paused-retry warning kept next to its cause.</td>
+									<td>Card, Badge, Icon, Notice, Dialog, EmptyState, Button, ButtonLink</td>
+								</tr>
+								<tr>
+									<td><strong>Settings</strong></td>
+									<td>Long form with logging, retention, email routing, disable-all options, and uninstall data deletion; warning notice.</td>
+									<td>Three cards: Logging, Email notifications, and Data. Email keeps recipients, per-event filters, a disable-all switch, and the recovery-mode warning. Data holds the opt-in uninstall deletion switch. One manual save for the whole surface.</td>
+									<td>Card, Fieldset, InputControl, CheckboxControl, SwitchControl, Notice, Button</td>
+								</tr>
+								<tr>
+									<td><strong>Updatronix 3000</strong></td>
+									<td>Bare license field and a blue button on an otherwise empty page.</td>
+									<td>An empty state with the product mark, a short explanation, license input, and primary activation, followed by the six-item Pro features list.</td>
+									<td>EmptyState, Card, InputControl, Button</td>
+								</tr>
+								<tr>
+									<td><strong>Update Shield</strong></td>
+									<td>No current screen; Pro feature only.</td>
+									<td>Protection switch, automatic-update queue, version control lock, incompatibility behavior, automatic re-enable, email alerts, abandoned-plugin flagging, then the recently blocked table. One manual save.</td>
+									<td>Card, SwitchControl, RadioGroupControl, Badge, Icon, Table, Link, Button</td>
+								</tr>
+								<tr>
+									<td><strong>Update Flow</strong></td>
+									<td>No current screen; Pro feature only.</td>
+									<td>Dependency chains with ordered, reorderable steps; add and edit in a dialog with an editable chain name and description; deletion asks for confirmation; validation for names, duplicates, and circular requirements across chains; one manual save.</td>
+									<td>Card, Dialog, AlertDialog, InputControl, TextareaControl, SelectControl, SwitchControl, IconButton, Button</td>
+								</tr>
+								<tr>
+									<td><strong>White label</strong></td>
+									<td>No current screen; Pro feature only.</td>
+									<td>Brand name, menu label, logo, brand and menu colors, replacement switches, and live admin menu and email previews. Manual save and reset.</td>
+									<td>Card, InputControl, SwitchControl, ColorPalette, FormFileUpload, Button</td>
+								</tr>
+								<tr>
+									<td><strong>Documentation</strong></td>
+									<td>New Help destination; no current screen.</td>
+									<td>One page header and three linked guide cards for the plugin, Updatronix 3000, and the WordPress update system. Links open on holdmywp.com.</td>
+									<td>Card, Icon, Text, Link</td>
+								</tr>
+								<tr>
+									<td><strong>Support</strong></td>
+									<td>New Help destination; no current screen.</td>
+									<td>Four recommendations before posting, plus a primary link to the WordPress.org support forum and a cross-link to Documentation.</td>
+									<td>Card, Icon, Text, ButtonLink</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</section>
+
+			<section class="section" id="before" aria-labelledby="before-title">
+				<div class="section-inner">
+					<p class="eyebrow">Applied Â· Before gallery</p>
+					<h2 id="before-title">The supplied current interface</h2>
+					<p class="lede">These are the user-supplied screenshots of Updatronix 1.2.0. Seven of the 19 are shown here; the rest are alternate language and modal states. The legacy interface copy is French; the applied interface is English, with French kept as a translation.</p>
+
+					<div class="before-grid">
+						<figure class="before-card">
+							<a href="assets/img/current/update-log.png"><img src="assets/img/current/update-log.png" width="1920" height="955" alt="Current Updatronix update log: a gradient blue header, a white secondary navigation column, and a list of update entries." loading="lazy"></a>
+							<figcaption><strong>Update log</strong><span>Gradient header, white nav column, card-like log rows.</span></figcaption>
+						</figure>
+						<figure class="before-card">
+							<a href="assets/img/current/log-details.png"><img src="assets/img/current/log-details.png" width="1920" height="955" alt="Current Updatronix log details modal with a summary table and process details." loading="lazy"></a>
+							<figcaption><strong>Log details</strong><span>Custom modal with a summary table and process text.</span></figcaption>
+						</figure>
+						<figure class="before-card">
+							<a href="assets/img/current/export-log.png"><img src="assets/img/current/export-log.png" width="1920" height="955" alt="Current Updatronix export logs modal with report options, column selection, and a preview table." loading="lazy"></a>
+							<figcaption><strong>Export logs</strong><span>Large custom modal with options, column selection, and a preview.</span></figcaption>
+						</figure>
+						<figure class="before-card">
+							<a href="assets/img/current/delete-log.png"><img src="assets/img/current/delete-log.png" width="1920" height="955" alt="Current Updatronix delete log confirmation modal with a red primary button." loading="lazy"></a>
+							<figcaption><strong>Delete log entry</strong><span>Confirmation modal with a red action.</span></figcaption>
+						</figure>
+						<figure class="before-card">
+							<a href="assets/img/current/auto-updates.png"><img src="assets/img/current/auto-updates.png" width="1920" height="955" alt="Current Updatronix auto updates screen with theme and plugin tables and inline toggles." loading="lazy"></a>
+							<figcaption><strong>Auto updates</strong><span>Separate tables, inline toggles, and a white sub-navigation.</span></figcaption>
+						</figure>
+						<figure class="before-card">
+							<a href="assets/img/current/settings.png"><img src="assets/img/current/settings.png" width="1920" height="955" alt="Current Updatronix settings screen with email notification options and a warning notice." loading="lazy"></a>
+							<figcaption><strong>Settings</strong><span>Long form with recipients, notification types, and a warning notice.</span></figcaption>
+						</figure>
+						<figure class="before-card">
+							<a href="assets/img/current/license.png"><img src="assets/img/current/license.png" width="1920" height="955" alt="Current Updatronix 3000 license activation screen with a license field and a blue button." loading="lazy"></a>
+							<figcaption><strong>Updatronix 3000</strong><span>Bare activation form with no supporting context.</span></figcaption>
+						</figure>
+					</div>
+				</div>
+			</section>
+
+			<section class="section" id="migration" aria-labelledby="migration-title">
+				<div class="section-inner">
+					<p class="eyebrow">Applied Â· Migration checklist</p>
+					<h2 id="migration-title">The review checklist for the applied screens</h2>
+					<p class="lede">Each item is checkable without a design debate. If a screen fails one, it is not ready for the new shell.</p>
+
+					<ul class="checklist">
+						<li><svg class="icon" aria-hidden="true"><use href="#wpds-check"/></svg><span>The gradient header is gone, and no element reproduces it in another color.</span></li>
+						<li><svg class="icon" aria-hidden="true"><use href="#wpds-check"/></svg><span>Every working screen is a rail item; the screens hub is the index outside the rail, and the white secondary navigation column no longer exists.</span></li>
+						<li><svg class="icon" aria-hidden="true"><use href="#wpds-check"/></svg><span>Each screen has one page title, one description, and at most one primary action.</span></li>
+						<li><svg class="icon" aria-hidden="true"><use href="#wpds-check"/></svg><span>Every color, space, radius, and motion value in the product comes from a <code>--wpds-*</code> token.</span></li>
+						<li><svg class="icon" aria-hidden="true"><use href="#wpds-check"/></svg><span>The update log uses a DataViews table, not custom rows, for its primary view.</span></li>
+						<li><svg class="icon" aria-hidden="true"><use href="#wpds-check"/></svg><span>Irreversible actions use <code>AlertDialog</code> with <code>intent="irreversible"</code>, name the object, and never use an ambiguous â€œDeleteâ€ label.</span></li>
+						<li><svg class="icon" aria-hidden="true"><use href="#wpds-check"/></svg><span>Health leads with readiness checks, then keeps each failure next to what happened, why, and what now.</span></li>
+						<li><svg class="icon" aria-hidden="true"><use href="#wpds-check"/></svg><span>One manual save per surface, kept in reach by a sticky bar and the <code>Ctrl+S</code> / <code>âŒ˜S</code> shortcut.</span></li>
+						<li><svg class="icon" aria-hidden="true"><use href="#wpds-check"/></svg><span>Focus rings, disabled states, and keyboard navigation are present on every control.</span></li>
+						<li><svg class="icon" aria-hidden="true"><use href="#wpds-check"/></svg><span>The <code>wp-theme</code> stylesheet is loaded once, and the provider is seeded for the admin color scheme.</span></li>
+						<li><svg class="icon" aria-hidden="true"><use href="#wpds-check"/></svg><span>Source strings are English; French ships as a translation, not as hardcoded copy.</span></li>
+						<li><svg class="icon" aria-hidden="true"><use href="#wpds-check"/></svg><span>@wordpress/ui and @wordpress/theme versions are pinned and tested against the target WordPress version.</span></li>
+					</ul>
+
+					<div class="callout callout--info">
+						<svg class="icon" aria-hidden="true"><use href="#wpds-info"/></svg>
+						<div>
+							<p class="callout-title">Decisions reflected in the screens</p>
+							<p>Updatronix uses WordPress blue as the brand seed. Log details and export open in dialogs, not a drawer. The sticky save bar stays title plus action and disables the button when the surface is clean. Each was a product decision, not a token decision.</p>
+						</div>
+					</div>
+				</div>
+			</section>
+
+			<section class="section" id="sources" aria-labelledby="sources-title">
+				<div class="section-inner">
+					<p class="eyebrow">Sources</p>
+					<h2 id="sources-title">What this guide is based on</h2>
+					<p class="lede">Documentation and package sources consulted on 23 October 2026. Token values are read from the shipped <code>design-tokens.css</code>, not reconstructed from screenshots.</p>
+
+					<ul class="source-list">
+						<li><a href="https://github.com/WordPress/gutenberg/blob/trunk/storybook/stories/design-system/introduction.mdx">Gutenberg Â· Design System introduction</a><span>WordPress/Gutenberg</span></li>
+						<li><a href="https://github.com/WordPress/gutenberg/blob/trunk/packages/theme/README.md">@wordpress/theme Â· README</a><span>WordPress/Gutenberg</span></li>
+						<li><a href="https://github.com/WordPress/gutenberg/blob/trunk/packages/theme/docs/tokens.md">Design tokens reference</a><span>WordPress/Gutenberg</span></li>
+						<li><a href="https://github.com/WordPress/gutenberg/blob/trunk/packages/ui/README.md">@wordpress/ui Â· README</a><span>WordPress/Gutenberg</span></li>
+						<li><a href="https://github.com/WordPress/gutenberg/blob/trunk/packages/icons/README.md">@wordpress/icons Â· README</a><span>WordPress/Gutenberg</span></li>
+						<li><a href="https://github.com/WordPress/gutenberg/blob/trunk/packages/eslint-plugin/docs/rules/use-recommended-components.md">use-recommended-components rule</a><span>WordPress/Gutenberg</span></li>
+						<li><a href="https://github.com/WordPress/gutenberg/blob/trunk/packages/admin-ui/README.md">@wordpress/admin-ui Â· README</a><span>WordPress/Gutenberg</span></li>
+						<li><a href="https://github.com/WordPress/gutenberg/blob/trunk/packages/dataviews/README.md">@wordpress/dataviews Â· README</a><span>WordPress/Gutenberg</span></li>
+						<li><a href="https://wordpress.github.io/gutenberg/?path=/docs/foundations-layout--page">Foundations Â· Layout</a><span>Gutenberg Storybook</span></li>
+						<li><a href="https://wordpress.github.io/gutenberg/?path=/docs/foundations-design-language-elevation--page">Foundations Â· Elevation</a><span>Gutenberg Storybook</span></li>
+						<li><a href="https://wordpress.github.io/gutenberg/?path=/docs/foundations-design-language-radius--page">Foundations Â· Radius</a><span>Gutenberg Storybook</span></li>
+						<li><a href="https://wordpress.github.io/gutenberg/?path=/story/design-system-theme-theme-provider-example-application--example-application">Theme Provider Â· Example Application</a><span>Gutenberg Storybook</span></li>
+						<li><a href="https://wordpress.github.io/gutenberg/?path=/docs/design-system-patterns-destructive-actions--docs">Patterns Â· Destructive actions</a><span>Gutenberg Storybook</span></li>
+						<li><a href="https://wordpress.github.io/gutenberg/?path=/docs/design-system-patterns-error-messages--docs">Patterns Â· Error messages</a><span>Gutenberg Storybook</span></li>
+						<li><a href="https://wordpress.github.io/gutenberg/?path=/docs/design-system-patterns-save-submit--docs">Patterns Â· Save and submit</a><span>Gutenberg Storybook</span></li>
+						<li><a href="https://wordpress.org/plugins/updatronix/">Updatronix on WordPress.org</a><span>Plugin page</span></li>
+						<li><a href="https://github.com/quentin-ld/updatronix">Updatronix repository</a><span>GitHub</span></li>
+					</ul>
+
+						<p class="small muted" style="margin-top:20px">Package versions at review time: theme 3.0.0, ui 0.25.0, components 43.0.0, dataviews 21.0.0, admin-ui 3.0.0, icons 19.0.0. The Default preset uses the design system tokens. Fresh, Blue, and Ectoplasm are WordPress admin color schemes exposed by <code>getAdminThemeColors()</code>, not an Updatronix brand recommendation.</p>
+				</div>
+			</section>
+		</main>
+
+		<footer class="footer">
+			<div class="footer-inner">
+				<span>Updatronix design system field guide Â· draft reference</span>
+				<span>Built from the WordPress Design System Â· 23 October 2026</span>
+			</div>
+		</footer>
+	</div>
+</div>
+
+<div class="live-region" id="live-region" role="status" aria-live="polite"></div>
+<script src="assets/js/guide.js"></script>
+</body>
+</html>

@@ -1,0 +1,200 @@
+/**
+ * Shared WordPress Design System runtime.
+ *
+ * Free owns the single bundled copy of the WPDS packages. Pro reads this
+ * object instead of bundling its own copy, so both plugins share one
+ * `@wordpress/theme` context and one set of components.
+ *
+ * The runtime is curated: only the components and icons the product uses are
+ * imported, so the bundle does not include the whole component library.
+ * `@wordpress/dataviews` stays out of the runtime; route chunks import it
+ * directly because only the update log needs it.
+ *
+ * Contract: docs/wpds/03-target-architecture.md, section 1.
+ */
+
+import * as element from '@wordpress/element';
+import { ThemeProvider } from '@wordpress/theme';
+import { Page, getAdminThemeColors } from '@wordpress/admin-ui';
+import {
+	AlertDialog,
+	Badge,
+	Breadcrumb,
+	Button,
+	ButtonLink,
+	Card,
+	CheckboxControl,
+	Dialog,
+	Drawer,
+	EmptyState,
+	Fieldset,
+	Icon,
+	IconButton,
+	InputControl,
+	Link,
+	Notice,
+	RadioGroupControl,
+	SearchableChipSelectControl,
+	SelectControl,
+	Spinner,
+	Stack,
+	SwitchControl,
+	Text,
+	TextareaControl,
+	Tooltip,
+	VisuallyHidden,
+} from '@wordpress/ui';
+import {
+	ColorPalette,
+	FormFileUpload,
+	KeyboardShortcuts,
+	SnackbarList,
+} from '@wordpress/components';
+import {
+	arrowRight,
+	backup,
+	brush,
+	calendar,
+	cancelCircleFilled,
+	caution,
+	check,
+	chevronDown,
+	chevronUp,
+	closeSmall,
+	code,
+	copy,
+	dashboard,
+	download,
+	dragHandle,
+	external,
+	filter,
+	grid,
+	info,
+	key,
+	language,
+	lifesaver,
+	lock,
+	menu,
+	more,
+	page,
+	pencil,
+	plugins,
+	plus,
+	postList,
+	replay,
+	scheduled,
+	search,
+	seen,
+	settings,
+	shield,
+	sidesAll,
+	stack,
+	starEmpty,
+	starFilled,
+	styles,
+	trash,
+	typography,
+	unlock,
+	update,
+	upload,
+	wordpress,
+} from '@wordpress/icons';
+
+const icons = {
+	arrowRight,
+	backup,
+	brush,
+	calendar,
+	cancelCircleFilled,
+	caution,
+	check,
+	chevronDown,
+	chevronUp,
+	closeSmall,
+	code,
+	copy,
+	dashboard,
+	download,
+	dragHandle,
+	external,
+	filter,
+	grid,
+	info,
+	key,
+	language,
+	lifesaver,
+	lock,
+	menu,
+	more,
+	page,
+	pencil,
+	plugins,
+	plus,
+	postList,
+	replay,
+	scheduled,
+	search,
+	seen,
+	settings,
+	shield,
+	sidesAll,
+	stack,
+	starEmpty,
+	starFilled,
+	styles,
+	trash,
+	typography,
+	unlock,
+	update,
+	upload,
+	wordpress,
+};
+
+const runtime = {
+	version: 1,
+	adminUi: { Page, getAdminThemeColors },
+	components: {
+		ColorPalette,
+		FormFileUpload,
+		KeyboardShortcuts,
+		SnackbarList,
+	},
+	element,
+	icons,
+	theme: { ThemeProvider },
+	ui: {
+		AlertDialog,
+		Badge,
+		Breadcrumb,
+		Button,
+		ButtonLink,
+		Card,
+		CheckboxControl,
+		Dialog,
+		Drawer,
+		EmptyState,
+		Fieldset,
+		Icon,
+		IconButton,
+		InputControl,
+		Link,
+		Notice,
+		RadioGroupControl,
+		SearchableChipSelectControl,
+		SelectControl,
+		Spinner,
+		Stack,
+		SwitchControl,
+		Text,
+		TextareaControl,
+		Tooltip,
+		VisuallyHidden,
+	},
+};
+
+if ( typeof window !== 'undefined' ) {
+	window.updatronix = window.updatronix || {};
+	window.updatronix.wpds = runtime;
+}
+
+export default runtime;

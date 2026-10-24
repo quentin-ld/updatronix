@@ -83,6 +83,7 @@ function partsToHi( v ) {
  * @param {Object}                     props.scheduleMeta            Labels + next run diagnostics.
  * @param {Object}                     props.wpConfigConstants       Localized constant map (same payload as Auto-updates).
  * @param {(name: string) => void}     props.onDismissConstantNotice Dismiss handler for dismissible constant notices.
+ * @param {boolean}                    [props.showIntro=true]        Whether to render the panel heading and description.
  * @return {import('react').JSX.Element} JSX.
  */
 export const SchedulePanel = memo( function SchedulePanelComponent( {
@@ -93,6 +94,7 @@ export const SchedulePanel = memo( function SchedulePanelComponent( {
 	scheduleMeta,
 	wpConfigConstants,
 	onDismissConstantNotice,
+	showIntro = true,
 } ) {
 	const schedule = settings.schedule ?? SCHED_FALLBACK;
 
@@ -155,15 +157,19 @@ export const SchedulePanel = memo( function SchedulePanelComponent( {
 
 	return (
 		<div className="updatronix-settings-form updatronix-schedule-panel">
-			<h2 className="updatronix-panel-title">
-				{ __( 'Schedule', 'updatronix' ) }
-			</h2>
-			<Text variant="muted">
-				{ __(
-					'Pick how often WordPress checks for updates and whether automatic installs wait.',
-					'updatronix'
-				) }
-			</Text>
+			{ showIntro && (
+				<>
+					<h2 className="updatronix-panel-title">
+						{ __( 'Schedule', 'updatronix' ) }
+					</h2>
+					<Text variant="muted">
+						{ __(
+							'Pick how often WordPress checks for updates and whether automatic installs wait.',
+							'updatronix'
+						) }
+					</Text>
+				</>
+			) }
 
 			<div className="updatronix-settings-section">
 				<h3 className="updatronix-settings-section-title">

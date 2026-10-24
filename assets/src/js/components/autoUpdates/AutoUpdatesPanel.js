@@ -28,11 +28,13 @@ import { TranslationsSection } from './TranslationsSection';
  * @param {Object}                        props
  * @param {string[]}                      [props.dismissedConstants]         Dismissed constant names from plugin settings (keeps notices in sync with Schedule tab).
  * @param {(dismissed: string[]) => void} [props.onDismissedConstantsChange] Fired when a dismissible notice is cleared.
+ * @param {boolean}                       [props.showIntro=true]             Whether to render the panel heading and description.
  * @return {import('react').JSX.Element} The auto-updates panel UI.
  */
 export function AutoUpdatesPanel( {
 	dismissedConstants,
 	onDismissedConstantsChange,
+	showIntro = true,
 } ) {
 	const retryRef = useRef( null );
 	const {
@@ -88,15 +90,19 @@ export function AutoUpdatesPanel( {
 
 	return (
 		<div className="updatronix-autoupdates-panel">
-			<h2 className="updatronix-panel-title">
-				{ __( 'Auto-updates', 'updatronix' ) }
-			</h2>
-			<Text variant="muted">
-				{ __(
-					'Choose what updates automatically on your site: WordPress core, plugins, themes, and translations.',
-					'updatronix'
-				) }
-			</Text>
+			{ showIntro && (
+				<>
+					<h2 className="updatronix-panel-title">
+						{ __( 'Auto-updates', 'updatronix' ) }
+					</h2>
+					<Text variant="muted">
+						{ __(
+							'Choose what updates automatically on your site: WordPress core, plugins, themes, and translations.',
+							'updatronix'
+						) }
+					</Text>
+				</>
+			) }
 			<ConstantNotices
 				constants={ data.constants }
 				sections={ [ 'core', 'plugins', 'themes', 'translations' ] }

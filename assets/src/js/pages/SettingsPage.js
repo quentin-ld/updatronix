@@ -1,135 +1,58 @@
-import {
-	useState,
-	useEffect,
-	useCallback,
-	useMemo,
-	useRef,
-} from '@wordpress/element';
-import {
-	backup as iconLogs,
-	calendar as iconSchedule,
-	settings as iconSettings,
-	starEmpty as iconStar,
-	update as iconUpdate,
-} from '@wordpress/icons';
-import { Notice } from '@wordpress/components';
+import { useState, useEffect, useCallback, useMemo } from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
+
 import { Notices } from '../components/Notices';
-import { Tabs } from '../components/Tabs';
 import { ActivityLogPanel } from '../components/activityLog';
 import { AutoUpdatesPanel } from '../components/autoUpdates';
 import { SchedulePanel } from '../components/schedule';
 import { SettingsPanel } from '../components/SettingsPanel';
 import { usePluginSettings } from '../hooks/usePluginSettings';
-import { __ } from '@wordpress/i18n';
+import AppShell from '../shell/AppShell';
+import {
+	getDestination,
+	getDestinations,
+	getInitialSlug,
+	getTabUrl,
+} from '../shell/routes';
+import DocumentationPage from './DocumentationPage';
+import HealthPage from './HealthPage';
+import ProDestination from './ProDestination';
+import SupportPage from './SupportPage';
 
-const TAB_LOGS = 'logs';
-const TAB_AUTO_UPDATES = 'auto-updates';
-const TAB_SCHEDULE = 'schedule';
-const TAB_SETTINGS = 'settings';
-
-/**
- * Map of known tab IDs to their WordPress icon components.
- *
- * @type {Object<string, Object>}
- */
-const BUILTIN_TAB_ICONS = {
-	[ TAB_LOGS ]: iconLogs,
-	[ TAB_AUTO_UPDATES ]: iconUpdate,
-	[ TAB_SCHEDULE ]: iconSchedule,
-	[ TAB_SETTINGS ]: iconSettings,
-};
-
-function resolveTabIcon( tab ) {
-	return BUILTIN_TAB_ICONS[ tab.slug ] || iconStar;
-}
+const bootSettings =
+	typeof window !== 'undefined' && window.updatronixSettings
+		? window.updatronixSettings
+		: {};
 
 /**
- * Default fallback tabs used when window.updatronixSettings is unavailable.
+ * Read the Pro panel registry from the global Pro populates.
  *
- * @return {Object<string, {slug: string, label: string, icon: string, priority: number}>} Default tab definitions keyed by slug.
- *     The `icon` field is reserved metadata; the React UI does not currently consume it.
+ * @return {Object} Registry keyed by destination slug.
  */
-function getDefaultTabs() {
-	const tabs = {
-		[ TAB_LOGS ]: {
-			slug: TAB_LOGS,
-			label: __( 'Update logs', 'updatronix' ),
-			icon: '',
-			priority: 10,
-		},
-		[ TAB_AUTO_UPDATES ]: {
-			slug: TAB_AUTO_UPDATES,
-			label: __( 'Auto-updates', 'updatronix' ),
-			icon: '',
-			priority: 20,
-		},
-		[ TAB_SCHEDULE ]: {
-			slug: TAB_SCHEDULE,
-			label: __( 'Schedule', 'updatronix' ),
-			icon: '',
-			priority: 30,
-		},
-		[ TAB_SETTINGS ]: {
-			slug: TAB_SETTINGS,
-			label: __( 'Settings', 'updatronix' ),
-			icon: '',
-			priority: 40,
-		},
-	};
+function getProPanelRegistry() {
+	const globalName = bootSettings.proPanelRegistryGlobal;
 
-	return tabs;
-}
-
-/**
- * Retrieve the tab definitions passed from PHP, sorted by priority.
- * Falls back to hardcoded defaults if PHP data is unavailable.
- *
- * @return {Array<{slug: string, label: string, icon: string, priority: number}>} Tabs sorted by priority ascending.
- *     The `icon` field is reserved metadata; the React UI does not currently consume it.
- */
-function getTabsFromPhp() {
-	let tabsObj;
-
-	if (
-		typeof window.updatronixSettings !== 'undefined' &&
-		typeof window.updatronixSettings.tabs === 'object' &&
-		window.updatronixSettings.tabs !== null &&
-		! Array.isArray( window.updatronixSettings.tabs )
-	) {
-		tabsObj = window.updatronixSettings.tabs;
-	} else {
-		tabsObj = getDefaultTabs();
+	if ( typeof globalName !== 'string' || ! globalName ) {
+		return {};
 	}
 
-	// Convert to array and sort by priority ascending.
-
-	const result = Object.values( tabsObj )
-		.map( ( tab ) => ( {
-			...tab,
-			priority: tab.priority ?? 10,
-		} ) )
-		.sort( ( a, b ) => a.priority - b.priority );
-
-	return result;
-}
-
-function setTabInUrl( tabId ) {
-	const params = new URLSearchParams( window.location.search );
-	params.set( 'tab', tabId );
-	const url = `${ window.location.pathname }?${ params.toString() }`;
-	window.history.replaceState( null, '', url );
+	return window[ globalName ] && typeof window[ globalName ] === 'object'
+		? window[ globalName ]
+		: {};
 }
 
 /**
- * Render the main settings page for Updatronix.
+ * Render the main Updatronix application.
  *
- * Active tab is synced with the ?tab= URL parameter for direct linking.
+ * The shell owns navigation. Each destination renders its own working
+ * surface; the existing panels keep their data and behavior while the
+ * migration moves them onto the shared patterns.
  *
- * @return {import('react').JSX.Element} The settings page UI.
+ * @return {import('react').JSX.Element} The application UI.
  */
 export const SettingsPage = () => {
 	const {
-		settings,
+		settings: pluginSettings,
 		setSettings,
 		saveSettings,
 		saving,
@@ -140,203 +63,171 @@ export const SettingsPage = () => {
 
 	const [ logsVersion, setLogsVersion ] = useState( 0 );
 	const handleLogsCleared = useCallback( () => {
-		setLogsVersion( ( v ) => v + 1 );
+		setLogsVersion( ( value ) => value + 1 );
 	}, [] );
 
 	const syncDismissedConstants = useCallback(
 		( dismissed ) => {
-			setSettings( ( prev ) => ( {
-				...prev,
+			setSettings( ( previous ) => ( {
+				...previous,
 				dismissed_constants: dismissed,
 			} ) );
 		},
 		[ setSettings ]
 	);
 
-	const tabs = useMemo( () => getTabsFromPhp(), [] );
+	const destinations = useMemo(
+		() => getDestinations( bootSettings.tabs ),
+		[]
+	);
 
-	const [ selectedTabId, setSelectedTabId ] = useState( () => {
-		const params = new URLSearchParams( window.location.search );
-		const requested = params.get( 'tab' );
-		const validSlugs = tabs.map( ( t ) => t.slug );
-		return validSlugs.includes( requested )
-			? requested
-			: window.updatronixSettings?.activeTab ||
-					tabs[ 0 ]?.slug ||
-					TAB_LOGS;
-	} );
+	const [ selectedSlug, setSelectedSlug ] = useState( () =>
+		getInitialSlug( destinations, bootSettings.activeTab )
+	);
 
-	const handleSelectTab = useCallback( ( tabId ) => {
-		setSelectedTabId( tabId );
-		setTabInUrl( tabId );
-	}, [] );
+	const navigate = useCallback(
+		( slug ) => {
+			if ( ! destinations.some( ( item ) => item.slug === slug ) ) {
+				return;
+			}
+
+			setSelectedSlug( slug );
+			window.history.pushState( null, '', getTabUrl( slug ) );
+		},
+		[ destinations ]
+	);
 
 	useEffect( () => {
-		const validSlugs = tabs.map( ( t ) => t.slug );
-		if ( ! selectedTabId || ! validSlugs.includes( selectedTabId ) ) {
-			const fallback = window.updatronixSettings?.activeTab || TAB_LOGS;
-			setSelectedTabId( fallback );
-			setTabInUrl( fallback );
+		const handlePopState = () => {
+			setSelectedSlug(
+				getInitialSlug( destinations, bootSettings.activeTab )
+			);
+		};
+
+		window.addEventListener( 'popstate', handlePopState );
+
+		return () => window.removeEventListener( 'popstate', handlePopState );
+	}, [ destinations ] );
+
+	useEffect( () => {
+		if ( destinations.some( ( item ) => item.slug === selectedSlug ) ) {
+			return;
 		}
-	}, [ selectedTabId, tabs ] );
+
+		const fallback = getInitialSlug( destinations, bootSettings.activeTab );
+		setSelectedSlug( fallback );
+		window.history.replaceState( null, '', getTabUrl( fallback ) );
+	}, [ destinations, selectedSlug ] );
+
+	const destination =
+		getDestination( selectedSlug, destinations ) || destinations[ 0 ];
+
+	if ( ! destination ) {
+		return null;
+	}
+
+	const isPro = Boolean( bootSettings.isPro );
+	const registry = getProPanelRegistry();
 
 	/**
-	 * Render a tab panel for a given tab definition.
+	 * Render the active destination.
 	 *
-	 * @param {{slug: string, label: string}} tab Tab definition.
-	 * @return {import('react').JSX.Element} The tab panel content.
+	 * @return {import('react').JSX.Element} Destination content.
 	 */
-	const renderTabPanel = ( tab ) => {
-		switch ( tab.slug ) {
-			case TAB_LOGS:
+	const renderDestination = () => {
+		switch ( destination.slug ) {
+			case 'logs':
 				return (
 					<ActivityLogPanel
-						loggingEnabled={ settings.logging_enabled }
+						loggingEnabled={ pluginSettings.logging_enabled }
 						logsVersion={ logsVersion }
+						showIntro={ false }
 					/>
 				);
-			case TAB_AUTO_UPDATES:
+			case 'auto-updates':
 				return (
 					<AutoUpdatesPanel
-						dismissedConstants={ settings.dismissed_constants }
+						dismissedConstants={
+							pluginSettings.dismissed_constants
+						}
 						onDismissedConstantsChange={ syncDismissedConstants }
+						showIntro={ false }
 					/>
 				);
-			case TAB_SCHEDULE:
+			case 'schedule':
 				return (
 					<SchedulePanel
-						settings={ settings }
+						settings={ pluginSettings }
 						setSettings={ setSettings }
 						saveSettings={ saveSettings }
 						saving={ saving }
 						scheduleMeta={ scheduleMeta }
 						wpConfigConstants={ wpConfigConstants }
 						onDismissConstantNotice={ dismissConstantNotice }
+						showIntro={ false }
 					/>
 				);
-			case TAB_SETTINGS:
+			case 'settings':
 				return (
 					<SettingsPanel
-						settings={ settings }
+						settings={ pluginSettings }
 						setSettings={ setSettings }
 						saveSettings={ saveSettings }
 						saving={ saving }
 						onLogsCleared={ handleLogsCleared }
+						showIntro={ false }
 					/>
 				);
+			case 'health':
+				return <HealthPage onNavigate={ navigate } />;
+			case 'documentation':
+				return <DocumentationPage />;
+			case 'support':
+				return <SupportPage onNavigate={ navigate } />;
 			default:
-				return <ProTabMount slug={ tab.slug } />;
+				if ( destination.edition === 'pro' ) {
+					return (
+						<ProDestination
+							destination={ destination }
+							isPro={ isPro }
+							registry={ registry }
+							onNavigate={ navigate }
+						/>
+					);
+				}
+
+				if ( registry[ destination.panel || destination.slug ] ) {
+					return (
+						<ProDestination
+							destination={ destination }
+							isPro
+							registry={ registry }
+							onNavigate={ navigate }
+						/>
+					);
+				}
+
+				return (
+					<p className="updatronix-extension-empty">
+						{ __(
+							'This section is registered by another plugin but has no panel.',
+							'updatronix'
+						) }
+					</p>
+				);
 		}
 	};
 
-	/**
-	 * Mount point for extension tabs (e.g., Updatronix Pro).
-	 *
-	 * Reads the renderer from the global Pro panel registry
-	 * (window.updatronixProPanelRegistry by default). The renderer
-	 * signature is (mountEl: HTMLElement) => (() => void) | undefined.
-	 * Returns an empty div when no extension is active.
-	 *
-	 * @param {{slug: string}} props Component props.
-	 * @return {import('react').JSX.Element} Mount-point div for the extension tab content.
-	 */
-	function ProTabMount( { slug } ) {
-		const mountRef = useRef( null );
-		const [ renderError, setRenderError ] = useState( null );
-
-		useEffect( () => {
-			setRenderError( null );
-
-			if ( ! window.updatronixSettings?.isPro ) {
-				return undefined;
-			}
-			const globalName = window.updatronixSettings.proPanelRegistryGlobal;
-			if ( typeof globalName !== 'string' || ! globalName ) {
-				return undefined;
-			}
-			const registry = window[ globalName ];
-			if ( ! registry || typeof registry !== 'object' ) {
-				return undefined;
-			}
-			const render = registry[ slug ];
-			if ( typeof render !== 'function' || ! mountRef.current ) {
-				return undefined;
-			}
-
-			try {
-				const cleanup = render( mountRef.current );
-
-				return () => {
-					if ( typeof cleanup === 'function' ) {
-						cleanup();
-					}
-				};
-			} catch ( e ) {
-				// eslint-disable-next-line no-console
-				console.error( 'Updatronix Pro tab render error:', e );
-				setRenderError(
-					e?.message || __( 'An error occurred.', 'updatronix' )
-				);
-				return undefined;
-			}
-		}, [ slug ] );
-
-		if ( renderError ) {
-			return (
-				<div className="updatronix-settings-form" role="alert">
-					<Notice status="error" isDismissible={ false }>
-						<p>{ renderError }</p>
-					</Notice>
-				</div>
-			);
-		}
-
-		return (
-			<div
-				ref={ mountRef }
-				id={ `updatronix-pro-tab-${ slug }` }
-				className="updatronix-settings-form"
-			/>
-		);
-	}
-
 	return (
-		<div className="updatronix-row">
-			<section className="updatronix-main">
-				<div className="updatronix-notices">
-					<Notices />
-				</div>
-				<div className="updatronix-panel">
-					<Tabs
-						orientation="vertical"
-						selectedTabId={ selectedTabId }
-						onSelect={ handleSelectTab }
-					>
-						<Tabs.TabList
-							label={ __(
-								'Updatronix settings sections',
-								'updatronix'
-							) }
-						>
-							{ tabs.map( ( tab ) => (
-								<Tabs.Tab
-									key={ tab.slug }
-									tabId={ tab.slug }
-									title={ tab.label }
-									icon={ resolveTabIcon( tab ) }
-								>
-									{ tab.label }
-								</Tabs.Tab>
-							) ) }
-						</Tabs.TabList>
-						{ tabs.map( ( tab ) => (
-							<Tabs.TabPanel key={ tab.slug } tabId={ tab.slug }>
-								{ renderTabPanel( tab ) }
-							</Tabs.TabPanel>
-						) ) }
-					</Tabs>
-				</div>
-			</section>
-		</div>
+		<AppShell
+			destination={ destination }
+			destinations={ destinations }
+			onNavigate={ navigate }
+		>
+			<div className="updatronix-notices">
+				<Notices />
+			</div>
+			{ renderDestination() }
+		</AppShell>
 	);
 };
