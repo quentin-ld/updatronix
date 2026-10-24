@@ -287,6 +287,8 @@ final class Updatronix_Cron {
 	 * @return void
 	 */
 	public static function prime_unified_discovery_before_core(): void {
+		do_action( 'updatronix_before_update_check' );
+
 		if ( ! self::is_unified_schedule_active() ) {
 			return;
 		}

@@ -32,7 +32,7 @@ document that owns its contract. Use this table to open one `/architect` or
 | `P1` | Done. Four destinations, the Pro panel error boundary, and multisite capability routing. |
 | `P2` | Done. License inactive/active states, six features, development and decryption states, activation and deactivation. |
 | `P3` | Done. Protection, update queue, recently blocked, expanded settings, and the license-aware shield API. |
-| `P4` | Partial. Chain storage, validation, REST, and the reference page; execution integration (`P4-04`) remains. |
+| `P4` | Done. Chain storage, validation, REST, reference page, and the execution runner. A live update run was not exercised. |
 | `P5` | Done. Brand, colors, logo upload, replacement switches, previews, reset, and admin/rail branding. |
 | `P6` | Done as gates. Queue list, Advanced exports, and Development tools are explicitly deferred under `D-14`; no separate screens. |
 

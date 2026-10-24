@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | Edition | Pro |
-| Status | Partial. Chain storage, validation, and the reference page are implemented; execution integration remains. |
+| Status | Implemented. Chain storage, validation, the reference page, and the execution runner. A live update run was not exercised. |
 | Rail | Automations · `update-flow` |
 | Design | [`../reference/screens/src/screens/UpdateFlow.jsx`](../reference/screens/src/screens/UpdateFlow.jsx) |
 | Plan tasks | `P4-01` to `P4-04` |

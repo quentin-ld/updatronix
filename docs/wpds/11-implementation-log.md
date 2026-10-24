@@ -559,3 +559,29 @@ The export modal still uses the legacy `Modal` and core controls. It works and k
 
 1. Free `F5`/`F6`.
 2. `P4-04`: flow execution.
+
+## 2026-10-24 · Update Flow execution (P4-04)
+
+### What landed
+
+- Free fires `updatronix_before_update_check` before the regular update check.
+- Pro's `Updatronix_Update_Flow_Runner` acquires a five-minute lock, walks the
+  enabled chains top to bottom, and updates plugin, theme, or core items only
+  when the update transient offers one. It stops at the first failure and
+  writes each successful or failed step to the update log with the chain name.
+- The runner is gated by the active license and uses WordPress's own
+  `Plugin_Upgrader`, `Theme_Upgrader`, and `Core_Upgrader` with the automatic
+  skin.
+
+### Verification
+
+- Pro PHPStan is clean; 200 PHPUnit tests and 612 assertions pass; Free PHPUnit
+  tests pass.
+- A live update run was not exercised: the test site has no pending update
+  offers, and forcing one would modify installed code. The runner and its
+  failure/logging paths are code-reviewed and PHPStan-checked.
+
+### Next
+
+1. Free `F5`/`F6`.
+2. Release candidate authorization.
