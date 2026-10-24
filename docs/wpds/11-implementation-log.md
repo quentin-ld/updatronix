@@ -273,3 +273,27 @@ The export modal still uses the legacy `Modal` and core controls. It works and k
 1. `R5`: Documentation and Support page-header meta.
 2. `F4-01`: Health.
 3. `P2`–`P5`: the Pro screens.
+
+## 2026-10-24 · Documentation and Support conformance (R5)
+
+### What landed
+
+- Documentation has its own `PageHeader` with the `3 guides` meta, the
+  three-column card grid, the `Read guide` footer, the Pro icon treatment, and
+  the closing note that links to Support.
+- Support has its own `PageHeader`, the numbered `Before you post` section, and
+  the separate WordPress.org forum card with the CTA, documentation link, and
+  privacy note.
+- The shell header is hidden for both destinations so each page owns its header.
+
+### Verification
+
+- `npm run lint`, `npm run lint:css`, `npm run build`, and `npm test` (12/12)
+  pass.
+- Browser pass: Documentation shows the header meta, three cards, and the
+  Support link; Support shows the numbered steps and the forum card.
+
+### Next
+
+1. `F4-01`: Health.
+2. `P2`–`P5`: the Pro screens.

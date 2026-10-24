@@ -6,10 +6,12 @@
 
 import { __ } from '@wordpress/i18n';
 
+import PageHeader from '../shell/PageHeader';
+import { getTabUrl } from '../shell/routes';
 import wpds from '../shell/wpds';
 
 const { Card, Icon, Text } = wpds.ui;
-const { code, external, page, starFilled } = wpds.icons;
+const { arrowRight, code, external, page, starFilled } = wpds.icons;
 
 const GUIDES = [
 	{
@@ -48,66 +50,113 @@ const GUIDES = [
 /**
  * Render the Documentation destination.
  *
+ * @param {Object}                 props              Component props.
+ * @param {Object}                 props.destination  Active destination.
+ * @param {(slug: string) => void} [props.onNavigate] Navigation callback.
  * @return {import('react').JSX.Element} Documentation page.
  */
-export default function DocumentationPage() {
+export default function DocumentationPage( { destination, onNavigate } ) {
 	return (
-		<div className="updatronix-doc-grid">
-			{ GUIDES.map( ( guide ) => (
-				<a
-					key={ guide.href }
-					className="updatronix-doc-card"
-					href={ guide.href }
-					target="_blank"
-					rel="noopener noreferrer"
-				>
-					<Card.Root>
-						<Card.Content>
-							<div className="updatronix-doc-head">
-								<Icon
-									icon={ guide.icon }
-									size={ 24 }
-									aria-hidden="true"
-								/>
-								<Text
-									variant="body-sm"
-									className="updatronix-doc-kicker"
-								>
-									{ guide.kicker }
-								</Text>
-								<Icon
-									icon={ external }
-									size={ 16 }
-									aria-hidden="true"
-								/>
-							</div>
-							<Text
-								variant="body-lg"
-								className="updatronix-doc-title"
-							>
-								{ guide.title }
-							</Text>
-							<Text
-								variant="body-sm"
-								className="updatronix-doc-description"
-							>
-								{ guide.description }
-							</Text>
-							{ guide.pro && (
-								<Text
-									variant="body-sm"
-									className="updatronix-doc-pro"
-								>
-									{ __( 'Pro', 'updatronix' ) }
-								</Text>
-							) }
-							<span className="screen-reader-text">
-								{ __( 'Opens in a new tab.', 'updatronix' ) }
-							</span>
-						</Card.Content>
-					</Card.Root>
-				</a>
-			) ) }
-		</div>
+		<>
+			<PageHeader
+				destination={ destination }
+				meta={ [ { label: __( '3 guides', 'updatronix' ) } ] }
+			/>
+
+			<div className="updatronix-page-body">
+				<div className="updatronix-doc-grid">
+					{ GUIDES.map( ( guide ) => (
+						<a
+							key={ guide.href }
+							className="updatronix-doc-card"
+							href={ guide.href }
+							target="_blank"
+							rel="noopener noreferrer"
+							aria-label={ `${ guide.title } — ${ __(
+								'opens in a new tab',
+								'updatronix'
+							) }` }
+						>
+							<Card.Root className="updatronix-doc-card-root">
+								<Card.Content className="updatronix-doc-card-content">
+									<div className="updatronix-doc-top">
+										<span
+											className={ `updatronix-doc-icon${
+												guide.pro
+													? ' updatronix-doc-icon--pro'
+													: ''
+											}` }
+										>
+											<Icon
+												icon={ guide.icon }
+												size={ 24 }
+												aria-hidden="true"
+											/>
+										</span>
+										<Icon
+											icon={ external }
+											size={ 18 }
+											aria-hidden="true"
+										/>
+									</div>
+
+									<div className="updatronix-doc-copy">
+										<Text
+											variant="body-sm"
+											className="updatronix-doc-kicker"
+										>
+											{ guide.kicker }
+										</Text>
+										<Card.Title
+											role="heading"
+											aria-level={ 2 }
+											className="updatronix-doc-title"
+										>
+											{ guide.title }
+										</Card.Title>
+										<Text
+											variant="body-md"
+											className="updatronix-doc-description"
+										>
+											{ guide.description }
+										</Text>
+									</div>
+
+									<div className="updatronix-doc-foot">
+										<span className="updatronix-doc-read">
+											{ __( 'Read guide', 'updatronix' ) }
+											<Icon
+												icon={ arrowRight }
+												size={ 16 }
+												aria-hidden="true"
+											/>
+										</span>
+									</div>
+								</Card.Content>
+							</Card.Root>
+						</a>
+					) ) }
+				</div>
+
+				<div className="updatronix-surface-note">
+					<Text variant="body-sm">
+						{ __(
+							'All three guides open on holdmywp.com in a new tab. Still stuck?',
+							'updatronix'
+						) }{ ' ' }
+						<a
+							href={ getTabUrl( 'support' ) }
+							onClick={ ( event ) => {
+								event.preventDefault();
+								onNavigate?.( 'support' );
+							} }
+						>
+							{ __( 'Visit Support', 'updatronix' ) }
+						</a>
+						.
+					</Text>
+				</div>
+			</div>
+		</>
 	);
 }

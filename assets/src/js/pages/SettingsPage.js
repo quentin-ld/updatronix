@@ -128,6 +128,8 @@ export const SettingsPage = () => {
 		'schedule',
 		'settings',
 		'auto-updates',
+		'documentation',
+		'support',
 	].includes( destination.slug );
 	const retentionDays = Number( pluginSettings.retention_days ) || 90;
 
@@ -182,9 +184,19 @@ export const SettingsPage = () => {
 			case 'health':
 				return <HealthPage onNavigate={ navigate } />;
 			case 'documentation':
-				return <DocumentationPage />;
+				return (
+					<DocumentationPage
+						destination={ destination }
+						onNavigate={ navigate }
+					/>
+				);
 			case 'support':
-				return <SupportPage onNavigate={ navigate } />;
+				return (
+					<SupportPage
+						destination={ destination }
+						onNavigate={ navigate }
+					/>
+				);
 			default:
 				if ( destination.edition === 'pro' ) {
 					return (
