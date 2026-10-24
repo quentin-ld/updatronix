@@ -12,18 +12,15 @@
  * on it. One flow, not a suite. E2E is expensive and flaky, and a second test
  * duplicating the integration suite would cost more than it caught.
  *
- * The page is a top-level menu registered by `add_menu_page()` in
+ * The page is a Tools submenu registered by `add_management_page()` in
  * `inc/admin/menu.php`. Its **slug** is `updatronix`; `updatronix_options_page`
- * is the *callback* that renders it, and passing it as `page=` asks WordPress
- * for a page that does not exist -- which it answers with the same
- * "Sorry, you are not allowed to access this page." it uses for a real
- * capability failure. That cost a long time: it reads as a permissions problem
- * and is a wrong URL.
+ * is the callback that renders the WPDS shell, and the page URL is
+ * `tools.php?page=updatronix`. Asking `admin.php` for the slug returns the
+ * generic "Sorry, you are not allowed to access this page." that reads like a
+ * capability failure but is a wrong URL.
  *
  * The menu requires `manage_updatronix`, which the plugin grants to the
- * administrator role, so the account does not need anything special. The first
- * version of this file also guessed `tools.php` and a dashboard widget,
- * neither of which exists.
+ * administrator role, so the account does not need anything special.
  *
  * What would make it fail: a PHP fatal in a template under `inc/admin/`, the
  * enqueue hook being unregistered, or the capability changing so an
@@ -36,13 +33,13 @@ test.describe( 'the admin page', () => {
 		admin,
 		page,
 	} ) => {
-		await admin.visitAdminPage( 'admin.php', 'page=updatronix' );
+		await admin.visitAdminPage( 'tools.php', 'page=updatronix&tab=logs' );
 
 		await expect( page.locator( '#updatronix-settings' ) ).toBeVisible();
 	} );
 
 	test( 'enqueues the plugin bundle', async ( { admin, page } ) => {
-		await admin.visitAdminPage( 'admin.php', 'page=updatronix' );
+		await admin.visitAdminPage( 'tools.php', 'page=updatronix&tab=logs' );
 
 		// The bundle is built by `bin/harness build`. If the enqueue is
 		// unregistered this finds nothing, which no PHP test would notice.

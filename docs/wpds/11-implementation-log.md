@@ -609,8 +609,11 @@ The export modal still uses the legacy `Modal` and core controls. It works and k
   recorded, not changed.
 - Free PHPStan is clean and 213 PHPUnit tests pass; Pro PHPStan is clean and
   200 PHPUnit tests pass.
-- E2E, mutation testing, a full screen-reader pass, and a manual Network Admin
-  pass were not available in this environment.
+- E2E was attempted after pointing the smoke at `tools.php`; Chromium cannot
+  launch in this environment because its runtime cannot load `libnspr4.so`.
+  The manual browser passes cover the same page.
+- Mutation testing, a full screen-reader pass, and a manual Network Admin pass
+  were not available in this environment.
 
 ### Next
 
