@@ -33,6 +33,7 @@ legacy WordPress admin shell to the WordPress Design System (WPDS).
 | [`09-acceptance.md`](09-acceptance.md) | Global acceptance checklist and per-phase gates. |
 | [`10-task-index.md`](10-task-index.md) | Task IDs, sequencing, and the document that owns each one. |
 | [`11-implementation-log.md`](11-implementation-log.md) | What landed, what was verified, and what remains. |
+| [`12-design-conformance-audit.md`](12-design-conformance-audit.md) | Screen-by-screen comparison against the Open Design reference and the remediation waves. |
 | [`reference/`](reference/) | Vendored field guide and screen sources. Screenshots are excluded. |
 
 ## Scope at a glance
@@ -56,6 +57,8 @@ These six rules come from the field guide. They are checkable in review.
 4. **Navigation lives in the rail.** Eleven destinations in four groups. Nested tabs stay inside the page.
 5. **One save model per surface.** Settings, Schedule, and Auto updates use manual save. The save bar is sticky and `Ctrl+S` / `Cmd+S` works.
 6. **Native chrome stays native.** The WordPress admin menu, footer, and global notices are outside the plugin surface.
+
+**Reference comparison is part of every task.** Open the reference screen source and the rendered Open Design screen before implementing, and again before marking the task done. A screen that differs in layout, copy, controls, or states is not done without a recorded decision. See [`12-design-conformance-audit.md`](12-design-conformance-audit.md).
 
 ## How to use this record
 

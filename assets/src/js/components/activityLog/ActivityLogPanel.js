@@ -5,7 +5,13 @@
  * WPDS dialogs. The REST surface and the filter registry are unchanged.
  */
 
-import { useMemo, useState, useEffect, useCallback } from '@wordpress/element';
+import {
+	useMemo,
+	useState,
+	useEffect,
+	useCallback,
+	useRef,
+} from '@wordpress/element';
 import { DataViews, filterSortAndPaginate } from '@wordpress/dataviews';
 import { __, sprintf } from '@wordpress/i18n';
 
@@ -106,6 +112,7 @@ export function ActivityLogPanel( { loggingEnabled = true, logsVersion = 0 } ) {
 	const [ toDelete, setToDelete ] = useState( null );
 	const [ deleteError, setDeleteError ] = useState( '' );
 	const [ exportOpen, setExportOpen ] = useState( false );
+	const exportTriggerRef = useRef( null );
 
 	const [ view, setView ] = useState( {
 		type: 'table',
@@ -416,18 +423,20 @@ export function ActivityLogPanel( { loggingEnabled = true, logsVersion = 0 } ) {
 							label={ __( 'Search logs', 'updatronix' ) }
 						/>
 						<DataViews.FiltersToggle />
-						<Button
-							variant="outline"
-							tone="neutral"
-							onClick={ () => setExportOpen( true ) }
-						>
-							<Icon
-								icon={ upload }
-								size={ 16 }
-								aria-hidden="true"
-							/>
-							{ __( 'Export logs', 'updatronix' ) }
-						</Button>
+						<span ref={ exportTriggerRef }>
+							<Button
+								variant="outline"
+								tone="neutral"
+								onClick={ () => setExportOpen( true ) }
+							>
+								<Icon
+									icon={ upload }
+									size={ 16 }
+									aria-hidden="true"
+								/>
+								{ __( 'Export logs', 'updatronix' ) }
+							</Button>
+						</span>
 						<div className="updatronix-log-toolbar-end">
 							<DataViews.ViewConfig />
 						</div>
@@ -507,6 +516,7 @@ export function ActivityLogPanel( { loggingEnabled = true, logsVersion = 0 } ) {
 					onClose={ () => setExportOpen( false ) }
 					view={ view }
 					logs={ logs }
+					exportTriggerRef={ exportTriggerRef }
 				/>
 			) }
 		</div>

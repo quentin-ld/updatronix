@@ -4,15 +4,8 @@
 
 import { useCallback, useMemo, useState } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
-import {
-	Modal,
-	Button,
-	ToggleControl,
-	CheckboxControl,
-	Notice,
-} from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
-import { copySmall } from '@wordpress/icons';
+import wpds from '../../shell/wpds';
 import { normalizeViewForExport, summarizeView } from './logFilters';
 import {
 	copyFormattedToClipboard,
@@ -24,6 +17,18 @@ import {
 	saveExportPreferences,
 	columnsToApiPayload,
 } from './exportPreferences';
+
+const { Button, CheckboxControl, Dialog, Icon, Notice, SwitchControl, Text } =
+	wpds.ui;
+const { copy } = wpds.icons;
+
+/** Map export notice statuses to WPDS Notice intents. */
+const NOTICE_INTENTS = {
+	error: 'error',
+	warning: 'warning',
+	success: 'success',
+	info: 'info',
+};
 
 /** @type {ReadonlyArray<{ id: string, label: string }>} */
 const COLUMN_OPTIONS = [
@@ -338,165 +343,230 @@ export function ExportLogsModal( {
 	}
 
 	return (
-		<Modal
-			className="updatronix-export-modal"
-			title={ __( 'Export update logs', 'updatronix' ) }
-			onRequestClose={ handleClose }
-			shouldCloseOnClickOutside={ false }
-			focusOnMount="firstContentElement"
-			aria-describedby="updatronix-export-modal-desc"
+		<Dialog.Root
+			open={ isOpen }
+			onOpenChange={ ( open ) => {
+				if ( ! open ) {
+					handleClose();
+				}
+			} }
 		>
-			<p id="updatronix-export-modal-desc">
-				{ __(
-					'Generate a plain-text summary of the logs that match your current filters and sort. Filters you have not set include all values.',
-					'updatronix'
-				) }
-			</p>
-
-			<div className="updatronix-export-modal__filters-section">
-				<p className="updatronix-export-modal__section-title">
-					<strong>{ __( 'Filters applied', 'updatronix' ) }</strong>
-				</p>
-				{ summaryParts.dimensions.length === 0 ? (
-					<p className="updatronix-export-modal__filters-empty">
-						{ __(
-							'No filters applied — all logs in the current view are included.',
-							'updatronix'
-						) }
-					</p>
-				) : (
-					<ul className="updatronix-export-modal__filters">
-						{ summaryParts.dimensions.map(
-							( { key, label, text } ) => (
-								<li
-									key={ key }
-									className="updatronix-export-modal__filter-chip"
-								>
-									<span className="updatronix-export-modal__filter-chip-name">
-										{ label }
-									</span>
-									<span className="updatronix-export-modal__filter-chip-value">
-										{ text }
-									</span>
-								</li>
-							)
-						) }
-					</ul>
-				) }
-				{ merge ? null : (
-					<p className="updatronix-export-modal__sort">
-						<strong>{ summaryParts.sortLine.label }:</strong>{ ' ' }
-						{ summaryParts.sortLine.text }
-					</p>
-				) }
-			</div>
-
-			<ToggleControl
-				label={ __( 'Merge logs for the same item', 'updatronix' ) }
-				help={ __(
-					'Combine repeated updates of the same plugin, theme, core release, or translation into a single line with the earliest and latest versions.',
-					'updatronix'
-				) }
-				checked={ merge }
-				onChange={ handleMergeChange }
-				disabled={ busy }
-				__nextHasNoMarginBottom
-			/>
-
-			<fieldset className="updatronix-export-modal__columns">
-				<legend>{ __( 'Report columns', 'updatronix' ) }</legend>
-				<p className="updatronix-export-modal__columns-help">
-					{ __(
-						'Choose which parts of the report to include. Element, version, and date columns are always shown.',
-						'updatronix'
-					) }
-				</p>
-				<div className="updatronix-export-modal__columns-grid">
-					{ COLUMN_OPTIONS.map( ( { id, label } ) => (
-						<CheckboxControl
-							key={ id }
-							label={ label }
-							checked={ columns[ id ] }
-							onChange={ ( checked ) =>
-								handleColumnChange( id, checked )
-							}
-							disabled={ busy }
-							__nextHasNoMarginBottom
-						/>
-					) ) }
-				</div>
-			</fieldset>
-
-			<div className="updatronix-export-modal__actions">
-				<Button
-					variant="primary"
-					onClick={ runExport }
-					isBusy={ busy }
-					disabled={ busy }
-					aria-busy={ busy }
-				>
-					{ busy
-						? __( 'Generating the export…', 'updatronix' )
-						: __( 'Generate export', 'updatronix' ) }
-				</Button>
-			</div>
-
-			{ notice ? (
-				<Notice status={ notice.status } isDismissible={ false }>
-					{ notice.message }
-				</Notice>
-			) : null }
-
-			<div
-				aria-live="polite"
-				className="screen-reader-text"
-				key={ generatedStamp }
-			>
-				{ liveRegion }
-			</div>
-
-			{ notice?.status === 'info' ? null : (
-				<>
-					<div className="updatronix-export-modal__output">
-						<label
-							className="components-textarea-control__label"
-							htmlFor="updatronix-export-output"
+			<Dialog.Popup size="large" className="updatronix-export-modal">
+				<Dialog.Header>
+					<Dialog.Title>
+						{ __( 'Export update logs', 'updatronix' ) }
+					</Dialog.Title>
+					<Dialog.CloseIconButton
+						label={ __( 'Close', 'updatronix' ) }
+					/>
+				</Dialog.Header>
+				<Dialog.Content>
+					<div className="updatronix-export-dialog__body">
+						<Text
+							variant="body-sm"
+							className="updatronix-muted"
+							id="updatronix-export-modal-desc"
 						>
-							{ __( 'Export output', 'updatronix' ) }
-						</label>
-						<p className="components-base-control__help">
 							{ __(
-								'Copy the report to save it. It expires after 15 minutes.',
+								'Generate a plain-text summary of the logs that match your current filters and sort. Filters you have not set include all values.',
 								'updatronix'
 							) }
-						</p>
-						<textarea
-							id="updatronix-export-output"
-							className="components-textarea-control__input"
-							value={ body }
-							readOnly
-							rows={ 14 }
+						</Text>
+
+						<div className="updatronix-export-modal__filters-section">
+							<p className="updatronix-export-modal__section-title">
+								<strong>
+									{ __( 'Filters applied', 'updatronix' ) }
+								</strong>
+							</p>
+							{ summaryParts.dimensions.length === 0 ? (
+								<p className="updatronix-export-modal__filters-empty">
+									{ __(
+										'No filters applied — all logs in the current view are included.',
+										'updatronix'
+									) }
+								</p>
+							) : (
+								<ul className="updatronix-export-modal__filters">
+									{ summaryParts.dimensions.map(
+										( { key, label, text } ) => (
+											<li
+												key={ key }
+												className="updatronix-export-modal__filter-chip"
+											>
+												<span className="updatronix-export-modal__filter-chip-name">
+													{ label }
+												</span>
+												<span className="updatronix-export-modal__filter-chip-value">
+													{ text }
+												</span>
+											</li>
+										)
+									) }
+								</ul>
+							) }
+							{ merge ? null : (
+								<p className="updatronix-export-modal__sort">
+									<strong>
+										{ summaryParts.sortLine.label }:
+									</strong>{ ' ' }
+									{ summaryParts.sortLine.text }
+								</p>
+							) }
+						</div>
+
+						<SwitchControl
+							label={ __(
+								'Merge logs for the same item',
+								'updatronix'
+							) }
+							description={ __(
+								'Combine repeated updates of the same plugin, theme, core release, or translation into a single line with the earliest and latest versions.',
+								'updatronix'
+							) }
+							checked={ merge }
+							onCheckedChange={ handleMergeChange }
+							disabled={ busy }
 						/>
-					</div>
-					<div className="updatronix-export-modal__copy-actions">
-						<Button
-							variant="secondary"
-							icon={ copySmall }
-							onClick={ () => copyExport( 'formatted' ) }
-							disabled={ ! hasExportBody || busy }
+
+						<fieldset className="updatronix-export-modal__columns">
+							<legend>
+								{ __( 'Report columns', 'updatronix' ) }
+							</legend>
+							<p className="updatronix-export-modal__columns-help">
+								{ __(
+									'Choose which parts of the report to include. Element, version, and date columns are always shown.',
+									'updatronix'
+								) }
+							</p>
+							<div className="updatronix-export-modal__columns-grid">
+								{ COLUMN_OPTIONS.map( ( { id, label } ) => (
+									<CheckboxControl
+										key={ id }
+										label={ label }
+										checked={ columns[ id ] }
+										onCheckedChange={ ( checked ) =>
+											handleColumnChange( id, checked )
+										}
+										disabled={ busy }
+									/>
+								) ) }
+							</div>
+						</fieldset>
+
+						<div className="updatronix-export-modal__actions">
+							<Button
+								variant="solid"
+								tone="brand"
+								onClick={ runExport }
+								disabled={ busy }
+								aria-busy={ busy }
+							>
+								{ busy
+									? __(
+											'Generating the export…',
+											'updatronix'
+										)
+									: __( 'Generate export', 'updatronix' ) }
+							</Button>
+						</div>
+
+						{ notice ? (
+							<Notice.Root
+								intent={
+									NOTICE_INTENTS[ notice.status ] || 'info'
+								}
+							>
+								<Notice.Description>
+									{ notice.message }
+								</Notice.Description>
+							</Notice.Root>
+						) : null }
+
+						<div
+							aria-live="polite"
+							className="screen-reader-text"
+							key={ generatedStamp }
 						>
-							{ __( 'Copy with formatting', 'updatronix' ) }
-						</Button>
-						<Button
-							variant="tertiary"
-							onClick={ () => copyExport( 'plain' ) }
-							disabled={ ! hasExportBody || busy }
-						>
-							{ __( 'Copy without formatting', 'updatronix' ) }
-						</Button>
+							{ liveRegion }
+						</div>
+
+						{ notice?.status === 'info' ? null : (
+							<>
+								<div className="updatronix-export-modal__output">
+									<Text variant="body-md">
+										{ __( 'Export output', 'updatronix' ) }
+									</Text>
+									<Text
+										variant="body-sm"
+										className="updatronix-muted"
+									>
+										{ __(
+											'Copy the report to save it. It expires after 15 minutes.',
+											'updatronix'
+										) }
+									</Text>
+									{ hasExportBody ? (
+										<pre className="updatronix-export-output">
+											{ body }
+										</pre>
+									) : (
+										<Text
+											variant="body-sm"
+											className="updatronix-muted"
+										>
+											{ __(
+												'Generate the export to preview it here.',
+												'updatronix'
+											) }
+										</Text>
+									) }
+								</div>
+								<div className="updatronix-export-modal__copy-actions">
+									<Button
+										variant="outline"
+										tone="neutral"
+										onClick={ () =>
+											copyExport( 'formatted' )
+										}
+										disabled={ ! hasExportBody || busy }
+									>
+										<Icon
+											icon={ copy }
+											size={ 16 }
+											aria-hidden="true"
+										/>
+										{ __(
+											'Copy with formatting',
+											'updatronix'
+										) }
+									</Button>
+									<Button
+										variant="outline"
+										tone="neutral"
+										onClick={ () => copyExport( 'plain' ) }
+										disabled={ ! hasExportBody || busy }
+									>
+										{ __(
+											'Copy without formatting',
+											'updatronix'
+										) }
+									</Button>
+								</div>
+							</>
+						) }
 					</div>
-				</>
-			) }
-		</Modal>
+				</Dialog.Content>
+				<Dialog.Footer>
+					<Button
+						variant="outline"
+						tone="neutral"
+						onClick={ handleClose }
+					>
+						{ __( 'Close', 'updatronix' ) }
+					</Button>
+				</Dialog.Footer>
+			</Dialog.Popup>
+		</Dialog.Root>
 	);
 }

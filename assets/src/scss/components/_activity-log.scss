@@ -39,6 +39,19 @@
 
 .updatronix-export-modal {
 
+	// The Dialog content wrapper carries the vertical rhythm; the old
+	// core Modal class no longer exists.
+	.updatronix-export-dialog__body {
+		display: flex;
+		flex-direction: column;
+		gap: var(--wpds-dimension-gap-lg);
+	}
+
+	.updatronix-export-dialog__body > * {
+		margin-bottom: 0;
+		margin-top: 0;
+	}
+
 	// Drive the vertical rhythm from a single section gap on the scroll
 	// container instead of the per-element default margins, so every block in
 	// the modal is evenly spaced. Child margins are zeroed so only the gap

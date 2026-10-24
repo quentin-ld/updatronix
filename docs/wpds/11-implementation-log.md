@@ -120,3 +120,33 @@ The export modal still uses the legacy `Modal` and core controls. It works and k
 1. Migrate the export modal to the WPDS `Dialog` and controls.
 2. `F3-03`: migrate auto updates to cards and one manual save.
 3. `F5-01`: remove the legacy shell styles and the unused log card layout helpers.
+
+## 2026-10-24 · Export modal and design-conformance audit
+
+### What landed
+
+- The export modal now uses the WPDS `Dialog`, `SwitchControl`,
+  `CheckboxControl`, `Notice`, and `Button`, with a `<pre>` output preview.
+  `F3-02` is complete.
+- The reference comparison found that the page header, Schedule, Settings, and
+  Update log diverge from the Open Design screens. The audit is
+  [`12-design-conformance-audit.md`](12-design-conformance-audit.md).
+- A mandatory design-conformance gate was added to
+  [`09-acceptance.md`](09-acceptance.md), [`10-task-index.md`](10-task-index.md),
+  and the README.
+
+### What is not conformant
+
+| Screen | Main deviation |
+|---|---|
+| Page header | No meta badges or per-screen actions. |
+| Schedule | Missing the hold field, Next-run section, hold table, header meta, and actions; hour/minute inputs replace the preferred-time select. |
+| Settings | Missing the Data card, chip recipients, always-on recovery row, and notes; has extra controls. |
+| Update log | Table instead of the reference activity feed with day grouping and a section header. |
+
+### Next
+
+1. `R1`: add the page-header meta/action slot and apply it to the three screens.
+2. `R2`: rewrite Schedule to the reference composition.
+3. `R3`: rewrite Settings, including the uninstall option.
+4. `R4`: restore the Update log activity layout and preview.

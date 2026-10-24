@@ -1,5 +1,20 @@
 # Acceptance
 
+## Design-conformance gate
+
+Every screen task begins and ends with a comparison against the reference:
+
+1. Open `docs/wpds/reference/screens/src/screens/<Screen>.jsx`.
+2. Open the rendered Open Design screen at
+   `open-design-project/2dc80110-…/screens/<screen>.html`.
+3. List the reference's sections, controls, copy, meta, actions, and states.
+4. Implement against that list.
+5. Record the comparison and any deliberate deviation in the task log and in
+   [`12-design-conformance-audit.md`](12-design-conformance-audit.md).
+
+A screen is not done while it differs in layout, copy, controls, or states
+without a recorded decision. Build and unit tests alone are not acceptance.
+
 ## The twelve-item migration checklist
 
 This is the release gate. Every item is checkable without a design debate. If a
