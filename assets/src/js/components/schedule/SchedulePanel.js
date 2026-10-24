@@ -8,11 +8,13 @@ import { memo, useEffect, useMemo, useRef, useState } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 
 import SaveBar from '../../shell/SaveBar';
+import PageHeader from '../../shell/PageHeader';
 import Section from '../../shell/Section';
 import wpds from '../../shell/wpds';
 import { ConstantNotices } from '../autoUpdates/ConstantNotices';
 
-const { InputControl, Notice, SelectControl, Stack, SwitchControl } = wpds.ui;
+const { Button, InputControl, Notice, SelectControl, Stack, SwitchControl } =
+	wpds.ui;
 
 const SCHED_FALLBACK = {
 	update_check: {
@@ -80,6 +82,7 @@ function getSchedule( settings ) {
  * Render the Schedule destination.
  *
  * @param {Object}                              props                         Component props.
+ * @param {Object}                              props.destination             Active destination.
  * @param {Object}                              props.settings                Current settings including `schedule`.
  * @param {(settings: Object) => void}          props.setSettings             Setter.
  * @param {(settings: Object) => Promise<void>} props.saveSettings            Async save.
@@ -90,6 +93,7 @@ function getSchedule( settings ) {
  * @return {import('react').JSX.Element} Schedule screen.
  */
 export const SchedulePanel = memo( function SchedulePanelComponent( {
+	destination,
 	settings,
 	setSettings,
 	saveSettings,
@@ -244,6 +248,35 @@ export const SchedulePanel = memo( function SchedulePanelComponent( {
 
 	return (
 		<div className="updatronix-schedule">
+			<PageHeader
+				destination={ destination }
+				meta={
+					scheduleMeta.update_check_next_human
+						? [
+								{
+									label: sprintf(
+										/* translators: %s: next scheduled check date/time. */
+										__( 'Next check: %s', 'updatronix' ),
+										scheduleMeta.update_check_next_human
+									),
+								},
+							]
+						: []
+				}
+				actions={
+					<Button
+						variant="solid"
+						tone="brand"
+						onClick={ handleSave }
+						disabled={ ! isDirty || saving }
+					>
+						{ saving
+							? __( 'Saving…', 'updatronix' )
+							: __( 'Save changes', 'updatronix' ) }
+					</Button>
+				}
+			/>
+
 			<Section
 				title={ __( 'Update checks', 'updatronix' ) }
 				description={ __(

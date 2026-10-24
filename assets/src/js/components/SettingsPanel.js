@@ -8,6 +8,7 @@ import { memo, useEffect, useRef, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 
 import SaveBar from '../shell/SaveBar';
+import PageHeader from '../shell/PageHeader';
 import Section from '../shell/Section';
 import wpds from '../shell/wpds';
 import { useLogs } from '../hooks/useLogs';
@@ -83,6 +84,7 @@ function editableSignature( settings ) {
  * Render the Settings destination.
  *
  * @param {Object}                              props               Component props.
+ * @param {Object}                              props.destination   Active destination.
  * @param {Object}                              props.settings      Current settings.
  * @param {(settings: Object) => void}          props.setSettings   Setter for settings.
  * @param {(settings: Object) => Promise<void>} props.saveSettings  Async save.
@@ -91,6 +93,7 @@ function editableSignature( settings ) {
  * @return {import('react').JSX.Element} Settings screen.
  */
 export const SettingsPanel = memo( function SettingsPanelForm( {
+	destination,
 	settings,
 	setSettings,
 	saveSettings,
@@ -162,6 +165,21 @@ export const SettingsPanel = memo( function SettingsPanelForm( {
 
 	return (
 		<>
+			<PageHeader
+				destination={ destination }
+				actions={
+					<Button
+						variant="solid"
+						tone="brand"
+						onClick={ handleSave }
+						disabled={ ! isDirty || saving }
+					>
+						{ saving
+							? __( 'Saving…', 'updatronix' )
+							: __( 'Save changes', 'updatronix' ) }
+					</Button>
+				}
+			/>
 			<div className="updatronix-settings-destination">
 				<Section
 					title={ __( 'Logging', 'updatronix' ) }

@@ -16,6 +16,8 @@ import { DataViews, filterSortAndPaginate } from '@wordpress/dataviews';
 import { __, sprintf } from '@wordpress/i18n';
 
 import wpds from '../../shell/wpds';
+import PageHeader from '../../shell/PageHeader';
+import Section from '../../shell/Section';
 import { useLogs, getFilterValue } from '../../hooks/useLogs';
 import { buildFilterFields, PER_PAGE_SIZES } from './logFilters';
 import { LOG_TYPE_PREFIX } from './constants';
@@ -90,11 +92,18 @@ function getVersionLabel( item ) {
  * Render the update log destination.
  *
  * @param {Object}  props                       Component props.
+ * @param {Object}  props.destination           Active destination.
  * @param {boolean} [props.loggingEnabled=true] Whether update logging is enabled.
  * @param {number}  [props.logsVersion=0]       Incremented to trigger a logs refetch.
+ * @param {number}  [props.retentionDays=90]    Retention period for the header badge.
  * @return {import('react').JSX.Element} The update log screen.
  */
-export function ActivityLogPanel( { loggingEnabled = true, logsVersion = 0 } ) {
+export function ActivityLogPanel( {
+	destination,
+	loggingEnabled = true,
+	logsVersion = 0,
+	retentionDays = 90,
+} ) {
 	const {
 		logs,
 		total,
@@ -400,52 +409,75 @@ export function ActivityLogPanel( { loggingEnabled = true, logsVersion = 0 } ) {
 				</Notice.Root>
 			) }
 
-			<DataViews
-				getItemId={ ( item ) => String( item.id ) }
-				view={ view }
-				onChangeView={ handleChangeView }
-				fields={ fields }
-				data={ shownData }
-				actions={ actions }
-				isLoading={ loading }
-				paginationInfo={ paginationInfo }
-				defaultLayouts={ { table: {} } }
-				config={ { perPageSizes: PER_PAGE_SIZES } }
-				searchLabel={ __( 'Search update log', 'updatronix' ) }
-				empty={ __(
-					'No update logs yet. Entries appear after WordPress runs an update.',
+			<PageHeader
+				destination={ destination }
+				meta={ [
+					{
+						label: sprintf(
+							/* translators: %s: retention period in days. */
+							__( 'Retention %s days', 'updatronix' ),
+							retentionDays
+						),
+					},
+				] }
+			/>
+
+			<Section
+				title={ __( 'Recent updates', 'updatronix' ) }
+				description={ __(
+					'Search and filter the history, then open a record for the full process details.',
 					'updatronix'
 				) }
+				actions={
+					<span ref={ exportTriggerRef }>
+						<Button
+							variant="outline"
+							tone="neutral"
+							onClick={ () => setExportOpen( true ) }
+						>
+							<Icon
+								icon={ upload }
+								size={ 16 }
+								aria-hidden="true"
+							/>
+							{ __( 'Export logs', 'updatronix' ) }
+						</Button>
+					</span>
+				}
 			>
-				<>
-					<div className="updatronix-log-toolbar">
-						<DataViews.Search
-							label={ __( 'Search logs', 'updatronix' ) }
-						/>
-						<DataViews.FiltersToggle />
-						<span ref={ exportTriggerRef }>
-							<Button
-								variant="outline"
-								tone="neutral"
-								onClick={ () => setExportOpen( true ) }
-							>
-								<Icon
-									icon={ upload }
-									size={ 16 }
-									aria-hidden="true"
-								/>
-								{ __( 'Export logs', 'updatronix' ) }
-							</Button>
-						</span>
-						<div className="updatronix-log-toolbar-end">
-							<DataViews.ViewConfig />
+				<DataViews
+					getItemId={ ( item ) => String( item.id ) }
+					view={ view }
+					onChangeView={ handleChangeView }
+					fields={ fields }
+					data={ shownData }
+					actions={ actions }
+					isLoading={ loading }
+					paginationInfo={ paginationInfo }
+					defaultLayouts={ { table: {} } }
+					config={ { perPageSizes: PER_PAGE_SIZES } }
+					searchLabel={ __( 'Search update log', 'updatronix' ) }
+					empty={ __(
+						'No update logs yet. Entries appear after WordPress runs an update.',
+						'updatronix'
+					) }
+				>
+					<>
+						<div className="updatronix-log-toolbar">
+							<DataViews.Search
+								label={ __( 'Search logs', 'updatronix' ) }
+							/>
+							<DataViews.FiltersToggle />
+							<div className="updatronix-log-toolbar-end">
+								<DataViews.ViewConfig />
+							</div>
 						</div>
-					</div>
-					<DataViews.FiltersToggled className="dataviews-filters__container" />
-					<DataViews.Layout />
-					<DataViews.Footer />
-				</>
-			</DataViews>
+						<DataViews.FiltersToggled className="dataviews-filters__container" />
+						<DataViews.Layout />
+						<DataViews.Footer />
+					</>
+				</DataViews>
+			</Section>
 
 			<Dialog.Root
 				open={ Boolean( detail ) }

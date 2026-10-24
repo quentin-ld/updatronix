@@ -14,12 +14,13 @@ import { getTabUrl } from './routes';
 /**
  * Render the shell around one destination.
  *
- * @param {Object}                 props              Component props.
- * @param {Object}                 props.destination  Active destination.
- * @param {Array}                  props.destinations Destination list.
- * @param {(slug: string) => void} props.onNavigate   Navigation callback.
- * @param {Object}                 [props.actions]    Optional page-header actions.
- * @param {Object}                 props.children     Working surface.
+ * @param {Object}                 props                    Component props.
+ * @param {Object}                 props.destination        Active destination.
+ * @param {Array}                  props.destinations       Destination list.
+ * @param {(slug: string) => void} props.onNavigate         Navigation callback.
+ * @param {Object}                 [props.actions]          Optional page-header actions.
+ * @param {boolean}                [props.hideHeader=false] Hide the shell header when the page renders its own.
+ * @param {Object}                 props.children           Working surface.
  * @return {import('react').JSX.Element} Shell markup.
  */
 export default function AppShell( {
@@ -27,6 +28,7 @@ export default function AppShell( {
 	destinations,
 	onNavigate,
 	actions,
+	hideHeader = false,
 	children,
 } ) {
 	const titleRef = useRef( null );
@@ -60,49 +62,53 @@ export default function AppShell( {
 				className="updatronix-shell-main"
 				tabIndex={ -1 }
 			>
-				<header className="updatronix-page-header">
-					<nav
-						className="updatronix-breadcrumb"
-						aria-label={ __( 'Breadcrumb', 'updatronix' ) }
-					>
-						<a
-							href={ getTabUrl( 'logs' ) }
-							onClick={ ( event ) => {
-								event.preventDefault();
-								onNavigate( 'logs' );
-							} }
+				{ ! hideHeader && (
+					<header className="updatronix-page-header">
+						<nav
+							className="updatronix-breadcrumb"
+							aria-label={ __( 'Breadcrumb', 'updatronix' ) }
 						>
-							{ __( 'Updatronix', 'updatronix' ) }
-						</a>
-						<span aria-hidden="true">/</span>
-						<span aria-current="page">{ destination.label }</span>
-					</nav>
-
-					<div className="updatronix-page-headrow">
-						<div className="updatronix-page-heading">
-							<h1
-								className="updatronix-page-title"
-								ref={ titleRef }
-								tabIndex={ -1 }
+							<a
+								href={ getTabUrl( 'logs' ) }
+								onClick={ ( event ) => {
+									event.preventDefault();
+									onNavigate( 'logs' );
+								} }
 							>
+								{ __( 'Updatronix', 'updatronix' ) }
+							</a>
+							<span aria-hidden="true">/</span>
+							<span aria-current="page">
 								{ destination.label }
-							</h1>
-							{ destination.description && (
-								<p className="updatronix-page-description">
-									{ destination.description }
-								</p>
+							</span>
+						</nav>
+
+						<div className="updatronix-page-headrow">
+							<div className="updatronix-page-heading">
+								<h1
+									className="updatronix-page-title"
+									ref={ titleRef }
+									tabIndex={ -1 }
+								>
+									{ destination.label }
+								</h1>
+								{ destination.description && (
+									<p className="updatronix-page-description">
+										{ destination.description }
+									</p>
+								) }
+							</div>
+
+							{ actions && (
+								<div className="updatronix-page-actions">
+									{ actions }
+								</div>
 							) }
 						</div>
+					</header>
+				) }
 
-						{ actions && (
-							<div className="updatronix-page-actions">
-								{ actions }
-							</div>
-						) }
-					</div>
-				</header>
-
-				<div className="updatronix-surface">{ children }</div>
+				{ children }
 			</main>
 		</div>
 	);

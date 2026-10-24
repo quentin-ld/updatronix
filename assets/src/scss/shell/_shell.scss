@@ -201,6 +201,13 @@ $updatronix-rail-muted: #a7adb3;
 	color: var(--wpds-color-foreground-content-neutral-weak);
 }
 
+.updatronix-page-meta {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--wpds-dimension-gap-xs);
+	margin-top: var(--wpds-dimension-gap-sm);
+}
+
 .updatronix-page-actions {
 	display: flex;
 	align-items: center;

@@ -128,6 +128,10 @@ export const SettingsPage = () => {
 
 	const isPro = Boolean( bootSettings.isPro );
 	const registry = getProPanelRegistry();
+	const hideHeader = [ 'logs', 'schedule', 'settings' ].includes(
+		destination.slug
+	);
+	const retentionDays = Number( pluginSettings.retention_days ) || 90;
 
 	/**
 	 * Render the active destination.
@@ -139,9 +143,10 @@ export const SettingsPage = () => {
 			case 'logs':
 				return (
 					<ActivityLogPanel
+						destination={ destination }
 						loggingEnabled={ pluginSettings.logging_enabled }
 						logsVersion={ logsVersion }
-						showIntro={ false }
+						retentionDays={ retentionDays }
 					/>
 				);
 			case 'auto-updates':
@@ -157,6 +162,7 @@ export const SettingsPage = () => {
 			case 'schedule':
 				return (
 					<SchedulePanel
+						destination={ destination }
 						settings={ pluginSettings }
 						setSettings={ setSettings }
 						saveSettings={ saveSettings }
@@ -169,6 +175,7 @@ export const SettingsPage = () => {
 			case 'settings':
 				return (
 					<SettingsPanel
+						destination={ destination }
 						settings={ pluginSettings }
 						setSettings={ setSettings }
 						saveSettings={ saveSettings }
@@ -221,6 +228,7 @@ export const SettingsPage = () => {
 			destination={ destination }
 			destinations={ destinations }
 			onNavigate={ navigate }
+			hideHeader={ hideHeader }
 		>
 			<div className="updatronix-notices">
 				<Notices />
