@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | Edition | Pro |
-| Status | Design only. No backend beyond the roadmap promise. |
+| Status | Partial. Chain storage, validation, and the reference page are implemented; execution integration remains. |
 | Rail | Automations · `update-flow` |
 | Design | [`../reference/screens/src/screens/UpdateFlow.jsx`](../reference/screens/src/screens/UpdateFlow.jsx) |
 | Plan tasks | `P4-01` to `P4-04` |

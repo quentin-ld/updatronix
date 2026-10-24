@@ -186,6 +186,10 @@ blocked table is read-only and linked; the license gate is enforced server-side.
 
 ## P4 — Update Flow
 
+**Status:** Partial on 2026-10-24. `P4-01` to `P4-03` are implemented: chain
+storage, validation, REST, and the reference page. `P4-04` execution
+integration remains. See [`11-implementation-log.md`](11-implementation-log.md).
+
 ### P4-01 · Data model and REST
 
 - **Change.** Define the chain shape: id, name, description, enabled, ordered

@@ -32,6 +32,7 @@ document that owns its contract. Use this table to open one `/architect` or
 | `P1` | Done. Four destinations, the Pro panel error boundary, and multisite capability routing. |
 | `P2` | Done. License inactive/active states, six features, development and decryption states, activation and deactivation. |
 | `P3` | Done. Protection, update queue, recently blocked, expanded settings, and the license-aware shield API. |
+| `P4` | Partial. Chain storage, validation, REST, and the reference page; execution integration (`P4-04`) remains. |
 
 ## Free
 

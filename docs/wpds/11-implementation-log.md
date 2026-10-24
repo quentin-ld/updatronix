@@ -467,3 +467,38 @@ The export modal still uses the legacy `Modal` and core controls. It works and k
 ### Next
 
 1. `P4`: Update Flow.
+
+## 2026-10-24 · Update Flow chains (P4-01 to P4-03)
+
+### What landed
+
+- `Updatronix_Update_Flow` stores ordered chains in a network option and
+  exposes `GET/POST /flow/chains` plus `GET /flow/items`. The item list is the
+  installed core, plugins, and themes.
+- Validation rejects an empty name, fewer than two steps, duplicate steps, and
+  cycles across all chains. The REST response carries a stable error code and
+  the offending field or loop.
+- The Update Flow page follows the reference composition: chain list, editor
+  dialog, keyboard reorder controls, delete confirmation that names the chain,
+  the dependency check, and one manual save with `Ctrl+S`.
+- The page and REST routes are gated by the Pro capability, Super Admin on
+  Multisite, and an active license or dev mode.
+- Unit tests cover normalization, name validation, the two-step floor,
+  duplicate steps, cross-chain cycles, and route registration.
+
+### Verification
+
+- Pro ESLint, Stylelint, and build pass; PHPStan is clean; 197 PHPUnit tests
+  and 599 assertions pass.
+- Browser pass with a temporary local license: the empty state rendered, a
+  “Payments first” chain was created with a plugin and theme step, saved, and
+  read back from `updatronix_pro_flow_chains`. The temporary license and chain
+  option were removed afterwards.
+- `P4-04` execution integration is not implemented. The chains are stored and
+  validated, but no update run consumes them yet, so the P4 gate remains open.
+
+### Next
+
+1. `P4-04`: run chains before the regular update check, stop on failure, and
+   record each step in the log.
+2. `P5`: White label.
