@@ -577,7 +577,7 @@ not a claim that the test was executed.
 | UX-T04 | Save Update Shield | Header Save + scroll SaveBar; snackbar | Body-top Save; top notice; no scroll bar. **Mismatch.** |
 | UX-T05 | Save Update Flow | Header Save + scroll SaveBar; snackbar | Body-top Save; top notice; no scroll bar. **Mismatch.** |
 | UX-T06 | Save White label | Header Reset/Save + scroll SaveBar; snackbar | Body-top Reset/Save; top notice; no scroll bar. **Mismatch.** |
-| UX-T07 | Save failure | Error snackbar; draft preserved; no false success | Top error notice; bottom status; inspect. **Needs test.** |
+| UX-T07 | Save failure | Error snackbar; draft preserved; no false success | Top error notice; bottom status; **false "All changes saved" confirmed on Settings and Schedule** (`SettingsPanel.js:199`, `SchedulePanel.js:196`). |
 | UX-T08 | Copy export | Snackbar "Copied"; clipboard content | Live region only. **Mismatch for sighted users.** |
 | UX-T09 | Delete log entry | AlertDialog names entry; focus returns; snackbar | Dialog exists; feedback path top notice. **Needs test.** |
 | UX-T10 | License activate/deactivate | Snackbar; header description changes; masked key | Top notice; header static. **Mismatch.** |
@@ -593,6 +593,97 @@ not a claim that the test was executed.
 | UX-T20 | Multiple feedback messages | Snackbars stack bottom center; each auto-dismisses | Top notices stack in content; no timer. **Mismatch.** |
 | UX-T21 | Row action menu | Actions menu opens by keyboard; details action works | DataViews action; needs comparison. **Needs test.** |
 | UX-T22 | Loading and empty states | No layout jump; empty state remains centered in card | Current spinners/empty states exist; verify. **Needs test.** |
+
+## Second-pass review — review-skill findings
+
+The available `review` skill inspected both trees from source after the first
+pass. It did not render the browser; focus, sticky, and contrast findings are
+source-read and must be confirmed visually. These findings are additional to
+the shell/header/save/rail findings above.
+
+### Should-fix
+
+- **UX-13 — A failed save can say "All changes saved."** Settings and Schedule
+  push the draft into the shared settings state before the request, so the
+  saved snapshot re-baselines to the draft, Save disables, and the beforeunload
+  guard drops even when the request fails (`SettingsPanel.js:199`;
+  `SchedulePanel.js:196`). Auto updates gates on the save result
+  (`AutoUpdatesPanel.js:297-304`); copy that pattern.
+- **UX-14 — Unsaved drafts are lost on rail navigation.** The only protection
+  is `beforeunload` in the shared SaveBar (`SaveBar.js:77-91`). Rail and
+  popstate navigation unmount the panel (`Rail.js:36-39`;
+  `SettingsPage.js:89-99`) and silently discard the draft. Pro pages have no
+  guard at all.
+- **UX-15 — Clearing a decryption-broken license bypasses confirmation.**
+  "Clear stored license" calls `deactivateLicense` immediately
+  (`LicensePanel.js:205`), while normal deactivation uses an irreversible
+  AlertDialog that names the site (`LicensePanel.js:319-321,431-453`).
+- **UX-16 — Some success notices fire before persistence.** White-label reset
+  and Flow chain create/delete announce success while only setting `dirty`
+  (`WhiteLabelPage.js:250`; `UpdateFlowPage.js:453,470`). Leaving the page
+  then loses work the UI already called successful.
+- **UX-17 — Notices move between layouts and survive navigation.** The notice
+  block renders before `renderDestination()` (`SettingsPage.js:268`), so it
+  sits above the H1 on the seven hide-header screens and below the H1 on Pro
+  screens. `Notices` only removes on click (`Notices.js:11-21`); navigation
+  does not clear old notices.
+- **UX-18 — PageHeader steals focus on first paint.** `PageHeader` focuses its
+  title on mount without the first-render guard used by `AppShell`
+  (`PageHeader.js:35` vs `AppShell.js:37-41`). The reference PageHeader has no
+  focus effect at all. This affects every hide-header screen on first load.
+
+### Nits
+
+- **UX-19 — Mobile breakpoint is 900px, reference is 960px.** At 901–960px the
+  candidate still shows the 264px desktop rail (`_shell.scss:948`;
+  `Rail.js:120`; reference `app.css:1968`).
+- **UX-20 — Drawer targets and focus are smaller than the reference.** The
+  drawer reuses the 36px desktop rail row; the reference uses 44px
+  (`Rail.js:163`; `app.css:291-298`). The menu trigger is 36×36 with no hover
+  (`app.css:231-248`), no white `:focus-visible` in the drawer/mobile bar
+  (`app.css:250-254`), and no safe-area insets (`app.css:284`).
+- **UX-21 — Pro dirty flags are one-way.** Reverting a Pro field to the saved
+  value still shows "Unsaved changes" (`UpdateShieldPage.js:92`;
+  `UpdateFlowPage.js:157`; `WhiteLabelPage.js:103`). Free screens compare
+  signatures (`SettingsPanel.js:75-118`).
+- **UX-22 — Rail hover and current share the same background.** Both use
+  `$updatronix-rail-bg-raised` (`_shell.scss:114`); the reference uses 0.12 for
+  hover and 0.18 plus the marker for current (`app.css:143-162`).
+- **UX-23 — Some loading states are bare spinners.** Shield and Health render
+  `<Spinner/>` without `role="status"` or a label
+  (`UpdateShieldPage.js:504`; `HealthPage.js:322`), while sibling states use a
+  labelled status.
+- **UX-24 — A failed re-fetch is silent once data exists.**
+  `AutoUpdatesPanel.js:244` only renders `fetchError` when there is no data.
+- **UX-25 — Ctrl+S is active behind the Flow editor dialog.** The
+  document-level handler posts the stale `chains` while the editor is open
+  (`UpdateFlowPage.js:240`); the dialog should own or block the shortcut.
+- **UX-26 — Save-bar shortcut is not hidden on small screens.**
+  `_shell.scss:924` keeps it visible; the reference hides it at ≤560px
+  (`app.css:441-446`).
+- **UX-27 — No JS regression coverage for interactions.** `tests/js/routes.test.js`
+  is the only JS test; none of the save/toast/focus/dialog/mobile behaviours
+  above have a regression guard.
+
+### Additional test register
+
+| ID | Scenario | Reference expectation | Candidate status |
+|---|---|---|---|
+| UX-T23 | Failed Settings/Schedule save | Error feedback; draft preserved; no clean state | False "All changes saved" (UX-13). **Mismatch.** |
+| UX-T24 | Edit then use rail/popstate | Confirm discard or preserve the draft | Draft lost (UX-14). **Mismatch.** |
+| UX-T25 | Clear decryption-broken license | Destructive confirmation naming the site | Immediate call (UX-15). **Mismatch.** |
+| UX-T26 | Reset/create/delete before save | No success until persistence | Premature success notices (UX-16). **Mismatch.** |
+| UX-T27 | Notices on hide-header vs Pro | One consistent position; clear on navigation | Above H1 on Free, below on Pro; stale (UX-17). **Mismatch.** |
+| UX-T28 | First paint of a hide-header screen | No focus stolen | PageHeader focuses the H1 (UX-18). **Mismatch.** |
+| UX-T29 | 901–960px viewport | Mobile shell at 960px | Desktop rail still visible (UX-19). **Mismatch.** |
+| UX-T30 | Drawer at 390px | 44px rows; hover/focus; safe area | 36px; missing hover/focus/safe area (UX-20). **Mismatch.** |
+| UX-T31 | Revert a Pro field to saved value | Clean state | Dirty remains (UX-21). **Mismatch.** |
+| UX-T32 | Rail hover vs current | Distinct backgrounds + marker | Same background (UX-22). **Mismatch.** |
+| UX-T33 | Shield/Health loading | Labelled status announcement | Bare Spinner (UX-23). **Needs test.** |
+| UX-T34 | Auto updates re-fetch failure | Visible error with existing data | Silent (UX-24). **Mismatch.** |
+| UX-T35 | Ctrl+S with Flow editor open | No stale save; dialog shortcut handling | Document handler fires (UX-25). **Mismatch.** |
+| UX-T36 | Save-bar shortcut at ≤560px | Hidden | Visible (UX-26). **Mismatch.** |
+| UX-T37 | Interaction regression suite | Coverage for save/toast/focus/mobile | Only routes test (UX-27). **Missing.** |
 
 ## What is already close
 
