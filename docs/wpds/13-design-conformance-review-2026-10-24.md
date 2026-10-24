@@ -692,6 +692,119 @@ the shell/header/save/rail findings above.
 | UX-T36 | Save-bar shortcut at ≤560px | Hidden | Visible (UX-26). **Mismatch.** |
 | UX-T37 | Interaction regression suite | Coverage for save/toast/focus/mobile | Only routes test (UX-27). **Missing.** |
 
+## Final sniff pass — rendered measurements
+
+Method: rendered the candidate at 1440×900 in the browser, rendered
+`update-log.html` beside it, read computed styles, and traced the DOM wrapper
+back to `inc/admin/menu.php` and `_settings.scss`. The measurements below are
+the concrete evidence for the user’s four observations.
+
+### SN-01 — The legacy page wrapper is still the app root
+
+`inc/admin/menu.php:89` still prints `.updatronix-page`, and
+`_settings.scss:11-24` gives it `margin-left: -20px` and
+`margin-bottom: -55px`; `.updatronix-settings` adds
+`padding: 12px 16px 0 20px`. The shell is nested inside that legacy main.
+Measured at 1440×900: `.updatronix-page` is x=160, w=1265; the shell is x=180,
+w=1229. The app therefore starts 20px left of `#wpbody-content` and 12px below
+the admin bar, while the page wrapper extends under the admin-menu edge.
+
+This is the first thing to remove or neutralize. The reference has one shell
+root, not a shell inside a legacy page wrapper.
+
+### SN-02 — The notices block sits above the H1
+
+On Settings at scroll 0, `.updatronix-notices` measures 66px tall at y=44 and
+the `PageHeader` starts at y=122. On Update logs the `PageHeader` starts at
+y=44. The same shell renders two different header positions depending on
+whether the notices store has an entry.
+
+This is not only a position issue: the reference has no top notice block.
+Transient feedback belongs in the fixed bottom-center snackbar; notices must
+not push the page header.
+
+### SN-03 — The WordPress footer is still inside the page
+
+`#wpfooter` is absolute at y=1501 on Update logs and y=1125 on Settings, with
+`margin-left: 160px`; the legacy page’s `margin-bottom: -55px` tries to cancel
+it. The reference has no WordPress footer inside the shell. Hiding or
+relocating the footer, and giving the shell its own scroll, is part of the
+wrapper fix.
+
+### SN-04 — Save is still a bottom strip
+
+On Settings, `.updatronix-savebar` measures 949×53 at y=947 (below the 900px
+fold), `position: sticky`, `bottom: 0`, background `#fcfcfc`, inside
+`.updatronix-shell-main`. It is not a top bar and it is not triggered by the
+header Save button leaving the viewport. The reference SaveBar is a card at the
+top of `.main`, after the header anchor scrolls out.
+
+### SN-05 — The rail is 689px, not full height
+
+At 1440×900 the rail is 264×689 at y=44, `position: sticky`, `top: 44px`,
+`max-height: calc(100vh - 32px - 2 * padding)`, `border-radius: 8px`. The
+content viewport is 868px tall; the rail ends 179px above it. The reference
+rail is a full-height column with no top offset or radius.
+
+### SN-06 — The main surface is transparent
+
+`.updatronix-shell-main` has `background: rgba(0, 0, 0, 0)`; the body is
+`#f0f0f0`. Only the section card is white. The reference `.main` is a white
+rounded surface with a shadow and an internal scroll; the dark shell is visible
+around it.
+
+### SN-07 — The page scrolls the window, not the surface
+
+Update logs has body height 1509px at a 900px viewport; Settings has 1133px.
+`.updatronix-shell-main` has `overflow: visible`. The reference scrolls inside
+`.main`, which is what makes the top SaveBar and the fixed rail possible.
+
+### SN-08 — Log row typography and date/time differ
+
+The candidate renders type labels uppercase (`TRANSLATION`) and WordPress
+locale date/time (`October 22, 2026`, `02:57 PM`). The reference renders
+sentence case (`Translation`), day-month dates (`23 October 2026`), and 24-hour
+times (`10:42`). Decide whether design conformance overrides the site locale
+format; if it does, use the reference formatter rather than the current
+`dateI18n`/`getSettings` output.
+
+### SN-09 — The search field is a legacy-control surface
+
+The DataViews search input has no border on the input itself; the visible
+purple outline comes from the legacy `components-search-control`/InputBase
+wrapper. The reference search field is a neutral WPDS input. Check the wrapper
+border token, not only the inner input.
+
+### SN-10 — The WordPress admin chrome is still outside the shell
+
+The admin bar and admin menu remain visible; the reference prototype is
+full-viewport. In a real plugin page the shell should fill the available
+`#wpbody-content` area, not hide the WordPress admin menu unless that is an
+explicit product decision. The wrapper fix should preserve the admin menu and
+make the shell own the content area.
+
+## Implementation order after the sniff pass
+
+The previous order still holds, but the wrapper is now step 0.
+
+0. Remove or neutralize `.updatronix-page` / `.updatronix-settings` legacy
+   margins/padding; mount the shell directly in `#wpbody-content`; decide the
+   WordPress footer behavior.
+1. Build the full-height shell: dark background, white `.main` card, 1120px
+   page column, internal scroll, full-height rail.
+2. One `PageHeader`, with actions and the reference typography; fix the
+   first-paint focus theft.
+3. Add the snackbar provider and fixed bottom-center list; remove the page-top
+   notice block; clear notices on navigation.
+4. Add the header Save and scroll-triggered top SaveBar; fix failed-save,
+   draft-loss, and Pro save states.
+5. Detail the rail: sentence-case groups, active marker, Pro badge policy,
+   hover/focus, 960px breakpoint, 44px drawer.
+6. Per-screen deltas, starting with log typography/date/time; then Shield,
+   Flow, White label, License, Health, Documentation, Support.
+7. Add the UX-T01–UX-T37 tests, then re-run the rendered comparison at 1440,
+   960, and 390.
+
 ## What is already close
 
 - WPDS `Section`/`Card` composition is used on the migrated screens.
