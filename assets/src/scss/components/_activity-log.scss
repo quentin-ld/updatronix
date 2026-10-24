@@ -37,6 +37,83 @@
 	max-width: $max-width-content;
 }
 
+.updatronix-log-layout {
+	display: grid;
+	gap: var(--wpds-dimension-gap-lg);
+	grid-template-columns: minmax(0, 1fr);
+
+	&.has-preview {
+		align-items: start;
+		grid-template-columns: minmax(0, 1fr) 360px;
+	}
+
+	> .updatronix-section {
+		min-width: 0;
+	}
+
+	.dataviews-view-activity__item-type {
+		width: var(--wpds-dimension-size-md);
+	}
+
+	.dataviews-view-activity__item-type-icon {
+		background: transparent;
+		height: var(--wpds-dimension-size-md);
+		width: var(--wpds-dimension-size-md);
+	}
+}
+
+.updatronix-log-preview {
+	position: sticky;
+	top: var(--wpds-dimension-gap-lg);
+}
+
+.updatronix-log-entry-title {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+}
+
+.updatronix-log-entry-kind {
+	color: var(--wpds-color-foreground-content-neutral-weak);
+	font-size: 11px;
+	font-weight: 600;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+}
+
+.updatronix-log-entry-name {
+	color: var(--wpds-color-foreground-content-neutral);
+	font-weight: 600;
+}
+
+.updatronix-log-entry-summary {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+}
+
+.updatronix-log-type-icon {
+	align-items: center;
+	background: var(--wpds-color-background-surface-neutral-weak);
+	border-radius: 8px;
+	color: var(--wpds-color-foreground-content-neutral-weak);
+	display: inline-flex;
+	height: 40px;
+	justify-content: center;
+	width: 40px;
+}
+
+@media (max-width: 1200px) {
+
+	.updatronix-log-layout.has-preview {
+		grid-template-columns: minmax(0, 1fr);
+	}
+
+	.updatronix-log-preview {
+		position: static;
+	}
+}
+
 .updatronix-export-modal {
 
 	// The Dialog content wrapper carries the vertical rhythm; the old

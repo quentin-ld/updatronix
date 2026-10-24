@@ -215,3 +215,32 @@ The export modal still uses the legacy `Modal` and core controls. It works and k
 1. `R4`: restore the Update log activity layout, day grouping, Section wrapper,
    and preview aside.
 2. `R5`: Auto updates, Documentation/Support meta, Health, and the Pro screens.
+
+## 2026-10-24 · Update log conformance (R4)
+
+### What landed
+
+- The update log now uses the DataViews `activity` layout grouped by day,
+  with `item`, `summary`, and `typeIcon` as the title, description, and media
+  fields, and `status` and `time` as the visible fields.
+- The feed is wrapped in the `Recent updates` Section with the Export action.
+  The page header keeps the `Retention N days` meta.
+- Selecting a row opens the details preview aside on screens wider than
+  1200px. Below that breakpoint the existing `Dialog` remains.
+- Server pagination and every filter remain in place. The feed note explains
+  the retention cleanup.
+- Added the reference activity spacing for the type column and timeline.
+
+### Verification
+
+- `npm run lint`, `npm run lint:css`, `npm run build`, and `npm test` (12/12)
+  pass.
+- Browser pass: the feed groups by day, rows show type/name, version,
+  trigger · actor, status, time, and actions; the preview aside opens and
+  closes; the Export dialog still opens.
+
+### Next
+
+1. `R5`: Auto updates to reference cards and one manual save.
+2. `R5`: Documentation and Support page-header meta.
+3. `F4-01` and the Pro screens remain separate tasks.

@@ -21,12 +21,12 @@ document that owns its contract. Use this table to open one `/architect` or
 | `F4-02`, `F4-03`, `F4-04` | Done. Documentation and Support are implemented; the hub decision is recorded. |
 | `F4-01` | Placeholder. Health is an explicit empty state until the backend lands. |
 | `F2-01` to `F2-04` | Done in substance. The shell page header, the `Section` primitive, the `SaveBar`, and the `AlertDialog` pattern are in place. |
-| `F3-01` | Implemented as a DataViews table; not conformant. R4 restores the reference activity layout. |
+| `F3-01` | Done. The update log uses the reference activity feed grouped by day, with the preview aside. |
 | `F3-02` | Done. Details, delete, and export use WPDS dialogs. |
 | `F3-04` | Done. Schedule matches the reference composition and includes `POST /run-check`. |
 | `F3-05` | Done. Three cards, chip recipients, Data opt-in, and closing notes match the reference. |
 | `F3-03` | Not started. |
-| `R1` to `R5` | R1 partial (three screens), R2 and R3 done; R4–R5 pending. See `12-design-conformance-audit.md`. |
+| `R1` to `R5` | R1 partial (three screens), R2–R4 done; R5 pending. See `12-design-conformance-audit.md`. |
 | `F5`, `F6` | Not started. |
 | `P0` to `P7` | Not started. Pro still bundles its own WPDS copy. |
 
