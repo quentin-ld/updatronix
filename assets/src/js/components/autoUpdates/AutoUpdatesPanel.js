@@ -10,7 +10,7 @@ import { __, sprintf } from '@wordpress/i18n';
 
 import PageHeader from '../../shell/PageHeader';
 import Section from '../../shell/Section';
-import SaveBar from '../../shell/SaveBar';
+import SaveBar, { SaveButton } from '../../shell/SaveBar';
 import wpds from '../../shell/wpds';
 import { useAutoUpdates } from '../../hooks/useAutoUpdates';
 import { ConstantNotices } from './ConstantNotices';
@@ -308,16 +308,11 @@ export function AutoUpdatesPanel( {
 	};
 
 	const handleSaveAction = (
-		<Button
-			variant="solid"
-			tone="brand"
+		<SaveButton
 			onClick={ handleSave }
 			disabled={ ! isDirty || busy }
-		>
-			{ busy
-				? __( 'Saving…', 'updatronix' )
-				: __( 'Save changes', 'updatronix' ) }
-		</Button>
+			busy={ busy }
+		/>
 	);
 
 	return (

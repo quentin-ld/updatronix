@@ -82,6 +82,22 @@ export const SettingsPage = () => {
 
 	const destinations = visibleDestinations;
 
+	const [ hasUnsavedChanges, setHasUnsavedChanges ] = useState( false );
+
+	useEffect( () => {
+		const handleDirtyChange = ( event ) => {
+			setHasUnsavedChanges( Boolean( event.detail?.dirty ) );
+		};
+
+		window.addEventListener( 'updatronix:dirty-change', handleDirtyChange );
+
+		return () =>
+			window.removeEventListener(
+				'updatronix:dirty-change',
+				handleDirtyChange
+			);
+	}, [] );
+
 	const [ selectedSlug, setSelectedSlug ] = useState( () =>
 		getInitialSlug( destinations, bootSettings.activeTab )
 	);
@@ -92,10 +108,24 @@ export const SettingsPage = () => {
 				return;
 			}
 
+			if ( hasUnsavedChanges ) {
+				// eslint-disable-next-line no-alert -- Native confirm is the lightweight guard for an in-app destination switch.
+				const leave = window.confirm(
+					__(
+						'You have unsaved changes. Leave this page and discard them?',
+						'updatronix'
+					)
+				);
+
+				if ( ! leave ) {
+					return;
+				}
+			}
+
 			setSelectedSlug( slug );
 			window.history.pushState( null, '', getTabUrl( slug ) );
 		},
-		[ destinations ]
+		[ destinations, hasUnsavedChanges ]
 	);
 
 	useEffect( () => {
@@ -152,6 +182,10 @@ export const SettingsPage = () => {
 		'documentation',
 		'support',
 		'health',
+		'updatronix-3000',
+		'update-shield',
+		'update-flow',
+		'white-label',
 	].includes( destination.slug );
 	const retentionDays = Number( pluginSettings.retention_days ) || 90;
 
@@ -185,7 +219,6 @@ export const SettingsPage = () => {
 					<SchedulePanel
 						destination={ destination }
 						settings={ pluginSettings }
-						setSettings={ setSettings }
 						saveSettings={ saveSettings }
 						saving={ saving }
 						scheduleMeta={ scheduleMeta }
@@ -198,7 +231,6 @@ export const SettingsPage = () => {
 					<SettingsPanel
 						destination={ destination }
 						settings={ pluginSettings }
-						setSettings={ setSettings }
 						saveSettings={ saveSettings }
 						saving={ saving }
 					/>

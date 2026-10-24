@@ -8,12 +8,11 @@ import { memo, useEffect, useRef, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 
 import PageHeader from '../shell/PageHeader';
-import SaveBar from '../shell/SaveBar';
+import SaveBar, { SaveButton } from '../shell/SaveBar';
 import Section from '../shell/Section';
 import wpds from '../shell/wpds';
 
 const {
-	Button,
 	CheckboxControl,
 	Fieldset,
 	InputControl,
@@ -91,7 +90,6 @@ function editableSignature( settings ) {
  * @param {Object}                              props              Component props.
  * @param {Object}                              props.destination  Active destination.
  * @param {Object}                              props.settings     Current settings.
- * @param {(settings: Object) => void}          props.setSettings  Setter for settings.
  * @param {(settings: Object) => Promise<void>} props.saveSettings Async save.
  * @param {boolean}                             props.saving       Whether save is in progress.
  * @return {import('react').JSX.Element} Settings screen.
@@ -99,7 +97,6 @@ function editableSignature( settings ) {
 export const SettingsPanel = memo( function SettingsPanelForm( {
 	destination,
 	settings,
-	setSettings,
 	saveSettings,
 	saving,
 } ) {
@@ -197,9 +194,7 @@ export const SettingsPanel = memo( function SettingsPanelForm( {
 	};
 
 	const handleSave = async () => {
-		const nextSettings = { ...draft };
-		setSettings( nextSettings );
-		await saveSettings( nextSettings );
+		await saveSettings( { ...draft } );
 	};
 
 	const handleDiscard = () => {
@@ -220,16 +215,11 @@ export const SettingsPanel = memo( function SettingsPanelForm( {
 			<PageHeader
 				destination={ destination }
 				actions={
-					<Button
-						variant="solid"
-						tone="brand"
+					<SaveButton
 						onClick={ handleSave }
 						disabled={ ! isDirty || saving }
-					>
-						{ saving
-							? __( 'Saving…', 'updatronix' )
-							: __( 'Save changes', 'updatronix' ) }
-					</Button>
+						busy={ saving }
+					/>
 				}
 			/>
 

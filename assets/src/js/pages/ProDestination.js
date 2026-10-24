@@ -12,6 +12,8 @@ import { useDispatch } from '@wordpress/data';
 import { __, sprintf } from '@wordpress/i18n';
 import { store as noticesStore } from '@wordpress/notices';
 
+import PageHeader from '../shell/PageHeader';
+import SaveBar, { SaveButton } from '../shell/SaveBar';
 import wpds from '../shell/wpds';
 
 const { Button, EmptyState, Notice } = wpds.ui;
@@ -182,6 +184,9 @@ export default function ProDestination( {
 						wpds={ wpds }
 						notify={ notify }
 						navigate={ onNavigate }
+						PageHeader={ PageHeader }
+						SaveBar={ SaveBar }
+						SaveButton={ SaveButton }
 					/>
 				</ProPanelErrorBoundary>
 			);
@@ -189,6 +194,7 @@ export default function ProDestination( {
 
 		return (
 			<ProPanelErrorBoundary label={ destination.label }>
+				<PageHeader destination={ destination } />
 				<LegacyPanelMount
 					slug={ destination.panel || destination.slug }
 					registry={ registry }
@@ -199,19 +205,48 @@ export default function ProDestination( {
 
 	if ( isPro ) {
 		return (
+			<>
+				<PageHeader destination={ destination } />
+				<EmptyState.Root>
+					<EmptyState.Icon icon={ starFilled } />
+					<EmptyState.Title>
+						{ __(
+							'This Pro panel is not available yet.',
+							'updatronix'
+						) }
+					</EmptyState.Title>
+					<EmptyState.Description>
+						{ __(
+							'The panel is part of the next Updatronix 3000 update. Your current Pro tools remain available on the Updatronix 3000 page.',
+							'updatronix'
+						) }
+					</EmptyState.Description>
+					<EmptyState.Actions>
+						<Button
+							variant="solid"
+							onClick={ () => onNavigate( 'updatronix-3000' ) }
+						>
+							{ __( 'Open Updatronix 3000', 'updatronix' ) }
+						</Button>
+					</EmptyState.Actions>
+				</EmptyState.Root>
+			</>
+		);
+	}
+
+	return (
+		<>
+			<PageHeader destination={ destination } />
 			<EmptyState.Root>
 				<EmptyState.Icon icon={ starFilled } />
 				<EmptyState.Title>
 					{ __(
-						'This Pro panel is not available yet.',
+						'Updatronix 3000 is the Pro edition.',
 						'updatronix'
 					) }
 				</EmptyState.Title>
 				<EmptyState.Description>
-					{ __(
-						'The panel is part of the next Updatronix 3000 update. Your current Pro tools remain available on the Updatronix 3000 page.',
-						'updatronix'
-					) }
+					{ destination.description }
 				</EmptyState.Description>
 				<EmptyState.Actions>
 					<Button
@@ -222,26 +257,6 @@ export default function ProDestination( {
 					</Button>
 				</EmptyState.Actions>
 			</EmptyState.Root>
-		);
-	}
-
-	return (
-		<EmptyState.Root>
-			<EmptyState.Icon icon={ starFilled } />
-			<EmptyState.Title>
-				{ __( 'Updatronix 3000 is the Pro edition.', 'updatronix' ) }
-			</EmptyState.Title>
-			<EmptyState.Description>
-				{ destination.description }
-			</EmptyState.Description>
-			<EmptyState.Actions>
-				<Button
-					variant="solid"
-					onClick={ () => onNavigate( 'updatronix-3000' ) }
-				>
-					{ __( 'Open Updatronix 3000', 'updatronix' ) }
-				</Button>
-			</EmptyState.Actions>
-		</EmptyState.Root>
+		</>
 	);
 }

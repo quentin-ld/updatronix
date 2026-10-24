@@ -9,7 +9,7 @@ import apiFetch from '@wordpress/api-fetch';
 import { memo, useEffect, useMemo, useRef, useState } from '@wordpress/element';
 import { __, _n, sprintf } from '@wordpress/i18n';
 
-import SaveBar from '../../shell/SaveBar';
+import SaveBar, { SaveButton } from '../../shell/SaveBar';
 import PageHeader from '../../shell/PageHeader';
 import Section from '../../shell/Section';
 import wpds from '../../shell/wpds';
@@ -68,7 +68,6 @@ function getHoldDays( schedule ) {
  * @param {Object}                              props                         Component props.
  * @param {Object}                              props.destination             Active destination.
  * @param {Object}                              props.settings                Current settings including `schedule`.
- * @param {(settings: Object) => void}          props.setSettings             Setter.
  * @param {(settings: Object) => Promise<void>} props.saveSettings            Async save.
  * @param {boolean}                             props.saving                  Saving state.
  * @param {Object}                              props.scheduleMeta            Labels + next run diagnostics.
@@ -79,7 +78,6 @@ function getHoldDays( schedule ) {
 export const SchedulePanel = memo( function SchedulePanelComponent( {
 	destination,
 	settings,
-	setSettings,
 	saveSettings,
 	saving,
 	scheduleMeta,
@@ -194,9 +192,7 @@ export const SchedulePanel = memo( function SchedulePanelComponent( {
 	};
 
 	const handleSave = async () => {
-		const nextSettings = { ...settings, schedule: draft };
-		setSettings( nextSettings );
-		await saveSettings( nextSettings );
+		await saveSettings( { ...settings, schedule: draft } );
 	};
 
 	const handleDiscard = () => {
@@ -249,16 +245,11 @@ export const SchedulePanel = memo( function SchedulePanelComponent( {
 								? __( 'Checking…', 'updatronix' )
 								: __( 'Run a check now', 'updatronix' ) }
 						</Button>
-						<Button
-							variant="solid"
-							tone="brand"
+						<SaveButton
 							onClick={ handleSave }
 							disabled={ ! isDirty || saving }
-						>
-							{ saving
-								? __( 'Saving…', 'updatronix' )
-								: __( 'Save changes', 'updatronix' ) }
-						</Button>
+							busy={ saving }
+						/>
 					</>
 				}
 			/>

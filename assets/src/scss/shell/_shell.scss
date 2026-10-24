@@ -986,17 +986,25 @@ body.updatronix-admin-page {
 }
 
 .updatronix-savebar {
-	position: sticky;
-	bottom: 0;
-	z-index: 2;
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
 	gap: var(--wpds-dimension-gap-md);
-	margin-top: var(--wpds-dimension-gap-md);
-	padding-top: var(--wpds-dimension-padding-md);
+	padding: var(--wpds-dimension-padding-sm) var(--wpds-dimension-padding-lg);
 	background: var(--wpds-color-background-surface-neutral);
-	border-top: 1px solid var(--wpds-color-stroke-surface-neutral-weak);
+	border-bottom: 1px solid var(--wpds-color-stroke-surface-neutral-weak);
+}
+
+.updatronix-savebar--top {
+	position: fixed;
+	z-index: 50;
+	box-shadow: 0 1px 0 var(--wpds-color-stroke-surface-neutral-weak);
+}
+
+.updatronix-save-button-shortcut {
+	margin-inline-start: var(--wpds-dimension-gap-sm);
+	font-size: var(--wpds-typography-font-size-xs);
+	opacity: 0.75;
 }
 
 .updatronix-savebar-status {
