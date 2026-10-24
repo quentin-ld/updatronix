@@ -132,6 +132,12 @@ Yes. Network-activate Updatronix and manage everything as a Super Admin from the
 
 == Changelog ==
 
+= Unreleased =
+* Improvement: Rebuild the admin interface on the WordPress Design System: dark rail, eleven destinations, one page header per screen, and one manual save.
+* Improvement: Add Health, Documentation, Support, Update Shield, Update Flow, and White label.
+* Dev: Bundle the pinned WPDS packages and share one runtime with Updatronix 3000.
+* Compatibility: WordPress 6.2 or later.
+
 = 1.3.0 =
 * Fix: Chunked exports no longer return HTTP 500 and discard their transient on a continuation request.
 * Fix: Chunked exports advance past unrenderable rows, enforce a server-side chunk cap, and honour the wall-clock limit.

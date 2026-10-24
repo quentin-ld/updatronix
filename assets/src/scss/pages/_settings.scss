@@ -74,8 +74,8 @@
 		padding: var(--wpds-dimension-padding-sm) var(--wpds-dimension-padding-lg);
 		gap: var(--wpds-dimension-gap-xl);
 		background:
-			repeating-linear-gradient(45deg, transparent, transparent 3px, rgba(0, 0, 0, 0.12) 3px, rgba(0, 0, 0, 0.12) 6px),
-			linear-gradient(to right, $color-accent, #1e1e1e);
+			repeating-linear-gradient(45deg, transparent, transparent 3px, color-mix(in srgb, var(--wpds-color-foreground-content-neutral) 12%, transparent) 3px, color-mix(in srgb, var(--wpds-color-foreground-content-neutral) 12%, transparent) 6px),
+			linear-gradient(to right, $color-accent, var(--wpds-color-background-surface-neutral-strong));
 		border: var(--wpds-border-width-xs) solid $color-accent-active-bg;
 		border-radius: 0;
 		color: var(--wpds-color-background-surface-neutral-strong);
@@ -239,12 +239,12 @@
 	&-panel {
 		border:
 			var(--wpds-border-width-xs) solid
-			#c3c4c7;
+			var(--wpds-color-stroke-surface-neutral);
 		border-radius: var(--wpds-border-radius-lg);
 		width: 100%;
 		max-width: 100%;
 		background: var(--wpds-color-background-surface-neutral-strong);
-		box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);
+		box-shadow: 0 1px 1px color-mix(in srgb, var(--wpds-color-foreground-content-neutral) 4%, transparent);
 	}
 
 	&-main,
@@ -531,7 +531,7 @@
 		margin-top: var(--wpds-dimension-gap-lg);
 		max-width: $max-width-content;
 		padding: var(--wpds-dimension-padding-lg) var(--wpds-dimension-padding-xl);
-		background: color-mix(in srgb, var(--wp-components-color-warning, #f0b849) 18%, var(--wpds-color-background-surface-neutral-strong));
+		background: color-mix(in srgb, var(--wpds-color-foreground-content-warning) 18%, var(--wpds-color-background-surface-neutral-strong));
 		border-radius: var(--wpds-border-radius-lg);
 		overflow: hidden;
 

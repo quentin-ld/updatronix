@@ -33,6 +33,10 @@ Updatronix is built on WordPress's own update engine, so everything keeps workin
 
 ## Features
 
+### Admin interface
+
+The admin is a dark rail with eleven destinations, one page header per screen, and one manual save. It is built on the WordPress Design System and keeps the native WordPress update engine.
+
 ### Update logs
 
 Every core, plugin, theme, and translation update is logged with its before and after versions, what triggered it, and how it ended. If something goes wrong, you have a precise starting point instead of a guess.

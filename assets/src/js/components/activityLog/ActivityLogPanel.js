@@ -79,7 +79,7 @@ function getVersionLabel( item ) {
 
 	if ( from && to && from !== to ) {
 		return sprintf(
-			/* translators: 1: previous version number, 2: new version number. */
+			/* translators: 1: previous version number, 2: new version number */
 			__( 'v%1$s → v%2$s', 'updatronix' ),
 			from,
 			to
@@ -88,7 +88,7 @@ function getVersionLabel( item ) {
 
 	if ( to ) {
 		return sprintf(
-			/* translators: %s: version number. */
+			/* translators: %s: version number */
 			__( 'v%s', 'updatronix' ),
 			to
 		);
@@ -96,7 +96,7 @@ function getVersionLabel( item ) {
 
 	if ( from ) {
 		return sprintf(
-			/* translators: %s: version number. */
+			/* translators: %s: version number */
 			__( 'v%s', 'updatronix' ),
 			from
 		);

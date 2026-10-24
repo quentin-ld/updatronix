@@ -585,3 +585,33 @@ The export modal still uses the legacy `Modal` and core controls. It works and k
 
 1. Free `F5`/`F6`.
 2. Release candidate authorization.
+
+## 2026-10-24 · Legacy cleanup and release gate (F5/F6)
+
+### What landed
+
+- Removed the unused legacy `Tabs` component and its stylesheet, and removed
+  the legacy shell import.
+- Replaced the remaining raw colors in the active Free styles with WPDS tokens.
+  Added `npm run lint:tokens` and wired it into `test:all`; the rail palette and
+  the legacy component-variable bridge are documented exceptions.
+- Regenerated `languages/updatronix.pot` without translator-comment warnings.
+- Added the Unreleased changelog entry and the admin-interface README note.
+- Recorded the accessibility, Multisite, bundle, and full-gate limits in
+  `.agents/notes/2026-10-24-wpds-release-gate.md`.
+
+### Verification
+
+- Free ESLint, Stylelint, token lint, 15/15 JS tests, and build pass.
+- Free initial entry is 1.7 MB; the page chunks are 476 KB and 98 KB.
+  DataViews remains in the page chunk, not the initial shell chunk. The webpack
+  runtime remains in the entry; extracting it needs an enqueue change and is
+  recorded, not changed.
+- Free PHPStan is clean and 213 PHPUnit tests pass; Pro PHPStan is clean and
+  200 PHPUnit tests pass.
+- E2E, mutation testing, a full screen-reader pass, and a manual Network Admin
+  pass were not available in this environment.
+
+### Next
+
+1. `F6-05`: version and release-candidate authorization.

@@ -27,7 +27,8 @@ document that owns its contract. Use this table to open one `/architect` or
 | `F3-05` | Done. Three cards, chip recipients, Data opt-in, and closing notes match the reference. |
 | `F3-03` | Done. Auto updates uses the reference cards and one manual Save action. |
 | `R1` to `R5` | R1 partial (three screens), R2–R4 done; R5 done for Free (Auto updates, Documentation, Support, Health). Pro screens remain. See `12-design-conformance-audit.md`. |
-| `F5`, `F6` | Not started. |
+| `F5` | Done. Unused Tabs removed, raw colors tokenized, token lint added, pot regenerated, and docs updated. |
+| `F6` | Partial. Accessibility/multisite reviews and bundle budget recorded; E2E/mutation not run; `F6-05` awaits version authorization. |
 | `P0` | Done. Pro consumes the Free runtime, registers a React component, and shares the WPDS pins. |
 | `P1` | Done. Four destinations, the Pro panel error boundary, and multisite capability routing. |
 | `P2` | Done. License inactive/active states, six features, development and decryption states, activation and deactivation. |

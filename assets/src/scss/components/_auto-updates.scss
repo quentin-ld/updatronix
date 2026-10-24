@@ -44,7 +44,7 @@
 
 	/* Improve row readability in DataViews auto-updates tables. */
 	.dataviews-view-table > tbody > tr:nth-child(2n + 1) {
-		background-color: #f6f7f7;
+		background-color: var(--wpds-color-background-surface-neutral-weak);
 	}
 
 	.dataviews-view-table > tbody > tr:nth-child(2n) {
