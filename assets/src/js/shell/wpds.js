@@ -45,10 +45,17 @@ import {
 	VisuallyHidden,
 } from '@wordpress/ui';
 import {
+	Button as LegacyButton,
+	CheckboxControl as LegacyCheckboxControl,
 	ColorPalette,
 	FormFileUpload,
+	Icon as LegacyIcon,
 	KeyboardShortcuts,
+	Notice as LegacyNotice,
+	Spinner as LegacySpinner,
 	SnackbarList,
+	TextControl,
+	ToggleControl,
 } from '@wordpress/components';
 import {
 	arrowRight,
@@ -154,10 +161,17 @@ const runtime = {
 	version: 1,
 	adminUi: { Page, getAdminThemeColors },
 	components: {
+		Button: LegacyButton,
+		CheckboxControl: LegacyCheckboxControl,
 		ColorPalette,
 		FormFileUpload,
+		Icon: LegacyIcon,
 		KeyboardShortcuts,
+		Notice: LegacyNotice,
+		Spinner: LegacySpinner,
 		SnackbarList,
+		TextControl,
+		ToggleControl,
 	},
 	element,
 	icons,

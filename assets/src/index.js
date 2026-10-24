@@ -5,6 +5,7 @@ import { getAdminThemeColors } from '@wordpress/admin-ui';
 import { ThemeProvider } from '@wordpress/theme';
 
 import './index.scss';
+import './js/shell/wpds';
 
 const updatronixSettings =
 	typeof window !== 'undefined' && window.updatronixSettings

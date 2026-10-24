@@ -333,3 +333,43 @@ The export modal still uses the legacy `Modal` and core controls. It works and k
 
 1. `P0`: the Pro shared runtime and package alignment.
 2. `P2`–`P5`: the Pro screens.
+
+## 2026-10-24 · Pro shared runtime (P0)
+
+### What landed
+
+- Pro's package pins match Free for `@wordpress/ui`, `theme`, `admin-ui`,
+  `components`, `dataviews`, and `icons`. `element` is 10.0.0 and React is
+  18.3.1.
+- Pro's `webpack.config.js` maps WPDS and `@wordpress/element` to
+  `window.updatronix.wpds`, maps those shared packages to the
+  `updatronix-scripts` handle, bundles `dataviews`/`compose`/`private-apis`/
+  `primitives` only if imported, and leaves the other WordPress handles alone.
+- Free imports the runtime from its entry so the global exists before Pro
+  executes. The runtime also exposes the legacy components Pro still imports
+  during the migration.
+- Pro registers `Updatronix3000Panel` as a React component
+  (`updatronixPanel = 'component'`) and dispatches
+  `updatronix:pro-panel-registered`. Free listens and re-renders the active Pro
+  destination.
+- Pro's stylesheet depends on `updatronix-style`, not `wp-components`.
+- `WpdsPackageAlignmentTest` compares the six shared pins across both plugins
+  and skips when the sibling checkout is absent.
+
+### Verification
+
+- Pro build: 11.1 KiB `index.js`; manifest deps are `react-jsx-runtime`,
+  `updatronix-scripts`, `wp-api-fetch`, `wp-data`, `wp-i18n`, and `wp-notices`.
+  No `wp-ui`, `wp-theme`, `wp-icons`, `wp-components`, or `wp-element`.
+- Pro PHPStan clean; 189 PHPUnit tests and 565 assertions.
+- Pro ESLint and Stylelint pass.
+- Browser pass: the Updatronix 3000 tab renders the Pro license activation
+  form inside Free's shell and providers; the console has no new errors.
+- Free's entry grows to about 1.7 MiB because the shared runtime is now in the
+  initial chunk. `F6-03` owns the final budget and an extracted runtime entry
+  is the likely follow-up.
+
+### Next
+
+1. `P1`: rail and destination contracts for the Pro screens.
+2. `P2`–`P5`: license, Shield, Flow, White label.

@@ -30,6 +30,10 @@ never renders a second `ThemeProvider`. The plan starts after Free gate `G-F2`.
 
 ## P0 — Shared runtime and build boundary
 
+**Status:** Done on 2026-10-24. Pro consumes `window.updatronix.wpds`, its
+manifest depends on `updatronix-scripts`, and the registry passes a React
+component. See [`11-implementation-log.md`](11-implementation-log.md).
+
 ### P0-01 · Consume the Free runtime
 
 - **Change.** Add a runtime guard that reads `window.updatronix.wpds`. If it is

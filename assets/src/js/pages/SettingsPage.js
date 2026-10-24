@@ -114,6 +114,22 @@ export const SettingsPage = () => {
 		window.history.replaceState( null, '', getTabUrl( fallback ) );
 	}, [ destinations, selectedSlug ] );
 
+	const [ registry, setRegistry ] = useState( () => getProPanelRegistry() );
+
+	useEffect( () => {
+		const syncRegistry = () => setRegistry( getProPanelRegistry() );
+		window.addEventListener(
+			'updatronix:pro-panel-registered',
+			syncRegistry
+		);
+
+		return () =>
+			window.removeEventListener(
+				'updatronix:pro-panel-registered',
+				syncRegistry
+			);
+	}, [] );
+
 	const destination =
 		getDestination( selectedSlug, destinations ) || destinations[ 0 ];
 
@@ -122,7 +138,6 @@ export const SettingsPage = () => {
 	}
 
 	const isPro = Boolean( bootSettings.isPro );
-	const registry = getProPanelRegistry();
 	const hideHeader = [
 		'logs',
 		'schedule',

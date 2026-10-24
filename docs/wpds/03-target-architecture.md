@@ -87,6 +87,13 @@ const SHARED = {
 };
 ```
 
+Shared imports also map to the `updatronix-scripts` handle, so Pro's asset
+manifest never declares `wp-ui`, `wp-icons`, `wp-theme`, `wp-components`, or
+`wp-element`. Free imports the runtime from its entry so the global exists
+before Pro executes. During the Pro migration the runtime also exposes the
+legacy components Pro still imports (`Button`, `CheckboxControl`, `Icon`,
+`Notice`, `Spinner`, `TextControl`, `ToggleControl`).
+
 Pro must fail soft. If `window.updatronix.wpds` is missing, Pro renders an admin
 notice that names the cause (Free missing or too old) instead of a blank panel.
 The version field allows a compatibility check: a Pro release declares the

@@ -28,7 +28,7 @@ document that owns its contract. Use this table to open one `/architect` or
 | `F3-03` | Done. Auto updates uses the reference cards and one manual Save action. |
 | `R1` to `R5` | R1 partial (three screens), R2–R4 done; R5 done for Free (Auto updates, Documentation, Support, Health). Pro screens remain. See `12-design-conformance-audit.md`. |
 | `F5`, `F6` | Not started. |
-| `P0` to `P7` | Not started. Pro still bundles its own WPDS copy. |
+| `P0` | Done. Pro consumes the Free runtime, registers a React component, and shares the WPDS pins. `P1`–`P7` not started. |
 
 ## Free
 
