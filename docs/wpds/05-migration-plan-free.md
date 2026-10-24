@@ -221,12 +221,14 @@ start P0 and P1.
 
 ### F3-03 · Auto updates manual save
 
-- **Change.** Cards for core mode, translations, themes, and plugins. Add an
-  atomic batch save endpoint or extend `/auto-updates` to accept a full payload.
-  Remove per-toggle requests. Remove the white sub-navigation.
-- **Verification.** One save commits all changes; a partial failure leaves the
-  draft intact; constants remain read-only; multisite works.
-- **Review.** `review_required: yes` (REST + new controls).
+- **Change.** Cards for core mode, translations, themes, and plugins. One Save
+  action compares the draft with the saved snapshot and sends only the changed
+  values through the existing native REST mutations. No per-toggle UI requests.
+  Remove the white sub-navigation.
+- **Verification.** One Save commits all changes; a partial failure keeps the
+  draft intact and shows an error, so a retry resends the changed values;
+  constants remain read-only; multisite works.
+- **Review.** `review_required: yes` (new save orchestration).
 - **Depends on.** `F2-03`.
 
 ### F3-04 · Schedule

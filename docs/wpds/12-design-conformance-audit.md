@@ -138,7 +138,7 @@ Every screen task must now begin and end with a reference comparison:
 | R2 | Done | Schedule matches the reference composition: Update checks, Next run, What the hold does, the 0–30 hold field, the preferred-time select, header meta/actions, and `POST /run-check`. |
 | R3 | Done | Settings matches the reference: three cards, chip recipients, five notification rows, the always-on recovery warning, the Data opt-in, and the closing notes. |
 | R4 | Done | The log uses the DataViews activity feed grouped by day, a Section header with Export, the retention meta, and a details preview aside on wide screens with the dialog fallback on narrow screens. |
-| R5 | Pending | Auto updates, Health, and the Pro screens. |
+| R5 | Partial | Auto updates is conformant. Documentation and Support still need their own page headers, and Health and the Pro screens remain separate tasks. |
 
 ## What not to do
 

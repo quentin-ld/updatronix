@@ -123,9 +123,12 @@ export const SettingsPage = () => {
 
 	const isPro = Boolean( bootSettings.isPro );
 	const registry = getProPanelRegistry();
-	const hideHeader = [ 'logs', 'schedule', 'settings' ].includes(
-		destination.slug
-	);
+	const hideHeader = [
+		'logs',
+		'schedule',
+		'settings',
+		'auto-updates',
+	].includes( destination.slug );
 	const retentionDays = Number( pluginSettings.retention_days ) || 90;
 
 	/**
@@ -146,11 +149,11 @@ export const SettingsPage = () => {
 			case 'auto-updates':
 				return (
 					<AutoUpdatesPanel
+						destination={ destination }
 						dismissedConstants={
 							pluginSettings.dismissed_constants
 						}
 						onDismissedConstantsChange={ syncDismissedConstants }
-						showIntro={ false }
 					/>
 				);
 			case 'schedule':

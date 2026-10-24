@@ -194,6 +194,80 @@ export function useAutoUpdates( onDismissedConstantsChange ) {
 		[ createSuccessNotice, createErrorNotice ]
 	);
 
+	const saveAll = useCallback(
+		async ( draft, saved ) => {
+			setBusy( true );
+			let latest = null;
+
+			try {
+				if ( draft.coreMode !== saved.coreMode ) {
+					latest = await apiFetch( {
+						path: `${ API_BASE }/core`,
+						method: 'POST',
+						data: { mode: draft.coreMode },
+					} );
+				}
+
+				if ( draft.translations !== saved.translations ) {
+					latest = await apiFetch( {
+						path: `${ API_BASE }/translation`,
+						method: 'POST',
+						data: { enable: !! draft.translations },
+					} );
+				}
+
+				for ( const [ stylesheet, enabled ] of Object.entries(
+					draft.themes || {}
+				) ) {
+					if ( enabled !== saved.themes?.[ stylesheet ] ) {
+						latest = await apiFetch( {
+							path: `${ API_BASE }/theme`,
+							method: 'POST',
+							data: { stylesheet, enable: !! enabled },
+						} );
+					}
+				}
+
+				for ( const [ file, enabled ] of Object.entries(
+					draft.plugins || {}
+				) ) {
+					if ( enabled !== saved.plugins?.[ file ] ) {
+						latest = await apiFetch( {
+							path: `${ API_BASE }/plugin`,
+							method: 'POST',
+							data: { plugin: file, enable: !! enabled },
+						} );
+					}
+				}
+
+				if ( latest ) {
+					setData( latest );
+				}
+
+				createSuccessNotice(
+					__( 'Auto-update settings saved.', 'updatronix' ),
+					{ id: 'updatronix-autoupdate-toggle' }
+				);
+
+				return true;
+			} catch ( e ) {
+				createErrorNotice(
+					e?.message ||
+						__(
+							'The auto-update settings could not be saved. Try again.',
+							'updatronix'
+						),
+					{ id: 'updatronix-autoupdate-toggle' }
+				);
+
+				return false;
+			} finally {
+				setBusy( false );
+			}
+		},
+		[ createSuccessNotice, createErrorNotice ]
+	);
+
 	const dismissConstant = useCallback(
 		async ( constant ) => {
 			try {
@@ -232,6 +306,7 @@ export function useAutoUpdates( onDismissedConstantsChange ) {
 		togglePlugin,
 		toggleTheme,
 		toggleTranslation,
+		saveAll,
 		dismissConstant,
 	};
 }

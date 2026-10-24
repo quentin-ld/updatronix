@@ -25,8 +25,8 @@ document that owns its contract. Use this table to open one `/architect` or
 | `F3-02` | Done. Details, delete, and export use WPDS dialogs. |
 | `F3-04` | Done. Schedule matches the reference composition and includes `POST /run-check`. |
 | `F3-05` | Done. Three cards, chip recipients, Data opt-in, and closing notes match the reference. |
-| `F3-03` | Not started. |
-| `R1` to `R5` | R1 partial (three screens), R2–R4 done; R5 pending. See `12-design-conformance-audit.md`. |
+| `F3-03` | Done. Auto updates uses the reference cards and one manual Save action. |
+| `R1` to `R5` | R1 partial (three screens), R2–R4 done; R5 partial (Auto updates). See `12-design-conformance-audit.md`. |
 | `F5`, `F6` | Not started. |
 | `P0` to `P7` | Not started. Pro still bundles its own WPDS copy. |
 

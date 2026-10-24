@@ -244,3 +244,32 @@ The export modal still uses the legacy `Modal` and core controls. It works and k
 1. `R5`: Auto updates to reference cards and one manual save.
 2. `R5`: Documentation and Support page-header meta.
 3. `F4-01` and the Pro screens remain separate tasks.
+
+## 2026-10-24 · Auto updates conformance (R5)
+
+### What landed
+
+- Auto updates now uses the reference composition: Core update mode radio,
+  Translations switch, Themes list, Plugins list, and the closing note.
+- Each theme or plugin row shows the logo or a fallback icon, the active badge,
+  the version, the description, the WordPress.org link, and one switch.
+  Unavailable and locked items keep their explicit states.
+- The page has one draft and one Save action. `saveAll` compares the draft with
+  the saved snapshot and sends only the changed values through the existing
+  native REST mutations. A partial failure keeps the draft intact and shows an
+  error, so retry resends the changed values.
+- The route label is now `Auto updates`, matching the reference.
+
+### Verification
+
+- `npm run lint`, `npm run lint:css`, `npm run build`, and `npm test` (12/12)
+  pass.
+- Browser pass: the page renders the four sections, the core mode changed to
+  Minor releases only, one Save persisted it and showed the success notice,
+  and the mode was restored to All releases afterwards.
+
+### Next
+
+1. `R5`: Documentation and Support page-header meta.
+2. `F4-01`: Health.
+3. `P2`–`P5`: the Pro screens.

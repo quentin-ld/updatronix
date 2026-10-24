@@ -32,7 +32,7 @@ export const DESTINATIONS = [
 	},
 	{
 		slug: 'auto-updates',
-		label: __( 'Auto-updates', 'updatronix' ),
+		label: __( 'Auto updates', 'updatronix' ),
 		description: __(
 			'Core, translation, theme, and plugin settings in one place.',
 			'updatronix'
