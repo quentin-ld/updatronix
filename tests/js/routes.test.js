@@ -10,6 +10,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import {
 	DESTINATIONS,
 	GROUPS,
+	filterDestinationsForUser,
 	getDestination,
 	getDestinations,
 	getInitialSlug,
@@ -155,5 +156,39 @@ describe( 'getTabUrl', () => {
 		expect( url.searchParams.get( 'page' ) ).toBe( 'updatronix' );
 		expect( url.searchParams.get( 'tab' ) ).toBe( 'support' );
 		expect( url.searchParams.get( 'foo' ) ).toBe( 'bar' );
+	} );
+} );
+
+describe( 'filterDestinationsForUser', () => {
+	const sample = [
+		{ slug: 'logs', edition: 'free' },
+		{ slug: 'updatronix-3000', edition: 'pro' },
+	];
+
+	it( 'keeps Pro destinations on a Free-only install', () => {
+		expect(
+			filterDestinationsForUser( sample, {
+				isPro: false,
+				canManagePro: false,
+			} )
+		).toHaveLength( 2 );
+	} );
+
+	it( 'hides Pro destinations when Pro is active without capability', () => {
+		expect(
+			filterDestinationsForUser( sample, {
+				isPro: true,
+				canManagePro: false,
+			} ).map( ( item ) => item.slug )
+		).toEqual( [ 'logs' ] );
+	} );
+
+	it( 'keeps Pro destinations when the capability is granted', () => {
+		expect(
+			filterDestinationsForUser( sample, {
+				isPro: true,
+				canManagePro: true,
+			} )
+		).toHaveLength( 2 );
 	} );
 } );

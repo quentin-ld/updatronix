@@ -406,3 +406,29 @@ The export modal still uses the legacy `Modal` and core controls. It works and k
 
 1. `P1-03`: multisite capability routing.
 2. `P3`: Update Shield.
+
+## 2026-10-24 · Pro capability routing (P1-03)
+
+### What landed
+
+- Free localizes `canManagePro` from the new `updatronix_can_manage_pro`
+  filter. Pro answers it with `current_user_can( UPDATRONIX_PRO_CAP_MANAGE )`
+  and, on Multisite, requires a Super Admin.
+- Free's destination registry gains `filterDestinationsForUser()`. On a
+  Pro-active install without the capability, the four Pro destinations are
+  removed from the rail. On Free-only installs they remain visible with the
+  upgrade path.
+- The shell computes the visible destinations once per page load from the
+  server flags; the capability is not inferred in the browser.
+
+### Verification
+
+- Free ESLint and build pass; 15/15 JS tests, including the three capability
+  cases.
+- Pro PHPStan is clean; 189 PHPUnit tests and 565 assertions pass.
+- Browser pass: the administrator receives `canManagePro: "1"` and sees all
+  four Pro destinations.
+
+### Next
+
+1. `P3`: Update Shield.

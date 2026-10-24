@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from '@wordpress/element';
+import { useState, useEffect, useCallback } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 
 import { Notices } from '../components/Notices';
@@ -9,6 +9,7 @@ import { SettingsPanel } from '../components/SettingsPanel';
 import { usePluginSettings } from '../hooks/usePluginSettings';
 import AppShell from '../shell/AppShell';
 import {
+	filterDestinationsForUser,
 	getDestination,
 	getDestinations,
 	getInitialSlug,
@@ -23,6 +24,14 @@ const bootSettings =
 	typeof window !== 'undefined' && window.updatronixSettings
 		? window.updatronixSettings
 		: {};
+
+const visibleDestinations = filterDestinationsForUser(
+	getDestinations( bootSettings.tabs ),
+	{
+		isPro: !! bootSettings.isPro,
+		canManagePro: !! bootSettings.canManagePro,
+	}
+);
 
 /**
  * Read the Pro panel registry from the global Pro populates.
@@ -71,10 +80,7 @@ export const SettingsPage = () => {
 		[ setSettings ]
 	);
 
-	const destinations = useMemo(
-		() => getDestinations( bootSettings.tabs ),
-		[]
-	);
+	const destinations = visibleDestinations;
 
 	const [ selectedSlug, setSelectedSlug ] = useState( () =>
 		getInitialSlug( destinations, bootSettings.activeTab )

@@ -172,6 +172,29 @@ export function getDestinations( tabs = {} ) {
 }
 
 /**
+ * Hide Pro destinations when Pro is active but the user cannot manage it.
+ *
+ * Free-only installs keep the Pro destinations so the upgrade path remains
+ * visible. The server-side capability is the source of truth.
+ *
+ * @param {Array<Object>} destinations          Destinations.
+ * @param {Object}        [access]              Access flags.
+ * @param {boolean}       [access.isPro]        Whether Pro is active.
+ * @param {boolean}       [access.canManagePro] Whether the user may manage Pro.
+ * @return {Array<Object>} Visible destinations.
+ */
+export function filterDestinationsForUser(
+	destinations,
+	{ isPro = false, canManagePro = false } = {}
+) {
+	if ( ! isPro || canManagePro ) {
+		return destinations;
+	}
+
+	return destinations.filter( ( item ) => item.edition !== 'pro' );
+}
+
+/**
  * Find one destination by slug.
  *
  * @param {string}        slug         Destination slug.

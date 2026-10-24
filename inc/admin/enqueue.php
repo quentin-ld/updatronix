@@ -328,6 +328,7 @@ function updatronix_localize_settings( string $admin_page ): void {
 			'version'                => UPDATRONIX_VERSION,
 			'logoUrl'                => plugins_url( 'assets/img/logo-60x60.png', updatronix_PLUGIN_FILE ),
 			'isPro'                  => defined( 'UPDATRONIX_PRO_VERSION' ),
+			'canManagePro'           => (bool) apply_filters( 'updatronix_can_manage_pro', false ),
 			// Global window property populated by Pro's admin JS for the panel registry; Free reads it via ProTabPanel.
 			'proPanelRegistryGlobal' => 'updatronixProPanelRegistry',
 		)

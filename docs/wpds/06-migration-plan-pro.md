@@ -75,6 +75,12 @@ notice helpers, and the Pro bundle contains no WPDS module or token stylesheet.
 
 ## P1 — Destinations in the rail
 
+**Status:** Done on 2026-10-24. The four Pro destinations render, Free wraps
+every Pro panel in an error boundary, and Free hides Pro destinations on a
+Pro-active install when the user lacks `UPDATRONIX_PRO_CAP_MANAGE` or Super
+Admin. Free-only installs keep the upgrade destinations. See
+[`11-implementation-log.md`](11-implementation-log.md).
+
 ### P1-01 · Register four destinations
 
 - **Change.** Add `updatronix-3000`, `update-shield`, `update-flow`, and
