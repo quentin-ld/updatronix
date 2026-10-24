@@ -526,6 +526,7 @@ final class Updatronix_Settings {
 		}
 
 		$log->summary_text = self::build_summary_text( $log );
+		$log->logo         = self::get_log_logo( $log );
 		if ( ! isset( $log->detail_available ) ) {
 			$log->detail_available = (bool) ( $log->message ?? null ) || (bool) ( $log->trace ?? null );
 		} else {
@@ -533,6 +534,80 @@ final class Updatronix_Settings {
 		}
 
 		return $log;
+	}
+
+	/**
+	 * Resolve an installed plugin or theme icon for a log row.
+	 *
+	 * WordPress does not expose a single local icon API. Use the update
+	 * transient first, then the common local icon files, and return an empty
+	 * string when the item has no artwork.
+	 *
+	 * @param \stdClass $log Log row.
+	 * @return string Absolute URL or empty string.
+	 */
+	private static function get_log_logo( \stdClass $log ): string {
+		$type = (string) ( $log->log_type ?? '' );
+		$slug = (string) ( $log->item_slug ?? '' );
+
+		if ( '' === $slug ) {
+			return '';
+		}
+
+		if ( 'theme' === $type ) {
+			$theme = wp_get_theme( $slug );
+
+			if ( $theme->exists() ) {
+				$screenshot = $theme->get_screenshot();
+
+				return (bool) $screenshot ? esc_url_raw( $screenshot ) : '';
+			}
+		}
+
+		if ( 'plugin' === $type ) {
+			if ( ! function_exists( 'get_plugins' ) ) {
+				require_once ABSPATH . 'wp-admin/includes/plugin.php';
+			}
+
+			foreach ( array_keys( get_plugins() ) as $file ) {
+				$dir = dirname( $file );
+
+				if ( ! in_array( $slug, array( $dir, basename( $file, '.php' ), $file ), true ) ) {
+					continue;
+				}
+
+				$updates = get_site_transient( 'update_plugins' );
+				$icons   = ( is_object( $updates ) && isset( $updates->response[ $file ]->icons ) )
+					? (array) $updates->response[ $file ]->icons
+					: array();
+
+				foreach ( array( '2x', '1x', 'svg' ) as $size ) {
+					if ( isset( $icons[ $size ] ) && is_string( $icons[ $size ] ) && '' !== $icons[ $size ] ) {
+						return esc_url_raw( $icons[ $size ] );
+					}
+				}
+
+				$plugin_dir = WP_PLUGIN_DIR . '/' . $dir;
+				$relative   = array(
+					'icon.svg',
+					'icon.png',
+					'assets/icon.svg',
+					'assets/icon.png',
+					'assets/icon-128x128.png',
+					'assets/img/logo-60x60.png',
+				);
+
+				foreach ( $relative as $path ) {
+					if ( file_exists( $plugin_dir . '/' . $path ) ) {
+						return esc_url_raw( plugins_url( $path, $file ) );
+					}
+				}
+
+				break;
+			}
+		}
+
+		return '';
 	}
 
 	/**

@@ -214,10 +214,8 @@ export default function SaveBar( {
 			role="region"
 			aria-label={ title || __( 'Save changes', 'updatronix' ) }
 		>
-			<Text variant="body-sm" className="updatronix-savebar-status">
-				{ isDirty
-					? __( 'Unsaved changes', 'updatronix' )
-					: __( 'All changes saved', 'updatronix' ) }
+			<Text variant="body-md" className="updatronix-savebar-title">
+				{ title || __( 'Save changes', 'updatronix' ) }
 			</Text>
 
 			<div className="updatronix-savebar-actions">

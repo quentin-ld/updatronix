@@ -327,6 +327,18 @@ export function ActivityLogPanel( {
 				enableHiding: false,
 				render: ( { item } ) => {
 					const key = String( item.log_type || '' ).toLowerCase();
+					const logo = typeof item.logo === 'string' ? item.logo : '';
+
+					if ( logo ) {
+						return (
+							<img
+								className="updatronix-log-type-icon updatronix-log-type-icon--image"
+								src={ logo }
+								alt=""
+								loading="lazy"
+							/>
+						);
+					}
 
 					return (
 						<span
