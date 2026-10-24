@@ -243,6 +243,7 @@ body.updatronix-admin-page {
 	display: flex;
 	align-items: center;
 	gap: var(--wpds-dimension-gap-xs);
+	min-height: var(--wpds-dimension-size-md);
 	color: var(--wpds-color-foreground-content-neutral-weak);
 	font-size: var(--wpds-typography-font-size-sm);
 
@@ -264,16 +265,18 @@ body.updatronix-admin-page {
 	display: flex;
 	align-items: flex-start;
 	justify-content: space-between;
-	gap: var(--wpds-dimension-gap-md);
-	margin-top: var(--wpds-dimension-gap-sm);
+	gap: var(--wpds-dimension-gap-lg);
 }
 
 .updatronix-page-heading {
+	display: flex;
+	flex-direction: column;
+	gap: var(--wpds-dimension-gap-xs);
 	min-width: 0;
 }
 
 .updatronix-page-title {
-	margin: 0;
+	margin: var(--wpds-dimension-gap-xs) 0 0;
 	font-family: var(--wpds-typography-font-family-heading);
 	font-size: var(--wpds-typography-font-size-2xl);
 	font-weight: var(--wpds-typography-font-weight-emphasis);
@@ -287,10 +290,10 @@ body.updatronix-admin-page {
 
 .updatronix-page-description {
 	max-width: 68ch;
-	margin: var(--wpds-dimension-gap-xs) 0 0;
+	margin: 0;
 	color: var(--wpds-color-foreground-content-neutral-weak);
 	font-size: var(--wpds-typography-font-size-lg);
-	line-height: var(--wpds-typography-line-height-lg);
+	line-height: var(--wpds-typography-line-height-md);
 }
 
 .updatronix-page-meta {
@@ -335,7 +338,7 @@ body.updatronix-admin-page {
 	border-bottom: 1px solid var(--wpds-color-stroke-surface-neutral-weak);
 	display: flex;
 	gap: var(--wpds-dimension-gap-md);
-	padding: var(--wpds-dimension-gap-md) 0;
+	padding: var(--wpds-dimension-padding-lg) 0;
 }
 
 .updatronix-auto-item:first-child {
@@ -367,7 +370,7 @@ body.updatronix-admin-page {
 	display: flex;
 	flex: 1;
 	flex-direction: column;
-	gap: 2px;
+	gap: var(--wpds-dimension-gap-xs);
 	min-width: 0;
 }
 
@@ -935,10 +938,6 @@ body.updatronix-admin-page {
 
 /* Sections and the manual-save surface */
 
-.updatronix-section {
-	margin-bottom: var(--wpds-dimension-gap-md);
-}
-
 .updatronix-section-heading {
 	display: flex;
 	flex-direction: column;
@@ -951,7 +950,7 @@ body.updatronix-admin-page {
 	font-family: var(--wpds-typography-font-family-heading);
 	font-size: var(--wpds-typography-font-size-lg);
 	font-weight: var(--wpds-typography-font-weight-emphasis);
-	line-height: var(--wpds-typography-line-height-lg);
+	line-height: var(--wpds-typography-line-height-sm);
 	color: var(--wpds-color-foreground-content-neutral);
 }
 

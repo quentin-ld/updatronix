@@ -65,27 +65,30 @@ export default function AppShell( {
 				<div className="updatronix-page">
 					{ ! hideHeader && (
 						<header className="updatronix-page-header">
-							<nav
-								className="updatronix-breadcrumb"
-								aria-label={ __( 'Breadcrumb', 'updatronix' ) }
-							>
-								<a
-									href={ getTabUrl( 'logs' ) }
-									onClick={ ( event ) => {
-										event.preventDefault();
-										onNavigate( 'logs' );
-									} }
-								>
-									{ __( 'Updatronix', 'updatronix' ) }
-								</a>
-								<span aria-hidden="true">/</span>
-								<span aria-current="page">
-									{ destination.label }
-								</span>
-							</nav>
-
 							<div className="updatronix-page-headrow">
 								<div className="updatronix-page-heading">
+									<nav
+										className="updatronix-breadcrumb"
+										aria-label={ __(
+											'Breadcrumb',
+											'updatronix'
+										) }
+									>
+										<a
+											href={ getTabUrl( 'logs' ) }
+											onClick={ ( event ) => {
+												event.preventDefault();
+												onNavigate( 'logs' );
+											} }
+										>
+											{ __( 'Updatronix', 'updatronix' ) }
+										</a>
+										<span aria-hidden="true">/</span>
+										<span aria-current="page">
+											{ destination.label }
+										</span>
+									</nav>
+
 									<h1
 										className="updatronix-page-title"
 										ref={ titleRef }
