@@ -13,6 +13,7 @@
 		"build": "wp-scripts build index=assets/src/index.js --output-path=assets/build",
 		"setup": "bash bin/harness setup",
 		"test:all": "composer run verify:all && composer run lint:pcp && npm run lint && npm run lint:css && npm run test:js",
+		"test": "npm run test:js",
 		"build:all": "npm run test:all && composer run make:pot && npm run build",
 		"zip": "bash bin/harness zip",
 		"harness": "bash bin/harness",
