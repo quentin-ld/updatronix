@@ -80,7 +80,7 @@ The manual pass used a local administrator and the DDEV site `https://updatronix
 ### Known gaps after this wave
 
 1. The Settings Data card is not shipped: the backend has no uninstall-deletion option. The route description now says “Logging, retention, and email routing.”
-2. The update log, auto updates, and their dialogs still use the legacy panels.
+2. Auto updates still uses the legacy panel.
 3. The page chunk remains 2.01 MiB; F6-03 owns the budget.
 
 ### Next
@@ -88,3 +88,35 @@ The manual pass used a local administrator and the DDEV site `https://updatronix
 1. `F3-01` and `F3-02`: migrate the update log to DataViews and its details, export, and delete dialogs.
 2. `F3-03`: migrate auto updates to cards and one manual save.
 3. `F5-01`: remove the legacy shell styles and the now-unused `Tabs` component.
+
+## 2026-10-24 · F3-01 and F3-02 update log table and dialogs
+
+### What landed
+
+| Area | Change |
+|---|---|
+| Table | One DataViews table with Item, Type, Version, Trigger, Status, Date, and Actions. The version cell is compact (`v7.1.2 → v7.1.3`), and the footer uses the server total. |
+| Actions | Row actions open WPDS dialogs: View details opens a `Dialog`, Delete opens an `AlertDialog` with `intent="irreversible"`. |
+| Status | WPDS `Badge` with the `stable`, `medium`, `high`, `informational`, and `none` intents. |
+| Details | `LogDetailsContent` now uses the WPDS `Notice` and `Text` components; the summary, process details, and advanced trace are unchanged. |
+| States | Error, logging-disabled, loading, empty, and delete-failure states are explicit. |
+
+### Remaining legacy surface
+
+The export modal still uses the legacy `Modal` and core controls. It works and keeps its chunked export behavior, but it is the next F3-02 slice.
+
+### Verification
+
+| Check | Result |
+|---|---|
+| `npm run lint` | Pass. |
+| `npm run lint:css` | Pass. |
+| `npm run build` | Pass. Entry 335 KiB; lazy page chunk 2.01 MiB. |
+| `npm test` | 12 tests pass. |
+| Manual browser pass | Seven rows render with the correct columns; details dialog, delete alert dialog open and cancel, export modal opens and closes, focus returns to the export button, no console errors. |
+
+### Next
+
+1. Migrate the export modal to the WPDS `Dialog` and controls.
+2. `F3-03`: migrate auto updates to cards and one manual save.
+3. `F5-01`: remove the legacy shell styles and the unused log card layout helpers.

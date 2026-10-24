@@ -3,8 +3,10 @@
  */
 import { useEffect, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { Notice } from '@wordpress/components';
+import wpds from '../../shell/wpds';
 import { formatDate, getStatusLabel } from './utils';
+
+const { Notice, Text } = wpds.ui;
 
 /**
  * Render message and trace content for a log detail modal.
@@ -57,14 +59,18 @@ export function LogDetailsContent( { log, logId, fetchLogDetails } ) {
 	}, [ fetchLogDetails, logId ] );
 
 	if ( loading ) {
-		return <p>{ __( 'Loading log details…', 'updatronix' ) }</p>;
+		return (
+			<Text variant="body-sm" className="updatronix-muted">
+				{ __( 'Loading log details…', 'updatronix' ) }
+			</Text>
+		);
 	}
 
 	if ( fetchError ) {
 		return (
-			<Notice status="error" isDismissible={ false }>
-				{ fetchError }
-			</Notice>
+			<Notice.Root intent="error">
+				<Notice.Description>{ fetchError }</Notice.Description>
+			</Notice.Root>
 		);
 	}
 

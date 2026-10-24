@@ -15,22 +15,22 @@ export const EMPTY_FALLBACK = _x( '—', 'empty value fallback', 'updatronix' );
  */
 export function statusToBadgeIntent( status ) {
 	if ( ! status ) {
-		return 'default';
+		return 'none';
 	}
 	const s = String( status ).toLowerCase();
 	if ( s === 'success' || s === 'updated' || s === 'ok' ) {
-		return 'success';
+		return 'stable';
 	}
 	if ( s === 'warning' || s === 'warn' ) {
-		return 'warning';
+		return 'medium';
 	}
 	if ( s === 'error' || s === 'failed' || s === 'errors' ) {
-		return 'error';
+		return 'high';
 	}
 	if ( s === 'info' || s === 'delayed' ) {
-		return 'info';
+		return 'informational';
 	}
-	return 'default';
+	return 'none';
 }
 
 /**

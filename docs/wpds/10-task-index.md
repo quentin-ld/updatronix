@@ -14,9 +14,11 @@ document that owns its contract. Use this table to open one `/architect` or
 | `F4-02`, `F4-03`, `F4-04` | Done. Documentation and Support are implemented; the hub decision is recorded. |
 | `F4-01` | Placeholder. Health is an explicit empty state until the backend lands. |
 | `F2-01` to `F2-04` | Done in substance. The shell page header, the `Section` primitive, the `SaveBar`, and the `AlertDialog` pattern are in place. |
+| `F3-01` | Done. The update log uses one DataViews table. |
+| `F3-02` | Partial. Details and delete use WPDS dialogs; the export modal is still legacy. |
 | `F3-04` | Done. Schedule uses the new sections, save bar, shortcut, and dirty state. |
 | `F3-05` | Partial. Settings uses the new sections and save bar; the Data card (uninstall deletion) is deferred until the backend option exists. |
-| `F3-01`, `F3-02`, `F3-03` | Not started. |
+| `F3-03` | Not started. |
 | `F5`, `F6` | Not started. |
 | `P0` to `P7` | Not started. Pro still bundles its own WPDS copy. |
 

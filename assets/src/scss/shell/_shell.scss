@@ -376,6 +376,43 @@ $updatronix-rail-muted: #a7adb3;
 	gap: var(--wpds-dimension-gap-md);
 }
 
+/* Update log table */
+
+.updatronix-log-toolbar {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--wpds-dimension-gap-sm);
+	margin-bottom: var(--wpds-dimension-gap-sm);
+}
+
+.updatronix-log-toolbar-end {
+	margin-inline-start: auto;
+}
+
+.updatronix-log-item {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	min-width: 0;
+}
+
+.updatronix-log-item-name {
+	font-weight: var(--wpds-typography-font-weight-emphasis);
+}
+
+.updatronix-export-output {
+	max-height: 320px;
+	overflow: auto;
+	margin: 0;
+	padding: var(--wpds-dimension-padding-sm);
+	background: var(--wpds-color-background-surface-neutral-weak);
+	border: 1px solid var(--wpds-color-stroke-surface-neutral-weak);
+	border-radius: var(--wpds-border-radius-sm);
+	white-space: pre-wrap;
+	overflow-wrap: anywhere;
+}
+
 .updatronix-settings-clear {
 	display: flex;
 	justify-content: flex-start;
