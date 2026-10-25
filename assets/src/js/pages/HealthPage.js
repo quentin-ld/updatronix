@@ -5,8 +5,10 @@
  */
 
 import apiFetch from '@wordpress/api-fetch';
+import { useDispatch } from '@wordpress/data';
 import { useCallback, useEffect, useState } from '@wordpress/element';
 import { __, _n, sprintf } from '@wordpress/i18n';
+import { store as noticesStore } from '@wordpress/notices';
 
 import PageHeader from '../shell/PageHeader';
 import Section from '../shell/Section';
@@ -46,9 +48,7 @@ const STATUS_LABELS = {
 export default function HealthPage( { destination, onNavigate } ) {
 	const [ snapshot, setSnapshot ] = useState( null );
 	const [ loading, setLoading ] = useState( true );
-	const [ running, setRunning ] = useState( false );
 	const [ error, setError ] = useState( '' );
-	const [ notice, setNotice ] = useState( null );
 	const [ detail, setDetail ] = useState( null );
 	const [ retry, setRetry ] = useState( null );
 	const [ retryBusy, setRetryBusy ] = useState( false );
@@ -57,11 +57,11 @@ export default function HealthPage( { destination, onNavigate } ) {
 	const [ diagnostics, setDiagnostics ] = useState( null );
 	const [ diagnosticsLoading, setDiagnosticsLoading ] = useState( false );
 	const [ copyState, setCopyState ] = useState( '' );
+	const { createSuccessNotice, createWarningNotice } =
+		useDispatch( noticesStore );
 
 	const loadHealth = useCallback( async ( force = false, quiet = false ) => {
-		if ( quiet ) {
-			setRunning( true );
-		} else {
+		if ( ! quiet ) {
 			setLoading( true );
 		}
 		setError( '' );
@@ -87,9 +87,7 @@ export default function HealthPage( { destination, onNavigate } ) {
 
 			return null;
 		} finally {
-			if ( quiet ) {
-				setRunning( false );
-			} else {
+			if ( ! quiet ) {
 				setLoading( false );
 			}
 		}
@@ -112,13 +110,26 @@ export default function HealthPage( { destination, onNavigate } ) {
 	const runCheck = async () => {
 		const result = await loadHealth( true, true );
 
-		if ( result ) {
-			setNotice( {
-				intent:
-					result.summary.status === 'good' ? 'success' : 'warning',
-				title: __( 'Health check complete', 'updatronix' ),
-				message: result.summary.sentence,
-			} );
+		if ( ! result ) {
+			return;
+		}
+
+		const good = result.summary.status === 'good';
+		const message = good
+			? __(
+					'Health check complete. All checks are passing.',
+					'updatronix'
+				)
+			: sprintf(
+					/* translators: %s: number or summary of checks needing attention. */
+					__( 'Health check complete. %s', 'updatronix' ),
+					result.summary.title
+				);
+
+		if ( good ) {
+			createSuccessNotice( message, { id: 'updatronix-health-check' } );
+		} else {
+			createWarningNotice( message, { id: 'updatronix-health-check' } );
 		}
 	};
 
@@ -180,16 +191,14 @@ export default function HealthPage( { destination, onNavigate } ) {
 			} );
 			const target = retry;
 			setRetry( null );
-			setNotice( {
-				intent: 'success',
-				title: __( 'Retry queued', 'updatronix' ),
-				message:
-					response?.message ||
+			createSuccessNotice(
+				response?.message ||
 					__(
 						'The retry will run shortly. The result appears in the update log.',
 						'updatronix'
 					),
-			} );
+				{ id: 'updatronix-health-retry' }
+			);
 			setSnapshot( ( previous ) =>
 				previous
 					? {
@@ -261,17 +270,10 @@ export default function HealthPage( { destination, onNavigate } ) {
 						tone="neutral"
 						onClick={ openDiagnostics }
 					>
-						{ __( 'Download diagnostics', 'updatronix' ) }
+						{ __( 'View diagnostics', 'updatronix' ) }
 					</Button>
-					<Button
-						variant="solid"
-						tone="brand"
-						onClick={ runCheck }
-						disabled={ running }
-					>
-						{ running
-							? __( 'Checking…', 'updatronix' )
-							: __( 'Run check', 'updatronix' ) }
+					<Button variant="solid" tone="brand" onClick={ runCheck }>
+						{ __( 'Run check', 'updatronix' ) }
 					</Button>
 				</>
 			}
@@ -360,13 +362,6 @@ export default function HealthPage( { destination, onNavigate } ) {
 						{ __( 'The last check failed', 'updatronix' ) }
 					</Notice.Title>
 					<Notice.Description>{ error }</Notice.Description>
-				</Notice.Root>
-			) }
-
-			{ notice && (
-				<Notice.Root intent={ notice.intent }>
-					<Notice.Title>{ notice.title }</Notice.Title>
-					<Notice.Description>{ notice.message }</Notice.Description>
 				</Notice.Root>
 			) }
 
