@@ -96,6 +96,7 @@ The owner asked for the rail to match the WordPress admin bar/background and the
 - Rail background: **#1e1e1e** — identical to the shell background and the live `#wpadminbar` (both measured `rgb(30,30,30)`).
 - Rail link base: **#b4b4b4** (the Site Editor navigation base); hover/focus: **#f0f0f0** with a **transparent** background.
 - Active links remain white with the existing dark active background and indicator.
+- Drawer header: **title and close icon are #fff** (previously rgb(30,30,30) on the rgb(30,30,30) drawer); the 20px/600 heading is now readable.
 - Mobile bar/admin frame, rail width, item geometry, active treatment, and full-screen behavior were not changed.
 
 Verified at 1280: rail/admin bar/shell all `rgb(30,30,30)`; non-active link base `rgb(180,180,180)`, hover `rgb(240,240,240)`, hover background transparent.

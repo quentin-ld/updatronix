@@ -1360,10 +1360,25 @@ body.updatronix-admin-page {
 	align-items: center;
 	justify-content: space-between;
 	gap: var(--wpds-dimension-gap-sm);
+	color: $updatronix-rail-focus;
+
+	.components-button {
+		color: $updatronix-rail-focus;
+	}
 }
 
 .updatronix-nav-drawer-title {
+	color: $updatronix-rail-focus;
 	font-weight: var(--wpds-typography-font-weight-emphasis);
+}
+
+.updatronix-nav-drawer .updatronix-nav-drawer-head .updatronix-nav-drawer-title {
+	color: $updatronix-rail-focus;
+}
+
+.updatronix-nav-drawer .updatronix-nav-drawer-head .components-button,
+.updatronix-nav-drawer .updatronix-nav-drawer-head [data-wp-ui-drawer-close-icon] {
+	color: $updatronix-rail-focus;
 }
 
 .updatronix-nav-drawer-body {
