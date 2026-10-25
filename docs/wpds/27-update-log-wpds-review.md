@@ -3,7 +3,7 @@
 **Date:** 2026-10-25
 **Scope:** Free Update logs screen (`tools.php?page=updatronix&tab=logs`).
 **Reference:** Open Design `update-log.html`, `UpdateLog.jsx`, `app.css`, and the live WordPress/WPDS components.
-**Status:** Review only. No UI source changed.
+**Status:** Implemented and verified for T1–T3; T4 is documented as the accepted title-button keyboard affordance.
 
 ## Method
 
@@ -71,6 +71,14 @@
 **Evidence:** MCP `Button` documents `@wordpress/components` variants (`primary`, `secondary`, `tertiary`, `link`) and no `tone`; the live screen uses `@wordpress/ui` `Button` with `outline`/`solid` and `tone`. MCP `SearchControl`/`SelectControl` similarly target `@wordpress/components`, while the screen uses `@wordpress/ui`/DataViews. `DataViews`, `Dialog`, and `IconButton` have no MCP entries.
 
 **Recommendation:** Treat the pinned local `@wordpress/ui`/`@wordpress/dataviews` types as authoritative and record the MCP gap in the review. Do not downgrade components to match the MCP’s older package docs.
+
+## Implementation result (2026-10-25)
+
+- **T1 fixed:** at 390 the toolbar is one 33px row; search is 178px, filter at x=239, View options at x=295. No search/filter/view wrap.
+- **T2 fixed:** the fixed Load more boundary is now ≤760px. At 760 the bar is `position:fixed` at y=843 (760×57), with 72px log bottom padding and a 16px retention tag gap. At 960 it remains in-flow.
+- **T3 fixed:** early load errors call `speak( error, 'assertive' )`; logging-off calls `speak( …, 'polite' )`. `@wordpress/a11y` is now a direct dependency.
+- **T4 accepted:** the title button remains the keyboard detail action; the row click remains the pointer shortcut.
+- Verification: ESLint, Stylelint, token lint, 15/15 JS tests, build; browser checks at 390 and 760.
 
 ## MCP component matrix
 

@@ -41,6 +41,7 @@
 	},
 	"dependencies": {
 		"@wordpress/admin-ui": "3.0.0",
+		"@wordpress/a11y": "^4.57.0",
 		"@wordpress/api-fetch": "^7.53.0",
 		"@wordpress/components": "43.0.0",
 		"@wordpress/compose": "9.0.0",

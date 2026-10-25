@@ -15,6 +15,7 @@ import {
 } from '@wordpress/element';
 import { DataViews, filterSortAndPaginate } from '@wordpress/dataviews';
 import { dateI18n } from '@wordpress/date';
+import { speak } from '@wordpress/a11y';
 import { __, sprintf } from '@wordpress/i18n';
 
 import wpds from '../../shell/wpds';
@@ -220,6 +221,23 @@ export function ActivityLogPanel( {
 		url.searchParams.delete( 'log' );
 		window.history.replaceState( {}, '', url.toString() );
 	}, [ deepLinkLogId, loading, logs ] );
+	useEffect( () => {
+		if ( error ) {
+			speak( error, 'assertive' );
+			return;
+		}
+
+		if ( ! loggingEnabled ) {
+			speak(
+				__(
+					'Update logging is off. Turn it on in Settings to keep a history of updates.',
+					'updatronix'
+				),
+				'polite'
+			);
+		}
+	}, [ error, loggingEnabled ] );
+
 	const [ toDelete, setToDelete ] = useState( null );
 	const [ deleteError, setDeleteError ] = useState( '' );
 	const [ exportOpen, setExportOpen ] = useState( false );

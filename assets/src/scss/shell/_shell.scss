@@ -1136,6 +1136,19 @@ body.updatronix-admin-page {
 	margin-bottom: var(--wpds-dimension-gap-sm);
 }
 
+@media (max-width: 600px) {
+
+	.updatronix-log-toolbar {
+		flex-wrap: nowrap;
+	}
+
+	.updatronix-log-toolbar .dataviews-search {
+		flex: 1 1 0;
+		max-width: calc(100% - 96px);
+		min-width: 0;
+	}
+}
+
 .updatronix-log-toolbar-end {
 	margin-inline-start: auto;
 }
