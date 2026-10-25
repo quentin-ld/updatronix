@@ -127,7 +127,7 @@ body.updatronix-admin-page {
 .updatronix-rail-brand-text {
 	display: flex;
 	flex-direction: column;
-	gap: 2px;
+	gap: var(--wpds-dimension-gap-xs);
 	min-width: 0;
 }
 
@@ -168,6 +168,7 @@ body.updatronix-admin-page {
 	gap: var(--wpds-dimension-gap-sm);
 	padding: var(--wpds-dimension-padding-sm) var(--wpds-dimension-padding-md);
 	color: $updatronix-rail-text;
+	line-height: var(--wpds-typography-line-height-md);
 	text-decoration: none;
 	border-radius: var(--wpds-border-radius-md);
 
@@ -202,10 +203,21 @@ body.updatronix-admin-page {
 }
 
 .updatronix-rail-pro {
+	display: flex;
+	align-items: center;
 	margin-inline-start: auto;
+
+	> span {
+		align-items: center;
+		display: inline-flex;
+		min-height: 24px;
+	}
 }
 
 .updatronix-rail-foot {
+	display: flex;
+	flex-direction: column;
+	gap: var(--wpds-dimension-gap-md);
 	margin-top: auto;
 	padding-top: var(--wpds-dimension-padding-lg);
 	border-top: 1px solid $updatronix-rail-border;
@@ -1237,6 +1249,7 @@ body.updatronix-admin-page {
 		padding: 0 var(--wpds-dimension-padding-sm) 0 var(--wpds-dimension-padding-md);
 		background: $updatronix-shell-bg;
 		color: $updatronix-rail-focus;
+		line-height: var(--wpds-typography-line-height-md);
 		border-bottom: 1px solid $updatronix-rail-border;
 		border-radius: 0;
 	}
@@ -1331,8 +1344,13 @@ body.updatronix-admin-page {
 }
 
 .updatronix-nav-drawer {
-	background: $updatronix-rail-bg;
+	background: $updatronix-shell-bg;
 	color: $updatronix-rail-text;
+}
+
+.updatronix-nav-drawer .updatronix-rail-link {
+	box-sizing: border-box;
+	min-height: 44px;
 }
 
 .updatronix-nav-drawer-head {
@@ -1350,7 +1368,7 @@ body.updatronix-admin-page {
 	display: flex;
 	flex-direction: column;
 	gap: var(--wpds-dimension-gap-lg);
-	padding: var(--wpds-dimension-padding-md);
+	padding: var(--wpds-dimension-padding-sm);
 }
 
 .updatronix-nav-drawer-version {
@@ -1366,5 +1384,12 @@ body.updatronix-admin-page {
 	.updatronix-mobile-bar a,
 	.updatronix-mobile-bar a:visited {
 		color: $updatronix-rail-text;
+	}
+
+	.updatronix-rail .updatronix-rail-link:hover,
+	.updatronix-rail .updatronix-rail-link:hover:visited,
+	.updatronix-rail .updatronix-rail-link.is-current,
+	.updatronix-rail .updatronix-rail-link.is-current:visited {
+		color: $updatronix-rail-focus;
 	}
 }

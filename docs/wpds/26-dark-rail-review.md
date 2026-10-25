@@ -3,7 +3,7 @@
 **Date:** 2026-10-25
 **Scope:** Free plugin dark rail and mobile navigation at `tools.php?page=updatronix`.
 **Reference:** `open-design-project/2dc80110-eba2-4562-acea-441ae2821939/screens/update-log.html`, `docs/wpds/reference/screens/src/ui.jsx`, `app.css`.
-**Status:** Review and recommendations only. No UI source changed.
+**Status:** Implemented and verified. The WordPress admin frame was retained.
 
 ## Method
 
@@ -88,6 +88,19 @@
 **Evidence:** The live mobile bar is 56px high and uses `rgb(30,30,30)`, matching the reference height and color. Its line-height is 18.2px versus 24px. The drawer active link is white in both, but the desktop active-color override and the short row height appear in the shared rail markup.
 
 **Recommendation:** Apply DR-002/DR-003 to the shared rail links; no separate mobile color scheme.
+
+## Implementation result (2026-10-25)
+
+- **DR-002 fixed:** rail links are 40px with 24px line-height; drawer links are 44px; mobile bar uses 24px line-height.
+- **DR-003 fixed:** active and hover label/icon are `rgb(255,255,255)`, overriding the legacy admin-link rule.
+- **DR-004 fixed:** brand block is 40px; brand-text gap is 4px.
+- **DR-005 fixed:** rail footer is flex column with a 12px gap.
+- **DR-006 fixed:** Pro badge is 35×24; colors/radius/padding remain unchanged.
+- **DR-007 fixed:** drawer surface is `rgb(30,30,30)`; first link is x=9, w=302; drawer links are 44px (border-box min-height).
+- **DR-008 fixed:** mobile bar is 56px high with 24px line-height and the matching background.
+- **DR-001 retained:** the WordPress admin menu/toolbar remains; rail is x=160/y=32 at 1280. This is the accepted admin-frame decision.
+
+Verification: Free Stylelint, token lint, 15/15 JS tests, build; browser checks at 1280 and 390; desktop rail links 40px, active white, brand 40px, footer flex/12px, Pro badge 24px; drawer 320px, link 44px at x=9/w=302; no horizontal overflow.
 
 ## Matching regions
 
