@@ -1,6 +1,6 @@
 # Update Shield review (2026-10-25)
 
-**Status:** Review only. No UI source has been changed for these findings.
+**Status:** Implemented and verified in the Pro plugin.
 **Reference:** `open-design-project/2dc80110-eba2-4562-acea-441ae2821939/screens/update-shield.html`, `docs/wpds/reference/screens/src/screens/UpdateShield.jsx`, `docs/wpds/reference/screens/src/app.css`, `docs/wpds/reference/screens/src/ui.jsx`.
 **Current:** `wp-content/plugins/updatronix-pro/assets/src/js/components/UpdateShieldPage.js`, `assets/src/scss/_pro-settings.scss`.
 **WPDS MCP:** SwitchControl, RadioGroupControl, Badge, Link, Button, Card, Icon, and Text checked. The current Button is from `@wordpress/ui`, while the MCP Button entry documents `@wordpress/components`; the rendered link action below is the visible consequence to review.
@@ -106,11 +106,25 @@
 - The live table was populated by review fixtures; treat those rows as test data.
 - The live site defaults Protect this site off; the reference shows it on. Both states were reviewed.
 
-## Open decisions
+## Resolved decisions
 
-1. Keep the item-to-log links in the blocked table?
-2. Keep the Recheck compatibility action in the Protection header?
-3. Show the configured recipient email or keep the generic “site administrator” copy?
+1. **US-006:** kept the item → log links.
+2. **US-007:** kept the Recheck compatibility action.
+3. **US-008:** kept the privacy-preserving “site administrator” copy.
+
+## Implementation result (2026-10-25)
+
+- **US-001 fixed:** “Open update log” is now a real `Link` (98×18 at 1280, underlined brand color) with a deep link to the log destination; the filled blue button is gone.
+- **US-002 fixed:** the item-type subtext is `display:block`; item and type render on separate lines and rows regain their reference height.
+- **US-003 fixed:** blocked dates use `j M, H:i` via `wp_date` (`25 Oct, 10:48`); raw timestamps are no longer shown.
+- **US-004 fixed:** the shield table has a 640px minimum width. At 560 the client/scroll widths are `444/640`; at 390 `274/640`; the page itself does not overflow.
+- **US-005 fixed:** the closing note uses the shared 80ch measure (`541×32` at 1280/960, available width on mobile).
+- **US-009 fixed:** blocked versions render ranges (`7.0.0 → 7.1.0`) without a `v` prefix when both versions exist.
+- **US-006 resolved:** blocked item → log links are kept.
+- **US-007 resolved:** the Recheck compatibility action is kept as a product-only action.
+- **US-008 resolved:** the generic “site administrator” recipient copy is kept for privacy.
+
+Verification: Pro lint/CSS/build pass; PHPStan is clean and 200 PHPUnit tests pass; the active Shield view is verified at 1280/960/560/390; the temporary license was removed and the site is inactive.
 
 ## Assumptions
 
