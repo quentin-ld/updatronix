@@ -288,6 +288,7 @@ export const SettingsPanel = memo( function SettingsPanelForm( {
 										'Type an email and press Enter. Add as many addresses as you need.',
 										'updatronix'
 									) }
+									disabled={ emailsOff }
 									searchPlaceholder="name@example.com"
 									clearButtonLabel={ __(
 										'Remove all recipients',
