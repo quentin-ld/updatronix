@@ -107,5 +107,6 @@
 - Free lint/CSS/token checks, 15 JS tests, build, PHPStan, and 213 PHPUnit tests pass.
 - Open issues remain review fixtures and Recently resolved is empty; these are data, not UI changes.
 - Mobile open issues: at ≤900px, issue actions now take a full-width row below the icon/body (reference behavior). At 390 the body is 222px wide, actions 274px, row height 217px, with no horizontal overflow; this replaces the previous 41px-wide body/433px row.
+- Mobile action alignment: the two buttons are right-aligned inside the full-width row. At 390, View details spans x=158–259 and Retry x=267–327, ending at the row’s right edge (327).
 
 Remaining gaps: no dedicated visual/snackbar/dialog tests; full screen-reader and cross-browser passes remain separate work.
