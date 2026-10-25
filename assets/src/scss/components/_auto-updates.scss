@@ -5,6 +5,13 @@
 	}
 }
 
+.updatronix-dashboard-wrap .updatronix-autoupdates-panel .updatronix-auto-item a[target="_blank"]::after {
+	background: none;
+	content: none;
+	display: none;
+	mask-image: none;
+}
+
 @media (max-width: 760px) {
 
 	.updatronix-autoupdates-panel > .updatronix-page-header {

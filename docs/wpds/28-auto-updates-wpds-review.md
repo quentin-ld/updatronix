@@ -3,7 +3,7 @@
 **Date:** 2026-10-25
 **Scope:** Free Automatic updates screen (`tools.php?page=updatronix&tab=auto-updates`).
 **Reference:** Open Design `auto-updates.html`, `AutoUpdates.jsx`, `app.css`, and the live WPDS components.
-**Status:** Review only. No UI source changed.
+**Status:** T1–T2 implemented and verified; T3 recorded as an MCP coverage note.
 
 ## Method
 
@@ -55,6 +55,13 @@ The rendered link therefore shows the arrow plus the extra document/external ico
 **Evidence:** `SwitchControl`, `RadioGroupControl`, `Card`, `EmptyState`, and `Link` are documented as `@wordpress/ui` and match the screen. The MCP `Button` entry still describes `@wordpress/components`; the screen uses `@wordpress/ui` Button variants/tones. `Text`/`Stack` are local.
 
 **Recommendation:** Keep the pinned local `@wordpress/ui` types as authoritative and record the MCP coverage gap; do not change component APIs to satisfy older MCP docs.
+
+## Implementation result (2026-10-25)
+
+- **AU28-01 fixed:** a scoped rule suppresses the dashboard `a[target="_blank"]::after` icon inside `.updatronix-autoupdates-panel .updatronix-auto-item`; the WPDS Link `link-icon` remains (`::after: "⁠↗"`) and `target="_blank"` is preserved. Computed anchor `::after` is now `content:none; display:none; mask-image:none`.
+- **AU28-02 fixed:** `ConstantNotices` announces the relevant constant descriptions with `speak( …, 'polite' )`, guarded by a `useRef` so parent re-renders do not repeat it.
+- **AU28-03 recorded:** MCP coverage gap remains a note; local `@wordpress/ui` types stay authoritative.
+- Verification: ESLint, Stylelint, token lint, 15/15 JS tests, build; live link computed-style check.
 
 ## Grilling QA — states and risks
 

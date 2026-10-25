@@ -6,6 +6,8 @@
  * @property {boolean}               locks   Whether the constant locks the setting.
  */
 
+import { useEffect, useRef } from '@wordpress/element';
+import { speak } from '@wordpress/a11y';
 import { __, sprintf } from '@wordpress/i18n';
 
 import wpds from '../../shell/wpds';
@@ -58,6 +60,48 @@ export function ConstantNotices( {
 	dismissed = [],
 	onDismiss,
 } ) {
+	const lastAnnouncement = useRef( '' );
+
+	useEffect( () => {
+		if ( ! constants ) {
+			return;
+		}
+
+		const names = Object.entries( constants )
+			.filter( ( [ name, info ] ) => {
+				if (
+					! ( info.affects || [] ).some( ( section ) =>
+						sections.includes( section )
+					)
+				) {
+					return false;
+				}
+				if ( dismissibleOnly && info.locks ) {
+					return false;
+				}
+				if ( lockingOnly && ! info.locks ) {
+					return false;
+				}
+				return ! dismissed.includes( name );
+			} )
+			.map( ( [ name ] ) => name );
+
+		if ( names.length === 0 ) {
+			return;
+		}
+
+		const message = names
+			.map( ( name ) => CONSTANT_DESCRIPTIONS[ name ] || name )
+			.join( ' ' );
+
+		if ( message === lastAnnouncement.current ) {
+			return;
+		}
+
+		lastAnnouncement.current = message;
+		speak( message, 'polite' );
+	}, [ constants, dismissed, dismissibleOnly, lockingOnly, sections ] );
+
 	if ( ! constants || Object.keys( constants ).length === 0 ) {
 		return null;
 	}
