@@ -441,7 +441,7 @@ body.updatronix-admin-page {
 }
 
 .updatronix-split {
-	align-items: start;
+	align-items: stretch;
 	display: grid;
 	gap: var(--wpds-dimension-gap-lg);
 	grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -477,10 +477,17 @@ body.updatronix-admin-page {
 	}
 }
 
-@media (max-width: 900px) {
+@media (max-width: 760px) {
 
 	.updatronix-split {
 		grid-template-columns: minmax(0, 1fr);
+	}
+}
+
+@media (max-width: 560px) {
+
+	.updatronix-split {
+		gap: var(--wpds-dimension-gap-md);
 	}
 }
 

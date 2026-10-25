@@ -6,8 +6,10 @@
  */
 
 import apiFetch from '@wordpress/api-fetch';
+import { useDispatch } from '@wordpress/data';
 import { memo, useEffect, useMemo, useRef, useState } from '@wordpress/element';
 import { __, _n, sprintf } from '@wordpress/i18n';
+import { store as noticesStore } from '@wordpress/notices';
 
 import SaveBar, { SaveButton } from '../../shell/SaveBar';
 import PageHeader from '../../shell/PageHeader';
@@ -88,9 +90,8 @@ export const SchedulePanel = memo( function SchedulePanelComponent( {
 		() => getSchedule( settings ),
 		[ settings ]
 	);
+	const { createInfoNotice, createErrorNotice } = useDispatch( noticesStore );
 	const [ draft, setDraft ] = useState( () => getSchedule( settings ) );
-	const [ running, setRunning ] = useState( false );
-	const [ runState, setRunState ] = useState( null );
 	const savedRef = useRef( savedSchedule );
 
 	useEffect( () => {
@@ -161,33 +162,27 @@ export const SchedulePanel = memo( function SchedulePanelComponent( {
 	};
 
 	const handleRunCheck = async () => {
-		setRunning( true );
-		setRunState( null );
-
 		try {
 			await apiFetch( {
 				path: '/updatronix/v1/run-check',
 				method: 'POST',
 			} );
-			setRunState( {
-				status: 'success',
-				message: __(
+			createInfoNotice(
+				__(
 					'Update check started. This can take a minute.',
 					'updatronix'
 				),
-			} );
+				{ id: 'updatronix-run-check' }
+			);
 		} catch ( error ) {
-			setRunState( {
-				status: 'error',
-				message:
-					error?.message ||
+			createErrorNotice(
+				error?.message ||
 					__(
 						'The update check could not be started.',
 						'updatronix'
 					),
-			} );
-		} finally {
-			setRunning( false );
+				{ id: 'updatronix-run-check' }
+			);
 		}
 	};
 
@@ -239,11 +234,8 @@ export const SchedulePanel = memo( function SchedulePanelComponent( {
 							variant="outline"
 							tone="neutral"
 							onClick={ handleRunCheck }
-							disabled={ running }
 						>
-							{ running
-								? __( 'Checking…', 'updatronix' )
-								: __( 'Run a check now', 'updatronix' ) }
+							{ __( 'Run a check now', 'updatronix' ) }
 						</Button>
 						<SaveButton
 							onClick={ handleSave }
@@ -255,21 +247,6 @@ export const SchedulePanel = memo( function SchedulePanelComponent( {
 			/>
 
 			<div className="updatronix-page-body">
-				{ runState && (
-					<Notice.Root
-						intent={
-							runState.status === 'error' ? 'error' : 'success'
-						}
-					>
-						<Notice.Title>
-							{ __( 'Update check', 'updatronix' ) }
-						</Notice.Title>
-						<Notice.Description>
-							{ runState.message }
-						</Notice.Description>
-					</Notice.Root>
-				) }
-
 				<div className="updatronix-split">
 					<Section
 						title={ __( 'Update checks', 'updatronix' ) }
@@ -286,10 +263,6 @@ export const SchedulePanel = memo( function SchedulePanelComponent( {
 
 							<SelectControl
 								label={ __( 'Frequency', 'updatronix' ) }
-								description={ __(
-									'Sets how often WordPress checks for updates and runs automatic updates.',
-									'updatronix'
-								) }
 								value={ selectedFrequency }
 								items={ FREQUENCIES }
 								onValueChange={ ( item ) =>
@@ -436,7 +409,7 @@ export const SchedulePanel = memo( function SchedulePanelComponent( {
 					</div>
 				</Section>
 
-				<Text variant="body-sm" className="updatronix-muted">
+				<Text variant="body-sm" className="updatronix-surface-note">
 					{ __(
 						'The hold applies after a release is detected. Core security releases skip the hold.',
 						'updatronix'
