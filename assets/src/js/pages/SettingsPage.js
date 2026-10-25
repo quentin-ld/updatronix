@@ -60,6 +60,12 @@ function getProPanelRegistry() {
  * @return {import('react').JSX.Element} The application UI.
  */
 export const SettingsPage = () => {
+	const [ deepLinkLogId ] = useState( () => {
+		const raw = new URLSearchParams( window.location.search ).get( 'log' );
+		const id = Number.parseInt( raw || '', 10 );
+
+		return Number.isInteger( id ) && id > 0 ? id : 0;
+	} );
 	const {
 		settings: pluginSettings,
 		setSettings,
@@ -202,6 +208,7 @@ export const SettingsPage = () => {
 						destination={ destination }
 						loggingEnabled={ pluginSettings.logging_enabled }
 						retentionDays={ retentionDays }
+						deepLinkLogId={ deepLinkLogId }
 					/>
 				);
 			case 'auto-updates':

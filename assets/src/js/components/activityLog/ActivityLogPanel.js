@@ -195,6 +195,7 @@ function useNarrowPreview() {
  * @param {boolean} [props.loggingEnabled=true] Whether update logging is enabled.
  * @param {number}  [props.logsVersion=0]       Incremented to trigger a logs refetch.
  * @param {number}  [props.retentionDays=90]    Retention period for the header badge.
+ * @param {number}  [props.deepLinkLogId=0]     Log id from a deep link.
  * @return {import('react').JSX.Element} The update log screen.
  */
 export function ActivityLogPanel( {
@@ -202,6 +203,7 @@ export function ActivityLogPanel( {
 	loggingEnabled = true,
 	logsVersion = 0,
 	retentionDays = 90,
+	deepLinkLogId = 0,
 } ) {
 	const {
 		logs,
@@ -217,6 +219,21 @@ export function ActivityLogPanel( {
 		type: 'polite',
 	} );
 	const [ detail, setDetail ] = useState( null );
+	const deepLinkHandled = useRef( false );
+
+	useEffect( () => {
+		if ( ! deepLinkLogId || loading || deepLinkHandled.current ) {
+			return;
+		}
+
+		const item = logs.find( ( log ) => Number( log.id ) === deepLinkLogId );
+		setDetail( item || { id: deepLinkLogId } );
+		deepLinkHandled.current = true;
+
+		const url = new URL( window.location.href );
+		url.searchParams.delete( 'log' );
+		window.history.replaceState( {}, '', url.toString() );
+	}, [ deepLinkLogId, loading, logs ] );
 	const [ toDelete, setToDelete ] = useState( null );
 	const [ deleteError, setDeleteError ] = useState( '' );
 	const [ exportOpen, setExportOpen ] = useState( false );
