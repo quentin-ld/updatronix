@@ -69,7 +69,7 @@
 
 ### DOC-006 — Matching areas
 
-- Page header title/description/meta “3 guides”, three-column composition at 1280, 16px gap, 24px card padding/content gap, icon/external icon placement, kicker copy, descriptions, Card.Title heading semantics, card link/aria-label/new-tab target, Read guide arrow, Pro icon treatment, closing note width/line-height/link, and Support navigation match.
+- Page header title/description, three-column composition at 1280, 16px gap, 24px card padding/content gap, icon/external icon placement, kicker copy, descriptions, Card.Title heading semantics, card link/aria-label/new-tab target, Read guide arrow, Pro icon treatment, closing note width/line-height/link, and Support navigation match.
 - No horizontal overflow at 560/390.
 - Card/Text/Link/Icon components match WPDS MCP documentation; the mismatches are local typography and grid rules.
 
@@ -79,6 +79,12 @@
 - The card height difference attributable to the narrower admin frame/wrapping.
 - No data/API state: this is a static screen.
 - No owner/product decisions are required for the found issues; all are local CSS fixes.
+
+## Owner override (2026-10-25)
+
+- Removed the “3 guides” counter badge from the PageHeader.
+- Suppressed the dashboard-wide external-link pseudo-icon below each guide card with a higher-specificity rule; the intended top-right external icon and `target="_blank"` behavior remain.
+- Build verification: no counter text; all three card `::after` pseudo-elements resolve to `content:none; display:none; background:none`; each card still has its guide icon, top-right external icon, and Read guide arrow.
 
 ## Implementation result (2026-10-25)
 

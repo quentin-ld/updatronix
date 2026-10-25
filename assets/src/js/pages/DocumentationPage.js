@@ -58,10 +58,7 @@ const GUIDES = [
 export default function DocumentationPage( { destination, onNavigate } ) {
 	return (
 		<>
-			<PageHeader
-				destination={ destination }
-				meta={ [ { label: __( '3 guides', 'updatronix' ) } ] }
-			/>
+			<PageHeader destination={ destination } />
 
 			<div className="updatronix-page-body">
 				<div className="updatronix-doc-grid">
