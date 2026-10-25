@@ -327,6 +327,8 @@ body.updatronix-admin-page {
 .updatronix-surface-note {
 	max-width: 80ch;
 	color: var(--wpds-color-foreground-content-neutral-weak);
+	font-size: var(--wpds-typography-font-size-sm);
+	line-height: var(--wpds-typography-line-height-sm);
 }
 
 .updatronix-auto-list {
@@ -529,7 +531,7 @@ body.updatronix-admin-page {
 .updatronix-doc-card-content {
 	display: flex;
 	flex-direction: column;
-	gap: var(--wpds-dimension-gap-lg);
+	gap: var(--wpds-dimension-gap-xl);
 	height: 100%;
 }
 
@@ -606,16 +608,34 @@ body.updatronix-admin-page {
 .updatronix-support-steps {
 	display: flex;
 	flex-direction: column;
-	gap: var(--wpds-dimension-gap-md);
 	margin: 0;
 	padding: 0;
 	list-style: none;
 
 	li {
-		display: flex;
 		align-items: flex-start;
-		gap: var(--wpds-dimension-gap-sm);
+		border-bottom: 1px solid var(--wpds-color-stroke-surface-neutral-weak);
+		display: flex;
+		gap: var(--wpds-dimension-gap-md);
+		margin: 0;
+		padding: var(--wpds-dimension-padding-md) 0;
 	}
+
+	li:first-child {
+		padding-top: 0;
+	}
+
+	li:last-child {
+		border-bottom: 0;
+		padding-bottom: 0;
+	}
+}
+
+.updatronix-support-step-body {
+	display: flex;
+	flex-direction: column;
+	gap: var(--wpds-dimension-gap-xs);
+	min-width: 0;
 }
 
 .updatronix-support-step-title {
@@ -668,7 +688,10 @@ body.updatronix-admin-page {
 }
 
 .updatronix-support-forum-title {
+	font-family: var(--wpds-typography-font-family-heading);
+	font-size: var(--wpds-typography-font-size-xl);
 	font-weight: var(--wpds-typography-font-weight-emphasis);
+	line-height: var(--wpds-typography-line-height-xl);
 	margin: var(--wpds-dimension-padding-md) 0 var(--wpds-dimension-gap-xs);
 }
 
@@ -677,16 +700,30 @@ body.updatronix-admin-page {
 }
 
 .updatronix-support-privacy {
+	border-top: 1px solid var(--wpds-color-stroke-surface-neutral-weak);
 	color: var(--wpds-color-foreground-content-neutral-weak);
 	display: block;
-	margin-top: var(--wpds-dimension-gap-md);
+	margin-top: var(--wpds-dimension-gap-xl);
+	padding-top: var(--wpds-dimension-padding-md);
 }
 
 .updatronix-support-actions {
 	display: flex;
-	align-items: center;
-	gap: var(--wpds-dimension-gap-md);
-	margin-top: var(--wpds-dimension-gap-lg);
+	flex-direction: column;
+	align-items: flex-start;
+	gap: var(--wpds-dimension-gap-sm);
+	margin-top: var(--wpds-dimension-gap-xl);
+}
+
+.updatronix-support-forum-cta {
+	justify-content: center;
+	width: 100%;
+}
+
+.updatronix-support-docs-link {
+	font-size: var(--wpds-typography-font-size-sm);
+	line-height: var(--wpds-typography-line-height-md);
+	text-underline-offset: 2px;
 }
 
 /* Health */

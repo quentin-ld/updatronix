@@ -78,7 +78,7 @@ export default function SupportPage( { destination, onNavigate } ) {
 									>
 										{ index + 1 }
 									</span>
-									<div>
+									<div className="updatronix-support-step-body">
 										<Text
 											variant="body-md"
 											className="updatronix-support-step-title"
