@@ -807,6 +807,12 @@ body.updatronix-admin-page {
 	color: var(--wpds-color-foreground-interactive-brand-strong);
 }
 
+.updatronix-dashboard-wrap .updatronix-support-layout .updatronix-support-forum-cta[target="_blank"]::after {
+	content: none;
+	display: none;
+	background: none;
+}
+
 .updatronix-support-docs-link {
 	font-size: var(--wpds-typography-font-size-sm);
 	line-height: var(--wpds-typography-line-height-md);

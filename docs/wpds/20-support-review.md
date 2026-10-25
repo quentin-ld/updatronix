@@ -69,6 +69,7 @@
 ## Implementation result (2026-10-25)
 
 - SUP-001 fixed: the forum CTA now computes `color: rgb(239, 240, 242)` on the blue background; the text and new-tab indicator are visible.
+- Owner follow-up: kept the ButtonLink’s native new-tab indicator and suppressed the dashboard-wide external pseudo-icon, so the CTA now has exactly one icon.
 - SUP-002 fixed: the forum icon now uses the brand foreground/brand-weak background tokens.
 - SUP-003 fixed: Support stays two columns at 960 (`539px / 313px`) and stacks at 900; 800/560/390 are one column.
 - SUP-004 fixed: step numbers compute `12px/12px` in a 32px circle, and switch to a 24px circle at ≤560.
