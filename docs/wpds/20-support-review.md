@@ -1,6 +1,6 @@
 # Support review (2026-10-25)
 
-**Status:** Review only. No UI source has been changed for these findings.
+**Status:** Implemented and verified in the Free plugin.
 **Reference:** `open-design-project/2dc80110-eba2-4562-acea-441ae2821939/screens/support.html`, `docs/wpds/reference/screens/src/screens/Support.jsx`, `docs/wpds/reference/screens/src/app.css`, `docs/wpds/reference/screens/src/ui.jsx`.
 **Current:** `assets/src/js/pages/SupportPage.js`, `assets/src/scss/shell/_shell.scss`.
 **WPDS MCP:** Card, Icon, and Text docs were checked. The MCP has no `ButtonLink` entry; the current and reference screens both import it from `@wordpress/ui`.
@@ -65,6 +65,16 @@
 - Forum kicker `12px/16px`, title `20px/32px`, description, CTA height, docs link, and privacy divider/padding.
 - `Card`, `Icon`, and `Text` props match the WPDS MCP docs; `Read the documentation` routes through the shell.
 - No horizontal overflow at 800, 560, or 390 (`scrollWidth === innerWidth`).
+
+## Implementation result (2026-10-25)
+
+- SUP-001 fixed: the forum CTA now computes `color: rgb(239, 240, 242)` on the blue background; the text and new-tab indicator are visible.
+- SUP-002 fixed: the forum icon now uses the brand foreground/brand-weak background tokens.
+- SUP-003 fixed: Support stays two columns at 960 (`539px / 313px`) and stacks at 900; 800/560/390 are one column.
+- SUP-004 fixed: step numbers compute `12px/12px` in a 32px circle, and switch to a 24px circle at ≤560.
+- SUP-005 remains accepted: cards are 365px vs 351px and step descriptions wrap more because of the narrower admin frame.
+- Free lint, CSS, token checks, 15 JS tests, build, PHPStan, and 213 PHPUnit tests pass.
+- Browser verified at 1280/960/900/800/560/390; no horizontal overflow.
 
 ## Assumptions
 
