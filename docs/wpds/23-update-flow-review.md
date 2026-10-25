@@ -1,6 +1,6 @@
 # Update Flow review (2026-10-25)
 
-**Status:** Review only. No UI source has been changed for these findings.
+**Status:** Implemented and verified in the Pro plugin; one 26px editor-height residual is accepted.
 **Reference:** `open-design-project/2dc80110-eba2-4562-acea-441ae2821939/screens/update-flow.html`, `docs/wpds/reference/screens/src/screens/UpdateFlow.jsx`, `docs/wpds/reference/screens/src/app.css`, `docs/wpds/reference/screens/src/ui.jsx`.
 **Current:** `wp-content/plugins/updatronix-pro/assets/src/js/components/UpdateFlowPage.js`, `assets/src/scss/_pro-settings.scss`.
 **WPDS MCP:** SelectControl, TextareaControl, and EmptyState checked. Dialog and IconButton are not present in the MCP catalog; the current implementation still imports them from `@wordpress/ui`.
@@ -107,6 +107,20 @@
 - Save-time loop guard and move-time loop rejection.
 - Editor width 560px, fields/labels, SelectControl/TextareaControl, step rows, Add step, Cancel/Save chain, loop conflict, AlertDialog deletion.
 - At 960/560/390 the page has no horizontal overflow; chain widths follow the admin frame (808/444/274 vs 844/460/290).
+
+## Implementation result (2026-10-25)
+
+- **UF-001 fixed:** New chain is 113×32 and single-line at 1280/960/560/390.
+- **UF-002 fixed:** step names render at weight 600.
+- **UF-003 fixed:** step numbers are 12px/12px, weight 600.
+- **UF-004 fixed:** Edit chain is 110×32.
+- **UF-005 fixed:** the check row is 58px high with the reference padding; it remains after the chain list.
+- **UF-006 fixed:** the closing note uses the 80ch measure (541×32 at 1280).
+- **UF-007:** the chain card is 330px vs the reference 312px; the remaining delta is accepted as admin-frame/data-driven.
+- **UF-008 partially fixed:** Add step is compact (32px) and the dialog is 560×574 vs 560×548; the remaining 26px height is accepted.
+- **UF-009 fixed:** inline rename is a 40px row with compact Save and a close IconButton.
+
+Verification: Pro lint/CSS/build pass; populated, editor, and rename states were checked at 1280; the review chains were restored to empty and the temporary license removed. The live site is inactive.
 
 ## Accepted deviations
 
