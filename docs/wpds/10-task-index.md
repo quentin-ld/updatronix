@@ -11,7 +11,7 @@ document that owns its contract. Use this table to open one `/architect` or
 > recorded decision. See
 > [`12-design-conformance-audit.md`](12-design-conformance-audit.md).
 
-## Progress at 2026-10-24
+## Progress at 2026-10-25
 
 | Area | State |
 |---|---|
@@ -26,9 +26,9 @@ document that owns its contract. Use this table to open one `/architect` or
 | `F3-04` | Done. Schedule matches the reference composition and includes `POST /run-check`. |
 | `F3-05` | Done. Three cards, chip recipients, Data opt-in, and closing notes match the reference. |
 | `F3-03` | Done. Auto updates uses the reference cards and one manual Save action. |
-| `R1` to `R5` | R1 partial (three screens), R2–R4 done; R5 done for Free (Auto updates, Documentation, Support, Health). Pro screens remain. See `12-design-conformance-audit.md`. |
+| `R1` to `R5` | Done. Free and Pro destinations were swept against the rendered reference at 1440/960/390. Final spacing commits: Free `926bd1e`, `8400b92`, `58f44c3`; Pro `c454679`. See `12-design-conformance-audit.md`. |
 | `F5` | Done. Unused Tabs removed, raw colors tokenized, token lint added, pot regenerated, and docs updated. |
-| `F6` | Partial. Accessibility/multisite reviews and bundle budget recorded; E2E blocked by the browser runtime; mutation not run; `F6-05` awaits version authorization. |
+| `F6` | Partial. Accessibility/Multisite reviews and bundle budget recorded; E2E is blocked by `libnspr4.so`; mutation, a full screen-reader pass, and a manual Network Admin pass are not run; `F6-05` awaits version authorization. |
 | `P0` | Done. Pro consumes the Free runtime, registers a React component, and shares the WPDS pins. |
 | `P1` | Done. Four destinations, the Pro panel error boundary, and multisite capability routing. |
 | `P2` | Done. License inactive/active states, six features, development and decryption states, activation and deactivation. |
@@ -36,6 +36,8 @@ document that owns its contract. Use this table to open one `/architect` or
 | `P4` | Done. Chain storage, validation, REST, reference page, and the execution runner. A live update run was not exercised. |
 | `P5` | Done. Brand, colors, logo upload, replacement switches, previews, reset, and admin/rail branding. |
 | `P6` | Done as gates. Queue list, Advanced exports, and Development tools are explicitly deferred under `D-14`; no separate screens. |
+| Interaction backlog | Done. Pro dirty state compares against saved snapshots, Flow supports inline rename, and the log page consumes `?log=<id>`. The legacy Pro DOM path is kept for one release. |
+| `P7` | Pending. Accessibility/security review and the full gate still carry the environment limits; `P7-04` awaits the same release authorization. |
 
 ## Free
 

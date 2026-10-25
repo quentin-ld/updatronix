@@ -618,3 +618,37 @@ The export modal still uses the legacy `Modal` and core controls. It works and k
 ### Next
 
 1. `F6-05`: version and release-candidate authorization.
+
+## 2026-10-25 · Spacing sweep and interaction closure
+
+### What landed
+
+- Free shared spacing: `926bd1e` (page header, section, row, mobile),
+  `8400b92` (Documentation card, Support rows/actions, surface note), and
+  `58f44c3` (shared table cells).
+- Pro spacing: `c454679` (24px header-to-body gap, License feature grid, Flow
+  chain/step chrome, White label two-column form, Shield table cells).
+- Interaction closure: `e475364` (Free `?log=<id>` deep link) and `4bc59f9`
+  (Pro dirty state from saved snapshots plus inline Flow rename).
+- The 960/390 pass found no horizontal overflow. License features and White
+  label form/previews collapse correctly; Free Settings split collapses at 390.
+- The temporary Pro license and Flow chain used for the checks were removed.
+- Legacy Pro DOM panel support is deliberately kept for one release; Pro 0.8
+  uses the React registry.
+
+### Verification
+
+- Free ESLint, Stylelint, token lint, build, 15/15 JS tests, PHPStan, and 213
+  PHPUnit tests pass.
+- Pro ESLint, Stylelint, build, PHPStan, and 200 PHPUnit tests pass.
+- Browser checks: Shield Save disabled → enabled → disabled after a toggle and
+  revert; Flow rename changed the name and enabled Save, then renaming back
+  disabled Save; the Free log deep link opened the details preview and removed
+  the query parameter.
+- E2E remains blocked by `libnspr4.so`; mutation testing, a full screen-reader
+  pass, a manual Network Admin pass, and a live Flow update run were not
+  available.
+
+### Next
+
+1. `F6-05` / `P7-04`: release-candidate authorization.

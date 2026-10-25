@@ -134,11 +134,28 @@ Every screen task must now begin and end with a reference comparison:
 
 | Wave | Status | Evidence |
 |---|---|---|
-| R1 | Partial | The log, Schedule, and Settings screens render their own `PageHeader` with meta and actions. Documentation, Support, Health, and the Pro screens still use the shell header. |
+| R1 | Done | Every destination uses the shared `PageHeader`; the shell header is hidden for all destinations, and the same breadcrumb, meta, and action contract is used. |
 | R2 | Done | Schedule matches the reference composition: Update checks, Next run, What the hold does, the 0–30 hold field, the preferred-time select, header meta/actions, and `POST /run-check`. |
 | R3 | Done | Settings matches the reference: three cards, chip recipients, five notification rows, the always-on recovery warning, the Data opt-in, and the closing notes. |
 | R4 | Done | The log uses the DataViews activity feed grouped by day, a Section header with Export, the retention meta, and a details preview aside on wide screens with the dialog fallback on narrow screens. |
-| R5 | Partial | Auto updates, Documentation, Support, and Health are conformant. The Pro screens remain. |
+| R5 | Done | Auto updates, Documentation, Support, Health, and the four Pro screens were swept against the rendered reference at 1440, 960, and 390. Final commits: Free `926bd1e`, `8400b92`, `58f44c3`; Pro `c454679`. |
+
+### 2026-10-25 addendum
+
+The page, header, section, table, card, and mobile spacing sweep is complete.
+The Pro pages now use the reference 24px header-to-body gap while their cards
+stay in a 16px stack. The License feature grid, Flow chain/step chrome, White
+label form, and Shield table use the reference padding and grid rules.
+
+The interaction closure is also complete: Pro dirty state is derived from the
+saved snapshot, Flow has inline chain rename, and the Free log page consumes
+`?log=<id>`. The legacy Pro DOM renderer is deliberately kept for one release;
+Pro 0.8 uses the React registry and removing the fallback would drop
+compatibility with older Pro builds.
+
+Still open: `F6-05`/`P7-04` release authorization, a live Flow update run, the
+E2E suite (`libnspr4.so`), mutation testing, a full screen-reader pass, and a
+manual Network Admin pass.
 
 ## What not to do
 
