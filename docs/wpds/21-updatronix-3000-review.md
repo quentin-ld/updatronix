@@ -1,6 +1,6 @@
 # Updatronix 3000 review (2026-10-25)
 
-**Status:** Review only. No UI source has been changed for these findings.
+**Status:** Implemented and verified in the Pro plugin.
 **Reference:** `open-design-project/2dc80110-eba2-4562-acea-441ae2821939/screens/updatronix-3000.html`, `docs/wpds/reference/screens/src/screens/License.jsx`, `docs/wpds/reference/screens/src/app.css`, `docs/wpds/reference/screens/src/ui.jsx`.
 **Current:** `wp-content/plugins/updatronix-pro/assets/src/js/components/LicensePanel.js`, `Updatronix3000Panel.js`, `assets/src/scss/_pro-settings.scss`.
 **WPDS MCP:** EmptyState, InputControl, Button, Card, Icon, and Text checked. EmptyState.Root has no built-in panel max-width; the reference adds `.license-panel` (max 560px, centered) and `.license-form` (max 360px). The current implementation uses the EmptyState default (320px) and a full-width form.
@@ -86,10 +86,22 @@
 - Feature-list column width difference attributable to the admin frame.
 - The real security note copy differs from the prototype simulation note; only its width/treatment is a finding.
 
-## Open decisions
+## Resolved decisions
 
-1. **Activation button:** match the reference (enabled, submit-time validation) or keep disabled until input.
-2. **Active metadata:** keep registered domain/last checked/dev mode (recommended) or trim to the reference masked key + Deactivate.
+1. **Activation button:** matched the reference — enabled, submit-time validation.
+2. **Active metadata:** kept the real registered-domain, last-checked, and dev-mode information; the key is bullet-masked and the timestamp uses the site format.
+
+## Implementation result (2026-10-25)
+
+- **LIC-001 fixed:** the license empty state is 560px at 1280/960, fills available width at 560 (444px) and 390 (274px); the form is 360px and centered; no horizontal overflow.
+- **LIC-002 fixed:** the activation button is enabled with an empty key and validates on submit; it is disabled only while activating.
+- **LIC-003 fixed:** the real security note uses the shared 80ch surface-note measure (541px at 1280).
+- **LIC-004 fixed:** inactive/active header copy now matches the reference.
+- **LIC-005 resolved:** active metadata is kept. The key is masked with bullets, last checked uses the site format (`25 October 2026 13h05`), and the domain/dev-mode lines remain.
+- **LIC-006 fixed:** the active key uses the mono, small, letter-spaced treatment.
+- **LIC-007 kept:** loading, error/retry, decryption recovery, dev-mode, and deactivation dialog remain WPDS-native product states.
+
+Verification: Pro lint/CSS/build pass; PHPStan is clean and 200 PHPUnit tests pass; active and inactive states verified at 1280/960/560/390; the temporary test license was deleted and the live screen is inactive.
 
 ## Assumptions
 
