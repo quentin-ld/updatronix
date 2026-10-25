@@ -47,6 +47,10 @@
 		grid-template-columns: minmax(0, 1fr) 440px;
 	}
 
+	.dataviews-view-activity {
+		padding-inline: 0;
+	}
+
 	.dataviews-view-activity__item {
 		border-radius: var(--wpds-border-radius-md);
 		cursor: pointer;
