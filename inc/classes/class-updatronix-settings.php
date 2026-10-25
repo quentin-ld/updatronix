@@ -148,30 +148,30 @@ final class Updatronix_Settings {
 					'callback'            => array( self::class, 'rest_update_settings' ),
 					'permission_callback' => array( self::class, 'rest_can_manage_logs' ),
 					'args'                => array(
-						'logging_enabled'    => array( 'type' => 'boolean' ),
+						'logging_enabled'          => array( 'type' => 'boolean' ),
 						'delete_data_on_uninstall' => array( 'type' => 'boolean' ),
-						'retention_days'     => array(
+						'retention_days'           => array(
 							'type'    => 'integer',
 							'minimum' => 1,
 							'maximum' => 365,
 						),
-						'notifications_mode' => array(
+						'notifications_mode'       => array(
 							'type' => 'string',
 							'enum' => array( 'default', 'disabled' ),
 						),
-						'notify_enabled'     => array( 'type' => 'boolean' ),
-						'notify_emails'      => array(
+						'notify_enabled'           => array( 'type' => 'boolean' ),
+						'notify_emails'            => array(
 							'type'      => 'string',
 							'maxLength' => UPDATRONIX_NOTIFY_EMAILS_MAX_BYTES,
 						),
-						'notify_on'          => array(
+						'notify_on'                => array(
 							'type'  => 'array',
 							'items' => array(
 								'type' => 'string',
 								'enum' => array( 'core', 'plugin_theme', 'debug', 'technical' ),
 							),
 						),
-						'schedule'           => array(
+						'schedule'                 => array(
 							'type'       => 'object',
 							'properties' => array(
 								'update_check'  => array(
@@ -466,10 +466,199 @@ final class Updatronix_Settings {
 
 		return new WP_REST_Response(
 			array(
-				'log' => self::enrich_log_for_display( $log ),
+				'log' => self::enrich_log_details( $log ),
 			),
 			200
 		);
+	}
+
+	/**
+	 * Add detail-only display fields: actor, trigger, run type, description,
+	 * product URL, and a best-effort changelog.
+	 *
+	 * @param \stdClass $log Log row object from get_log().
+	 * @return \stdClass Enriched log object.
+	 */
+	public static function enrich_log_details( \stdClass $log ): \stdClass {
+		$log = self::enrich_log_for_display( $log );
+
+		$log->actor       = $log->performed_by_display;
+		$log->trigger     = $log->performed_as_display;
+		$log->run_type    = $log->update_context_display;
+		$log->description = self::build_detail_description( $log );
+		$log->product_url = self::get_log_product_url( $log );
+		$log->changelog   = self::get_log_changelog( $log );
+
+		return $log;
+	}
+
+	/**
+	 * Build a human-readable description for the details card.
+	 *
+	 * @param \stdClass $log Enriched log row.
+	 * @return string Description.
+	 */
+	private static function build_detail_description( \stdClass $log ): string {
+		$log_type = (string) ( $log->log_type ?? '' );
+		$item     = (string) ( $log->item_name ?? '' );
+		$action   = (string) ( $log->action_type_display ?? '' );
+		$before   = (string) ( $log->version_before ?? '' );
+		$after    = (string) ( $log->version_after ?? '' );
+
+		if ( 'translation' === $log_type && '' !== (string) ( $log->summary_text ?? '' ) ) {
+			return (string) $log->summary_text;
+		}
+
+		$item   = '' !== $item ? $item : __( 'Item', 'updatronix' );
+		$action = '' !== $action ? $action : __( 'Update', 'updatronix' );
+
+		if ( '' !== $before && '' !== $after && $before !== $after ) {
+			return sprintf(
+				/* translators: 1: action, 2: item name, 3: previous version, 4: new version */
+				__( '%1$s %2$s from %3$s to %4$s.', 'updatronix' ),
+				$action,
+				$item,
+				$before,
+				$after
+			);
+		}
+
+		if ( '' !== $after ) {
+			return sprintf(
+				/* translators: 1: action, 2: item name, 3: version */
+				__( '%1$s %2$s at version %3$s.', 'updatronix' ),
+				$action,
+				$item,
+				$after
+			);
+		}
+
+		if ( '' !== $before ) {
+			return sprintf(
+				/* translators: 1: action, 2: item name, 3: version */
+				__( '%1$s %2$s from version %3$s.', 'updatronix' ),
+				$action,
+				$item,
+				$before
+			);
+		}
+
+		return sprintf(
+			/* translators: 1: action, 2: item name */
+			__( '%1$s %2$s.', 'updatronix' ),
+			$action,
+			$item
+		);
+	}
+
+	/**
+	 * Build the WordPress.org product URL for a log entry.
+	 *
+	 * @param \stdClass $log Log row.
+	 * @return string URL, or empty when there is no product page.
+	 */
+	private static function get_log_product_url( \stdClass $log ): string {
+		$type = (string) ( $log->log_type ?? '' );
+		$slug = (string) ( $log->item_slug ?? '' );
+
+		if ( 'core' === $type ) {
+			return 'https://wordpress.org/download/releases/';
+		}
+
+		if ( '' === $slug ) {
+			return '';
+		}
+
+		if ( 'plugin' === $type ) {
+			return 'https://wordpress.org/plugins/' . rawurlencode( $slug ) . '/';
+		}
+
+		if ( 'theme' === $type ) {
+			return 'https://wordpress.org/themes/' . rawurlencode( $slug ) . '/';
+		}
+
+		return '';
+	}
+
+	/**
+	 * Fetch a short plugin/theme changelog from WordPress.org.
+	 *
+	 * Network access is skipped in the PHPUnit environment. Results are cached
+	 * for 12 hours; failures are cached empty for one hour.
+	 *
+	 * @param \stdClass $log Log row.
+	 * @return string[] Changelog lines.
+	 */
+	private static function get_log_changelog( \stdClass $log ): array {
+		$type = (string) ( $log->log_type ?? '' );
+		$slug = (string) ( $log->item_slug ?? '' );
+
+		if ( ! in_array( $type, array( 'plugin', 'theme' ), true ) || '' === $slug || defined( 'WP_TESTS_DIR' ) ) {
+			return array();
+		}
+
+		$cache_key = 'updatronix_changelog_' . md5( $type . '|' . $slug );
+		$cached    = get_transient( $cache_key );
+		if ( is_array( $cached ) ) {
+			return $cached;
+		}
+
+		$html = '';
+		if ( 'plugin' === $type ) {
+			require_once ABSPATH . 'wp-admin/includes/plugin-install.php';
+			$info = plugins_api(
+				'plugin_information',
+				array(
+					'slug'   => $slug,
+					'fields' => array( 'sections' => true ),
+				)
+			);
+			if ( ! is_wp_error( $info ) && isset( $info->sections['changelog'] ) ) {
+				$html = (string) $info->sections['changelog'];
+			}
+		} else {
+			require_once ABSPATH . 'wp-admin/includes/theme-install.php';
+			$info = themes_api(
+				'theme_information',
+				array(
+					'slug'   => $slug,
+					'fields' => array( 'sections' => true ),
+				)
+			);
+			if ( ! is_wp_error( $info ) && isset( $info->sections['changelog'] ) ) {
+				$html = (string) $info->sections['changelog'];
+			}
+		}
+
+		$lines = self::parse_changelog_html( $html );
+		set_transient( $cache_key, $lines, array() === $lines ? HOUR_IN_SECONDS : 12 * HOUR_IN_SECONDS );
+
+		return $lines;
+	}
+
+	/**
+	 * Convert the WordPress.org changelog HTML to short text lines.
+	 *
+	 * @param string $html Changelog HTML.
+	 * @return string[] Changelog lines.
+	 */
+	private static function parse_changelog_html( string $html ): array {
+		if ( '' === trim( $html ) ) {
+			return array();
+		}
+
+		$html  = preg_replace( '/<(h[1-6]|li|p|br)[^>]*>/i', "\n", $html );
+		$text  = wp_strip_all_tags( (string) $html );
+		$text  = html_entity_decode( $text, ENT_QUOTES | ENT_HTML5, get_bloginfo( 'charset' ) );
+		$lines = preg_split( '/\R+/', $text );
+		$lines = array_values(
+			array_filter(
+				array_map( 'trim', is_array( $lines ) ? $lines : array() ),
+				static fn ( string $line ): bool => '' !== $line
+			)
+		);
+
+		return array_slice( array_values( array_unique( $lines ) ), 0, 8 );
 	}
 
 	/**
@@ -641,38 +830,24 @@ final class Updatronix_Settings {
 		if ( 'same_version' === ( $log->action_type ?? '' ) ) {
 			$version = '' !== $version_after ? $version_after : $version_before;
 
-			return '' !== $version
-				? sprintf(
-					/* translators: %s: version number */
-					__( 'v%s', 'updatronix' ),
-					$version
-				)
-				: __( '—', 'updatronix' );
+			return '' !== $version ? $version : __( '—', 'updatronix' );
 		}
 
 		if ( '' !== $version_before && '' !== $version_after ) {
 			return sprintf(
 				/* translators: 1: previous version number, 2: new version number */
-				__( 'v%1$s → v%2$s', 'updatronix' ),
+				'%1$s → %2$s',
 				$version_before,
 				$version_after
 			);
 		}
 
 		if ( '' !== $version_after ) {
-			return sprintf(
-				/* translators: %s: version number */
-				__( 'v%s', 'updatronix' ),
-				$version_after
-			);
+			return $version_after;
 		}
 
 		if ( '' !== $version_before ) {
-			return sprintf(
-				/* translators: %s: version number */
-				__( 'v%s', 'updatronix' ),
-				$version_before
-			);
+			return $version_before;
 		}
 
 		return __( '—', 'updatronix' );
@@ -1037,7 +1212,7 @@ final class Updatronix_Settings {
 	 * @return int Blog ID, or 0 for the network-global scope.
 	 */
 	private static function resolve_site_id( \WP_REST_Request $request ): int {
-		$current_site_id   = (int) get_current_blog_id();
+		$current_site_id = (int) get_current_blog_id();
 		// @infection-ignore-all.
 		$requested_site_id = absint( (string) $request->get_param( 'site_id' ) ); // counterfactual: equivalent — `absint()` is `abs( (int) $value )`, so the `(string)` cast in front of it is idempotent for the string and int shapes the parameter accepts.
 

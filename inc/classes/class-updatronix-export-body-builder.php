@@ -206,6 +206,7 @@ final class Updatronix_Export_Body_Builder {
 	 * @param array<string, bool> $columns             Column visibility toggles ({@see normalize_export_columns()}).
 	 * @param string              $existing_chunk_body Already emitted bytes for this HTTP chunk.
 	 * @param int                 $max_chunk_bytes     Soft max chunk bytes ({@see Updatronix_Export::MAX_BYTES_PER_CHUNK}).
+	 * @param string              $format              Export format (`txt` or `json`).
 	 * @return array{body: string, rows_emitted: int, merged_lines_added: int, byte_cap_hit: bool}
 	 */
 	public static function render(
@@ -213,7 +214,8 @@ final class Updatronix_Export_Body_Builder {
 		bool $merge,
 		array $columns,
 		string $existing_chunk_body,
-		int $max_chunk_bytes
+		int $max_chunk_bytes,
+		string $format = 'txt'
 	): array {
 		$columns = self::normalize_export_columns( $columns );
 
@@ -224,6 +226,11 @@ final class Updatronix_Export_Body_Builder {
 
 		try {
 			self::prime_user_cache( $rows );
+
+			if ( 'json' === $format ) {
+				return self::render_json_records( $rows, $merge, $columns, $existing_chunk_body, $max_chunk_bytes );
+			}
+
 			$records = self::build_sectioned_records( $rows, $merge, $columns );
 
 			return self::emit_until_cap( $records, $existing_chunk_body, $max_chunk_bytes );
@@ -319,6 +326,172 @@ final class Updatronix_Export_Body_Builder {
 			'merged_lines_added' => $merged_lines_added,
 			'byte_cap_hit'       => $byte_cap_hit,
 		);
+	}
+
+	/**
+	 * Render one JSON chunk as newline-delimited objects.
+	 *
+	 * @param array<int, object>  $rows               Rows in one SQL chunk.
+	 * @param bool                $merge              Collapse rows sharing entity, action, and status.
+	 * @param array<string, bool> $columns            Normalised column toggles.
+	 * @param string              $existing_chunk_body Already emitted bytes for this chunk.
+	 * @param int                 $max_chunk_bytes    Chunk ceiling.
+	 * @return array{body: string, rows_emitted: int, merged_lines_added: int, byte_cap_hit: bool}
+	 */
+	private static function render_json_records( array $rows, bool $merge, array $columns, string $existing_chunk_body, int $max_chunk_bytes ): array {
+		$body               = $existing_chunk_body;
+		$rows_emitted       = 0;
+		$merged_lines_added = 0;
+		$byte_cap_hit       = false;
+
+		foreach ( self::build_json_items( $rows, $merge, $columns ) as $item ) {
+			$line = wp_json_encode( $item['data'] );
+			if ( ! is_string( $line ) ) {
+				continue;
+			}
+
+			$sep       = ( '' === $body ) ? '' : "\n";
+			$candidate = $body . $sep . $line;
+
+			if ( strlen( $candidate ) > $max_chunk_bytes ) {
+				if ( '' === $existing_chunk_body && '' === $body && strlen( $line ) > $max_chunk_bytes ) {
+					$body = $line;
+					$rows_emitted += (int) $item['row_span'];
+					++$merged_lines_added;
+					$byte_cap_hit = true;
+				} else {
+					$byte_cap_hit = true;
+				}
+
+				break;
+			}
+
+			$body = $candidate;
+			if ( $item['row_span'] > 0 ) {
+				$rows_emitted += (int) $item['row_span'];
+				++$merged_lines_added;
+			}
+		}
+
+		return array(
+			'body'               => $body,
+			'rows_emitted'       => $rows_emitted,
+			'merged_lines_added' => $merged_lines_added,
+			'byte_cap_hit'       => $byte_cap_hit,
+		);
+	}
+
+	/**
+	 * Build JSON data items for a chunk.
+	 *
+	 * @param array<int, object>  $rows    Rows in one SQL chunk.
+	 * @param bool                $merge   Merge repeated updates.
+	 * @param array<string, bool> $columns Normalised column toggles.
+	 * @return array<int, array{sort_ts: int, category_rank: int, name: string, data: array<string, string>, row_span: int}>
+	 */
+	private static function build_json_items( array $rows, bool $merge, array $columns ): array {
+		$items = array();
+
+		if ( $merge ) {
+			$buckets = array();
+			foreach ( $rows as $row ) {
+				$buckets[ self::merge_key( $row ) ][] = $row;
+			}
+
+			foreach ( $buckets as $group ) {
+				$first = $group[0];
+				$lt    = sanitize_key( (string) ( $first->log_type ?? '' ) );
+				if ( ! in_array( $lt, self::CATEGORY_ORDER, true ) ) {
+					continue;
+				}
+
+				$items[] = array(
+					'sort_ts'       => self::latest_timestamp( $group ),
+					'category_rank' => (int) array_search( $lt, self::CATEGORY_ORDER, true ),
+					'name'          => mb_strtolower( self::real_name( $first ), 'UTF-8' ),
+					'data'          => self::json_parts( self::build_row_parts( $group ), $lt, $columns ),
+					'row_span'      => count( $group ),
+				);
+			}
+
+			usort(
+				$items,
+				static function ( array $a, array $b ): int {
+					if ( $a['category_rank'] !== $b['category_rank'] ) {
+						return $a['category_rank'] <=> $b['category_rank'];
+					}
+					if ( $a['sort_ts'] !== $b['sort_ts'] ) {
+						return $b['sort_ts'] <=> $a['sort_ts'];
+					}
+
+					return $a['name'] <=> $b['name'];
+				}
+			);
+
+			return $items;
+		}
+
+		foreach ( $rows as $row ) {
+			$lt = sanitize_key( (string) ( $row->log_type ?? '' ) );
+			if ( ! in_array( $lt, self::CATEGORY_ORDER, true ) ) {
+				continue;
+			}
+
+			$items[] = array(
+				'sort_ts'       => self::latest_timestamp( array( $row ) ),
+				'category_rank' => 0,
+				'name'          => mb_strtolower( self::real_name( $row ), 'UTF-8' ),
+				'data'          => self::json_parts( self::build_row_parts( array( $row ), true ), $lt, $columns ),
+				'row_span'      => 1,
+			);
+		}
+
+		usort(
+			$items,
+			static function ( array $a, array $b ): int {
+				if ( $a['sort_ts'] !== $b['sort_ts'] ) {
+					return $b['sort_ts'] <=> $a['sort_ts'];
+				}
+
+				return $a['name'] <=> $b['name'];
+			}
+		);
+
+		return $items;
+	}
+
+	/**
+	 * Map one row-parts array to the JSON export shape.
+	 *
+	 * @param array<string, string> $parts   Row-parts values.
+	 * @param string                $log_type Sanitised log type.
+	 * @param array<string, bool>   $columns  Normalised column toggles.
+	 * @return array<string, string>
+	 */
+	private static function json_parts( array $parts, string $log_type, array $columns ): array {
+		$data = array(
+			'element' => $parts['name'],
+			'version' => $parts['versions'],
+			'date'    => $parts['dates'],
+		);
+
+		if ( $columns['action_type'] ?? true ) {
+			$data['action'] = $parts['action'];
+		}
+		if ( $columns['run_context'] ?? true ) {
+			$data['context'] = $parts['context'];
+		}
+		if ( $columns['user'] ?? true ) {
+			$data['user'] = $parts['user'];
+		}
+		if ( $columns['status'] ?? true ) {
+			$data['status'] = $parts['status'];
+		}
+		if ( $columns['category'] ?? true ) {
+			$data['category'] = $parts['category'] ?? self::category_label_for( $log_type );
+		}
+
+		return $data;
 	}
 
 	/**
@@ -793,7 +966,7 @@ final class Updatronix_Export_Body_Builder {
 	 */
 	private static function status_label( string $status ): string {
 		return match ( strtolower( sanitize_key( $status ) ) ) {
-			'error', 'failed', 'errors' => __( 'Error', 'updatronix' ),
+			'error', 'failed', 'errors' => __( 'Failed', 'updatronix' ),
 			'cancelled' => __( 'Cancelled', 'updatronix' ),
 			'delayed'   => __( 'Delayed', 'updatronix' ),
 			default => __( 'Success', 'updatronix' ),

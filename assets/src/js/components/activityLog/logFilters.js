@@ -175,7 +175,7 @@ export const LOG_FILTERS = [
 	{
 		id: 'category',
 		restField: 'category',
-		label: __( 'Category', 'updatronix' ),
+		label: __( 'Type', 'updatronix' ),
 		operators: CATEGORICAL_OPERATORS,
 		filterable: true,
 		getElements: () =>
@@ -188,7 +188,7 @@ export const LOG_FILTERS = [
 	{
 		id: 'actionType',
 		restField: 'actionType',
-		label: __( 'Action type', 'updatronix' ),
+		label: __( 'Action', 'updatronix' ),
 		operators: CATEGORICAL_OPERATORS,
 		filterable: true,
 		getElements: () =>
@@ -206,7 +206,7 @@ export const LOG_FILTERS = [
 		filterable: true,
 		getElements: () => [
 			{ value: 'success', label: __( 'Success', 'updatronix' ) },
-			{ value: 'error', label: __( 'Error', 'updatronix' ) },
+			{ value: 'error', label: __( 'Failed', 'updatronix' ) },
 			{ value: 'cancelled', label: __( 'Cancelled', 'updatronix' ) },
 			{ value: 'delayed', label: __( 'Delayed', 'updatronix' ) },
 			{ value: 'info', label: __( 'Info', 'updatronix' ) },
@@ -217,7 +217,7 @@ export const LOG_FILTERS = [
 	{
 		id: 'user',
 		restField: 'user',
-		label: __( 'User', 'updatronix' ),
+		label: __( 'Triggered by', 'updatronix' ),
 		operators: CATEGORICAL_OPERATORS,
 		filterable: true,
 		getElements: ( { logs = [] } ) => {
@@ -242,7 +242,7 @@ export const LOG_FILTERS = [
 	{
 		id: 'date',
 		restField: 'date',
-		label: __( 'Date', 'updatronix' ),
+		label: __( 'Day', 'updatronix' ),
 		operators: DATE_OPERATORS,
 		filterable: true,
 		formatSummary: ( filter ) =>

@@ -32,16 +32,15 @@ import {
 import { LogDetailsContent } from './LogDetailsContent';
 import { ExportLogsModal } from './ExportLogsModal';
 
-const { AlertDialog, Badge, Button, Dialog, Icon, IconButton, Notice, Text } =
-	wpds.ui;
+const { AlertDialog, Badge, Button, Icon, IconButton, Notice, Text } = wpds.ui;
 const {
 	closeSmall,
+	download,
 	language,
 	plugins,
 	seen,
 	styles,
 	trash,
-	upload,
 	wordpress,
 } = wpds.icons;
 
@@ -79,28 +78,15 @@ function getVersionLabel( item ) {
 	const to = item.version_after;
 
 	if ( from && to && from !== to ) {
-		return sprintf(
-			/* translators: 1: previous version number, 2: new version number */
-			__( 'v%1$s → v%2$s', 'updatronix' ),
-			from,
-			to
-		);
+		return `${ from } → ${ to }`;
 	}
 
 	if ( to ) {
-		return sprintf(
-			/* translators: %s: version number */
-			__( 'v%s', 'updatronix' ),
-			to
-		);
+		return String( to );
 	}
 
 	if ( from ) {
-		return sprintf(
-			/* translators: %s: version number */
-			__( 'v%s', 'updatronix' ),
-			from
-		);
+		return String( from );
 	}
 
 	return item.action_type_display || EMPTY_FALLBACK;
@@ -162,32 +148,6 @@ function formatTime( value ) {
 }
 
 /**
- * Whether the details preview should use the narrow-screen dialog.
- *
- * @return {boolean} True below the preview breakpoint.
- */
-function useNarrowPreview() {
-	const [ narrow, setNarrow ] = useState(
-		() =>
-			typeof window !== 'undefined' &&
-			window.matchMedia( '(max-width: 1200px)' ).matches
-	);
-
-	useEffect( () => {
-		if ( typeof window === 'undefined' ) {
-			return undefined;
-		}
-		const media = window.matchMedia( '(max-width: 1200px)' );
-		const handleChange = ( event ) => setNarrow( event.matches );
-		media.addEventListener( 'change', handleChange );
-
-		return () => media.removeEventListener( 'change', handleChange );
-	}, [] );
-
-	return narrow;
-}
-
-/**
  * Render the update log destination.
  *
  * @param {Object}  props                       Component props.
@@ -238,12 +198,29 @@ export function ActivityLogPanel( {
 	const [ deleteError, setDeleteError ] = useState( '' );
 	const [ exportOpen, setExportOpen ] = useState( false );
 	const exportTriggerRef = useRef( null );
-	const isNarrow = useNarrowPreview();
+	const previewRef = useRef( null );
+
+	useEffect( () => {
+		if (
+			! detail ||
+			! window.matchMedia( '(max-width: 1200px)' ).matches
+		) {
+			return;
+		}
+
+		const reduceMotion = window.matchMedia(
+			'(prefers-reduced-motion: reduce)'
+		).matches;
+		previewRef.current?.scrollIntoView( {
+			block: 'nearest',
+			behavior: reduceMotion ? 'auto' : 'smooth',
+		} );
+	}, [ detail ] );
 
 	const [ view, setView ] = useState( {
 		type: 'activity',
 		page: 1,
-		perPage: 50,
+		perPage: 25,
 		search: '',
 		filters: [],
 		sort: FIXED_SORT,
@@ -322,14 +299,14 @@ export function ActivityLogPanel( {
 						<Text variant="body-md">
 							{ getVersionLabel( item ) }
 						</Text>
-						<Text variant="body-sm" className="updatronix-muted">
+						<span className="updatronix-log-entry-meta">
 							{ sprintf(
 								/* translators: 1: trigger label, 2: actor label. */
 								__( '%1$s · %2$s', 'updatronix' ),
 								item.performed_as_display || EMPTY_FALLBACK,
 								item.performed_by_display || EMPTY_FALLBACK
 							) }
-						</Text>
+						</span>
 					</span>
 				),
 				enableSorting: false,
@@ -380,7 +357,7 @@ export function ActivityLogPanel( {
 			},
 			{
 				id: 'date',
-				label: __( 'Date', 'updatronix' ),
+				label: __( 'Day', 'updatronix' ),
 				type: 'date',
 				getValue: ( { item } ) => item.created_at,
 				render: ( { item } ) => formatDate( item.created_at ),
@@ -643,7 +620,7 @@ export function ActivityLogPanel( {
 								onClick={ () => setExportOpen( true ) }
 							>
 								<Icon
-									icon={ upload }
+									icon={ download }
 									size={ 16 }
 									aria-hidden="true"
 								/>
@@ -673,7 +650,10 @@ export function ActivityLogPanel( {
 						<>
 							<div className="updatronix-log-toolbar">
 								<DataViews.Search
-									label={ __( 'Search logs', 'updatronix' ) }
+									label={ __(
+										'Search update log',
+										'updatronix'
+									) }
 								/>
 								<DataViews.FiltersToggle />
 								<div className="updatronix-log-toolbar-end">
@@ -682,13 +662,51 @@ export function ActivityLogPanel( {
 							</div>
 							<DataViews.FiltersToggled className="dataviews-filters__container" />
 							<DataViews.Layout />
-							<DataViews.Footer />
 						</>
 					</DataViews>
+					{ shownData.length > 0 && (
+						<div className="updatronix-log-load-more">
+							<Text
+								variant="body-sm"
+								className="updatronix-muted"
+							>
+								{ sprintf(
+									/* translators: 1: visible entries, 2: total entries. */
+									__(
+										'Showing %1$d of %2$d entries',
+										'updatronix'
+									),
+									shownData.length,
+									total
+								) }
+							</Text>
+							{ shownData.length < total &&
+								view.perPage < 200 && (
+									<Button
+										variant="outline"
+										tone="neutral"
+										onClick={ () =>
+											setView( ( current ) => ( {
+												...current,
+												page: 1,
+												perPage: Math.min(
+													200,
+													( current.perPage || 50 ) +
+														25
+												),
+											} ) )
+										}
+									>
+										{ __( 'Load more', 'updatronix' ) }
+									</Button>
+								) }
+						</div>
+					) }
 				</Section>
 
-				{ detail && ! isNarrow && (
+				{ detail && (
 					<aside
+						ref={ previewRef }
 						className="updatronix-log-preview"
 						aria-label={ __( 'Update details', 'updatronix' ) }
 					>
@@ -727,36 +745,6 @@ export function ActivityLogPanel( {
 					retentionDays
 				) }
 			</Text>
-
-			{ detail && isNarrow && (
-				<Dialog.Root
-					open={ Boolean( detail ) }
-					onOpenChange={ ( open ) => {
-						if ( ! open ) {
-							setDetail( null );
-						}
-					} }
-				>
-					<Dialog.Popup size="large">
-						<Dialog.Header>
-							<Dialog.Title>
-								{ detail?.item_name ||
-									__( 'Log details', 'updatronix' ) }
-							</Dialog.Title>
-							<Dialog.CloseIconButton
-								label={ __( 'Close', 'updatronix' ) }
-							/>
-						</Dialog.Header>
-						<Dialog.Content>
-							<LogDetailsContent
-								log={ detail }
-								logId={ detail.id }
-								fetchLogDetails={ fetchLogDetails }
-							/>
-						</Dialog.Content>
-					</Dialog.Popup>
-				</Dialog.Root>
-			) }
 
 			<AlertDialog.Root
 				open={ Boolean( toDelete ) }
@@ -797,6 +785,7 @@ export function ActivityLogPanel( {
 					onClose={ () => setExportOpen( false ) }
 					view={ view }
 					logs={ logs }
+					total={ total }
 					exportTriggerRef={ exportTriggerRef }
 				/>
 			) }

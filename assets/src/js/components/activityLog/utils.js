@@ -2,6 +2,7 @@
  * Pure helpers for activity log display and formatting.
  */
 import { __, _x, sprintf } from '@wordpress/i18n';
+import { dateI18n } from '@wordpress/date';
 import { ACTION_LABELS, LOG_TYPE_PREFIX } from './constants';
 
 /** Translated fallback for empty values (em dash). */
@@ -51,7 +52,7 @@ export function getStatusLabel( status ) {
 		return __( 'Warning', 'updatronix' );
 	}
 	if ( s === 'error' || s === 'failed' || s === 'errors' ) {
-		return __( 'Error', 'updatronix' );
+		return __( 'Failed', 'updatronix' );
 	}
 	if ( s === 'cancelled' ) {
 		return __( 'Cancelled', 'updatronix' );
@@ -75,11 +76,12 @@ export function formatDate( dateStr ) {
 	if ( ! dateStr ) {
 		return EMPTY_FALLBACK;
 	}
-	try {
-		return new Date( dateStr ).toLocaleString();
-	} catch {
+	const date = new Date( dateStr );
+	if ( Number.isNaN( date.getTime() ) ) {
 		return dateStr;
 	}
+
+	return `${ dateI18n( 'j F Y', date ) }, ${ dateI18n( 'H:i', date ) }`;
 }
 
 /**
@@ -149,35 +151,16 @@ export function getActivityDescription( item ) {
 	}
 	if ( item.action_type === 'same_version' ) {
 		const version = to || from;
-		return version
-			? sprintf(
-					/* translators: %s: version number */
-					__( 'v%s', 'updatronix' ),
-					version
-				)
-			: EMPTY_FALLBACK;
+		return version ? String( version ) : EMPTY_FALLBACK;
 	}
 	if ( from && to ) {
-		return sprintf(
-			/* translators: 1: previous version number, 2: new version number */
-			__( 'v%1$s → v%2$s', 'updatronix' ),
-			from,
-			to
-		);
+		return `${ from } → ${ to }`;
 	}
 	if ( to ) {
-		return sprintf(
-			/* translators: %s: version number */
-			__( 'v%s', 'updatronix' ),
-			to
-		);
+		return String( to );
 	}
 	if ( from ) {
-		return sprintf(
-			/* translators: %s: version number */
-			__( 'v%s', 'updatronix' ),
-			from
-		);
+		return String( from );
 	}
 	return EMPTY_FALLBACK;
 }

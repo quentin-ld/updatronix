@@ -1196,6 +1196,40 @@ body.updatronix-admin-page {
 	}
 }
 
+@media (max-width: 600px) {
+
+	.updatronix-page {
+		--wp-ui-card-padding: var(--wpds-dimension-padding-lg);
+		gap: var(--wpds-dimension-gap-lg);
+		padding-top: var(--wpds-dimension-padding-lg);
+		padding-bottom: calc(var(--wpds-dimension-padding-3xl) * 1.25);
+	}
+
+	.updatronix-page-headrow {
+		gap: var(--wpds-dimension-gap-md);
+	}
+
+	.updatronix-page-heading {
+		gap: 2px;
+	}
+
+	.updatronix-page-meta {
+		margin-top: 0;
+	}
+
+	.updatronix-page-body {
+		gap: var(--wpds-dimension-gap-md);
+	}
+}
+
+@media (max-width: 560px) {
+
+	.updatronix-page-title {
+		font-size: var(--wpds-typography-font-size-xl);
+		line-height: var(--wpds-typography-line-height-xl);
+	}
+}
+
 .updatronix-nav-drawer {
 	background: $updatronix-rail-bg;
 	color: $updatronix-rail-text;

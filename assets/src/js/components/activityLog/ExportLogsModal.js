@@ -2,7 +2,7 @@
  * Modal surface for POST /updatronix/v1/logs/export — plain-text preview + chunked fetch loop.
  */
 
-import { useCallback, useMemo, useState } from '@wordpress/element';
+import { useCallback, useEffect, useMemo, useState } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { useDispatch } from '@wordpress/data';
 import { store as noticesStore } from '@wordpress/notices';
@@ -12,7 +12,6 @@ import { normalizeViewForExport, summarizeView } from './logFilters';
 import {
 	copyFormattedToClipboard,
 	copyTextToClipboard,
-	stripExportFormatting,
 } from './exportCopyUtils';
 import {
 	loadExportPreferences,
@@ -20,9 +19,18 @@ import {
 	columnsToApiPayload,
 } from './exportPreferences';
 
-const { Button, CheckboxControl, Dialog, Icon, Notice, SwitchControl, Text } =
-	wpds.ui;
-const { copy } = wpds.icons;
+const {
+	Button,
+	CheckboxControl,
+	Dialog,
+	Icon,
+	Notice,
+	RadioGroupControl,
+	SelectControl,
+	SwitchControl,
+	Text,
+} = wpds.ui;
+const { copy, download } = wpds.icons;
 
 /** Map export notice statuses to WPDS Notice intents. */
 const NOTICE_INTENTS = {
@@ -34,10 +42,6 @@ const NOTICE_INTENTS = {
 
 /** @type {ReadonlyArray<{ id: string, label: string }>} */
 const COLUMN_OPTIONS = [
-	{
-		id: 'headingTable',
-		label: __( 'Column headings', 'updatronix' ),
-	},
 	{
 		id: 'action',
 		label: __( 'Action', 'updatronix' ),
@@ -60,6 +64,98 @@ const COLUMN_OPTIONS = [
 	},
 ];
 
+/** @type {ReadonlyArray<{ value: string, label: string }>} */
+const FORMAT_ITEMS = [
+	{ value: 'csv', label: __( 'CSV', 'updatronix' ) },
+	{ value: 'json', label: __( 'JSON', 'updatronix' ) },
+	{ value: 'txt', label: __( 'Plain text', 'updatronix' ) },
+];
+
+/** Stable JSON keys mapped to localized CSV headings. */
+const CSV_COLUMNS = [
+	[ 'element', __( 'Element', 'updatronix' ) ],
+	[ 'action', __( 'Action', 'updatronix' ) ],
+	[ 'version', __( 'Version', 'updatronix' ) ],
+	[ 'date', __( 'Date', 'updatronix' ) ],
+	[ 'context', __( 'Run context', 'updatronix' ) ],
+	[ 'user', __( 'User', 'updatronix' ) ],
+	[ 'status', __( 'Status', 'updatronix' ) ],
+	[ 'category', __( 'Category', 'updatronix' ) ],
+];
+
+/**
+ * Escape one CSV cell.
+ *
+ * @param {string|number|null|undefined} value Cell value.
+ * @return {string} Quoted cell.
+ */
+function csvCell( value ) {
+	return `"${ String( value ?? '' ).replace( /"/g, '""' ) }"`;
+}
+
+/**
+ * Convert the server NDJSON records to CSV.
+ *
+ * @param {Array<Object>} rows    Parsed records.
+ * @param {Object}        columns Column toggles.
+ * @return {string} CSV report.
+ */
+function buildCsvReport( rows, columns ) {
+	const keys = CSV_COLUMNS.filter(
+		( [ key ] ) =>
+			key in ( rows[ 0 ] ?? {} ) ||
+			key === 'element' ||
+			key === 'version' ||
+			key === 'date'
+	);
+	const lines = [];
+	if ( columns.headingTable !== false ) {
+		lines.push(
+			keys.map( ( [ , label ] ) => csvCell( label ) ).join( ',' )
+		);
+	}
+	for ( const row of rows ) {
+		lines.push(
+			keys.map( ( [ key ] ) => csvCell( row[ key ] ) ).join( ',' )
+		);
+	}
+	return lines.join( '\n' );
+}
+
+/**
+ * Parse the server's newline-delimited JSON records.
+ *
+ * @param {string} text NDJSON.
+ * @return {Array<Object>} Records.
+ */
+function parseJsonLines( text ) {
+	return text
+		.split( /\r?\n/ )
+		.filter( ( line ) => line.trim() !== '' )
+		.map( ( line ) => JSON.parse( line ) );
+}
+
+/**
+ * Format the accumulated server body for the selected export format.
+ *
+ * @param {string} text         Accumulated server body.
+ * @param {string} exportFormat Selected format.
+ * @param {Object} columns      Column toggles.
+ * @return {string} Formatted report.
+ */
+function formatExportBody( text, exportFormat, columns ) {
+	if ( exportFormat === 'txt' ) {
+		return text;
+	}
+
+	const rows = parseJsonLines( text );
+	if ( exportFormat === 'json' ) {
+		return JSON.stringify( rows, null, 2 );
+	}
+
+	return buildCsvReport( rows, columns );
+}
+
 /**
  * Export modal entrypoint.
  *
@@ -68,6 +164,7 @@ const COLUMN_OPTIONS = [
  * @param {() => void}                             props.onClose          Parent close handler (also restores focus target).
  * @param {Object}                                 props.view             Live DataViews view.
  * @param {Array<Object>}                          props.logs             Logs from REST for resolving filter labels → IDs.
+ * @param {number}                                 [props.total=0]        Total matching records for the current view.
  * @param {import('react').RefObject<HTMLElement>} props.exportTriggerRef Focus target after close.
  * @return {import('react').JSX.Element|null} Modal subtree while `isOpen` is true.
  */
@@ -76,6 +173,7 @@ export function ExportLogsModal( {
 	onClose,
 	view,
 	logs,
+	total = 0,
 	exportTriggerRef,
 } ) {
 	const { createSuccessNotice } = useDispatch( noticesStore );
@@ -87,16 +185,40 @@ export function ExportLogsModal( {
 	const [ notice, setNotice ] = useState( null );
 	const [ liveRegion, setLiveRegion ] = useState( '' );
 	const [ generatedStamp, setGeneratedStamp ] = useState( '' );
+	const [ scope, setScope ] = useState( 'filtered' );
+	const [ exportFormat, setExportFormat ] = useState( 'txt' );
 
-	const normalizedView = useMemo(
-		() => normalizeViewForExport( view, logs ),
-		[ view, logs ] // View is the source of truth for export filters; logs resolves user display names to IDs.
-	);
+	const scopeView = useMemo( () => {
+		const base = normalizeViewForExport( view, logs );
+		delete base.page;
+		delete base.perPage;
+		delete base.per_page;
+
+		if ( 'all' === scope ) {
+			return { ...base, filters: [], search: '' };
+		}
+
+		if ( 'month' === scope ) {
+			const filters = ( base.filters || [] ).filter(
+				( filter ) => filter && filter.field !== 'date'
+			);
+			filters.push( {
+				field: 'date',
+				operator: 'inThePast',
+				value: 30,
+			} );
+			return { ...base, filters };
+		}
+
+		return base;
+	}, [ view, logs, scope ] );
 
 	const summaryParts = useMemo(
-		() => summarizeView( normalizedView ),
-		[ normalizedView ]
+		() => summarizeView( scopeView ),
+		[ scopeView ]
 	);
+
+	const serverFormat = exportFormat === 'txt' ? 'txt' : 'json';
 
 	const apiColumns = useMemo(
 		() => columnsToApiPayload( columns ),
@@ -129,12 +251,27 @@ export function ExportLogsModal( {
 		[ merge, persistPreferences ]
 	);
 
+	const handleHeaderChange = useCallback(
+		( checked ) => {
+			setColumns( ( prev ) => {
+				const next = { ...prev, headingTable: checked };
+				persistPreferences( merge, next );
+				return next;
+			} );
+		},
+		[ merge, persistPreferences ]
+	);
+
 	const resetOutput = useCallback( () => {
 		setBody( '' );
 		setNotice( null );
 		setLiveRegion( '' );
 		setGeneratedStamp( '' );
 	}, [] );
+
+	useEffect( () => {
+		resetOutput();
+	}, [ scope, exportFormat, merge, columns, resetOutput ] );
 
 	const handleClose = useCallback( () => {
 		resetOutput();
@@ -202,13 +339,14 @@ export function ExportLogsModal( {
 				const payload = cursor
 					? {
 							cursor,
-							view: normalizedView,
+							view: scopeView,
 							merge,
 						}
 					: {
-							view: normalizedView,
+							view: scopeView,
 							merge,
 							columns: apiColumns,
+							format: serverFormat,
 						};
 
 				const response = await apiFetch( {
@@ -238,7 +376,9 @@ export function ExportLogsModal( {
 						response && response.truncated === true
 							? response
 							: null;
-					setBody( accumulated );
+					setBody(
+						formatExportBody( accumulated, exportFormat, columns )
+					);
 					const ga = response?.meta?.generated_at;
 					const stamp =
 						ga !== undefined && ga !== null
@@ -301,7 +441,16 @@ export function ExportLogsModal( {
 		} finally {
 			setBusy( false );
 		}
-	}, [ apiColumns, mapExportError, merge, normalizedView, resetOutput ] );
+	}, [
+		apiColumns,
+		mapExportError,
+		merge,
+		scopeView,
+		resetOutput,
+		exportFormat,
+		columns,
+		serverFormat,
+	] );
 
 	const copyExport = useCallback(
 		async ( mode ) => {
@@ -310,8 +459,8 @@ export function ExportLogsModal( {
 			}
 
 			try {
-				if ( mode === 'plain' ) {
-					await copyTextToClipboard( stripExportFormatting( body ) );
+				if ( mode === 'plain' || exportFormat !== 'txt' ) {
+					await copyTextToClipboard( body );
 				} else {
 					await copyFormattedToClipboard( body );
 				}
@@ -340,8 +489,40 @@ export function ExportLogsModal( {
 				} );
 			}
 		},
-		[ body, createSuccessNotice ]
+		[ body, createSuccessNotice, exportFormat ]
 	);
+
+	const downloadExport = useCallback( () => {
+		if ( ! body.trim() ) {
+			return;
+		}
+
+		let extension = 'txt';
+		let mime = 'text/plain';
+
+		if ( exportFormat === 'json' ) {
+			extension = 'json';
+			mime = 'application/json';
+		} else if ( exportFormat === 'csv' ) {
+			extension = 'csv';
+			mime = 'text/csv';
+		}
+
+		const blob = new Blob( [ body ], { type: mime } );
+		const url = URL.createObjectURL( blob );
+		const anchor = document.createElement( 'a' );
+		anchor.href = url;
+		anchor.download = `update-log.${ extension }`;
+		document.body.appendChild( anchor );
+		anchor.click();
+		anchor.remove();
+		window.setTimeout( () => URL.revokeObjectURL( url ), 0 );
+		const message = __( 'Export downloaded.', 'updatronix' );
+		setLiveRegion( message );
+		createSuccessNotice( message, {
+			id: 'updatronix-export-download',
+		} );
+	}, [ body, createSuccessNotice, exportFormat ] );
 
 	const hasExportBody = body.trim() !== '';
 
@@ -361,7 +542,7 @@ export function ExportLogsModal( {
 			<Dialog.Popup size="large" className="updatronix-export-modal">
 				<Dialog.Header>
 					<Dialog.Title>
-						{ __( 'Export update logs', 'updatronix' ) }
+						{ __( 'Export update log', 'updatronix' ) }
 					</Dialog.Title>
 					<Dialog.CloseIconButton
 						label={ __( 'Close', 'updatronix' ) }
@@ -375,10 +556,62 @@ export function ExportLogsModal( {
 							id="updatronix-export-modal-desc"
 						>
 							{ __(
-								'Generate a plain-text summary of the logs that match your current filters and sort. Filters you have not set include all values.',
+								'Create a summary of the log matching the current search, filters, and sort. Filters that are not set include every value.',
 								'updatronix'
 							) }
 						</Text>
+
+						<div className="updatronix-export-modal__scopes">
+							<RadioGroupControl
+								label={ __( 'Scope', 'updatronix' ) }
+								value={ scope }
+								onValueChange={ setScope }
+								items={ [
+									{
+										value: 'filtered',
+										label: __(
+											'Current search and filters',
+											'updatronix'
+										),
+										description: total
+											? sprintf(
+													/* translators: %d: matching records. */
+													__(
+														'%d records matching this view.',
+														'updatronix'
+													),
+													total
+												)
+											: __(
+													'Matching records in the current view.',
+													'updatronix'
+												),
+									},
+									{
+										value: 'all',
+										label: __(
+											'All entries',
+											'updatronix'
+										),
+										description: __(
+											'All records in the retention window.',
+											'updatronix'
+										),
+									},
+									{
+										value: 'month',
+										label: __(
+											'Last 30 days',
+											'updatronix'
+										),
+										description: __(
+											'Records from the last 30 days.',
+											'updatronix'
+										),
+									},
+								] }
+							/>
+						</div>
 
 						<div className="updatronix-export-modal__filters-section">
 							<p className="updatronix-export-modal__section-title">
@@ -436,6 +669,20 @@ export function ExportLogsModal( {
 							disabled={ busy }
 						/>
 
+						<SwitchControl
+							label={ __(
+								'Include column headers',
+								'updatronix'
+							) }
+							description={ __(
+								'Add the column names as the first row of the report.',
+								'updatronix'
+							) }
+							checked={ columns.headingTable !== false }
+							onCheckedChange={ handleHeaderChange }
+							disabled={ busy }
+						/>
+
 						<fieldset className="updatronix-export-modal__columns">
 							<legend>
 								{ __( 'Report columns', 'updatronix' ) }
@@ -462,6 +709,19 @@ export function ExportLogsModal( {
 						</fieldset>
 
 						<div className="updatronix-export-modal__actions">
+							<SelectControl
+								label={ __( 'Format', 'updatronix' ) }
+								value={
+									FORMAT_ITEMS.find(
+										( item ) => item.value === exportFormat
+									) || FORMAT_ITEMS[ 2 ]
+								}
+								onValueChange={ ( item ) =>
+									setExportFormat( item?.value || 'txt' )
+								}
+								items={ FORMAT_ITEMS }
+								disabled={ busy }
+							/>
 							<Button
 								variant="solid"
 								tone="brand"
@@ -558,6 +818,19 @@ export function ExportLogsModal( {
 											'Copy without formatting',
 											'updatronix'
 										) }
+									</Button>
+									<Button
+										variant="solid"
+										tone="brand"
+										onClick={ downloadExport }
+										disabled={ ! hasExportBody || busy }
+									>
+										<Icon
+											icon={ download }
+											size={ 16 }
+											aria-hidden="true"
+										/>
+										{ __( 'Download', 'updatronix' ) }
 									</Button>
 								</div>
 							</>

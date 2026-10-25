@@ -41,7 +41,7 @@ final class Updatronix_Export_Request_Schema {
 		 */
 		$params = $raw_params;
 
-		$allowed_top = array( 'view', 'merge', 'columns', 'cursor' );
+		$allowed_top = array( 'view', 'merge', 'columns', 'format', 'cursor' );
 		foreach ( array_keys( $params ) as $key ) {
 			if ( ! in_array( $key, $allowed_top, true ) ) {
 				return new WP_Error( 'view_invalid', '', array( 'status' => 400 ) );
@@ -54,6 +54,12 @@ final class Updatronix_Export_Request_Schema {
 		}
 
 		$merge = isset( $params['merge'] ) ? self::sanitize_request_boolean( $params['merge'] ) : true;
+		$format = isset( $params['format'] ) && is_string( $params['format'] )
+			? sanitize_key( $params['format'] )
+			: 'txt';
+		if ( ! in_array( $format, array( 'txt', 'json' ), true ) ) {
+			return new WP_Error( 'view_invalid', '', array( 'status' => 400 ) );
+		}
 		// `columns` is optional: a missing or non-array value falls back to the
 		// server-side defaults applied in Updatronix_Export_Body_Builder::normalize_export_columns().
 		$columns_in = isset( $params['columns'] ) && is_array( $params['columns'] ) ? $params['columns'] : array();
@@ -140,6 +146,7 @@ final class Updatronix_Export_Request_Schema {
 			'per_page'         => $pagination_ctx['per_page'],
 			'slice_sql_offset' => $pagination_ctx['slice_sql_offset'],
 			'slice_max_rows'   => $pagination_ctx['slice_max_rows'],
+			'format'           => $format,
 		);
 
 		$view_applied = array(
@@ -157,6 +164,7 @@ final class Updatronix_Export_Request_Schema {
 		return array(
 			'site_id'            => $site_id,
 			'merge'              => $merge,
+			'format'             => $format,
 			'columns'            => $columns,
 			'search'             => $search,
 			'sort_column'        => $sort_column,

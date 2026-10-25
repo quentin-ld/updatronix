@@ -172,6 +172,11 @@ final class Updatronix_Export {
 					'columns' => array(
 						'type' => 'object',
 					),
+					'format'  => array(
+						'type'    => 'string',
+						'enum'    => array( 'txt', 'json' ),
+						'default' => 'txt',
+					),
 					'cursor'  => array(
 						'type'    => 'string',
 						'default' => '',
@@ -270,6 +275,7 @@ final class Updatronix_Export {
 		 * @var array<string, bool>
 		 */
 		$columns = isset( $validated['columns'] ) && is_array( $validated['columns'] ) ? $validated['columns'] : array();
+		$format  = (string) ( $validated['format'] ?? 'txt' );
 
 		$max_rows_attempt = min(
 			self::MAX_ROWS_TOTAL,
@@ -311,7 +317,8 @@ final class Updatronix_Export {
 				$merge,
 				$columns,
 				'',
-				self::MAX_BYTES_PER_CHUNK
+				self::MAX_BYTES_PER_CHUNK,
+				$format
 			);
 
 			$chunk_delta        = $render['body'];
@@ -616,12 +623,15 @@ final class Updatronix_Export {
 		);
 
 		$response_body = $chunk_delta;
+		$format        = (string) ( $validated['format'] ?? 'txt' );
 
-		if ( $truncated ) {
+		if ( $truncated && 'json' !== $format ) {
 			$footer              = Updatronix_Export_Body_Builder::truncation_footer( $total_rows_scanned, $matched_estimate );
 			$response_body      .= ( '' !== $response_body ? "\n" : '' ) . $footer;
 			$glue_f              = ( '' !== $new_accumulated ) ? "\n" : '';
 			$terminal_store_body = $new_accumulated . $glue_f . $footer;
+		} elseif ( $truncated ) {
+			$terminal_store_body = $new_accumulated;
 		} else {
 			$terminal_store_body = $new_accumulated;
 		}
