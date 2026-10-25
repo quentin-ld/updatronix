@@ -99,6 +99,15 @@
 	top: var(--wpds-dimension-gap-lg);
 }
 
+.updatronix-log-detail-dialog {
+	max-width: min(560px, calc(100vw - 32px));
+}
+
+.updatronix-log-detail-dialog__content {
+	max-height: min(70vh, 640px);
+	overflow-y: auto;
+}
+
 .updatronix-log-entry-title {
 	display: flex;
 	flex-direction: column;

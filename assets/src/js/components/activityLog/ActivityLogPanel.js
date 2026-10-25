@@ -32,7 +32,8 @@ import {
 import { LogDetailsContent } from './LogDetailsContent';
 import { ExportLogsModal } from './ExportLogsModal';
 
-const { AlertDialog, Badge, Button, Icon, IconButton, Notice, Text } = wpds.ui;
+const { AlertDialog, Badge, Button, Dialog, Icon, IconButton, Notice, Text } =
+	wpds.ui;
 const {
 	closeSmall,
 	download,
@@ -51,6 +52,29 @@ const TYPE_ICONS = {
 	theme: styles,
 	translation: language,
 };
+
+/**
+ * Track the narrow layout that uses the details dialog.
+ *
+ * @return {boolean} Whether the viewport is at or below 1200px.
+ */
+function useNarrowDetails() {
+	const [ isNarrow, setIsNarrow ] = useState(
+		() =>
+			typeof window !== 'undefined' &&
+			window.matchMedia( '(max-width: 1200px)' ).matches
+	);
+
+	useEffect( () => {
+		const query = window.matchMedia( '(max-width: 1200px)' );
+		const onChange = () => setIsNarrow( query.matches );
+
+		query.addEventListener( 'change', onChange );
+		return () => query.removeEventListener( 'change', onChange );
+	}, [] );
+
+	return isNarrow;
+}
 
 /**
  * Get a short label for a log type.
@@ -180,6 +204,7 @@ export function ActivityLogPanel( {
 		type: 'polite',
 	} );
 	const [ detail, setDetail ] = useState( null );
+	const isNarrow = useNarrowDetails();
 	const deepLinkHandled = useRef( false );
 
 	useEffect( () => {
@@ -247,21 +272,12 @@ export function ActivityLogPanel( {
 	}, [ logs ] );
 
 	useEffect( () => {
-		if (
-			! detail ||
-			! window.matchMedia( '(max-width: 1200px)' ).matches
-		) {
+		if ( ! detail || isNarrow ) {
 			return;
 		}
 
-		const reduceMotion = window.matchMedia(
-			'(prefers-reduced-motion: reduce)'
-		).matches;
-		previewRef.current?.scrollIntoView( {
-			block: 'nearest',
-			behavior: reduceMotion ? 'auto' : 'smooth',
-		} );
-	}, [ detail ] );
+		previewRef.current?.focus( { preventScroll: true } );
+	}, [ detail, isNarrow ] );
 
 	const [ view, setView ] = useState( {
 		type: 'activity',
@@ -649,7 +665,7 @@ export function ActivityLogPanel( {
 
 			<div
 				className={ `updatronix-log-layout${
-					detail ? ' has-preview' : ''
+					detail && ! isNarrow ? ' has-preview' : ''
 				}` }
 			>
 				<Section
@@ -760,7 +776,7 @@ export function ActivityLogPanel( {
 					) }
 				</Section>
 
-				{ detail && (
+				{ detail && ! isNarrow && (
 					<aside
 						ref={ previewRef }
 						className="updatronix-log-preview"
@@ -790,6 +806,40 @@ export function ActivityLogPanel( {
 					</aside>
 				) }
 			</div>
+
+			{ detail && isNarrow && (
+				<Dialog.Root
+					open
+					onOpenChange={ ( open ) => {
+						if ( ! open ) {
+							setDetail( null );
+						}
+					} }
+				>
+					<Dialog.Popup
+						size="medium"
+						className="updatronix-log-detail-dialog"
+					>
+						<Dialog.Header>
+							<Dialog.Title>
+								{ __( 'Details', 'updatronix' ) }
+							</Dialog.Title>
+							<Dialog.CloseIconButton
+								label={ __( 'Close details', 'updatronix' ) }
+							/>
+						</Dialog.Header>
+						<Dialog.Content>
+							<div className="updatronix-log-detail-dialog__content">
+								<LogDetailsContent
+									log={ detail }
+									logId={ detail.id }
+									fetchLogDetails={ fetchLogDetails }
+								/>
+							</div>
+						</Dialog.Content>
+					</Dialog.Popup>
+				</Dialog.Root>
+			) }
 
 			<Text variant="body-sm" className="updatronix-muted">
 				{ sprintf(
