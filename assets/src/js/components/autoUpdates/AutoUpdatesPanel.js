@@ -107,6 +107,25 @@ function ExtensionRow( {
 	const lockReason =
 		item.auto_update_locked_reason ||
 		__( 'Locked because automatic updates are unavailable.', 'updatronix' );
+	const isWordPressOrg =
+		/^https?:\/\/(?:[^/]+\.)?wordpress\.org(?:[/?#]|$)/i.test( url );
+	let linkLabel = __( 'Visit plugin site', 'updatronix' );
+
+	if ( isWordPressOrg ) {
+		linkLabel = __( 'View on WordPress.org', 'updatronix' );
+	} else if ( 'theme_uri' === uriKey ) {
+		linkLabel = __( 'Visit theme site', 'updatronix' );
+	}
+
+	let reason = '';
+	if ( unavailable ) {
+		reason = __(
+			'No update data is available for this extension.',
+			'updatronix'
+		);
+	} else if ( locked ) {
+		reason = lockReason;
+	}
 
 	return (
 		<div className="updatronix-auto-item" role="listitem">
@@ -154,20 +173,16 @@ function ExtensionRow( {
 				) }
 				{ url && (
 					<Link href={ url } openInNewTab>
-						{ __( 'View on WordPress.org', 'updatronix' ) }
+						{ linkLabel }
 					</Link>
 				) }
 			</div>
 
 			<div className="updatronix-auto-item-switch">
-				<Text variant="body-sm" className="updatronix-muted">
-					{ __( 'Auto-updates', 'updatronix' ) }
-				</Text>
-				{ unavailable ? (
+				<div className="updatronix-auto-item-switch-row">
 					<Text variant="body-sm" className="updatronix-muted">
-						{ __( 'Unavailable', 'updatronix' ) }
+						{ __( 'Auto-updates', 'updatronix' ) }
 					</Text>
-				) : (
 					<SwitchControl
 						label={ sprintf(
 							/* translators: %s: plugin or theme name. */
@@ -177,12 +192,12 @@ function ExtensionRow( {
 						hideLabelFromVision
 						checked={ checked }
 						onCheckedChange={ onToggle }
-						disabled={ disabled || locked }
+						disabled={ disabled || locked || unavailable }
 					/>
-				) }
-				{ locked && (
+				</div>
+				{ reason && (
 					<Text variant="body-sm" className="updatronix-muted">
-						{ lockReason }
+						{ reason }
 					</Text>
 				) }
 			</div>
@@ -308,11 +323,7 @@ export function AutoUpdatesPanel( {
 	};
 
 	const handleSaveAction = (
-		<SaveButton
-			onClick={ handleSave }
-			disabled={ ! isDirty || busy }
-			busy={ busy }
-		/>
+		<SaveButton onClick={ handleSave } disabled={ busy } busy={ busy } />
 	);
 
 	return (
@@ -326,7 +337,6 @@ export function AutoUpdatesPanel( {
 				<ConstantNotices
 					constants={ data.constants }
 					sections={ [ 'core', 'plugins', 'themes', 'translations' ] }
-					dismissibleOnly
 					dismissed={ dismissed }
 					onDismiss={ dismissConstant }
 				/>
@@ -338,11 +348,6 @@ export function AutoUpdatesPanel( {
 						'updatronix'
 					) }
 				>
-					<ConstantNotices
-						constants={ data.constants }
-						sections={ [ 'core' ] }
-						lockingOnly
-					/>
 					<RadioGroupControl
 						label={ __( 'Core update mode', 'updatronix' ) }
 						hideLabelFromVision
@@ -365,11 +370,6 @@ export function AutoUpdatesPanel( {
 						'updatronix'
 					) }
 				>
-					<ConstantNotices
-						constants={ data.constants }
-						sections={ [ 'translations' ] }
-						lockingOnly
-					/>
 					<SwitchControl
 						label={ __( 'Translation auto-updates', 'updatronix' ) }
 						description={ __(
@@ -391,11 +391,11 @@ export function AutoUpdatesPanel( {
 					title={ __( 'Themes', 'updatronix' ) }
 					description={ __( 'Per-theme control.', 'updatronix' ) }
 				>
-					<ConstantNotices
-						constants={ data.constants }
-						sections={ [ 'themes' ] }
-						lockingOnly
-					/>
+					{ ( data.themes || [] ).length === 0 && (
+						<Text variant="body-sm" className="updatronix-muted">
+							{ __( 'No themes are installed.', 'updatronix' ) }
+						</Text>
+					) }
 					<div className="updatronix-auto-list" role="list">
 						{ ( data.themes || [] ).map( ( item ) => (
 							<ExtensionRow
@@ -424,11 +424,11 @@ export function AutoUpdatesPanel( {
 					title={ __( 'Plugins', 'updatronix' ) }
 					description={ __( 'Per-plugin control.', 'updatronix' ) }
 				>
-					<ConstantNotices
-						constants={ data.constants }
-						sections={ [ 'plugins' ] }
-						lockingOnly
-					/>
+					{ ( data.plugins || [] ).length === 0 && (
+						<Text variant="body-sm" className="updatronix-muted">
+							{ __( 'No plugins are installed.', 'updatronix' ) }
+						</Text>
+					) }
 					<div className="updatronix-auto-list" role="list">
 						{ ( data.plugins || [] ).map( ( item ) => (
 							<ExtensionRow

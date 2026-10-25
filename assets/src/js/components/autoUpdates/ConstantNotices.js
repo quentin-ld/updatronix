@@ -6,8 +6,18 @@
  * @property {boolean}               locks   Whether the constant locks the setting.
  */
 
-import { Notice } from '@wordpress/components';
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
+
+import wpds from '../../shell/wpds';
+
+const { Notice } = wpds.ui;
+
+const SECTION_LABELS = {
+	core: __( 'Core', 'updatronix' ),
+	plugins: __( 'Plugins', 'updatronix' ),
+	themes: __( 'Themes', 'updatronix' ),
+	translations: __( 'Translations', 'updatronix' ),
+};
 
 const CONSTANT_DESCRIPTIONS = {
 	WP_AUTO_UPDATE_CORE: __(
@@ -73,18 +83,30 @@ export function ConstantNotices( {
 		return null;
 	}
 
-	return relevant.map( ( [ name, info ] ) => (
-		<Notice
-			key={ name }
-			status="warning"
-			isDismissible={ ! info.locks }
-			onDismiss={
-				! info.locks && onDismiss ? () => onDismiss( name ) : undefined
-			}
-		>
-			<strong>{ name }</strong>
-			<br />
-			{ CONSTANT_DESCRIPTIONS[ name ] || name }
-		</Notice>
-	) );
+	return relevant.map( ( [ name, info ] ) => {
+		const affects = ( info.affects || [] )
+			.map( ( section ) => SECTION_LABELS[ section ] )
+			.filter( Boolean )
+			.join( ', ' );
+
+		return (
+			<Notice.Root key={ name } intent="warning">
+				<Notice.Title>{ name }</Notice.Title>
+				<Notice.Description>
+					{ CONSTANT_DESCRIPTIONS[ name ] || name }
+					{ affects &&
+						` ${ sprintf(
+							/* translators: %s: comma-separated affected sections. */
+							__( 'Affects: %s.', 'updatronix' ),
+							affects
+						) }` }
+				</Notice.Description>
+				{ ! info.locks && onDismiss && (
+					<Notice.CloseIconButton
+						onClick={ () => onDismiss( name ) }
+					/>
+				) }
+			</Notice.Root>
+		);
+	} );
 }

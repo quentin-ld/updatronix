@@ -389,11 +389,55 @@ body.updatronix-admin-page {
 
 .updatronix-auto-item-switch {
 	align-items: flex-end;
+	align-self: flex-start;
 	display: flex;
 	flex-direction: column;
 	flex-shrink: 0;
 	gap: 4px;
+	height: auto;
 	max-width: 220px;
+}
+
+.updatronix-auto-item-switch-row {
+	align-items: flex-end;
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+@media (max-width: 760px) {
+
+	.updatronix-auto-item {
+		align-items: start;
+		display: grid;
+		grid-template-columns: 40px minmax(0, 1fr);
+	}
+
+	.updatronix-auto-item-icon {
+		grid-column: 1;
+		grid-row: 1;
+	}
+
+	.updatronix-auto-item-body {
+		grid-column: 2;
+		grid-row: 1;
+	}
+
+	.updatronix-auto-item-switch {
+		align-items: stretch;
+		align-self: stretch;
+		grid-column: 2;
+		grid-row: 2;
+		max-width: none;
+		padding-top: var(--wpds-dimension-padding-sm);
+		width: auto;
+	}
+
+	.updatronix-auto-item-switch-row {
+		align-items: center;
+		flex-direction: row;
+		justify-content: space-between;
+	}
 }
 
 .updatronix-split {
@@ -1087,6 +1131,10 @@ body.updatronix-admin-page {
 }
 
 @media (max-width: 560px) {
+
+	.updatronix-save-button-shortcut {
+		display: none;
+	}
 
 	.updatronix-savebar-shortcut {
 		display: none;

@@ -217,7 +217,7 @@ export const SettingsPanel = memo( function SettingsPanelForm( {
 				actions={
 					<SaveButton
 						onClick={ handleSave }
-						disabled={ ! isDirty || saving }
+						disabled={ saving }
 						busy={ saving }
 					/>
 				}

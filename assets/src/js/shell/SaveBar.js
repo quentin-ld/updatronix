@@ -78,23 +78,19 @@ export function SaveButton( {
 /**
  * Render the scroll-triggered save bar.
  *
- * @param {Object}     props                Component props.
- * @param {boolean}    props.isDirty        Whether the draft differs from the saved snapshot.
- * @param {boolean}    props.isSaving       Whether a save is in progress.
- * @param {() => void} props.onSave         Save handler.
- * @param {() => void} [props.onDiscard]    Discard handler.
- * @param {string}     [props.saveLabel]    Save label.
- * @param {string}     [props.discardLabel] Discard label.
- * @param {string}     [props.title]        Surface name, for the region label.
+ * @param {Object}     props             Component props.
+ * @param {boolean}    props.isDirty     Whether the draft differs from the saved snapshot.
+ * @param {boolean}    props.isSaving    Whether a save is in progress.
+ * @param {() => void} props.onSave      Save handler.
+ * @param {string}     [props.saveLabel] Save label.
+ * @param {string}     [props.title]     Surface name, for the region label.
  * @return {import('react').JSX.Element|null} Save bar.
  */
 export default function SaveBar( {
 	isDirty,
 	isSaving,
 	onSave,
-	onDiscard,
 	saveLabel,
-	discardLabel,
 	title,
 } ) {
 	const [ visible, setVisible ] = useState( false );
@@ -219,22 +215,11 @@ export default function SaveBar( {
 			</Text>
 
 			<div className="updatronix-savebar-actions">
-				{ isDirty && onDiscard && (
-					<Button
-						variant="outline"
-						tone="neutral"
-						onClick={ onDiscard }
-						disabled={ isSaving }
-					>
-						{ discardLabel || __( 'Discard', 'updatronix' ) }
-					</Button>
-				) }
-
 				<Button
 					variant="solid"
 					tone="brand"
 					onClick={ onSave }
-					disabled={ ! isDirty || isSaving }
+					disabled={ isSaving }
 					aria-keyshortcuts="Control+S Meta+S"
 				>
 					{ isSaving

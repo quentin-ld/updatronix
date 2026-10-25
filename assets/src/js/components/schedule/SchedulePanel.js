@@ -247,7 +247,7 @@ export const SchedulePanel = memo( function SchedulePanelComponent( {
 						</Button>
 						<SaveButton
 							onClick={ handleSave }
-							disabled={ ! isDirty || saving }
+							disabled={ saving }
 							busy={ saving }
 						/>
 					</>
