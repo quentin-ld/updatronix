@@ -1,6 +1,6 @@
 # White label review (2026-10-25)
 
-**Status:** Review only. No UI source has been changed for these findings.
+**Status:** Implemented and verified in the Pro plugin.
 **Reference:** `open-design-project/2dc80110-eba2-4562-acea-441ae2821939/screens/white-label.html`, `docs/wpds/reference/screens/src/screens/WhiteLabel.jsx`, `docs/wpds/reference/screens/src/app.css`, `docs/wpds/reference/screens/src/ui.jsx`.
 **Current:** `wp-content/plugins/updatronix-pro/assets/src/js/components/WhiteLabelPage.js`, `assets/src/scss/_pro-settings.scss`.
 **WPDS MCP:** InputControl, SwitchControl, Button, Link, Card, and Text checked. ColorPalette and FormFileUpload are `@wordpress/components` primitives, not WPDS components in the MCP catalog.
@@ -82,6 +82,18 @@
 - Preview card: admin menu and email composition, active menu item, email header/body/footer, “Sent by” branding.
 - Responsive: two columns at 960, one column at 560/390; no horizontal overflow. Form/preview widths follow the admin frame (396/444/274 vs 414/460/290).
 - Settings/defaults restore and the temp license cleanup verified.
+
+## Implementation result (2026-10-25)
+
+- **WL-001 fixed:** Choose logo is 102×32.
+- **WL-002 fixed:** Site settings is now an underlined WPDS Link (66×13), not a filled button.
+- **WL-003 fixed:** the note is 541×16 at 1280/960 with the 80ch measure.
+- **WL-004 fixed:** the brand form is 184px after tightening the logo group gap.
+- **WL-005 fixed:** menu 177px, email 215px, preview section 239px.
+- **WL-006 accepted:** the selected-logo state keeps the image + remove icon; the Media Library upload remains persistent.
+- **WL-007/008 accepted:** reset confirmation and real shell branding remain intentional product behavior.
+
+Verification: Pro lint/CSS/build pass; the configured brand was checked at 1280 and the responsive layout at 960/560/390 has no overflow. Default settings and the temporary license were restored.
 
 ## Accepted deviations
 
