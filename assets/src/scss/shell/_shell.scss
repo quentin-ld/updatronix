@@ -1386,10 +1386,19 @@ body.updatronix-admin-page {
 	flex-direction: column;
 	gap: var(--wpds-dimension-gap-lg);
 	padding: var(--wpds-dimension-padding-sm);
+
+	> div {
+		display: flex;
+		flex: 1 1 auto;
+		flex-direction: column;
+		min-height: 0;
+	}
 }
 
 .updatronix-nav-drawer-version {
+	border-top: 1px solid $updatronix-rail-border;
 	margin-top: auto;
+	padding-top: var(--wpds-dimension-padding-lg);
 }
 
 /* The legacy page styles color every link in the dashboard wrapper with the
