@@ -5,6 +5,13 @@
 	}
 }
 
+@media (max-width: 760px) {
+
+	.updatronix-autoupdates-panel > .updatronix-page-header {
+		margin-bottom: var(--wpds-dimension-gap-lg);
+	}
+}
+
 .updatronix-autoupdates-loading {
 	display: flex;
 	align-items: center;

@@ -195,4 +195,6 @@ The live page is narrower at 980/960 because the WordPress admin menu is not par
 
 T1–T5 and the shared save-model decision are implemented. Verification: Free lint/CSS/token checks, 15 JS tests, build, and 213 PHPUnit tests; Pro lint/build and 200 PHPUnit tests; browser checks at 1280/760/560 (active Save, no Discard, row reflow, hidden shortcut, disabled unavailable switch with reason, corrected link labels); a temporary constants fixture rendered one global WPDS warning per constant; fixtures and options were cleaned up.
 
+Mobile spacing follow-up: at ≤760px, the auto-updates panel now adds a 16px gap below the PageHeader/Save changes button. Verified at 390: Save changes ends at y=298, the first section starts at y=314 (16px), matching the reference page-head/page-body rhythm.
+
 Remaining explicit gaps: save-error/network/stale/retry states, empty theme/plugin lists (unreachable on this site), many-row stress, full screen-reader pass, and a Pro visual pass. The earlier “pre-fix baseline” save-state bullets describe the review baseline, not the final build.
