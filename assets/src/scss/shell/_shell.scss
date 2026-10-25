@@ -3,14 +3,16 @@
 // field guide. The pinned token snapshot has no inverse foreground token,
 // so the rail carries its own documented pair.
 
-$updatronix-rail-bg: #25292b;
+$updatronix-rail-bg: #1e1e1e;
 $updatronix-rail-bg-raised: #2e3336;
 $updatronix-rail-text: #f0f0f1;
+$updatronix-rail-link-text: #b4b4b4;
 $updatronix-rail-muted: #a7adb3;
 $updatronix-shell-bg: #1e1e1e;
 $updatronix-rail-hover: rgba(0, 0, 0, 0.12);
 $updatronix-rail-current: rgba(0, 0, 0, 0.18);
 $updatronix-rail-focus: #fff;
+$updatronix-rail-hover-text: #f0f0f0;
 $updatronix-rail-border: rgba(255, 255, 255, 0.12);
 
 body.updatronix-admin-page {
@@ -167,14 +169,14 @@ body.updatronix-admin-page {
 	align-items: center;
 	gap: var(--wpds-dimension-gap-sm);
 	padding: var(--wpds-dimension-padding-sm) var(--wpds-dimension-padding-md);
-	color: $updatronix-rail-text;
+	color: $updatronix-rail-link-text;
 	line-height: var(--wpds-typography-line-height-md);
 	text-decoration: none;
 	border-radius: var(--wpds-border-radius-md);
 
 	&:hover {
-		background: $updatronix-rail-hover;
-		color: $updatronix-rail-focus;
+		background: transparent;
+		color: $updatronix-rail-hover-text;
 	}
 
 	&.is-current {
@@ -1386,8 +1388,16 @@ body.updatronix-admin-page {
 		color: $updatronix-rail-text;
 	}
 
+	.updatronix-rail .updatronix-rail-link,
+	.updatronix-rail .updatronix-rail-link:visited {
+		color: $updatronix-rail-link-text;
+	}
+
 	.updatronix-rail .updatronix-rail-link:hover,
-	.updatronix-rail .updatronix-rail-link:hover:visited,
+	.updatronix-rail .updatronix-rail-link:hover:visited {
+		color: $updatronix-rail-hover-text;
+	}
+
 	.updatronix-rail .updatronix-rail-link.is-current,
 	.updatronix-rail .updatronix-rail-link.is-current:visited {
 		color: $updatronix-rail-focus;

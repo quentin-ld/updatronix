@@ -89,6 +89,17 @@
 
 **Recommendation:** Apply DR-002/DR-003 to the shared rail links; no separate mobile color scheme.
 
+## Owner color/hover override (2026-10-25)
+
+The owner asked for the rail to match the WordPress admin bar/background and the Site Editor hover, without changing the full-screen/admin frame:
+
+- Rail background: **#1e1e1e** — identical to the shell background and the live `#wpadminbar` (both measured `rgb(30,30,30)`).
+- Rail link base: **#b4b4b4** (the Site Editor navigation base); hover/focus: **#f0f0f0** with a **transparent** background.
+- Active links remain white with the existing dark active background and indicator.
+- Mobile bar/admin frame, rail width, item geometry, active treatment, and full-screen behavior were not changed.
+
+Verified at 1280: rail/admin bar/shell all `rgb(30,30,30)`; non-active link base `rgb(180,180,180)`, hover `rgb(240,240,240)`, hover background transparent.
+
 ## Implementation result (2026-10-25)
 
 - **DR-002 fixed:** rail links are 40px with 24px line-height; drawer links are 44px; mobile bar uses 24px line-height.
@@ -104,11 +115,11 @@ Verification: Free Stylelint, token lint, 15/15 JS tests, build; browser checks 
 
 ## Matching regions
 
-- Rail width **264px**, padding **16px**, gap **16px**, background **rgb(37,41,43)**, zero radius.
+- Rail width **264px**, padding **16px**, gap **16px**, background **rgb(30,30,30)** (same as the shell and admin bar), zero radius.
 - Brand icon/subtitle, name **15px/20px/600**, outer brand gap **8px**.
 - Group label **12px/16px**, color **rgb(167,173,179)**, padding **0 8px**.
-- Link padding **8×12**, icon **20px**, link gap **8px**, radius **4px**.
-- Hover background `rgba(0,0,0,0.12)`, active background `rgba(0,0,0,0.18)`, 2px white active indicator, 2px focus outline.
+- Link padding **8×12**, icon **20px**, link gap **8px**, radius **4px**, base text **#b4b4b4**.
+- Hover: transparent background, text **#f0f0f0**; active background `rgba(0,0,0,0.18)`, 2px white active indicator, 2px focus outline.
 - Group order and destinations, Pro visibility, drawer width **320px**, mobile bar height **56px** and background.
 - Rail order and link labels match; the version value is data (1.3.0 live vs 1.2.0 reference).
 
