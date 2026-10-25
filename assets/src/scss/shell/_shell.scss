@@ -145,6 +145,12 @@ body.updatronix-admin-page {
 	color: $updatronix-rail-muted;
 }
 
+.updatronix-rail-foot .updatronix-rail-muted {
+	color: $updatronix-rail-text;
+	font-size: var(--wpds-typography-font-size-md);
+	line-height: var(--wpds-typography-line-height-md);
+}
+
 .updatronix-rail-nav {
 	display: flex;
 	flex-direction: column;
@@ -1412,6 +1418,9 @@ body.updatronix-admin-page {
 
 .updatronix-nav-drawer-version {
 	border-top: 1px solid $updatronix-rail-border;
+	color: $updatronix-rail-text;
+	font-size: var(--wpds-typography-font-size-md);
+	line-height: var(--wpds-typography-line-height-md);
 	margin-top: auto;
 	padding-top: var(--wpds-dimension-padding-lg);
 }

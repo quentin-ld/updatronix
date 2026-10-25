@@ -3,7 +3,7 @@
 **Date:** 2026-10-25
 **Scope:** Free admin rail and mobile navigation drawer.
 **Reference:** Open Design rail in `update-log.html`, `ui.jsx`, `app.css`; live WPDS Navigation/Drawer.
-**Status:** Review only. No UI source changed.
+**Status:** T1 implemented and verified. No other UI source changed.
 
 ## Method
 
@@ -40,6 +40,12 @@
 **Evidence:** The desktop footer and mobile drawer version render at 12px/16px, color `#a7adb3` (the shared muted body-sm style). The reference rail meta is 13px/24px, color `#f0f0f1`. Position and separator already match.
 
 **Recommendation:** Style the version as the reference rail meta (13px/24px, normal foreground) in both the desktop footer and mobile drawer; keep bottom anchoring and the separator. Verify at 1440, 390, and the drawer.
+
+## Implementation result (2026-10-25)
+
+- **DR30-01 fixed:** the desktop rail footer and mobile drawer version now use 13px/24px and the normal rail foreground (`#f0f0f1`), while the subtitle stays 12px/16px muted. Verified live: `Version 1.3.0` is 13px/24px at both locations.
+- The style asset version now includes the CSS file mtime, so CSS-only builds are not served from the stale `index.css?ver=…` cache. Verified the new stylesheet URL includes the mtime suffix.
+- Verification: Free ESLint, Stylelint, token lint, 15/15 JS tests, build, PHPStan 37/37, and 213 PHPUnit tests.
 
 ## MCP coverage
 

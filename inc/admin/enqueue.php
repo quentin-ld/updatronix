@@ -266,6 +266,12 @@ function updatronix_admin_enqueue_scripts( string $admin_page ): void {
 
 	updatronix_enqueue_script_translations_split_bundle( 'updatronix-scripts', 'updatronix', updatronix_PLUGIN_DIR . 'languages' );
 
+	$style_file    = updatronix_PLUGIN_DIR . 'assets/build/index.css';
+	$style_mtime   = is_readable( $style_file ) ? filemtime( $style_file ) : false;
+	$style_version = false !== $style_mtime
+		? $asset['version'] . '-' . $style_mtime
+		: (string) $asset['version'];
+
 	wp_enqueue_style(
 		'updatronix-style',
 		plugins_url( 'assets/build/index.css', updatronix_PLUGIN_FILE ),
@@ -278,7 +284,7 @@ function updatronix_admin_enqueue_scripts( string $admin_page ): void {
 				}
 			)
 		),
-		$asset['version']
+		$style_version
 	);
 
 	/**
