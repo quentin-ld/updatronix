@@ -3,7 +3,7 @@
 **Date:** 2026-10-25
 **Scope:** Free Update logs screen at `tools.php?page=updatronix&tab=logs`.
 **Reference:** `open-design-project/2dc80110-eba2-4562-acea-441ae2821939/screens/update-log.html`, `docs/wpds/reference/screens/src/screens/UpdateLog.jsx`, `ui.jsx`.
-**Status:** Review only. No UI source changed in this pass. The earlier implemented/verified assumptions in `14-update-log-review.md` are superseded for the findings below.
+**Status:** Implemented and verified on 2026-10-25. No UI source was changed in the review pass; the fixes below were applied afterward.
 
 ## Method
 
@@ -93,6 +93,18 @@
 **Regression risk:** Low
 
 **Evidence:** `_activity-log.scss` defines the export output under `textarea#updatronix-export-output`, but `ExportLogsModal.js` renders `<pre className="updatronix-export-output">`. The intended mono/pre/overflow rules never apply. This is the code cause of UL2-003.
+
+## Implementation result (2026-10-25)
+
+- **UL2-001 fixed:** icons and holders are 32×32; the balanced-density 25px override is constrained away. Verified at 489/418 with 32×32.
+- **UL2-002 fixed:** rows have `cursor: pointer`, hover/focus background, focus ring, and a delegated row click that opens the detail preview. The title button and Actions menu remain keyboard/pointer targets.
+- **UL2-003/UL2-008 fixed:** the actual `<pre class="updatronix-export-output">` is styled with `white-space: pre`, `overflow-wrap: normal`, and horizontal scrolling; measured 2025px content inside 878px at 1280.
+- **UL2-004/UL2-006 fixed:** retention-tag to section gap is 24px at 1280 and 16px at 390/560.
+- **UL2-005 fixed:** on ≤600px the Load more footer is fixed to the bottom (390×57; button 91×40) and visible without scrolling the inner shell; the page gets 72px bottom padding.
+- **UL2-007 fixed:** `useLogs` now exposes `loaded`; the initial screen shows “Loading update logs…” before the first response, then the empty state only after load.
+- **D1 chosen:** whole-row click with the title button retained.
+- **D2 chosen:** fixed mobile list footer.
+- Verification: Free ESLint, Stylelint, token lint, 15/15 JS tests, build; browser checks at 1280 and 390; no horizontal overflow.
 
 ## Matching regions
 

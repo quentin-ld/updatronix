@@ -43,6 +43,7 @@ export function useLogs() {
 	const [ logs, setLogs ] = useState( [] );
 	const [ total, setTotal ] = useState( 0 );
 	const [ loading, setLoading ] = useState( false );
+	const [ loaded, setLoaded ] = useState( false );
 	const [ error, setError ] = useState( null );
 	const detailsCacheRef = useRef( {} );
 
@@ -73,6 +74,7 @@ export function useLogs() {
 			);
 		} finally {
 			setLoading( false );
+			setLoaded( true );
 		}
 	}, [] );
 
@@ -134,6 +136,7 @@ export function useLogs() {
 		logs,
 		total,
 		loading,
+		loaded,
 		error,
 		fetchLogs,
 		fetchLogDetails,

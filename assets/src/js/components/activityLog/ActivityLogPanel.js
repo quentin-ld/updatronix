@@ -169,6 +169,7 @@ export function ActivityLogPanel( {
 		logs,
 		total,
 		loading,
+		loaded,
 		error,
 		fetchLogs,
 		fetchLogDetails,
@@ -199,6 +200,51 @@ export function ActivityLogPanel( {
 	const [ exportOpen, setExportOpen ] = useState( false );
 	const exportTriggerRef = useRef( null );
 	const previewRef = useRef( null );
+	const logsRef = useRef( null );
+
+	useEffect( () => {
+		const container = logsRef.current;
+		if ( ! container ) {
+			return undefined;
+		}
+
+		const handleClick = ( event ) => {
+			if ( event.defaultPrevented ) {
+				return;
+			}
+
+			const row = event.target.closest(
+				'.dataviews-view-activity__item'
+			);
+			if ( ! row ) {
+				return;
+			}
+
+			if (
+				event.target.closest(
+					'button, a, input, select, textarea, [role="button"], [role="menu"], [role="menuitem"]'
+				)
+			) {
+				return;
+			}
+
+			const holder = row.querySelector( '[data-log-id]' );
+			const id = holder?.getAttribute( 'data-log-id' );
+			if ( ! id ) {
+				return;
+			}
+
+			const item = logs.find(
+				( log ) => String( log.id ) === String( id )
+			);
+			if ( item ) {
+				setDetail( item );
+			}
+		};
+
+		container.addEventListener( 'click', handleClick );
+		return () => container.removeEventListener( 'click', handleClick );
+	}, [ logs ] );
 
 	useEffect( () => {
 		if (
@@ -584,7 +630,7 @@ export function ActivityLogPanel( {
 	}
 
 	return (
-		<div className="updatronix-logs">
+		<div className="updatronix-logs" ref={ logsRef }>
 			<div
 				aria-live={ announcement.type }
 				className="screen-reader-text"
@@ -642,10 +688,14 @@ export function ActivityLogPanel( {
 						defaultLayouts={ { activity: {} } }
 						config={ { perPageSizes: PER_PAGE_SIZES } }
 						searchLabel={ __( 'Search update log', 'updatronix' ) }
-						empty={ __(
-							'No update logs yet. Entries appear after WordPress runs an update.',
-							'updatronix'
-						) }
+						empty={
+							loading || ! loaded
+								? __( 'Loading update logs…', 'updatronix' )
+								: __(
+										'No update logs yet. Entries appear after WordPress runs an update.',
+										'updatronix'
+									)
+						}
 					>
 						<>
 							<div className="updatronix-log-toolbar">
@@ -665,7 +715,13 @@ export function ActivityLogPanel( {
 						</>
 					</DataViews>
 					{ shownData.length > 0 && (
-						<div className="updatronix-log-load-more">
+						<div
+							className={ `updatronix-log-load-more${
+								shownData.length < total && view.perPage < 200
+									? ' has-more'
+									: ''
+							}` }
+						>
 							<Text
 								variant="body-sm"
 								className="updatronix-muted"
