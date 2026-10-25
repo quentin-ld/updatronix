@@ -414,14 +414,18 @@ body.updatronix-admin-page {
 	th,
 	td {
 		border-bottom: 1px solid var(--wpds-color-stroke-surface-neutral-weak);
-		padding: var(--wpds-dimension-gap-sm) var(--wpds-dimension-gap-md);
 		text-align: left;
 		vertical-align: top;
 	}
 
 	th {
+		padding: var(--wpds-dimension-padding-xs) var(--wpds-dimension-padding-sm);
 		color: var(--wpds-color-foreground-content-neutral-weak);
 		font-weight: 600;
+	}
+
+	td {
+		padding: var(--wpds-dimension-padding-sm);
 	}
 
 	tr:last-child td {
