@@ -102,6 +102,7 @@
 - **UL2-004/UL2-006 fixed:** retention-tag to section gap is 24px at 1280 and 16px at 390/560.
 - **UL2-005 fixed:** on ≤600px the Load more footer is fixed to the bottom (390×57; button 91×40) and visible without scrolling the inner shell; the page gets 72px bottom padding.
 - **Activity alignment fixed:** the DataViews activity wrapper now has `padding-inline: 0`; the toolbar, activity wrapper, and item all measure x=469/w=729 at 1280 and x=53/w=274 at 390. No horizontal overflow.
+- **Activity icon border fixed:** the balanced type column is 32px (was 24px), the holder is 32×32 with an 8px radius (was 4px), and the holder/icon now sit at x=469 inside the activity edge. The icon border is no longer clipped; alignment is preserved.
 - **UL2-007 fixed:** `useLogs` now exposes `loaded`; the initial screen shows “Loading update logs…” before the first response, then the empty state only after load.
 - **D1 chosen:** whole-row click with the title button retained.
 - **D2 chosen:** fixed mobile list footer.

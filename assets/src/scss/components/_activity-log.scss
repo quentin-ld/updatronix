@@ -51,6 +51,11 @@
 		padding-inline: 0;
 	}
 
+	.dataviews-view-activity__item.is-balanced .dataviews-view-activity__item-type {
+		min-width: 32px;
+		width: 32px;
+	}
+
 	.dataviews-view-activity__item {
 		border-radius: var(--wpds-border-radius-md);
 		cursor: pointer;
@@ -67,6 +72,7 @@
 	}
 
 	.dataviews-view-activity__item.is-balanced .dataviews-view-activity__item-type-icon {
+		border-radius: var(--wpds-border-radius-lg);
 		height: 32px;
 		min-height: 32px;
 		min-width: 32px;
