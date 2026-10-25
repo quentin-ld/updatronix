@@ -1075,8 +1075,10 @@ body.updatronix-admin-page {
 	}
 
 	.updatronix-error-actions {
+		flex-basis: 100%;
 		justify-content: flex-start;
 		margin-left: 0;
+		width: 100%;
 	}
 
 	.updatronix-health-dl {

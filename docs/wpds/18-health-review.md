@@ -106,5 +106,6 @@
 - Verified Health at 1280/560/390 with no horizontal overflow; check grid columns collapse to one column at mobile.
 - Free lint/CSS/token checks, 15 JS tests, build, PHPStan, and 213 PHPUnit tests pass.
 - Open issues remain review fixtures and Recently resolved is empty; these are data, not UI changes.
+- Mobile open issues: at ≤900px, issue actions now take a full-width row below the icon/body (reference behavior). At 390 the body is 222px wide, actions 274px, row height 217px, with no horizontal overflow; this replaces the previous 41px-wide body/433px row.
 
 Remaining gaps: no dedicated visual/snackbar/dialog tests; full screen-reader and cross-browser passes remain separate work.
