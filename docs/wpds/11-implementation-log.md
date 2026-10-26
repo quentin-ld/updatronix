@@ -652,3 +652,575 @@ The export modal still uses the legacy `Modal` and core controls. It works and k
 ### Next
 
 1. `F6-05` / `P7-04`: release-candidate authorization.
+
+## 2026-10-26 · Screen audit baseline
+
+### What landed
+
+- Added `docs/wpds/33-screen-audit-protocol.md`: the shared protocol for one
+  screen per fresh tab, the eleven-screen inventory, the test inventory, the
+  claims matrix, the native-vs-custom table, and the feature development guide.
+- Corrected `tests/Integration/LogsRestApiTest.php` to expect the bare version
+  span `1.0 → 1.1`. The code and the update-log review specify bare versions;
+  the test still expected the removed `v` prefix.
+
+### Verification
+
+| Check | Result |
+|---|---|
+| Free `bin/harness test` | 213 tests, 415 assertions, pass. |
+| Free `bin/harness integration` | 65 tests, 172 assertions, 13 skipped, pass. |
+| Free `bin/harness test:js` | 15 tests, pass. |
+| Free `bin/harness build` | Pass. Entry 1.91 MiB; existing size warnings unchanged. |
+| Pro `bin/harness test` | 200 tests, 612 assertions, pass. |
+| Pro `bin/harness build` | Pass. Entry 74 KiB. |
+
+### Known gaps
+
+1. E2E remains blocked by the host's missing `libnspr4.so`.
+2. Pro has no JS, integration, or E2E suite yet; Phase 6 owns the cross-cutting
+   suite work.
+3. Mutation testing and a full screen-reader pass were not available in this
+   environment.
+4. The Free webpack runtime remains in the entry chunk; extracting it needs an
+   enqueue change and is not part of this baseline.
+
+### Next
+
+1. `1.2`: fix the license key format, placeholder, mask, and tests.
+2. `1.3` and `1.4`: implement the edition and license gates in Free and Pro.
+
+## 2026-10-26 · Phase 1.2 and 1.3
+
+### What landed
+
+- **1.2 — License format.** Replaced the 4×4 client pattern with
+  `UPD-PRO-XXXXXXXX-XXXXXXXX-XXXXXXXX`, stopped uppercasing the case-sensitive
+  payload, updated the placeholder, error copy, and mask, added server-side key
+  validation and real-format masking, and added 10 JS tests plus 4 PHP tests.
+- **1.3 — Free gating.** The rail now keeps only Updatronix 3000 on a Free-only
+  install, keeps only the activation screen when Pro is installed without an
+  active license, and hides Shield, Flow, and White Label until Pro, the
+  capability, and the license are all active. The Free-only Updatronix 3000
+  destination is a presentation with no license form and no self-link.
+- The localized boot payload now exposes `licenseActive` and `exportFormats`.
+  Free defaults to `txt`; the export dialog hides the format selector when only
+  one format is available, and the export REST route rejects JSON while only
+  plain text is enabled.
+
+### Verification
+
+| Check | Result |
+|---|---|
+| Pro `bin/harness test:js` | 10 tests, pass. |
+| Pro `bin/harness test` | 204 tests, 621 assertions, pass. |
+| Free `bin/harness test:js` | 16 tests, pass. |
+| Free `bin/harness test` | 213 tests, 415 assertions, pass. |
+| Free `bin/harness integration` | 66 tests, 173 assertions, 13 skipped, pass. |
+| Free `bin/harness lint:js` | Pass. |
+| Free and Pro `bin/harness build` | Pass; Free entry 1.91 MiB with the existing warnings, Pro entry 74 KiB. |
+| Focused WPCS | 0 errors; only a pre-existing unused `$request` warning in the Pro license REST class. |
+
+### Known gaps
+
+1. E2E remains blocked by the host's missing `libnspr4.so`.
+2. Pro still registers Safe Mode, White Label, and the Pro panels at bootstrap
+   regardless of the license; 1.4 closes that server-side gate.
+3. The Free-only Updatronix 3000 presentation is intentionally minimal; Phase 3
+   owns the license screen polish and Phase 5 owns the full marketing surface.
+4. No version bump.
+
+### Next
+
+1. `1.4`: gate Pro bootstrap, hooks, REST, panels, and assets on the license.
+2. `1.5`: write the roadmap matrix.
+
+## 2026-10-26 · Phase 1.4
+
+### What landed
+
+- Pro now exposes `updatronix_license_active` and `updatronix_export_formats`
+  to Free. The license screen, license REST, connector, enqueue, and updater
+  always load so activation stays possible.
+- Shield, Flow, the Flow runner, and White label register only when the license
+  is active. Their REST routes and brand filters therefore disappear with the
+  license, while their permission callbacks keep the existing defense in depth.
+- Pro's admin entry now imports each panel with a dynamic import. An inactive
+  license loads only the activation panel; the Shield, Flow, and White label
+  chunks are not requested.
+- Removed the legacy Pro DOM mount from Free's `ProDestination`; the React
+  registry is the only Pro panel contract.
+
+### Verification
+
+| Check | Result |
+|---|---|
+| Pro `bin/harness test` | 207 tests, 632 assertions, pass. `ProGatingTest` covers inactive and active bootstrap, plus export formats. |
+| Pro `bin/harness lint:js` | Pass. |
+| Pro `bin/harness build` | Pass. Entry 4.12 KiB plus four panel chunks; the inactive path loads only the activation chunk. |
+| Pro focused WPCS | 0 errors, 0 warnings. |
+| Free `bin/harness lint:js` | Pass after removing the legacy mount. |
+| Free `bin/harness build` | Pass; entry 1.91 MiB with the existing warnings. |
+
+### Known gaps
+
+1. E2E remains blocked by the host's missing `libnspr4.so`.
+2. A manual browser pass with an inactive license is still needed to confirm the
+   activation-only rail and the absence of Shield/Flow/White label chunks.
+3. The Free-only Updatronix 3000 presentation remains intentionally minimal.
+4. No version bump.
+
+### Next
+
+1. `1.5`: write the roadmap matrix.
+
+## 2026-10-26 · Phase 1.5
+
+### What landed
+
+- Added `docs/wpds/34-roadmap-matrix.md` with the frozen Free/Pro split, the
+  current code state, the dependency order, the briefs that still need writing,
+  the acceptance rules, and the out-of-scope items.
+- Linked the matrix from `docs/wpds/10-task-index.md` so every Phase 5 feature
+  starts from the same contract.
+- The matrix records the three settings that are currently UI-only
+  (`queue_enabled`, `flag_abandoned`, `re_enable`) and requires each to be wired
+  or hidden before release.
+
+### Verification
+
+- `docs/wpds/34-roadmap-matrix.md` exists and names every owner roadmap item
+  R-01 to R-10.
+- The Free/Pro split matches the owner correction: FTP/external logging and
+  direct changelog links are Free; the other feature items are Pro; prices are
+  out of code.
+- No source code changed in this step.
+
+### Next
+
+1. Phase 2.1: Settings screen audit, starting with the uninstall-data setting.
+2. Phase 2.2: Update logs screen audit.
+
+## 2026-10-26 · Phase 2.1 — Settings
+
+### What landed
+
+- Extracted the Settings draft comparison into
+  `assets/src/js/components/settingsDraft.js`; added `isSettingsDirty()` and
+  `canLeaveDraft()` plus 11 Vitest cases covering the uninstall opt-in, reverted
+  fields, notification order, and the discard decision.
+- Fixed the `popstate` dirty guard and restored the current tab URL when the
+  user cancels. The rail guard and the browser guard now share one decision.
+- Associated and announced the recipient error with `id`, `role="alert"`,
+  `aria-invalid`, and `aria-describedby`; removed the dead `onDiscard` SaveBar
+  prop.
+- Added the `PUT /updratronix/v1/settings` integration test for the opt-in,
+  the direct uninstall decision test, and the multisite helper-name fix.
+- Required `manage_options` to turn the irreversible uninstall opt-in on;
+  turning it off remains available.
+- Wrote `docs/wpds/35-settings-state-of-play.md`, updated the Settings contract
+  key list, and refreshed the protocol test inventory.
+
+### Verification
+
+| Check | Result |
+|---|---|
+| Free `bin/harness test:js` | 27 tests, pass. |
+| Free `bin/harness integration` | 69 tests, 180 assertions, 13 skipped, pass. |
+| Free `bin/harness test` | 213 tests, 415 assertions, pass. |
+| Free `bin/harness lint:js` | Pass. |
+| Free `bin/harness build` | Pass; entry 1.91 MiB with the existing warnings. |
+| Focused WPCS | 0 errors; 5 pre-existing unused-`$request` warnings. |
+| Review/security subagent passes | Completed; SET-06 to SET-10 fixed. |
+
+### Known gaps
+
+1. E2E remains blocked by `libnspr4.so`.
+2. The keyboard/screen-reader/browser pass for Settings is still manual.
+3. A component-level 500/network save test is still missing.
+4. Retention clamps per keystroke; the contract's validation-error state is a
+   recorded follow-up.
+5. No version bump.
+
+### Next
+
+1. Phase 2.2: Update logs screen audit.
+
+## 2026-10-26 · Phase 2.2 — Update logs
+
+### What landed
+
+- Extracted `parseDeepLinkLogId()` and added 6 JS cases for the Pro
+  blocked-history `?log=<id>` link; `SettingsPage` now uses it.
+- Extracted `filterExportFormats()` and added 6 JS cases. The export dialog
+  keeps known formats, removes duplicates, and falls back to `txt`; Free cannot
+  expose CSV or JSON.
+- Wrote `docs/wpds/36-update-logs-state-of-play.md` with the claims matrix,
+  mechanics, findings, test inventory, and feature guide.
+- Verified the deep-link and format-gating claims; no P0/P1 defect was found in
+  the filters, row actions, details dialog, or delete dialog.
+- Recorded UL-04 (redaction fail-open on `preg_replace()` null) as an open
+  security follow-up from the security pass.
+
+### Verification
+
+| Check | Result |
+|---|---|
+| Free `bin/harness test:js` | 39 tests, pass. |
+| Free `bin/harness integration` | 69 tests, 180 assertions, 13 skipped, pass. |
+| Free `bin/harness lint:js` | Pass. |
+| Free `bin/harness build` | Pass; entry 1.91 MiB with the existing warnings. |
+| PHP suites | Unchanged from 2.1: 213 unit tests pass; integration rerun above. |
+
+### Known gaps
+
+1. E2E remains blocked by `libnspr4.so`.
+2. No live large-table export run in this pass.
+3. No manual screen-reader pass on the details or export dialogs.
+4. UL-04 redaction fail-open remains open.
+5. No version bump.
+
+### Next
+
+1. Phase 2.3: Auto updates screen audit.
+
+## 2026-10-26 · Phase 2.3 — Auto updates
+
+### What landed
+
+- Extracted `buildAutoUpdateDraft()` and `collectAutoUpdateMutations()` into
+  `autoUpdatesDraft.js`; added 6 Vitest cases for defaults, changed-only rows,
+  and the core → translations → themes → plugins order.
+- `saveAll` now applies that ordered plan and, on a later mutation failure,
+  refetches the server state before reporting. The notice says some changes may
+  have been applied and the page now shows the server state.
+- The panel shows a visible warning with Retry when a refresh fails while data
+  is still on screen, instead of silently keeping stale values.
+- Removed the dead `onDiscard` SaveBar prop.
+- Wrote `docs/wpds/37-auto-updates-state-of-play.md` with the claims matrix,
+  mechanics, findings, test inventory, and feature guide.
+
+### Verification
+
+| Check | Result |
+|---|---|
+| Free `bin/harness test:js` | 45 tests, pass. |
+| Free `bin/harness integration` | 69 tests, 180 assertions, 13 skipped, pass. |
+| Free `bin/harness lint:js` | Pass. |
+| Free `bin/harness build` | Pass; entry 1.91 MiB with the existing warnings. |
+| PHP suites | 213 unit tests from 2.1; integration rerun above. |
+
+### Known gaps
+
+1. E2E remains blocked by `libnspr4.so`.
+2. No component-level test simulates a 500 on the third mutation.
+3. No manual screen-reader pass on the constant notices or refresh warning.
+4. No live update run.
+5. No version bump.
+
+### Next
+
+1. Phase 2.4: Schedule screen audit.
+
+## 2026-10-26 · Phase 2.4 — Schedule
+
+### What landed
+
+- Extracted `scheduleDraft.js` with `getSchedule`, `getHoldDays`,
+  `isScheduleDirty`, and `validateHoldDays`; added 11 Vitest cases for fallback,
+  hold bounds, dirty/revert, and the validation copy.
+- Added the explicit site-timezone label under Preferred time.
+- Added the WP-Cron-disabled warning in Next run.
+- Replaced silent hold clamping with a validation error; the last valid draft
+  stays in place.
+- Removed the dead `onDiscard` SaveBar prop.
+- Wrote `docs/wpds/38-schedule-state-of-play.md` with the claims matrix,
+  mechanics, findings, test inventory, and feature guide.
+
+### Verification
+
+| Check | Result |
+|---|---|
+| Free `bin/harness test:js` | 56 tests, pass. |
+| Free `bin/harness integration` | 69 tests, 180 assertions, 13 skipped, pass. |
+| Free `bin/harness test` | 213 tests, 415 assertions, pass. |
+| Free `bin/harness lint:js` | Pass. |
+| Free `bin/harness build` | Pass; entry 1.91 MiB with the existing warnings. |
+
+### Known gaps
+
+1. E2E remains blocked by `libnspr4.so`.
+2. No manual screen-reader pass on the timezone label, hold error, or WP-Cron
+   notice.
+3. No live cron run.
+4. No component-level save-500 test.
+5. No version bump.
+
+### Next
+
+1. Phase 2.5: Health screen audit.
+
+## 2026-10-26 · Phase 2.5 — Health
+
+### What landed
+
+- Added `canLoadDiagnostics()` and a Retry action to the diagnostics error state;
+  a failed request no longer caches an unretryable error.
+- Added an error notice when “Run check” fails.
+- Added `HealthRestApiTest` for the snapshot shape, diagnostics payload, missing
+  retry 404, and capability 403.
+- Wrote `docs/wpds/39-health-state-of-play.md` with the claims matrix, mechanics,
+  findings, test inventory, and feature guide.
+
+### Verification
+
+| Check | Result |
+|---|---|
+| Free `bin/harness test:js` | 60 tests, pass. |
+| Free `bin/harness integration` | 73 tests, 197 assertions, 13 skipped, pass. |
+| Free `bin/harness test` | 213 tests, 415 assertions, pass. |
+| Free `bin/harness lint:js` | Pass. |
+| Free `bin/harness build` | Pass; entry 1.91 MiB with the existing warnings. |
+
+### Known gaps
+
+1. E2E remains blocked by `libnspr4.so`.
+2. No manual screen-reader pass on the diagnostics, retry, or check grid.
+3. No live retry.
+4. Local open issues are review fixtures.
+5. No version bump.
+
+### Next
+
+1. Phase 2.6: Documentation screen audit.
+
+## 2026-10-26 · Phase 2.6 — Documentation
+
+### What landed
+
+- Moved the three guide URLs into `pages/staticLinks.js` and added 3 JS cases
+  asserting HTTPS, the documentation host, uniqueness, and the guide names.
+- Added the WPDS `Pro` badge to the Updatronix 3000 guide card, matching
+  `FEAT-F-DOCS`.
+- Wrote `docs/wpds/40-documentation-state-of-play.md` with the claims matrix,
+  mechanics, findings, test inventory, and feature guide.
+
+### Verification
+
+| Check | Result |
+|---|---|
+| Free `bin/harness test:js` | 63 tests, pass. |
+| Free `bin/harness lint:js` | Pass. |
+| Free `bin/harness build` | Pass; entry 1.91 MiB with the existing warnings. |
+
+### Known gaps
+
+1. E2E remains blocked by `libnspr4.so`.
+2. No manual screen-reader pass on the cards or closing note.
+3. Link reachability was not network-tested.
+4. No visual regression test.
+5. No version bump.
+
+### Next
+
+1. Phase 2.7: Support screen audit.
+
+## 2026-10-26 · Phase 2.7 — Support
+
+### What landed
+
+- Moved the WordPress.org forum URL into `pages/staticLinks.js`; the shared
+  static-link test now covers HTTPS, host, path, and the three documentation
+  guides.
+- Verified the review-20 fixes remain in place: visible CTA, brand icon, 900px
+  stack breakpoint, and the smaller mobile step number.
+- Wrote `docs/wpds/41-support-state-of-play.md` with the claims matrix,
+  mechanics, findings, test inventory, and feature guide.
+
+### Verification
+
+| Check | Result |
+|---|---|
+| Free `bin/harness test:js` | 63 tests, pass. |
+| Free `bin/harness lint:js` | Pass. |
+| Free `bin/harness build` | Pass; entry 1.91 MiB with the existing warnings. |
+
+### Known gaps
+
+1. E2E remains blocked by `libnspr4.so`.
+2. No manual screen-reader pass on the steps, CTA, or privacy note.
+3. Link reachability was not network-tested.
+4. No visual regression test.
+5. No version bump.
+
+### Next
+
+1. Phase 2 close: sweep the 2026-10-24 QA findings.
+
+## 2026-10-26 · Phase 2 close — QA sweep
+
+### What landed
+
+- Added `docs/wpds/42-qa-2026-10-24-sweep.md`: every Free finding from the
+  2026-10-24 QA note is marked Fixed, Partial, Open, or Accepted with the
+  evidence and the next owner.
+- The Pro findings are carried forward to Phase 3/5, the update-engine findings
+  to Phase 4, and the environment/manual gaps to Phase 6.
+- All seven Free screens now have a state-of-play dossier and a claims matrix.
+
+### Verification
+
+| Check | Result |
+|---|---|
+| Free `bin/harness test:js` | 63 tests, pass. |
+| Free `bin/harness integration` | 73 tests, 197 assertions, 13 skipped, pass. |
+| Free `bin/harness test` | 213 tests, 415 assertions, pass. |
+| Free `bin/harness lint:js` | Pass. |
+| Free `bin/harness build` | Pass; entry 1.91 MiB with the existing warnings. |
+| E2E | Blocked by `libnspr4.so`. |
+
+### Open after Phase 2
+
+1. Pro screen guards, dirty flags, feedback, and SaveBar verification (Phase 3/5).
+2. Flow runner failure/live coverage and the shared queue kernel (Phase 4).
+3. Component-level interaction tests, screen-reader pass, 901–960/390 pass,
+   slow-network/concurrent-save tests, E2E host dependency (Phase 6).
+
+### Next
+
+1. Phase 3.1: Updatronix 3000 / license screen audit in a fresh tab.
+2. Phase 3.2: White label screen audit.
+
+## 2026-10-26 · Phase 3.1 — Updatronix 3000 / licence
+
+### What landed
+
+- Audited the Pro licence screen against contract §4, `FEAT-P-LICENSE`, the
+  roadmap matrix, the prior review, and the QA/reviewer/security checklists.
+- Corrected the claims: Queue list and Development tools are roadmap; Advanced
+  exports is CSV/JSON; XML is roadmap; Shield no longer claims the queue or
+  version-controlled locking. The Free-only presentation says the same.
+- Added the reload boundary after activation, deactivation, and clear. Pro's
+  PHP hooks, REST routes, and panel chunks are registered at boot; a one-shot
+  session-storage notice preserves the success message across the reload.
+- Server activation errors are inline, with `aria-invalid`,
+  `aria-errormessage`, and focus on the field after render. A 429 names the
+  remaining seconds and returns `retry_after`.
+- Added distinct status-service and invalid-licence states. A decryption error
+  is now detected even when the stored status is `invalid`, so the clear path
+  cannot trap the user.
+- Redacted the submitted key from upstream error messages. Status never
+  contains the full key.
+- Wrote `43-updatronix-3000-state-of-play.md`; updated contract §4, the feature
+  brief, the roadmap row for R-08, the audit protocol inventory/baseline, this
+  log, and both changelogs.
+
+### Verification
+
+| Check | Result |
+|---|---|
+| Pro `bin/harness test` | 220 tests, 690 assertions, pass |
+| Pro `bin/harness test:js` | 18 tests, pass |
+| Pro `bin/harness lint:js` | Pass, 0 warnings |
+| Pro `bin/harness build` | Pass |
+| Pro `bin/harness lint:files` on modified PHP | Pass |
+| Pro `bin/harness lint` | No errors; pre-existing warnings in unrelated tests |
+| Pro PHPStan | No errors |
+| Free `bin/harness test:js` | 63 tests, pass |
+| Free `bin/harness lint:js` | Pass |
+| Free `bin/harness build` | Pass; existing runtime-chunk warnings |
+| Manual runtime | Active/inactive/loading, activation and deactivation reload, clear reload, 400/429 inline, status error, invalid, decryption+invalid, dev mode, Free-only copy |
+| E2E | Free suite 2/2 pass after installing Playwright Chromium and its system libraries in the DDEV container; Pro has no E2E suite. |
+
+### Known gaps
+
+1. Pro still has no integration suite; route registration and validation are
+   unit-tested through the recording shim.
+2. No live Multisite pass; the Super-Admin-only decision is unit-tested.
+3. The Free export dialog's XML branch still renders CSV; it is deferred to the
+   Free update-log audit/Phase 6.
+4. No screen-reader or RTL pass.
+5. Pro still has no E2E configuration; the Free suite passes 2/2.
+6. No version bump and no commit.
+
+### Next
+
+1. Phase 3.2: White label screen audit.
+2. Phase 6: Pro integration/E2E, the Free XML export fix, and the
+   accessibility pass.
+
+## 2026-10-26 · Phase 3.2 — White label
+
+### What landed
+
+- Audited the Pro White label screen against contract §7,
+  `FEAT-P-WHITE-LABEL`, the prior reviews 24 and 31, the roadmap matrix, and
+  the QA/reviewer/security checklists.
+- Made white label opt-in: both replacement switches now default to false in
+  PHP and JS. Reset restores the same defaults.
+- Hardened the PHP class: `sanitize_text_field` with 60/40 character caps,
+  `sanitize_hex_color`, `rest_sanitize_boolean`, known-key normalization on
+  read and write, and a fail-closed license check. A changed invalid logo now
+  returns 400 `updatronix_invalid_logo` without writing the option.
+- Restricted the logo to PNG, JPEG, or WebP attachments that exist, are images
+  (not SVG), are readable by the current user, respect `upload_files`, are at
+  most 1 MB, and are at least 64×64 px. The client checks the same type/size/
+  dimension rules before uploading and clears the input afterwards.
+- Applied the colors to the real shell: the brand color seeds the WPDS
+  `ThemeProvider` (buttons, links, focus, active states), the menu color drives
+  the rail/shell CSS variables, the active rail item uses the brand color, and
+  a light-menu body class switches the rail to a readable dark-on-light palette.
+- Replaced the preview mocks with the real rail destinations and the real
+  plain-text Safe mode email (subject and body, name-only branding). The copy
+  now says what the code does; the old “hides names/links/marks”, “name and color
+  in emails”, and “SVG or PNG” claims are gone.
+- Fixed the state machine: license loading, license-status error, inactive
+  license, settings load error, settings loading, ready. A failed initial GET
+  now shows the error card with Retry instead of a permanent spinner; a license
+  status failure has its own card; save failures are inline and in a snackbar.
+- Named both color palettes for assistive technology and described both
+  previews as images. The admin preview uses the real visible destinations.
+- Renamed the shared `licenseReload` helper to `adminReload`; White label now
+  reloads after save with a one-shot notice, so the rail and admin menu update
+  immediately.
+- Wrote `44-white-label-state-of-play.md` and updated contract §7, the feature
+  brief, the audit protocol inventory/baseline, the roadmap row, this log, the
+  prior review pointer, and both changelogs.
+
+### Verification
+
+| Check | Result |
+|---|---|
+| Pro `bin/harness test` | 243 tests, 778 assertions, pass |
+| Pro `bin/harness test:js` | 3 files, 41 tests, pass |
+| Pro `bin/harness lint:js` | Pass, 0 warnings |
+| Pro `bin/harness build` | Pass |
+| Pro `bin/harness lint:files` on modified PHP | Pass |
+| Pro `bin/harness lint` | WPCS has only pre-existing warnings in unrelated files; PHPStan no errors |
+| Free `bin/harness test` | 213 tests, 415 assertions, pass |
+| Free `bin/harness test:js` | 63 tests, pass |
+| Free `bin/harness lint:js` | Pass, 0 warnings |
+| Free `bin/harness build` | Pass; existing runtime/size warnings |
+| Free `bin/harness lint:files` on modified PHP | Pass |
+| Free `bin/harness integration` | 73 tests, 197 assertions, 13 skipped, pass |
+| Manual runtime | Colors (Navy/Teal), light menu, save/reload notice, logo SVG/small/large rejection, valid PNG upload, server 400, load-error, status-error, reset defaults |
+| E2E | Not re-run in this task; Free baseline 2/2 from Phase 3.1. Pro has no E2E configuration |
+
+### Known gaps
+
+1. Pro still has no integration suite; the route and callbacks are unit-tested
+   through the WordPress shim.
+2. No live Multisite pass; the Super-Admin gate and the network note are
+   unit-tested.
+3. No screen-reader or RTL pass. The color controls and preview descriptions
+   are improved, but the full traversal remains Phase 6.
+4. The email application is name-only for the Safe mode notification. Branded
+   HTML email and core update-email retemplating are not in this release.
+5. Pro still has no E2E configuration; the Free suite passes 2/2.
+6. No version bump and no commit.
+
+### Next
+
+1. Phase 3.3: Update Shield and Update Flow screen audits.
+2. Phase 6: Pro integration/E2E, a live Multisite pass, the Free XML export
+   fix, and the accessibility pass.

@@ -33,6 +33,12 @@ function updatronix_admin_body_class( string $classes ): string {
 
 	if ( null !== $screen && false !== strpos( $screen->id, 'updatronix' ) ) {
 		$classes .= ' updatronix-admin-page';
+
+		$brand = updatronix_get_admin_brand();
+
+		if ( ! empty( $brand['replace'] ) && '#F0F0F1' === strtoupper( (string) ( $brand['menuColor'] ?? '' ) ) ) {
+			$classes .= ' updatronix-brand-menu-light';
+		}
 	}
 
 	return $classes;

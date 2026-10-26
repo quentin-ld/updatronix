@@ -53,11 +53,11 @@ final class Updatronix_Export_Request_Schema {
 			return new WP_Error( 'view_invalid', '', array( 'status' => 400 ) );
 		}
 
-		$merge = isset( $params['merge'] ) ? self::sanitize_request_boolean( $params['merge'] ) : true;
+		$merge  = isset( $params['merge'] ) ? self::sanitize_request_boolean( $params['merge'] ) : true;
 		$format = isset( $params['format'] ) && is_string( $params['format'] )
 			? sanitize_key( $params['format'] )
 			: 'txt';
-		if ( ! in_array( $format, array( 'txt', 'json' ), true ) ) {
+		if ( ! in_array( $format, updatronix_get_server_export_formats(), true ) ) {
 			return new WP_Error( 'view_invalid', '', array( 'status' => 400 ) );
 		}
 		// `columns` is optional: a missing or non-array value falls back to the

@@ -3,6 +3,7 @@ import { useDispatch } from '@wordpress/data';
 import { store as noticesStore } from '@wordpress/notices';
 import apiFetch from '@wordpress/api-fetch';
 import { __ } from '@wordpress/i18n';
+import { collectAutoUpdateMutations } from '../components/autoUpdates/autoUpdatesDraft';
 
 const API_BASE = 'updatronix/v1/auto-updates';
 
@@ -198,51 +199,21 @@ export function useAutoUpdates( onDismissedConstantsChange ) {
 		async ( draft, saved ) => {
 			setBusy( true );
 			let latest = null;
+			const mutations = collectAutoUpdateMutations( draft, saved );
 
 			try {
-				if ( draft.coreMode !== saved.coreMode ) {
+				for ( const mutation of mutations ) {
 					latest = await apiFetch( {
-						path: `${ API_BASE }/core`,
+						path: `${ API_BASE }${ mutation.path }`,
 						method: 'POST',
-						data: { mode: draft.coreMode },
+						data: mutation.data,
 					} );
-				}
-
-				if ( draft.translations !== saved.translations ) {
-					latest = await apiFetch( {
-						path: `${ API_BASE }/translation`,
-						method: 'POST',
-						data: { enable: !! draft.translations },
-					} );
-				}
-
-				for ( const [ stylesheet, enabled ] of Object.entries(
-					draft.themes || {}
-				) ) {
-					if ( enabled !== saved.themes?.[ stylesheet ] ) {
-						latest = await apiFetch( {
-							path: `${ API_BASE }/theme`,
-							method: 'POST',
-							data: { stylesheet, enable: !! enabled },
-						} );
-					}
-				}
-
-				for ( const [ file, enabled ] of Object.entries(
-					draft.plugins || {}
-				) ) {
-					if ( enabled !== saved.plugins?.[ file ] ) {
-						latest = await apiFetch( {
-							path: `${ API_BASE }/plugin`,
-							method: 'POST',
-							data: { plugin: file, enable: !! enabled },
-						} );
-					}
 				}
 
 				if ( latest ) {
 					setData( latest );
 				}
+				setFetchError( null );
 
 				createSuccessNotice(
 					__( 'Auto-update settings saved.', 'updatronix' ),
@@ -251,14 +222,35 @@ export function useAutoUpdates( onDismissedConstantsChange ) {
 
 				return true;
 			} catch ( e ) {
-				createErrorNotice(
+				const original =
 					e?.message ||
+					__(
+						'The auto-update settings could not be saved. Try again.',
+						'updatronix'
+					);
+
+				/*
+				 * A later mutation may have succeeded before this one failed.
+				 * Reconcile with the server before reporting so the screen
+				 * shows the real state instead of a partial draft.
+				 */
+				try {
+					const response = await apiFetch( { path: API_BASE } );
+					setData( response );
+					setFetchError( null );
+					createErrorNotice(
 						__(
-							'The auto-update settings could not be saved. Try again.',
+							'Some auto-update changes may have been applied. The page now shows the server state. Review the changes and try again.',
 							'updatronix'
 						),
-					{ id: 'updatronix-autoupdate-toggle' }
-				);
+						{ id: 'updatronix-autoupdate-toggle' }
+					);
+				} catch {
+					setFetchError( original );
+					createErrorNotice( original, {
+						id: 'updatronix-autoupdate-toggle',
+					} );
+				}
 
 				return false;
 			} finally {

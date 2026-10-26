@@ -9,8 +9,9 @@ import { __ } from '@wordpress/i18n';
 import PageHeader from '../shell/PageHeader';
 import { getTabUrl } from '../shell/routes';
 import wpds from '../shell/wpds';
+import { DOCUMENTATION_URLS } from './staticLinks';
 
-const { Card, Icon, Text } = wpds.ui;
+const { Badge, Card, Icon, Text } = wpds.ui;
 const { arrowRight, code, external, page, starFilled } = wpds.icons;
 
 const GUIDES = [
@@ -21,7 +22,7 @@ const GUIDES = [
 			'Install Updatronix, understand each update setting, and read the update log.',
 			'updatronix'
 		),
-		href: 'https://holdmywp.com/en/documents/updatronix-documentation/',
+		href: DOCUMENTATION_URLS.plugin,
 		icon: page,
 	},
 	{
@@ -31,7 +32,7 @@ const GUIDES = [
 			'License activation, Update Shield, safe mode, and the Pro maintenance workflow.',
 			'updatronix'
 		),
-		href: 'https://holdmywp.com/en/documents/updatronix-3000-documentation/',
+		href: DOCUMENTATION_URLS.pro,
 		icon: starFilled,
 		pro: true,
 	},
@@ -42,7 +43,7 @@ const GUIDES = [
 			'Hooks, filters, and APIs behind the WordPress update system.',
 			'updatronix'
 		),
-		href: 'https://holdmywp.com/en/documents/wordpress-update-system-developer-reference/',
+		href: DOCUMENTATION_URLS.developer,
 		icon: code,
 	},
 ];
@@ -95,6 +96,11 @@ export default function DocumentationPage( { destination, onNavigate } ) {
 											size={ 18 }
 											aria-hidden="true"
 										/>
+										{ guide.pro && (
+											<Badge intent="stable">
+												{ __( 'Pro', 'updatronix' ) }
+											</Badge>
+										) }
 									</div>
 
 									<div className="updatronix-doc-copy">

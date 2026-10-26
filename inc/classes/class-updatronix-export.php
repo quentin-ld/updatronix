@@ -174,7 +174,7 @@ final class Updatronix_Export {
 					),
 					'format'  => array(
 						'type'    => 'string',
-						'enum'    => array( 'txt', 'json' ),
+						'enum'    => updatronix_get_server_export_formats(),
 						'default' => 'txt',
 					),
 					'cursor'  => array(

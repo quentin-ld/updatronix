@@ -16,21 +16,16 @@ import PageHeader from '../../shell/PageHeader';
 import Section from '../../shell/Section';
 import wpds from '../../shell/wpds';
 import { ConstantNotices } from '../autoUpdates/ConstantNotices';
+import {
+	HOLD_VALIDATION_MESSAGE,
+	MAX_HOLD_DAYS,
+	getHoldDays,
+	getSchedule,
+	isScheduleDirty,
+	validateHoldDays,
+} from './scheduleDraft';
 
 const { Button, InputControl, Notice, SelectControl, Stack, Text } = wpds.ui;
-
-const SCHED_FALLBACK = {
-	update_check: {
-		recurrence: '',
-		time: '03:00',
-	},
-	delay_updates: {
-		enabled: false,
-		delay_value: 0,
-	},
-};
-
-const MAX_HOLD_DAYS = 30;
 
 const FREQUENCIES = [
 	{ value: 'daily', label: __( 'Daily', 'updatronix' ) },
@@ -41,28 +36,6 @@ const FREQUENCIES = [
 ];
 
 const PREFERRED_TIMES = [ '03:00', '06:00', '12:00', '21:00' ];
-
-/**
- * Read the schedule subtree with a safe fallback.
- *
- * @param {Object} settings Settings object.
- * @return {Object} Schedule subtree.
- */
-function getSchedule( settings ) {
-	return settings?.schedule ?? SCHED_FALLBACK;
-}
-
-/**
- * Read the hold in days from the schedule subtree.
- *
- * @param {Object} schedule Schedule subtree.
- * @return {number} Hold days, 0 when disabled.
- */
-function getHoldDays( schedule ) {
-	return schedule.delay_updates.enabled
-		? Math.max( 0, Number( schedule.delay_updates.delay_value ) || 0 )
-		: 0;
-}
 
 /**
  * Render the Schedule destination.
@@ -92,6 +65,7 @@ export const SchedulePanel = memo( function SchedulePanelComponent( {
 	);
 	const { createInfoNotice, createErrorNotice } = useDispatch( noticesStore );
 	const [ draft, setDraft ] = useState( () => getSchedule( settings ) );
+	const [ holdError, setHoldError ] = useState( '' );
 	const savedRef = useRef( savedSchedule );
 
 	useEffect( () => {
@@ -99,8 +73,7 @@ export const SchedulePanel = memo( function SchedulePanelComponent( {
 		setDraft( savedSchedule );
 	}, [ savedSchedule ] );
 
-	const isDirty =
-		JSON.stringify( draft ) !== JSON.stringify( savedRef.current );
+	const isDirty = isScheduleDirty( draft, savedRef.current );
 	const hold = getHoldDays( draft );
 
 	const timeItems = useMemo( () => {
@@ -147,16 +120,19 @@ export const SchedulePanel = memo( function SchedulePanelComponent( {
 	};
 
 	const handleHoldChange = ( event ) => {
-		const parsed = Number( event.target.value );
-		const nextHold = Number.isFinite( parsed )
-			? Math.max( 0, Math.min( MAX_HOLD_DAYS, Math.trunc( parsed ) ) )
-			: 0;
+		const parsed = validateHoldDays( event.target.value );
 
+		if ( null === parsed ) {
+			setHoldError( HOLD_VALIDATION_MESSAGE );
+			return;
+		}
+
+		setHoldError( '' );
 		updateSchedule( ( previous ) => ( {
 			...previous,
 			delay_updates: {
-				enabled: nextHold > 0,
-				delay_value: nextHold,
+				enabled: parsed > 0,
+				delay_value: parsed,
 			},
 		} ) );
 	};
@@ -188,10 +164,6 @@ export const SchedulePanel = memo( function SchedulePanelComponent( {
 
 	const handleSave = async () => {
 		await saveSettings( { ...settings, schedule: draft } );
-	};
-
-	const handleDiscard = () => {
-		setDraft( savedRef.current );
 	};
 
 	const nextCheckLabel = scheduleMeta.update_check_next_human
@@ -282,6 +254,17 @@ export const SchedulePanel = memo( function SchedulePanelComponent( {
 									setTime( item.value )
 								}
 							/>
+							<Text
+								variant="body-sm"
+								className="updatronix-muted"
+							>
+								{ sprintf(
+									/* translators: %s: site timezone. */
+									__( 'Times use %s.', 'updatronix' ),
+									scheduleMeta.timezone_string ||
+										__( 'the site timezone', 'updatronix' )
+								) }
+							</Text>
 
 							<InputControl
 								label={ __(
@@ -298,6 +281,15 @@ export const SchedulePanel = memo( function SchedulePanelComponent( {
 								value={ String( hold ) }
 								onChange={ handleHoldChange }
 							/>
+							{ holdError && (
+								<Text
+									variant="body-sm"
+									className="updatronix-form-error"
+									role="alert"
+								>
+									{ holdError }
+								</Text>
+							) }
 						</Stack>
 					</Section>
 
@@ -309,6 +301,22 @@ export const SchedulePanel = memo( function SchedulePanelComponent( {
 						) }
 					>
 						<Stack direction="column" gap="md">
+							{ scheduleMeta.wp_cron_disabled && (
+								<Notice.Root intent="warning">
+									<Notice.Title>
+										{ __(
+											'WP-Cron is disabled',
+											'updatronix'
+										) }
+									</Notice.Title>
+									<Notice.Description>
+										{ __(
+											'WordPress will not run the scheduled check until WP-Cron is enabled or a real cron job calls it.',
+											'updatronix'
+										) }
+									</Notice.Description>
+								</Notice.Root>
+							) }
 							<Text variant="heading-lg">{ nextRunCopy }</Text>
 							<Text
 								variant="body-md"
@@ -421,7 +429,6 @@ export const SchedulePanel = memo( function SchedulePanelComponent( {
 				isDirty={ isDirty }
 				isSaving={ saving }
 				onSave={ handleSave }
-				onDiscard={ handleDiscard }
 				title={ __( 'Schedule', 'updatronix' ) }
 			/>
 		</div>

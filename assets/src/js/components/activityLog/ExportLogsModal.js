@@ -18,6 +18,7 @@ import {
 	saveExportPreferences,
 	columnsToApiPayload,
 } from './exportPreferences';
+import { filterExportFormats } from './exportFormats';
 
 const {
 	Button,
@@ -64,12 +65,16 @@ const COLUMN_OPTIONS = [
 	},
 ];
 
-/** @type {ReadonlyArray<{ value: string, label: string }>} */
-const FORMAT_ITEMS = [
-	{ value: 'csv', label: __( 'CSV', 'updatronix' ) },
-	{ value: 'json', label: __( 'JSON', 'updatronix' ) },
-	{ value: 'txt', label: __( 'Plain text', 'updatronix' ) },
-];
+/** @type {Readonly<Object<string, string>>} */
+const FORMAT_LABELS = {
+	csv: __( 'CSV', 'updatronix' ),
+	json: __( 'JSON', 'updatronix' ),
+	txt: __( 'Plain text', 'updatronix' ),
+	xml: __( 'XML', 'updatronix' ),
+};
+
+/** Formats that the Free edition may request from the export API. */
+const DEFAULT_FORMATS = [ 'txt' ];
 
 /** Stable JSON keys mapped to localized CSV headings. */
 const CSV_COLUMNS = [
@@ -166,6 +171,7 @@ function formatExportBody( text, exportFormat, columns ) {
  * @param {Array<Object>}                          props.logs             Logs from REST for resolving filter labels → IDs.
  * @param {number}                                 [props.total=0]        Total matching records for the current view.
  * @param {import('react').RefObject<HTMLElement>} props.exportTriggerRef Focus target after close.
+ * @param {string[]}                               [props.formats]        Formats the current edition may export.
  * @return {import('react').JSX.Element|null} Modal subtree while `isOpen` is true.
  */
 export function ExportLogsModal( {
@@ -175,7 +181,16 @@ export function ExportLogsModal( {
 	logs,
 	total = 0,
 	exportTriggerRef,
+	formats = DEFAULT_FORMATS,
 } ) {
+	const formatItems = useMemo(
+		() =>
+			filterExportFormats( formats ).map( ( value ) => ( {
+				value,
+				label: FORMAT_LABELS[ value ],
+			} ) ),
+		[ formats ]
+	);
 	const { createSuccessNotice } = useDispatch( noticesStore );
 	const storedPrefs = useMemo( () => loadExportPreferences(), [] );
 	const [ merge, setMerge ] = useState( storedPrefs.merge );
@@ -186,7 +201,15 @@ export function ExportLogsModal( {
 	const [ liveRegion, setLiveRegion ] = useState( '' );
 	const [ generatedStamp, setGeneratedStamp ] = useState( '' );
 	const [ scope, setScope ] = useState( 'filtered' );
-	const [ exportFormat, setExportFormat ] = useState( 'txt' );
+	const [ exportFormat, setExportFormat ] = useState(
+		() => formatItems[ 0 ]?.value || 'txt'
+	);
+
+	useEffect( () => {
+		if ( ! formatItems.some( ( item ) => item.value === exportFormat ) ) {
+			setExportFormat( formatItems[ 0 ]?.value || 'txt' );
+		}
+	}, [ formatItems, exportFormat ] );
 
 	const scopeView = useMemo( () => {
 		const base = normalizeViewForExport( view, logs );
@@ -709,19 +732,22 @@ export function ExportLogsModal( {
 						</fieldset>
 
 						<div className="updatronix-export-modal__actions">
-							<SelectControl
-								label={ __( 'Format', 'updatronix' ) }
-								value={
-									FORMAT_ITEMS.find(
-										( item ) => item.value === exportFormat
-									) || FORMAT_ITEMS[ 2 ]
-								}
-								onValueChange={ ( item ) =>
-									setExportFormat( item?.value || 'txt' )
-								}
-								items={ FORMAT_ITEMS }
-								disabled={ busy }
-							/>
+							{ formatItems.length > 1 && (
+								<SelectControl
+									label={ __( 'Format', 'updatronix' ) }
+									value={
+										formatItems.find(
+											( item ) =>
+												item.value === exportFormat
+										) || formatItems[ 0 ]
+									}
+									onValueChange={ ( item ) =>
+										setExportFormat( item?.value || 'txt' )
+									}
+									items={ formatItems }
+									disabled={ busy }
+								/>
+							) }
 							<Button
 								variant="solid"
 								tone="brand"

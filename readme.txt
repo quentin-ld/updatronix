@@ -135,6 +135,9 @@ Yes. Network-activate Updatronix and manage everything as a Super Admin from the
 = Unreleased =
 * Improvement: Rebuild the admin interface on the WordPress Design System: dark rail, eleven destinations, one page header per screen, and one manual save.
 * Improvement: Add Health, Documentation, Support, Update Shield, Update Flow, and White label.
+* Improvement: The Updatronix 3000 presentation names only the available Pro features and labels the queue, XML export, and development tools as roadmap.
+* Improvement: White label brand and menu colors apply to the shared admin shell; the rail adapts to a light menu background.
+* Fix: The shell breadcrumb uses the configured brand name.
 * Dev: Bundle the pinned WPDS packages and share one runtime with Updatronix 3000.
 * Compatibility: WordPress 6.2 or later.
 

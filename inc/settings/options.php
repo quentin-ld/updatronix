@@ -649,3 +649,44 @@ function updatronix_dismissable_constants_allowlist(): array {
 		'DISABLE_WP_CRON',
 	);
 }
+
+/**
+ * Export formats the current edition may offer.
+ *
+ * Free defaults to plain text. Pro adds CSV, JSON, and XML through the
+ * `updatronix_export_formats` filter when its license is active.
+ *
+ * @since 1.3.0
+ *
+ * @return string[]
+ */
+function updatronix_get_export_formats(): array {
+	$formats = array_merge( array( 'txt' ), (array) apply_filters( 'updatronix_export_formats', array() ) );
+	$formats = array_map( 'sanitize_key', $formats );
+	$formats = array_values( array_unique( $formats ) );
+	$formats = array_values( array_intersect( $formats, array( 'txt', 'csv', 'json', 'xml' ) ) );
+
+	return array() !== $formats ? $formats : array( 'txt' );
+}
+
+/**
+ * Formats the export REST endpoint accepts.
+ *
+ * CSV, JSON, and XML are all built from the server's JSON records, so the
+ * endpoint accepts `txt` plus `json` whenever any structured format is
+ * enabled for the current edition.
+ *
+ * @since 1.3.0
+ *
+ * @return string[]
+ */
+function updatronix_get_server_export_formats(): array {
+	$formats = updatronix_get_export_formats();
+	$server  = array( 'txt' );
+
+	if ( array() !== array_intersect( $formats, array( 'csv', 'json', 'xml' ) ) ) {
+		$server[] = 'json';
+	}
+
+	return $server;
+}

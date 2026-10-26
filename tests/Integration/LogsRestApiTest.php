@@ -229,7 +229,7 @@ final class LogsRestApiTest extends WP_UnitTestCase {
 		self::assertSame( $admin_display, $data['log']->performed_by_display );
 		self::assertSame( 'Automatic', $data['log']->performed_as_display );
 		self::assertTrue( $data['log']->detail_available );
-		self::assertSame( 'v1.0 → v1.1', $data['log']->summary_text );
+		self::assertSame( '1.0 → 1.1', $data['log']->summary_text );
 	}
 
 	/**
@@ -353,6 +353,29 @@ final class LogsRestApiTest extends WP_UnitTestCase {
 		self::assertIsString( $data['transient_key'] ?? null );
 		self::assertNotEmpty( $data['transient_key'] );
 		self::assertFalse( $data['truncated'] ?? true, 'An empty log table must not truncate.' );
+	}
+
+	/**
+	 * The Free edition rejects a JSON export request; only plain text is enabled.
+	 *
+	 * @return void
+	 */
+	public function test_export_rejects_json_in_free_edition(): void {
+		$this->create_admin();
+
+		$request = new WP_REST_Request( 'POST', '/updatronix/v1/logs/export' );
+		$request->set_header( 'Content-Type', 'application/json' );
+		$request->set_body(
+			(string) wp_json_encode(
+				array(
+					'view'   => array(),
+					'format' => 'json',
+				)
+			)
+		);
+		$response = rest_do_request( $request );
+
+		self::assertSame( 400, $response->get_status() );
 	}
 
 	/**

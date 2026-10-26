@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | Edition | Pro |
-| Status | Implemented. Inactive and active states, six features, development mode, decryption recovery, activation and deactivation. |
+| Status | Implemented. Inactive and active states, four available features plus two roadmap items, development mode, decryption recovery, activation and deactivation. |
 | Rail | Automations · `updatronix-3000` |
 | Design | [`../reference/screens/src/screens/License.jsx`](../reference/screens/src/screens/License.jsx) |
 | Plan tasks | `P2-01`, `P2-02` |
@@ -30,12 +30,19 @@ destination. The license backend does not change.
 2. **Active.** `EmptyState` with a check icon, the title `Updatronix 3000 is
    active`, a description, a masked key, and an outline `Deactivate` button.
 3. The feature list names Update Shield, Update Flow, White label, Queue list,
-   Advanced exports, and Development tools, each with one sentence.
+   Advanced exports, and Development tools. Update Shield, Update Flow, White
+   label, and Advanced exports (CSV and JSON) are available; Queue list and
+   Development tools carry a visible **Roadmap** badge, and XML export is named
+   as roadmap in the legend.
 4. Development mode is stated explicitly; do not present it as a purchased license.
 5. A decryption error is a distinct state with a recovery instruction, not a
-   generic failure.
+   generic failure. A status-service error and an invalid stored license are
+   also distinct states.
 6. The Free-only upgrade path renders the same page, so a user without Pro can
-   read what Pro adds.
+   read what Pro adds. It names only available features and labels roadmap items.
+7. A successful activation, deactivation, or clear reloads the admin page so
+   the rail, Pro panel chunks, PHP hooks, and REST routes match the stored
+   license. The success message survives the reload.
 
 ## Data
 
@@ -54,18 +61,22 @@ The stored license data keeps its shape. The page reads the status returned by
 ## Capabilities and multisite
 
 - `UPDATRONIX_PRO_CAP_MANAGE`.
-- On multisite, only a Super Admin can activate or deactivate the network-wide
-  license. A subsite administrator sees the state but cannot change it.
+- On multisite, only a Super Admin can read or change the network-wide license.
+  A subsite administrator has no Pro destination; the status route also returns
+  403. This is stricter than the earlier read-only draft and is the accepted
+  contract.
 - Enforce this on the server; the UI only reflects it.
 
 ## UI composition
 
 - `PageHeader` with the dynamic description.
 - `Card` + `EmptyState` for the license state.
-- `InputControl` with `aria-invalid` and `aria-describedby` on error.
+- `InputControl` with `aria-invalid` and `aria-errormessage` on error.
+- `Badge` with the text `Roadmap` for planned features.
 - `Button` primary for activation, outline neutral for deactivation.
 - `Text` for the masked key and the feature descriptions.
-- `Note` for development mode or a decryption error.
+- `Note` for development mode, a decryption error, status-service failure, or
+  an invalid stored license.
 
 ## States
 
@@ -74,13 +85,16 @@ The stored license data keeps its shape. The page reads the status returned by
 | Loading | Spinner or skeleton; no layout jump. |
 | Inactive | Activation empty state. |
 | Activating | Input and button disabled; progress on the button. |
-| Active | Active empty state with the masked key. |
-| Deactivating | Confirmation, then progress; the state updates on success. |
+| Active | Active empty state with the masked key, domain, and last check. |
+| Deactivating | Confirmation, then progress; the page reloads on success. |
 | Server rejection | Inline error, field marked invalid, focus on the field. |
-| Network failure | Inline error with retry; the draft key is preserved. |
-| Decryption error | Distinct notice with recovery instructions. |
+| Network failure | Inline error; the draft key is preserved. |
+| Throttle (429) | Inline error naming the remaining seconds; `retry_after` in the payload. |
+| Status-service error | Dedicated card with Retry; no activation form. |
+| Invalid license | Warning with a re-activation instruction above the form. |
+| Decryption error | Distinct notice with recovery instructions; clear works even when status is `invalid`. |
 | Development mode | Active state plus a note that no license is stored. |
-| Read-only (multisite) | State visible; actions disabled with an explanation. |
+| Multisite non-Super-Admin | No access; the destination is hidden and the REST routes return 403. |
 
 ## Security
 
@@ -96,13 +110,23 @@ The stored license data keeps its shape. The page reads the status returned by
 - Text domain `updatronix-pro`.
 - The error is associated with the input and announced.
 - The masked key is text, not a password field with a fake value.
-- The six feature names match the product copy and are translated.
+- The six feature names match the product copy and are translated; roadmap
+  badges carry the text label `Roadmap`, not colour alone.
 - The page has one `h1` and a logical heading order.
 
 ## Tests
 
-- Unit: format check accepts the expected pattern and rejects empty, short, and
-  wrong-separator keys.
+- Unit: format check accepts the expected pattern and rejects empty, short,
+  wrong-separator, and legacy 4×4 keys.
+- Unit: the activation route registers the real-key validator and the shared
+  capability/Super-Admin permission callback.
+- Unit: activation and deactivation reject a malformed key or an upstream
+  rejection and redact the key from any echoed message.
+- Unit: status never contains the full key; decryption + `invalid` is flagged.
+- Unit: the connector gate requires the capability and a Super Admin on
+  Multisite.
+- JS: the one-shot licence notice is written before the reload and consumed
+  once.
 - Integration: activation rejects a malformed key, a server error, and a
   non-Super-Admin on multisite.
 - Integration: deactivation clears the stored data.
@@ -113,11 +137,13 @@ The stored license data keeps its shape. The page reads the status returned by
 ## Acceptance
 
 - The page renders as the Free-only upgrade destination and inside Pro.
-- The six features are present and match the product copy.
+- The four available features match the product copy; Queue list and
+  Development tools are explicitly roadmap; XML export is roadmap.
 - The key is masked after activation.
-- Server errors appear inline, with the field marked invalid.
+- Server errors appear inline, with the field marked invalid and focused.
+- The page reloads after a license change and the rail matches.
 - No blue legacy button.
-- Multisite read-only behavior is correct.
+- Multisite is Super-Admin-only on the server and in the rail.
 - The page passes the accessibility smoke test.
 
 ## Dependencies and risks

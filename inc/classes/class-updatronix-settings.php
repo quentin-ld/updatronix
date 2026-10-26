@@ -910,6 +910,23 @@ final class Updatronix_Settings {
 	public static function rest_update_settings( \WP_REST_Request $request ): WP_REST_Response {
 		$current = updatronix_get_settings();
 
+		$requested_delete_data = $request->has_param( 'delete_data_on_uninstall' )
+			? (bool) $request->get_param( 'delete_data_on_uninstall' )
+			: null;
+
+		// Turning on the irreversible uninstall wipe needs the site-management
+		// capability, not only the Updatronix capability.
+		if ( true === $requested_delete_data && ! current_user_can( 'manage_options' ) ) {
+			return new WP_REST_Response(
+				array(
+					'code'    => 'updatronix_forbidden',
+					'message' => __( 'You do not have permission to change this setting.', 'updatronix' ),
+					'data'    => array( 'status' => 403 ),
+				),
+				403
+			);
+		}
+
 		$schedule_in_request = $request->has_param( 'schedule' ) && is_array( $request->get_param( 'schedule' ) );
 
 		$next = array(
@@ -925,7 +942,7 @@ final class Updatronix_Settings {
 				: $current['notify_on'],
 			'auto_update_translations' => $current['auto_update_translations'],
 			'dismissed_constants'      => $current['dismissed_constants'],
-			'delete_data_on_uninstall' => $request->has_param( 'delete_data_on_uninstall' ) ? (bool) $request->get_param( 'delete_data_on_uninstall' ) : $current['delete_data_on_uninstall'],
+			'delete_data_on_uninstall' => null !== $requested_delete_data ? $requested_delete_data : $current['delete_data_on_uninstall'],
 			'schedule'                 => $schedule_in_request
 				? updatronix_merge_partial_schedule_into( (array) $request->get_param( 'schedule' ), $current['schedule'] )
 				: $current['schedule'],

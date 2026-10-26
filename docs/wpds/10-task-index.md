@@ -11,6 +11,11 @@ document that owns its contract. Use this table to open one `/architect` or
 > recorded decision. See
 > [`12-design-conformance-audit.md`](12-design-conformance-audit.md).
 
+> **Roadmap contract.** The frozen Free/Pro split, dependencies, statuses, and
+> owning briefs for the owner's roadmap live in
+> [`34-roadmap-matrix.md`](34-roadmap-matrix.md). A Phase 5 feature starts from
+> that matrix, not from a chat summary.
+
 ## Progress at 2026-10-25
 
 | Area | State |

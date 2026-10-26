@@ -148,38 +148,67 @@ an out-of-range hold; save error.
 ## 4. Updatronix 3000
 
 **Target.** An empty state with the product mark, a short explanation, a license
-input, and a primary activation, followed by the six-item Pro feature list. When
-active: a success empty state with a masked key and a deactivate action.
+input, and a primary activation, followed by the Pro feature list. When active:
+a success empty state with a masked key and a deactivate action.
 
 **Page header.** Title `Updatronix 3000`; description switches between “Activate
-your Updatronix 3000 license for this site.” and “Your license is active for this
-site.”; no primary action in the header (activation is inside the card).
+your Updatronix 3000 license for this site.”, “Your license is active for this
+site.”, “Your license needs to be activated again.”, “The stored license key
+cannot be decrypted.”, and “The license status could not be loaded.”; no
+primary action in the header (activation is inside the card).
 
 **Working surface.**
 
 - Inactive: `EmptyState` with key icon, title, description, `InputControl`,
   inline validation, primary `Activate license`.
 - Active: `EmptyState` with check icon, title, description, masked key
-  (`••••-••••-••••-1234`), outline `Deactivate`.
-- Feature list: Update Shield, Update Flow, White label, Queue list, Advanced
-  exports, Development tools, each with a one-line description.
-- A note states whether the site is in development mode or has a decryption
-  error.
+  (`UPD-PRO-••••••••-••••••••-••••1234`), registered domain, last check, and
+  outline `Deactivate`.
+- Feature list, with availability:
+  - Update Shield — stops incompatible updates and records blocked items.
+  - Update Flow — runs updates in dependency order.
+  - White label — applies the agency name, mark, and colors.
+  - Advanced exports — CSV and JSON.
+  - Queue list — **Roadmap** badge; not available in this release.
+  - Development tools — **Roadmap** badge; not available in this release.
+  - A legend states that roadmap items, including XML export, are planned and
+    not part of the current release.
+- A note states whether the site is in development mode, has a decryption
+  error, or has an invalid stored license.
 
 **Data.** `/license/status`, `/license/activate`, `/license/deactivate`. Keep the
 existing encrypted storage, masking, and error states. Do not accept a key that
-the server rejects; the client-side format check is a convenience only.
+the server rejects; the client-side format check is a convenience only. The
+activation route validates `UPD-PRO-XXXXXXXX-XXXXXXXX-XXXXXXXX`; case is
+preserved. A successful activation, deactivation, or clear reloads the admin
+page because Pro's PHP hooks and REST routes are registered at boot from the
+stored license. The success message survives the reload as a one-shot notice.
 
-**States.** Loading; inactive; activating; active; deactivating; license error;
-decryption error; development mode; multisite non-super-admin (read-only or
-denied, matching the server).
+**States.** Loading; inactive; activating; active; deactivating; status-service
+error; invalid license; decryption error; development mode; Multisite
+non-Super-Admin (no access; the contract is Super-Admin-only).
+
+**Error handling.**
+
+- Client format failure and server rejection use the same inline error element,
+  set `aria-invalid` and `aria-errormessage` on the input, and return focus to
+  the input after render.
+- The status endpoint failure renders a dedicated “License status unavailable”
+  card with Retry; it does not render the activation form.
+- A 429 response names the remaining seconds and carries `retry_after`.
+- A decryption error renders its own notice and a confirmed “Clear stored
+  license” action. The clear path works even when the stored status is
+  `invalid`.
 
 **Acceptance.**
 
 - The page works with Pro active and as the Free-only upgrade destination.
 - The key is never rendered in full after activation.
-- Server validation errors appear inline, with the field marked invalid.
-- The six features match the product copy exactly.
+- Server validation errors appear inline, with the field marked invalid and
+  focus on the field.
+- The feature list matches the product copy and marks roadmap items explicitly.
+- The page reloads after a license state change and the rail matches the new
+  state.
 - No blue legacy button.
 
 ---
@@ -275,7 +304,8 @@ progress; run failure; license inactive; save error.
 ## 7. White label
 
 **Target.** Brand name, menu label, logo, brand and menu colors, replacement
-switches, and live admin menu and email previews. Manual save and reset.
+switches, and previews of the real admin rail and the real Safe mode email.
+Manual save and reset. White label is opt-in: both switches are off by default.
 
 **Page header.** Title `White label`; description “Put your name, mark, and
 colors on every Updatronix screen.”; primary action `Save changes`; secondary
@@ -284,27 +314,63 @@ colors on every Updatronix screen.”; primary action `Save changes`; secondary
 **Working surface.**
 
 - Brand card: brand name, menu label, logo upload and remove.
-- Colors card: brand color, menu color, with accessible color controls.
-- Replace card: replace Updatronix branding, apply brand to emails.
-- Preview card: admin menu preview and email preview, driven by the draft values.
-- Reset returns every field to the default and marks the surface dirty.
+- Colors card: brand color and menu background, with accessible color controls.
+  The brand color seeds the WPDS theme (buttons, links, focus, active states);
+  the menu background drives the rail, shell frame, mobile bar, and drawer.
+- Replace card: replace Updatronix branding, apply the brand name to Safe mode
+  notification emails.
+- Preview card: the real visible rail destinations and the real plain-text Safe
+  mode email, driven by the draft values.
+- Reset returns every field to the opt-in default and marks the surface dirty.
+- A successful save reloads the admin page so the server-rendered rail and menu
+  label update immediately; a one-shot notice survives the reload.
 
-**Data.** New option `updatronix_pro_white_label` (scope per `D-15`), new REST
-route `/white-label`, and a logo attachment reference. Sanitize the name and
-menu label with `sanitize_text_field`, colors with `sanitize_hex_color`, and the
-logo by attachment ID, MIME type, and size. Never trust a client-provided URL.
+**Data.** Option `updatronix_pro_white_label` (network-wide per `D-15`), REST
+route `/white-label`, and a logo attachment reference.
 
-**States.** No logo; upload in progress; upload rejected (type or size); preview
-light and dark menu; reset confirmation; save error; license inactive.
+| Field | Rule |
+|---|---|
+| `brand_name` | `sanitize_text_field`, max 60 characters. |
+| `menu_label` | `sanitize_text_field`, max 40 characters. |
+| `brand_color` | `sanitize_hex_color`; invalid values fall back to `#3858E9`. |
+| `menu_color` | `sanitize_hex_color`; invalid values fall back to `#1E1E1E`. |
+| `logo_id` | Positive attachment ID; exists; attachment; PNG/JPEG/WebP; not SVG; readable; `upload_files`; ≤ 1 MB; ≥ 64×64 px. A changed invalid ID returns 400. |
+| `replace_branding` | Boolean; default false. |
+| `apply_to_emails` | Boolean; default false; requires `replace_branding`. |
+
+Never accept a logo URL, a file path, or raw SVG. Removing or resetting the logo
+removes the attachment reference, not the Media Library file.
+
+**Apply points.** The branding applies only to:
+
+- the Updatronix admin menu label (Tools on single site; Network Admin on
+  Multisite);
+- the shell rail brand name, mark, and colors, and the page breadcrumb;
+- the brand color through the WPDS theme for buttons, links, and the active rail
+  item; the menu color for the rail and shell background;
+- the brand name in the Safe mode blocked-update notification email.
+
+The WordPress admin menu background, other plugins' menus, the site title, the
+login screen, and the WordPress logo are untouched.
+
+**States.** License loading; license status error; license inactive; settings
+loading; load error with Retry; no logo; upload in progress; upload rejected for
+type, size, dimensions, or capability; preview light and dark menu; reset
+confirmation; save success; save error; Multisite read-only note.
 
 **Acceptance.**
 
 - The preview reflects the draft, not the saved values.
+- The previewed rail and email match what the product actually renders.
 - A logo removal removes the attachment reference, not an arbitrary file.
-- The branding applies to the admin menu, the Updatronix screens, and the
-  configured emails, and nowhere else.
-- Reset is reversible until save.
-- The screen works with the keyboard and a screen reader.
+- The branding applies at the points above and nowhere else.
+- Reset restores the opt-in defaults and is reversible until save.
+- The screen works with the keyboard and a screen reader; color controls have
+  accessible names and the previews have text descriptions.
+- A failed load or license-status check shows a Retry state, never a permanent
+  spinner.
+- A successful save updates the real rail and menu after the reload.
+
 
 ---
 
@@ -363,8 +429,8 @@ and uninstall data.”; primary action `Save changes`.
 
 **Data.** `/settings`. Keep the existing keys: `logging_enabled`,
 `retention_days`, `notifications_mode`, `notify_enabled`, `notify_emails`,
-`notify_on`, `auto_update_translations`, `dismissed_constants`. Do not rename a
-stored key without a migration.
+`notify_on`, `auto_update_translations`, `dismissed_constants`,
+`delete_data_on_uninstall`. Do not rename a stored key without a migration.
 
 **States.** Validation error for retention; invalid email; recovery warning;
 save error; multisite.

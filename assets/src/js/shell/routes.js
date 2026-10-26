@@ -172,26 +172,43 @@ export function getDestinations( tabs = {} ) {
 }
 
 /**
- * Hide Pro destinations when Pro is active but the user cannot manage it.
+ * Hide Pro destinations that the current site may not use.
  *
- * Free-only installs keep the Pro destinations so the upgrade path remains
- * visible. The server-side capability is the source of truth.
+ * Free-only installs keep the Updatronix 3000 presentation destination. The
+ * other Pro destinations require Pro, an active license, and the Pro
+ * capability. A Pro install without an active license keeps only the
+ * Updatronix 3000 activation screen.
  *
- * @param {Array<Object>} destinations          Destinations.
- * @param {Object}        [access]              Access flags.
- * @param {boolean}       [access.isPro]        Whether Pro is active.
- * @param {boolean}       [access.canManagePro] Whether the user may manage Pro.
+ * @param {Array<Object>} destinations           Destinations.
+ * @param {Object}        [access]               Access flags.
+ * @param {boolean}       [access.isPro]         Whether Pro is active.
+ * @param {boolean}       [access.canManagePro]  Whether the user may manage Pro.
+ * @param {boolean}       [access.licenseActive] Whether the Pro license is active.
  * @return {Array<Object>} Visible destinations.
  */
 export function filterDestinationsForUser(
 	destinations,
-	{ isPro = false, canManagePro = false } = {}
+	{ isPro = false, canManagePro = false, licenseActive = false } = {}
 ) {
-	if ( ! isPro || canManagePro ) {
-		return destinations;
+	if ( isPro && ! canManagePro ) {
+		return destinations.filter( ( item ) => item.edition !== 'pro' );
 	}
 
-	return destinations.filter( ( item ) => item.edition !== 'pro' );
+	return destinations.filter( ( item ) => {
+		if ( item.edition !== 'pro' ) {
+			return true;
+		}
+
+		if ( ! isPro ) {
+			return item.slug === 'updatronix-3000';
+		}
+
+		if ( item.slug === 'updatronix-3000' ) {
+			return true;
+		}
+
+		return licenseActive;
+	} );
 }
 
 /**

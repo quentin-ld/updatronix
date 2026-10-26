@@ -163,32 +163,54 @@ describe( 'filterDestinationsForUser', () => {
 	const sample = [
 		{ slug: 'logs', edition: 'free' },
 		{ slug: 'updatronix-3000', edition: 'pro' },
+		{ slug: 'update-shield', edition: 'pro' },
+		{ slug: 'update-flow', edition: 'pro' },
+		{ slug: 'white-label', edition: 'pro' },
 	];
 
-	it( 'keeps Pro destinations on a Free-only install', () => {
+	it( 'keeps only the Updatronix 3000 presentation on a Free-only install', () => {
 		expect(
 			filterDestinationsForUser( sample, {
 				isPro: false,
 				canManagePro: false,
-			} )
-		).toHaveLength( 2 );
+				licenseActive: false,
+			} ).map( ( item ) => item.slug )
+		).toEqual( [ 'logs', 'updatronix-3000' ] );
 	} );
 
-	it( 'hides Pro destinations when Pro is active without capability', () => {
+	it( 'hides all Pro destinations when Pro is active without capability', () => {
 		expect(
 			filterDestinationsForUser( sample, {
 				isPro: true,
 				canManagePro: false,
+				licenseActive: true,
 			} ).map( ( item ) => item.slug )
 		).toEqual( [ 'logs' ] );
 	} );
 
-	it( 'keeps Pro destinations when the capability is granted', () => {
+	it( 'keeps only the activation screen when the license is inactive', () => {
 		expect(
 			filterDestinationsForUser( sample, {
 				isPro: true,
 				canManagePro: true,
-			} )
-		).toHaveLength( 2 );
+				licenseActive: false,
+			} ).map( ( item ) => item.slug )
+		).toEqual( [ 'logs', 'updatronix-3000' ] );
+	} );
+
+	it( 'keeps every Pro destination when Pro, capability, and license are active', () => {
+		expect(
+			filterDestinationsForUser( sample, {
+				isPro: true,
+				canManagePro: true,
+				licenseActive: true,
+			} ).map( ( item ) => item.slug )
+		).toEqual( [
+			'logs',
+			'updatronix-3000',
+			'update-shield',
+			'update-flow',
+			'white-label',
+		] );
 	} );
 } );

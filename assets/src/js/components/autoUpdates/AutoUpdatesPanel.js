@@ -15,6 +15,7 @@ import wpds from '../../shell/wpds';
 import { useAutoUpdates } from '../../hooks/useAutoUpdates';
 import { ConstantNotices } from './ConstantNotices';
 import { isSectionLocked } from './utils';
+import { buildAutoUpdateDraft } from './autoUpdatesDraft';
 
 const {
 	Badge,
@@ -55,29 +56,6 @@ const CORE_MODES = [
 		),
 	},
 ];
-
-/**
- * Build the editable draft from the REST dataset.
- *
- * @param {Object|null} data Auto-update data.
- * @return {Object} Draft.
- */
-function buildDraft( data ) {
-	return {
-		coreMode: data?.core?.mode || 'minor',
-		translations: !! data?.translations?.auto_update,
-		themes: Object.fromEntries(
-			( Array.isArray( data?.themes ) ? data.themes : [] ).map(
-				( item ) => [ item.stylesheet, !! item.auto_update ]
-			)
-		),
-		plugins: Object.fromEntries(
-			( Array.isArray( data?.plugins ) ? data.plugins : [] ).map(
-				( item ) => [ item.file, !! item.auto_update ]
-			)
-		),
-	};
-}
 
 /**
  * One plugin or theme row.
@@ -230,8 +208,8 @@ export function AutoUpdatesPanel( {
 		dismissConstant,
 	} = useAutoUpdates( onDismissedConstantsChange );
 
-	const [ draft, setDraft ] = useState( () => buildDraft( null ) );
-	const savedRef = useRef( buildDraft( null ) );
+	const [ draft, setDraft ] = useState( () => buildAutoUpdateDraft( null ) );
+	const savedRef = useRef( buildAutoUpdateDraft( null ) );
 
 	useEffect( () => {
 		if ( fetchError && retryRef.current ) {
@@ -241,7 +219,7 @@ export function AutoUpdatesPanel( {
 
 	useEffect( () => {
 		if ( data ) {
-			const next = buildDraft( data );
+			const next = buildAutoUpdateDraft( data );
 			savedRef.current = next;
 			setDraft( next );
 		}
@@ -318,10 +296,6 @@ export function AutoUpdatesPanel( {
 		}
 	};
 
-	const handleDiscard = () => {
-		setDraft( savedRef.current );
-	};
-
 	const handleSaveAction = (
 		<SaveButton onClick={ handleSave } disabled={ busy } busy={ busy } />
 	);
@@ -334,6 +308,33 @@ export function AutoUpdatesPanel( {
 			/>
 
 			<div className="updatronix-page-body">
+				{ fetchError && data && (
+					<div
+						className="updatronix-autoupdates-refresh-error"
+						role="alert"
+					>
+						<Notice.Root intent="warning">
+							<Notice.Title>
+								{ __(
+									'Auto-updates could not be refreshed',
+									'updatronix'
+								) }
+							</Notice.Title>
+							<Notice.Description>
+								{ fetchError }
+							</Notice.Description>
+						</Notice.Root>
+						<Button
+							variant="outline"
+							tone="neutral"
+							onClick={ retryFetch }
+							ref={ retryRef }
+						>
+							{ __( 'Retry', 'updatronix' ) }
+						</Button>
+					</div>
+				) }
+
 				<ConstantNotices
 					constants={ data.constants }
 					sections={ [ 'core', 'plugins', 'themes', 'translations' ] }
@@ -467,7 +468,6 @@ export function AutoUpdatesPanel( {
 				isDirty={ isDirty }
 				isSaving={ busy }
 				onSave={ handleSave }
-				onDiscard={ handleDiscard }
 				title={ __( 'Auto updates', 'updatronix' ) }
 			/>
 		</div>

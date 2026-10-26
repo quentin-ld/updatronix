@@ -10,11 +10,10 @@ import PageHeader from '../shell/PageHeader';
 import Section from '../shell/Section';
 import { getTabUrl } from '../shell/routes';
 import wpds from '../shell/wpds';
+import { SUPPORT_FORUM_URL } from './staticLinks';
 
 const { ButtonLink, Card, Icon, Text } = wpds.ui;
 const { lifesaver } = wpds.icons;
-
-const FORUM_URL = 'https://wordpress.org/support/plugin/updatronix/';
 
 const STEPS = [
 	{
@@ -135,7 +134,7 @@ export default function SupportPage( { destination, onNavigate } ) {
 							<div className="updatronix-support-actions">
 								<ButtonLink
 									className="updatronix-support-forum-cta"
-									href={ FORUM_URL }
+									href={ SUPPORT_FORUM_URL }
 									target="_blank"
 									rel="noopener noreferrer"
 									variant="solid"

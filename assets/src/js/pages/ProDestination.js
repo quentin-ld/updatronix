@@ -1,13 +1,11 @@
 /**
  * Pro destination.
  *
- * Free renders the destination and the upgrade state. When Pro is active,
- * the panel comes from the Pro component registry. The legacy DOM renderer
- * is still supported so the current Pro release keeps working during the
- * migration.
+ * Free renders the destination selection. When Pro is active, the panel comes
+ * from the Pro component registry on `window.updatronixProPanelRegistry`.
  */
 
-import { Component, useEffect, useRef, useState } from '@wordpress/element';
+import { Component } from '@wordpress/element';
 import { useDispatch } from '@wordpress/data';
 import { __, sprintf } from '@wordpress/i18n';
 import { store as noticesStore } from '@wordpress/notices';
@@ -16,61 +14,8 @@ import PageHeader from '../shell/PageHeader';
 import SaveBar, { SaveButton } from '../shell/SaveBar';
 import wpds from '../shell/wpds';
 
-const { Button, EmptyState, Notice } = wpds.ui;
+const { Button, ButtonLink, EmptyState, Notice } = wpds.ui;
 const { starFilled } = wpds.icons;
-
-/**
- * Mount a legacy Pro panel renderer into a DOM node.
- *
- * @param {Object} props          Component props.
- * @param {string} props.slug     Panel slug.
- * @param {Object} props.registry Pro panel registry.
- * @return {import('react').JSX.Element} Mount point.
- */
-function LegacyPanelMount( { slug, registry } ) {
-	const mountRef = useRef( null );
-	const [ error, setError ] = useState( null );
-
-	useEffect( () => {
-		setError( null );
-
-		const render = registry?.[ slug ];
-		if ( typeof render !== 'function' || ! mountRef.current ) {
-			return undefined;
-		}
-
-		try {
-			const cleanup = render( mountRef.current );
-
-			return () => {
-				if ( typeof cleanup === 'function' ) {
-					cleanup();
-				}
-			};
-		} catch ( renderError ) {
-			// eslint-disable-next-line no-console
-			console.error( 'Updatronix Pro panel render error:', renderError );
-			setError(
-				renderError?.message ||
-					__( 'The Pro panel could not be loaded.', 'updatronix' )
-			);
-			return undefined;
-		}
-	}, [ slug, registry ] );
-
-	if ( error ) {
-		return (
-			<Notice.Root intent="error">
-				<Notice.Title>
-					{ __( 'The Pro panel could not be loaded.', 'updatronix' ) }
-				</Notice.Title>
-				<Notice.Description>{ error }</Notice.Description>
-			</Notice.Root>
-		);
-	}
-
-	return <div ref={ mountRef } className="updatronix-pro-panel" />;
-}
 
 /**
  * Keep a Pro panel error inside the destination.
@@ -150,15 +95,17 @@ class ProPanelErrorBoundary extends Component {
 /**
  * Render a Pro destination.
  *
- * @param {Object}                 props             Component props.
- * @param {Object}                 props.destination Destination.
- * @param {boolean}                props.isPro       Whether Pro is active.
- * @param {Object}                 props.registry    Pro panel registry.
- * @param {(slug: string) => void} props.onNavigate  Navigation callback.
+ * @param {Object}                 props                Component props.
+ * @param {Object}                 props.destination    Destination.
+ * @param {Array}                  [props.destinations] Visible destinations.
+ * @param {boolean}                props.isPro          Whether Pro is active.
+ * @param {Object}                 props.registry       Pro panel registry.
+ * @param {(slug: string) => void} props.onNavigate     Navigation callback.
  * @return {import('react').JSX.Element} Pro destination.
  */
 export default function ProDestination( {
 	destination,
+	destinations = [],
 	isPro,
 	registry = {},
 	onNavigate,
@@ -174,30 +121,19 @@ export default function ProDestination( {
 	};
 
 	if ( isPro && panel ) {
-		if ( panel.updatronixPanel === 'component' ) {
-			const Panel = panel;
-
-			return (
-				<ProPanelErrorBoundary label={ destination.label }>
-					<Panel
-						destination={ destination }
-						wpds={ wpds }
-						notify={ notify }
-						navigate={ onNavigate }
-						PageHeader={ PageHeader }
-						SaveBar={ SaveBar }
-						SaveButton={ SaveButton }
-					/>
-				</ProPanelErrorBoundary>
-			);
-		}
+		const Panel = panel;
 
 		return (
 			<ProPanelErrorBoundary label={ destination.label }>
-				<PageHeader destination={ destination } />
-				<LegacyPanelMount
-					slug={ destination.panel || destination.slug }
-					registry={ registry }
+				<Panel
+					destination={ destination }
+					destinations={ destinations }
+					wpds={ wpds }
+					notify={ notify }
+					navigate={ onNavigate }
+					PageHeader={ PageHeader }
+					SaveBar={ SaveBar }
+					SaveButton={ SaveButton }
 				/>
 			</ProPanelErrorBoundary>
 		);
@@ -246,15 +182,19 @@ export default function ProDestination( {
 					) }
 				</EmptyState.Title>
 				<EmptyState.Description>
-					{ destination.description }
+					{ __(
+						'It adds Update Shield, Update Flow, white label, and advanced exports (CSV and JSON). Queue list, XML export, and development tools are on the roadmap. No Pro feature is active on this site.',
+						'updatronix'
+					) }
 				</EmptyState.Description>
 				<EmptyState.Actions>
-					<Button
-						variant="solid"
-						onClick={ () => onNavigate( 'updatronix-3000' ) }
+					<ButtonLink
+						href="https://holdmywp.com/en/documents/updatronix-3000-documentation/"
+						target="_blank"
+						rel="noopener noreferrer"
 					>
-						{ __( 'Open Updatronix 3000', 'updatronix' ) }
-					</Button>
+						{ __( 'Read the Updatronix 3000 guide', 'updatronix' ) }
+					</ButtonLink>
 				</EmptyState.Actions>
 			</EmptyState.Root>
 		</>

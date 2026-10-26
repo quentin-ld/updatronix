@@ -11,6 +11,7 @@ import PageHeader from '../shell/PageHeader';
 import SaveBar, { SaveButton } from '../shell/SaveBar';
 import Section from '../shell/Section';
 import wpds from '../shell/wpds';
+import { isSettingsDirty } from './settingsDraft';
 
 const {
 	CheckboxControl,
@@ -63,28 +64,6 @@ function serializeRecipients( items ) {
 }
 
 /**
- * Build the comparable signature of the fields this surface edits.
- *
- * Other settings keys are carried through the draft but do not mark the
- * surface dirty.
- *
- * @param {Object} settings Settings object.
- * @return {string} Stable signature.
- */
-function editableSignature( settings ) {
-	return JSON.stringify( {
-		logging_enabled: !! settings.logging_enabled,
-		retention_days: Number( settings.retention_days ) || 90,
-		notificationsMode:
-			settings.notificationsMode === 'disabled' ? 'disabled' : 'default',
-		notify_enabled: !! settings.notify_enabled,
-		notify_emails: String( settings.notify_emails || '' ),
-		notifyOn: [ ...( settings.notifyOn || [] ) ].sort(),
-		delete_data_on_uninstall: !! settings.delete_data_on_uninstall,
-	} );
-}
-
-/**
  * Render the Settings destination.
  *
  * @param {Object}                              props              Component props.
@@ -111,8 +90,7 @@ export const SettingsPanel = memo( function SettingsPanelForm( {
 		setDraft( settings );
 	}, [ settings ] );
 
-	const isDirty =
-		editableSignature( draft ) !== editableSignature( savedRef.current );
+	const isDirty = isSettingsDirty( draft, savedRef.current );
 	const emailsOff =
 		! draft.notify_enabled || draft.notificationsMode === 'disabled';
 	const recipients = parseRecipients( draft.notify_emails );
@@ -195,10 +173,6 @@ export const SettingsPanel = memo( function SettingsPanelForm( {
 
 	const handleSave = async () => {
 		await saveSettings( { ...draft } );
-	};
-
-	const handleDiscard = () => {
-		setDraft( savedRef.current );
 	};
 
 	const handleRetentionChange = ( event ) => {
@@ -289,6 +263,14 @@ export const SettingsPanel = memo( function SettingsPanelForm( {
 										'updatronix'
 									) }
 									disabled={ emailsOff }
+									aria-invalid={
+										recipientError ? 'true' : undefined
+									}
+									aria-describedby={
+										recipientError
+											? 'updatronix-recipient-error'
+											: undefined
+									}
 									searchPlaceholder="name@example.com"
 									clearButtonLabel={ __(
 										'Remove all recipients',
@@ -316,6 +298,8 @@ export const SettingsPanel = memo( function SettingsPanelForm( {
 									details={
 										recipientError ? (
 											<Text
+												id="updatronix-recipient-error"
+												role="alert"
 												variant="body-sm"
 												className="updatronix-form-error"
 											>
@@ -455,7 +439,6 @@ export const SettingsPanel = memo( function SettingsPanelForm( {
 				isDirty={ isDirty }
 				isSaving={ saving }
 				onSave={ handleSave }
-				onDiscard={ handleDiscard }
 				title={ __( 'Settings', 'updatronix' ) }
 			/>
 		</>

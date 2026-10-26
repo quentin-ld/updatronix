@@ -175,12 +175,13 @@ function formatTime( value ) {
 /**
  * Render the update log destination.
  *
- * @param {Object}  props                       Component props.
- * @param {Object}  props.destination           Active destination.
- * @param {boolean} [props.loggingEnabled=true] Whether update logging is enabled.
- * @param {number}  [props.logsVersion=0]       Incremented to trigger a logs refetch.
- * @param {number}  [props.retentionDays=90]    Retention period for the header badge.
- * @param {number}  [props.deepLinkLogId=0]     Log id from a deep link.
+ * @param {Object}   props                         Component props.
+ * @param {Object}   props.destination             Active destination.
+ * @param {boolean}  [props.loggingEnabled=true]   Whether update logging is enabled.
+ * @param {number}   [props.logsVersion=0]         Incremented to trigger a logs refetch.
+ * @param {number}   [props.retentionDays=90]      Retention period for the header badge.
+ * @param {number}   [props.deepLinkLogId=0]       Log id from a deep link.
+ * @param {string[]} [props.exportFormats=['txt']] Formats the current edition may export.
  * @return {import('react').JSX.Element} The update log screen.
  */
 export function ActivityLogPanel( {
@@ -189,6 +190,7 @@ export function ActivityLogPanel( {
 	logsVersion = 0,
 	retentionDays = 90,
 	deepLinkLogId = 0,
+	exportFormats = [ 'txt' ],
 } ) {
 	const {
 		logs,
@@ -911,6 +913,7 @@ export function ActivityLogPanel( {
 					logs={ logs }
 					total={ total }
 					exportTriggerRef={ exportTriggerRef }
+					formats={ exportFormats }
 				/>
 			) }
 		</div>

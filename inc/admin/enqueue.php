@@ -302,6 +302,27 @@ function updatronix_admin_enqueue_scripts( string $admin_page ): void {
 	do_action( 'updatronix_enqueue_admin_assets', $admin_page );
 }
 
+/**
+ * Returns the shell brand, filtered by Pro's white label when it is active.
+ *
+ * @return array<string, mixed>
+ */
+function updatronix_get_admin_brand(): array {
+	$logo_url = plugins_url( 'assets/img/logo-60x60.png', updatronix_PLUGIN_FILE );
+
+	return (array) apply_filters(
+		'updatronix_admin_brand',
+		array(
+			'name'       => __( 'Updatronix', 'updatronix' ),
+			'menu_label' => __( 'Updatronix', 'updatronix' ),
+			'logoUrl'    => $logo_url,
+			'color'      => '#3858E9',
+			'menuColor'  => '#1E1E1E',
+			'replace'    => false,
+		)
+	);
+}
+
 add_action( 'admin_enqueue_scripts', 'updatronix_localize_settings' );
 /**
  * Localize REST URL and nonce for the Updatronix settings page.
@@ -315,10 +336,30 @@ function updatronix_localize_settings( string $admin_page ): void {
 		return;
 	}
 
-	$options    = updatronix_get_settings();
-	$tabs       = updatronix_get_admin_tabs();
-	$active_tab = updatronix_get_active_tab( $tabs );
-	$logo_url   = plugins_url( 'assets/img/logo-60x60.png', updatronix_PLUGIN_FILE );
+	$options     = updatronix_get_settings();
+	$tabs        = updatronix_get_admin_tabs();
+	$active_tab  = updatronix_get_active_tab( $tabs );
+	$logo_url    = plugins_url( 'assets/img/logo-60x60.png', updatronix_PLUGIN_FILE );
+	$brand       = updatronix_get_admin_brand();
+	$brand_color = sanitize_hex_color( (string) ( $brand['color'] ?? '' ) );
+	$menu_color  = sanitize_hex_color( (string) ( $brand['menuColor'] ?? '' ) );
+
+	if ( ! is_string( $brand_color ) ) {
+		$brand_color = '#3858E9';
+	}
+
+	if ( ! is_string( $menu_color ) ) {
+		$menu_color = '#1E1E1E';
+	}
+
+	wp_add_inline_style(
+		'updatronix-style',
+		sprintf(
+			':root{--updatronix-brand-color:%1$s;--updatronix-brand-menu-color:%2$s;}',
+			$brand_color,
+			$menu_color
+		)
+	);
 
 	wp_localize_script(
 		'updatronix-scripts',
@@ -334,18 +375,11 @@ function updatronix_localize_settings( string $admin_page ): void {
 			'activeTab'              => $active_tab,
 			'version'                => UPDATRONIX_VERSION,
 			'logoUrl'                => $logo_url,
-			'brand'                  => apply_filters(
-				'updatronix_admin_brand',
-				array(
-					'name'       => __( 'Updatronix', 'updatronix' ),
-					'menu_label' => __( 'Updatronix', 'updatronix' ),
-					'logoUrl'    => $logo_url,
-					'color'      => '#3858E9',
-					'menuColor'  => '#1E1E1E',
-				)
-			),
+			'brand'                  => $brand,
 			'isPro'                  => defined( 'UPDATRONIX_PRO_VERSION' ),
+			'licenseActive'          => (bool) apply_filters( 'updatronix_license_active', false ),
 			'canManagePro'           => (bool) apply_filters( 'updatronix_can_manage_pro', false ),
+			'exportFormats'          => updatronix_get_export_formats(),
 			// Global window property populated by Pro's admin JS for the panel registry; Free reads it via ProTabPanel.
 			'proPanelRegistryGlobal' => 'updatronixProPanelRegistry',
 		)

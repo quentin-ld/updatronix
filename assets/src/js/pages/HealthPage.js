@@ -14,6 +14,7 @@ import PageHeader from '../shell/PageHeader';
 import Section from '../shell/Section';
 import { getTabUrl } from '../shell/routes';
 import wpds from '../shell/wpds';
+import { canLoadDiagnostics } from './healthDiagnostics';
 
 const {
 	Badge,
@@ -57,7 +58,7 @@ export default function HealthPage( { destination, onNavigate } ) {
 	const [ diagnostics, setDiagnostics ] = useState( null );
 	const [ diagnosticsLoading, setDiagnosticsLoading ] = useState( false );
 	const [ copyState, setCopyState ] = useState( '' );
-	const { createSuccessNotice, createWarningNotice } =
+	const { createSuccessNotice, createWarningNotice, createErrorNotice } =
 		useDispatch( noticesStore );
 
 	const loadHealth = useCallback( async ( force = false, quiet = false ) => {
@@ -111,6 +112,13 @@ export default function HealthPage( { destination, onNavigate } ) {
 		const result = await loadHealth( true, true );
 
 		if ( ! result ) {
+			createErrorNotice(
+				__(
+					'The health check could not be completed. Try again.',
+					'updatronix'
+				),
+				{ id: 'updatronix-health-check' }
+			);
 			return;
 		}
 
@@ -135,7 +143,7 @@ export default function HealthPage( { destination, onNavigate } ) {
 
 	const openDiagnostics = async () => {
 		setDiagnosticsOpen( true );
-		if ( diagnostics || diagnosticsLoading ) {
+		if ( ! canLoadDiagnostics( diagnostics, diagnosticsLoading ) ) {
 			return;
 		}
 
@@ -324,9 +332,20 @@ export default function HealthPage( { destination, onNavigate } ) {
 		diagnosticsContent = <Spinner />;
 	} else if ( diagnostics?.error ) {
 		diagnosticsContent = (
-			<Notice.Root intent="error">
-				<Notice.Description>{ diagnostics.error }</Notice.Description>
-			</Notice.Root>
+			<Stack direction="column" gap="sm">
+				<Notice.Root intent="error">
+					<Notice.Description>
+						{ diagnostics.error }
+					</Notice.Description>
+				</Notice.Root>
+				<Button
+					variant="outline"
+					tone="neutral"
+					onClick={ openDiagnostics }
+				>
+					{ __( 'Retry', 'updatronix' ) }
+				</Button>
+			</Stack>
 		);
 	} else {
 		diagnosticsContent = (

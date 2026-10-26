@@ -3,17 +3,28 @@
 // field guide. The pinned token snapshot has no inverse foreground token,
 // so the rail carries its own documented pair.
 
-$updatronix-rail-bg: #1e1e1e;
-$updatronix-rail-bg-raised: #2e3336;
-$updatronix-rail-text: #f0f0f1;
-$updatronix-rail-link-text: #b4b4b4;
-$updatronix-rail-muted: #a7adb3;
-$updatronix-shell-bg: #1e1e1e;
-$updatronix-rail-hover: rgba(0, 0, 0, 0.12);
-$updatronix-rail-current: rgba(0, 0, 0, 0.18);
-$updatronix-rail-focus: #fff;
-$updatronix-rail-hover-text: #f0f0f0;
-$updatronix-rail-border: rgba(255, 255, 255, 0.12);
+$updatronix-rail-bg: var(--updatronix-brand-menu-color, #1e1e1e);
+$updatronix-rail-bg-raised: var(--updatronix-rail-bg-raised, #2e3336);
+$updatronix-rail-text: var(--updatronix-rail-text, #f0f0f1);
+$updatronix-rail-link-text: var(--updatronix-rail-link-text, #b4b4b4);
+$updatronix-rail-muted: var(--updatronix-rail-muted, #a7adb3);
+$updatronix-shell-bg: var(--updatronix-brand-menu-color, #1e1e1e);
+$updatronix-rail-hover: var(--updatronix-rail-hover, rgba(0, 0, 0, 0.12));
+$updatronix-rail-current: var(--updatronix-brand-color, #3858e9);
+$updatronix-rail-focus: var(--updatronix-rail-focus, #fff);
+$updatronix-rail-hover-text: var(--updatronix-rail-hover-text, #f0f0f0);
+$updatronix-rail-border: var(--updatronix-rail-border, rgba(255, 255, 255, 0.12));
+
+body.updatronix-brand-menu-light {
+	--updatronix-rail-text: #1e1e1e;
+	--updatronix-rail-link-text: #3c434a;
+	--updatronix-rail-muted: #50575e;
+	--updatronix-rail-hover: rgba(0, 0, 0, 0.06);
+	--updatronix-rail-focus: #1e1e1e;
+	--updatronix-rail-hover-text: #1e1e1e;
+	--updatronix-rail-border: rgba(0, 0, 0, 0.12);
+	--updatronix-rail-bg-raised: #e0e0e0;
+}
 
 body.updatronix-admin-page {
 	background: $updatronix-shell-bg;
@@ -187,11 +198,11 @@ body.updatronix-admin-page {
 
 	&.is-current {
 		background: $updatronix-rail-current;
-		color: $updatronix-rail-focus;
+		color: #fff;
 	}
 
 	&.is-current::before {
-		background: $updatronix-rail-focus;
+		background: #fff;
 		border-radius: var(--wpds-border-radius-xs);
 		content: "";
 		inset-block: 4px;
@@ -1448,6 +1459,6 @@ body.updatronix-admin-page {
 
 	.updatronix-rail .updatronix-rail-link.is-current,
 	.updatronix-rail .updatronix-rail-link.is-current:visited {
-		color: $updatronix-rail-focus;
+		color: #fff;
 	}
 }

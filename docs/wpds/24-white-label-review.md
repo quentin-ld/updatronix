@@ -110,3 +110,11 @@ Verification: Pro lint/CSS/build pass; the configured brand was checked at 1280 
 ## Safe fix taskfile
 
 `.agents/tasks/2026-10-25-white-label-review.md` lists WL-001 through WL-005 and the optional WL-006 confirmation.
+
+## Audit follow-up (2026-10-26)
+
+Phase 3.2 supersedes the WL-006 open decision and the preview-only color
+assumption. The selected-logo state stays image + remove; the Media Library
+upload remains persistent; colors, previews, logo limits, states, and the
+save/reload boundary are recorded in
+[`44-white-label-state-of-play.md`](44-white-label-state-of-play.md).

@@ -3,9 +3,11 @@ import { __ } from '@wordpress/i18n';
 
 import SnackbarHost from '../components/SnackbarHost';
 import { ActivityLogPanel } from '../components/activityLog';
+import { parseDeepLinkLogId } from '../components/activityLog/logDeepLink';
 import { AutoUpdatesPanel } from '../components/autoUpdates';
 import { SchedulePanel } from '../components/schedule';
 import { SettingsPanel } from '../components/SettingsPanel';
+import { canLeaveDraft } from '../components/settingsDraft';
 import { usePluginSettings } from '../hooks/usePluginSettings';
 import AppShell from '../shell/AppShell';
 import {
@@ -30,6 +32,7 @@ const visibleDestinations = filterDestinationsForUser(
 	{
 		isPro: !! bootSettings.isPro,
 		canManagePro: !! bootSettings.canManagePro,
+		licenseActive: !! bootSettings.licenseActive,
 	}
 );
 
@@ -60,12 +63,9 @@ function getProPanelRegistry() {
  * @return {import('react').JSX.Element} The application UI.
  */
 export const SettingsPage = () => {
-	const [ deepLinkLogId ] = useState( () => {
-		const raw = new URLSearchParams( window.location.search ).get( 'log' );
-		const id = Number.parseInt( raw || '', 10 );
-
-		return Number.isInteger( id ) && id > 0 ? id : 0;
-	} );
+	const [ deepLinkLogId ] = useState( () =>
+		parseDeepLinkLogId( window.location.search )
+	);
 	const {
 		settings: pluginSettings,
 		setSettings,
@@ -115,15 +115,7 @@ export const SettingsPage = () => {
 			}
 
 			if ( hasUnsavedChanges ) {
-				// eslint-disable-next-line no-alert -- Native confirm is the lightweight guard for an in-app destination switch.
-				const leave = window.confirm(
-					__(
-						'You have unsaved changes. Leave this page and discard them?',
-						'updatronix'
-					)
-				);
-
-				if ( ! leave ) {
+				if ( ! canLeaveDraft( { dirty: true } ) ) {
 					return;
 				}
 			}
@@ -136,15 +128,33 @@ export const SettingsPage = () => {
 
 	useEffect( () => {
 		const handlePopState = () => {
-			setSelectedSlug(
-				getInitialSlug( destinations, bootSettings.activeTab )
+			const nextSlug = getInitialSlug(
+				destinations,
+				bootSettings.activeTab
 			);
+
+			if ( nextSlug === selectedSlug ) {
+				return;
+			}
+
+			if ( hasUnsavedChanges ) {
+				if ( ! canLeaveDraft( { dirty: true } ) ) {
+					window.history.pushState(
+						null,
+						'',
+						getTabUrl( selectedSlug )
+					);
+					return;
+				}
+			}
+
+			setSelectedSlug( nextSlug );
 		};
 
 		window.addEventListener( 'popstate', handlePopState );
 
 		return () => window.removeEventListener( 'popstate', handlePopState );
-	}, [ destinations ] );
+	}, [ destinations, hasUnsavedChanges, selectedSlug ] );
 
 	useEffect( () => {
 		if ( destinations.some( ( item ) => item.slug === selectedSlug ) ) {
@@ -209,6 +219,9 @@ export const SettingsPage = () => {
 						loggingEnabled={ pluginSettings.logging_enabled }
 						retentionDays={ retentionDays }
 						deepLinkLogId={ deepLinkLogId }
+						exportFormats={
+							bootSettings.exportFormats || [ 'txt' ]
+						}
 					/>
 				);
 			case 'auto-updates':
@@ -268,6 +281,7 @@ export const SettingsPage = () => {
 					return (
 						<ProDestination
 							destination={ destination }
+							destinations={ destinations }
 							isPro={ isPro }
 							registry={ registry }
 							onNavigate={ navigate }
@@ -279,6 +293,7 @@ export const SettingsPage = () => {
 					return (
 						<ProDestination
 							destination={ destination }
+							destinations={ destinations }
 							isPro
 							registry={ registry }
 							onNavigate={ navigate }

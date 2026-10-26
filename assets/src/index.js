@@ -24,20 +24,30 @@ if ( updatronixSettings.nonce ) {
  * @return {{ primary: string, background: string }} Theme seeds.
  */
 function getThemeSeeds() {
+	const brand = updatronixSettings.brand || {};
+	const brandPrimary =
+		brand.replace &&
+		/^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test( brand.color || '' )
+			? brand.color
+			: '';
+
 	try {
 		const colors = getAdminThemeColors();
 		if ( colors && colors.primary ) {
 			// The rail carries the dark surface. The content frame stays light
 			// so tables and forms match the design system's applied screens,
 			// even when the admin color scheme is dark.
-			return { primary: colors.primary, background: '#fcfcfc' };
+			return {
+				primary: brandPrimary || colors.primary,
+				background: '#fcfcfc',
+			};
 		}
 	} catch {
 		// Fall through to the design-system default. A missing body class
 		// must not prevent the admin page from rendering.
 	}
 
-	return { primary: '#3858e9', background: '#fcfcfc' };
+	return { primary: brandPrimary || '#3858e9', background: '#fcfcfc' };
 }
 
 /**

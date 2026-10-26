@@ -11,6 +11,12 @@ import { __ } from '@wordpress/i18n';
 import Rail from './Rail';
 import { getTabUrl } from './routes';
 
+const settings =
+	typeof window !== 'undefined' && window.updatronixSettings
+		? window.updatronixSettings
+		: {};
+const brandName = settings.brand?.name || __( 'Updatronix', 'updatronix' );
+
 /**
  * Render the shell around one destination.
  *
@@ -81,7 +87,7 @@ export default function AppShell( {
 												onNavigate( 'logs' );
 											} }
 										>
-											{ __( 'Updatronix', 'updatronix' ) }
+											{ brandName }
 										</a>
 										<span aria-hidden="true">/</span>
 										<span aria-current="page">
