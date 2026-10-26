@@ -1209,6 +1209,43 @@ No production test is required for this 4.1 document.
   the network-admin/WP-CLI guard; settings and logs keep the Free opt-in.
 - **4.2-D7 — Time.** All queue timestamps are UTC; display uses `wp_date`.
 
+**Implementation decisions (2026-10-26, 4.2)**
+
+These pin points the ADR left to implementation. None changes a 4.3/4.4
+decision.
+
+- **Job key scope.** `job_key = sha256(site|type|id|target|shared)`. The origin
+  scope is normalized to `shared`, so an automatic run, a Flow chain, and a
+  manual retry for the same target reuse one row and the first origin wins.
+  This resolves the review's `origin_scope` ambiguity in favor of the stated
+  first-origin-wins behavior.
+- **Queue insert.** `INSERT ... ON DUPLICATE KEY UPDATE id=id`; a duplicate is
+  not an error path and produces no database error output.
+- **Explicit retry.** An explicit retry of `failed`/`uncertain` resets
+  `attempts` to 0 before the next claim.
+- **Skipped fact.** `no_longer_offered` and `already_installed` are `succeeded`
+  queue rows with distinct result codes; `skipped` remains a run-summary fact.
+- **Lock busy.** Requeued with `available_at = now + 5 minutes`, not failed.
+- **Unknown version.** `uncertain` with `partial_state`; manual review only.
+- **Journal digest.** The digest is sent once per run and recorded with a
+  run-scoped event key in the Free log; the log remains the ledger.
+- **Table install.** Activation and the first request after a schema version
+  change; the installer fails closed when `$wpdb` is unavailable. The table is
+  main-site/network scoped.
+- **Dormancy.** Engine classes are lazily loaded; `register_runtime()` is empty
+  until 4.3. `queue_enabled` is not read in 4.2 and its Shield default is left
+  untouched because 4.3-D8 owns the default migration and worker activation.
+- **Uninstall guard.** The network-admin/WP-CLI guard now covers the whole Pro
+  uninstall cleanup, not only the queue drop.
+- **Site Health.** The queue checks listed in §12.1 are deferred to the 4.3
+  surfaces because the 4.2 mission forbids UI/routes; the table and stale-lease
+  data are already available.
+- **Tests.** Pro now has `tests/Integration`, a PHPUnit integration config, and
+  a real plugin/theme fixture update through
+  `WP_Automatic_Updater::update()`. The single-site run skips the live
+  Multisite guard; the pure capability matrix covers the Super-Admin rule.
+  See doc 46 for the full 4.2 report.
+
 ### 12.2 Phase 4.3 — Shield policies and queue activation
 
 **Scope**

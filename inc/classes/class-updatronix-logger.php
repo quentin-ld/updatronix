@@ -210,7 +210,7 @@ final class Updatronix_Logger {
 	/**
 	 * Build WHERE clause and placeholder values for log queries.
 	 *
-	 * @param array<string, mixed> $args Keys: site_id, log_type, status, performed_as.
+	 * @param array<string, mixed> $args Keys: site_id, log_type, action_type, action_types, status, performed_as, search, created_at_after, created_at_before.
 	 * @return array{where_sql: string, values: array<int, int|string>}
 	 */
 	private static function build_logs_where( array $args ): array {
@@ -230,6 +230,27 @@ final class Updatronix_Logger {
 			$where[]  = 'log_type = %s';
 			$values[] = Updatronix_Security::sanitize_log_type( (string) $log_type );
 		}
+		$action_type = $args['action_type'] ?? null;
+		if ( null !== $action_type && '' !== $action_type ) {
+			$where[]  = 'action_type = %s';
+			$values[] = Updatronix_Security::sanitize_action_type( (string) $action_type );
+		}
+		$action_types = $args['action_types'] ?? null;
+		if ( is_array( $action_types ) && array() !== $action_types ) {
+			$allowed = Updatronix_Security::get_allowed_action_types();
+			$clean   = array();
+			foreach ( $action_types as $candidate ) {
+				$candidate = sanitize_key( (string) $candidate );
+				if ( in_array( $candidate, $allowed, true ) ) {
+					$clean[] = $candidate;
+				}
+			}
+			$clean = array_values( array_unique( $clean ) );
+			if ( array() !== $clean ) {
+				$where[] = 'action_type IN (' . implode( ',', array_fill( 0, count( $clean ), '%s' ) ) . ')';
+				$values  = array_merge( $values, $clean );
+			}
+		}
 		$status = $args['status'] ?? null;
 		if ( null !== $status && '' !== $status ) {
 			$where[]  = 'status = %s';
@@ -239,6 +260,16 @@ final class Updatronix_Logger {
 		if ( null !== $performed_as && '' !== $performed_as ) {
 			$where[]  = 'performed_as = %s';
 			$values[] = Updatronix_Security::sanitize_performed_as( (string) $performed_as );
+		}
+		$created_at_after = $args['created_at_after'] ?? null;
+		if ( null !== $created_at_after && '' !== $created_at_after ) {
+			$where[]  = 'created_at >= %s';
+			$values[] = (string) $created_at_after;
+		}
+		$created_at_before = $args['created_at_before'] ?? null;
+		if ( null !== $created_at_before && '' !== $created_at_before ) {
+			$where[]  = 'created_at <= %s';
+			$values[] = (string) $created_at_before;
 		}
 
 		$search = $args['search'] ?? null;
@@ -259,7 +290,7 @@ final class Updatronix_Logger {
 	/**
 	 * Get logs with optional filters and pagination.
 	 *
-	 * @param array<string, mixed> $args            Optional. site_id, log_type, status, performed_as, per_page, page, orderby, order.
+	 * @param array<string, mixed> $args            Optional. site_id, log_type, action_type, action_types, status, performed_as, search, created_at_after, created_at_before, per_page, page, orderby, order.
 	 * @param bool                 $include_details Whether to include message and trace columns.
 	 * @return array<int, \stdClass> Array of log row objects.
 	 */
@@ -276,6 +307,8 @@ final class Updatronix_Logger {
 				$defaults = array(
 					'site_id'      => null,
 					'log_type'     => null,
+					'action_type'  => null,
+					'action_types' => null,
 					'status'       => null,
 					'performed_as' => null,
 					'search'       => null,
@@ -286,8 +319,21 @@ final class Updatronix_Logger {
 				);
 				$args     = wp_parse_args( $args, $defaults );
 
+				/**
+				 * Filters the log query arguments.
+				 *
+				 * Additive: callers may add `action_type`, `action_types`,
+				 * `created_at_after`, or `created_at_before` without changing
+				 * existing call sites.
+				 *
+				 * @since 1.4.0
+				 *
+				 * @param array<string, mixed> $args Query arguments.
+				 */
+				$args = (array) apply_filters( 'updatronix_log_query_args', $args );
+
 				$built    = self::build_logs_where( $args );
-				$orderby  = in_array( $args['orderby'], array( 'id', 'created_at', 'log_type', 'status', 'item_name', 'performed_as' ), true )
+				$orderby  = in_array( $args['orderby'], array( 'id', 'created_at', 'log_type', 'action_type', 'status', 'item_name', 'performed_as' ), true )
 				? $args['orderby']
 				: 'created_at';
 				$order    = strtoupper( $args['order'] ) === 'ASC' ? 'ASC' : 'DESC';
@@ -316,7 +362,7 @@ final class Updatronix_Logger {
 	/**
 	 * Get total count of logs matching filters.
 	 *
-	 * @param array<string, mixed> $args Optional. site_id, log_type, status, performed_as.
+	 * @param array<string, mixed> $args Optional. site_id, log_type, action_type, action_types, status, performed_as, created_at_after, created_at_before.
 	 * @return int
 	 */
 	public static function get_logs_count( array $args = array() ): int {
@@ -328,6 +374,9 @@ final class Updatronix_Logger {
 			static function () use ( $args ): int {
 				global $wpdb;
 				$table = Updatronix_Database::get_table_name();
+
+				/** This filter is documented in inc/classes/class-updatronix-logger.php */
+				$args = (array) apply_filters( 'updatronix_log_query_args', $args );
 
 				$built  = self::build_logs_where( $args );
 				$values = array_merge( array( $table ), $built['values'] );

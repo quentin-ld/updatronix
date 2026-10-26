@@ -1224,3 +1224,70 @@ The export modal still uses the legacy `Modal` and core controls. It works and k
 1. Phase 3.3: Update Shield and Update Flow screen audits.
 2. Phase 6: Pro integration/E2E, a live Multisite pass, the Free XML export
    fix, and the accessibility pass.
+
+## 2026-10-26 · Phase 4.2 — Shared update engine kernel (dormant)
+
+Branch `major/wpds`, Free and Pro. No version bump, no commit.
+
+### What landed
+
+| Area | Change |
+|---|---|
+| Kernel | `inc/update-engine/`: job/status value object, policy result and contract, plan and planner contract, execution result, queue repository, native executor adapter, journal, notifier, kernel, facade, dormant bootstrap. |
+| Queue | Main-site table `updatronix_pro_update_queue`, schema `1.0.0`, `dbDelta` install/upgrade, schema option, atomic conditional claim, 15-minute lease, attempt increment, dependency gate, retry/backoff, cancel, sweep, retention, item barriers. |
+| Executor | Only `WP_Automatic_Updater::update()`; native `auto_updater` lock; `pre_auto_update` observation; result mapping for `true`/`false`/`WP_Error`/`null`; scoped execution flag for the 4.3 handshake. |
+| Journal | Free logger adapter, `sha256` event keys, action/status mapping, DB-level blocked history, bounded non-autoloaded run summaries. |
+| Notifier | One plain-text digest per run, Free recipient settings, Pro `notify_email`, event-key dedupe, no client address. |
+| Free | Additive `updatronix_log_action_types` and `updatronix_log_query_args` filters; `action_type`, `action_types`, `created_at_after`, `created_at_before` SQL filters. No Free option or transient added. |
+| Bootstrap | `updatronix_pro_update_engine_enabled` default false; registration requires the switch, an active license, and the main site. No cron, REST route, `auto_update_*` filter, panel, or email in 4.2. |
+| Uninstall | 4.2-D6: the queue table is always dropped from the main site, with the network-admin/WP-CLI guard, even when Free's data opt-in is false. |
+| Tests | First Pro integration suite: PHPUnit integration config/bootstrap, 11 integration files, real plugin and theme fixture updates through the native updater, and 10 pure unit files. |
+
+### Verification
+
+| Check | Result |
+|---|---|
+| Pro `bin/harness test` | 291 tests, 1002 assertions, pass (baseline 243). |
+| Pro `bin/harness integration` | 65 tests, 644 assertions, pass; 1 intentional Multisite-only skip (baseline: no suite). |
+| Pro `bin/harness test:js` | 41 tests, pass (unchanged). |
+| Pro `bin/harness lint:js` | Pass, 0 warnings. |
+| Pro `bin/harness lint:files` on modified PHP | Pass. |
+| Pro `bin/harness lint` (full) | Pass; PHPStan no errors. The test-tree filename rule is excluded in `.config/phpcs-project.xml` because PHPUnit discovers PascalCase test classes. |
+| Pro `bin/harness build` | Pass. |
+| Pro `bin/harness counterfactual` | 7 substitutable changed lines, 0 executed by the unit suite. These are declarative value-object property defaults plus uninstall/bootstrap wiring; the wiring is covered by the integration suite, the defaults by constructor behavior. Recorded as a coverage finding, not a pass. |
+| Free `bin/harness test` | 216 tests, 422 assertions, pass (baseline 213). |
+| Free `bin/harness integration` | 77 tests, 208 assertions, pass, 13 pre-existing skips (baseline 73). |
+| Free `bin/harness lint:files` on modified PHP | Pass. |
+| E2E | Not run; still blocked by `libnspr4.so`. Not claimed. |
+
+The integration proof includes two-worker atomic claim, attempts increment once,
+expired-lease recovery for target/source/unknown/exhausted versions, a stale
+worker blocked after the sweep, retry/backoff and exhaustion, lock-busy requeue,
+cancel and downstream cancel, license-gated cancellation, policy denial before
+the updater, chain failure, run summaries, journal dedupe, digest one-send,
+executor mapping, and real plugin/theme fixture installs with no external
+network. The Multisite live guard is skipped in the single-site run; the
+Super-Admin rule is covered by the pure capability matrix.
+
+### Known gaps
+
+1. No live Multisite run. The table/main-site/worker rule and the Super-Admin
+   gate are tested by the pure matrix and the guarded integration test.
+2. No real disk-full or fatal-loopback fixture. The failure paths are injected
+   or simulated; the native plugin/theme fixture proves the executor path.
+3. Site Health queue checks and the queue REST routes remain 4.3/5.1 surfaces;
+   the 4.2 mission forbids UI/routes.
+4. `queue_enabled` is not read by the engine. Its Shield default is left for
+   4.3-D8 so 4.2 does not change Shield settings; the queue is inactive because
+   no scheduler is registered.
+5. E2E remains blocked by the host library.
+6. No version bump and no commit.
+
+### Next
+
+1. Phase 4.3: Shield policies, VCS/Composer detection, `disable`/`cancel`,
+   re-enable, abandoned advisory, blocked history, the ownership handshake, the
+   scheduler, queue REST routes, and the `queue_enabled=false` migration.
+2. Phase 4.4: the Flow planner, `POST /flow/run`, run summaries, and removal of
+   the old runner.
+3. Phase 6: Pro E2E and the live Multisite pass when the environment allows.

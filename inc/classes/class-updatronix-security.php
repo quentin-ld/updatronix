@@ -61,6 +61,40 @@ final class Updatronix_Security {
 	}
 
 	/**
+	 * Returns the allowed action types, including filter additions.
+	 *
+	 * @since 1.4.0
+	 *
+	 * @return array<int, string>
+	 */
+	public static function get_allowed_action_types(): array {
+		/**
+		 * Filters the log action-type allowlist.
+		 *
+		 * Additive: callers keep the existing types and append their own. The
+		 * update engine uses this to add `auto_update_reenabled` when enabled.
+		 *
+		 * @since 1.4.0
+		 *
+		 * @param array<int, string> $types Allowed action types.
+		 */
+		$types = (array) apply_filters( 'updatronix_log_action_types', self::ALLOWED_ACTION_TYPES );
+
+		$types = array_values(
+			array_unique(
+				array_filter(
+					array_map(
+						static fn ( $type ): string => sanitize_key( (string) $type ),
+						$types
+					)
+				)
+			)
+		);
+
+		return array() === $types ? self::ALLOWED_ACTION_TYPES : $types;
+	}
+
+	/**
 	 * Sanitize action type.
 	 *
 	 * @param string $value Raw value.
@@ -69,7 +103,7 @@ final class Updatronix_Security {
 	public static function sanitize_action_type( string $value ): string {
 		$value = sanitize_key( $value );
 
-		return in_array( $value, self::ALLOWED_ACTION_TYPES, true ) ? $value : 'update'; // counterfactual: equivalent — both sides of the comparison are strings — a declared `string` operand and a haystack of string literals — so the strict comparison and the loose one agree.
+		return in_array( $value, self::get_allowed_action_types(), true ) ? $value : 'update'; // counterfactual: equivalent — both sides of the comparison are strings — a declared `string` operand and a haystack of string literals — so the strict comparison and the loose one agree.
 	}
 
 	/**
