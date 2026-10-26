@@ -86,14 +86,14 @@ final class Updatronix_Health {
 			'open_issues'        => $issues,
 			'resolved'           => $resolved,
 			'counts'             => array(
-				'total'    => count( $checks ),
-				'passing'  => count(
+				'total'   => count( $checks ),
+				'passing' => count(
 					array_filter(
 						$checks,
 						static fn( array $check ): bool => 'good' === $check['status']
 					)
 				),
-				'open'     => count( $issues ),
+				'open'    => count( $issues ),
 			),
 			'logging_enabled'    => (bool) updatronix_get_settings()['logging_enabled'],
 			'has_log_table'      => Updatronix_Database::table_exists(),
@@ -237,8 +237,8 @@ final class Updatronix_Health {
 	private static function build_resolved( array $failed, array $success ): array {
 		$failures = array();
 		foreach ( $failed as $row ) {
-			$key = self::item_key( $row );
-			$ts  = (int) strtotime( (string) $row->created_at );
+			$key              = self::item_key( $row );
+			$ts               = (int) strtotime( (string) $row->created_at );
 			$failures[ $key ] = max( $failures[ $key ] ?? 0, $ts );
 		}
 
@@ -278,7 +278,7 @@ final class Updatronix_Health {
 	 * @return array<int, array<string, mixed>>
 	 */
 	private static function build_checks( array $failed ): array {
-		return array(
+		$checks = array(
 			self::check_wordpress(),
 			self::check_php(),
 			self::check_disk(),
@@ -286,6 +286,47 @@ final class Updatronix_Health {
 			self::check_lock(),
 			self::check_retries( $failed ),
 		);
+
+		/**
+		 * Filters the Health checks.
+		 *
+		 * Additive surfaces (Pro queue checks) append rows with the same shape:
+		 * id, label, value, status (`good`, `attention`, `critical`), intent,
+		 * detail, and optional href/link_label.
+		 *
+		 * @since 1.5.0
+		 *
+		 * @param array<int, array<string, mixed>> $checks Health checks.
+		 * @param array<int, \stdClass>            $failed Failed log rows in the window.
+		 */
+		$filtered = apply_filters( 'updatronix_health_checks', $checks, $failed );
+
+		if ( ! is_array( $filtered ) ) {
+			return $checks;
+		}
+
+		$valid = array();
+		foreach ( $filtered as $check ) {
+			if ( ! is_array( $check ) ) {
+				continue;
+			}
+
+			$status = (string) ( $check['status'] ?? '' );
+			if ( ! in_array( $status, array( 'good', 'attention', 'critical' ), true ) ) {
+				continue;
+			}
+
+			if ( ! isset( $check['id'], $check['label'], $check['value'], $check['detail'] ) ) {
+				continue;
+			}
+
+			$check['intent']     = (string) ( $check['intent'] ?? ( 'good' === $status ? 'stable' : ( 'attention' === $status ? 'medium' : 'high' ) ) );
+			$check['href']       = $check['href'] ?? null;
+			$check['link_label'] = $check['link_label'] ?? null;
+			$valid[]             = $check;
+		}
+
+		return $valid;
 	}
 
 	/**
@@ -307,7 +348,7 @@ final class Updatronix_Health {
 
 		if ( version_compare( $current, '6.2', '<' ) ) {
 			return self::check(
-				'wordpress',
+				'WordPress',
 				__( 'WordPress version', 'updatronix' ),
 				$current,
 				'critical',
@@ -316,7 +357,7 @@ final class Updatronix_Health {
 		}
 
 		return self::check(
-			'wordpress',
+			'WordPress',
 			__( 'WordPress version', 'updatronix' ),
 			$current,
 			'good',
@@ -533,7 +574,7 @@ final class Updatronix_Health {
 
 		$groups = array();
 		foreach ( $failed as $row ) {
-			$key = self::item_key( $row );
+			$key            = self::item_key( $row );
 			$groups[ $key ] = ( $groups[ $key ] ?? 0 ) + 1;
 		}
 		$max = max( $groups );
@@ -598,7 +639,7 @@ final class Updatronix_Health {
 	 * @return array<string, mixed>
 	 */
 	private static function build_summary( array $checks, array $issues ): array {
-		$critical = array_values(
+		$critical  = array_values(
 			array_filter(
 				$checks,
 				static fn( array $check ): bool => 'critical' === $check['status']
@@ -691,7 +732,7 @@ final class Updatronix_Health {
 	public static function get_diagnostics(): array {
 		global $wpdb;
 
-		$cron = Updatronix_Cron::get_schedule_rest_meta();
+		$cron        = Updatronix_Cron::get_schedule_rest_meta();
 		$environment = array(
 			array(
 				'label' => __( 'WordPress', 'updatronix' ),

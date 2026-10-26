@@ -355,7 +355,7 @@ final class Updatronix_Export_Body_Builder {
 
 			if ( strlen( $candidate ) > $max_chunk_bytes ) {
 				if ( '' === $existing_chunk_body && '' === $body && strlen( $line ) > $max_chunk_bytes ) {
-					$body = $line;
+					$body          = $line;
 					$rows_emitted += (int) $item['row_span'];
 					++$merged_lines_added;
 					$byte_cap_hit = true;

@@ -297,10 +297,10 @@ final class AutoUpdateDelayBehaviorTest extends TestCase {
 	 */
 	public function test_schedule_slice_coerces_the_stored_flag_and_clamps_the_window(): void {
 		$cases = array(
-			'string flag, ordinary window'      => array( '1', 5, true, 5 ),
-			'zero means one day'                => array( true, 0, true, 1 ),
-			'a year is the ceiling'             => array( true, 1000, true, 365 ),
-			'delay off, the window is one day'  => array( false, 0, false, 1 ),
+			'string flag, ordinary window'     => array( '1', 5, true, 5 ),
+			'zero means one day'               => array( true, 0, true, 1 ),
+			'a year is the ceiling'            => array( true, 1000, true, 365 ),
+			'delay off, the window is one day' => array( false, 0, false, 1 ),
 		);
 
 		foreach ( $cases as $label => $case ) {
@@ -612,7 +612,7 @@ final class AutoUpdateDelayBehaviorTest extends TestCase {
 		);
 		$hash  = hash( 'sha256', 'theme|twentytwentyfive|2.0' );
 
-		$GLOBALS['updatronix_test_site_transients']['update_themes'] = (object) array(
+		$GLOBALS['updatronix_test_site_transients']['update_themes']                     = (object) array(
 			'response' => array(
 				'twentytwentyfive' => array( 'new_version' => '2.0' ),
 			),

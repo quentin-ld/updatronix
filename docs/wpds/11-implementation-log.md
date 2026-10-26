@@ -1367,3 +1367,60 @@ available. E2E remains blocked.
 1. Phase 4.3b: live queue fixture, Screen claims, queue summary, and Site
    Health, still behind the live gate.
 2. Phase 4.4: Flow planner, `POST /flow/run`, and runner removal.
+
+## 2026-10-26 · Phase 4.3b — Queue live preparation
+
+Branch `major/wpds`, Free and Pro. No version bump, no commit. The queue is
+still dormant: `queue_live` false, `queue_enabled` false by default, engine kill
+switch false by default, Shield switch disabled. The owner decided on
+2026-10-26 to keep `queue_live=false`; no activation was performed.
+
+### What landed
+
+| Area | Change |
+|---|---|
+| Live fixture | `UpdateQueueLiveFixtureTest` runs the real scheduler, kernel, native executor, Free journal, notifier, and REST callbacks against local plugin/theme zips. Offers are injected through the native transient filters; WordPress.org update checks are answered synthetically; no package or API socket is opened. |
+| Scenarios | Plugin/theme success, Shield block, retryable failure, terminal failure + REST retry, cancel, three expired-lease recoveries, duplicate worker against the native lock, duplicate planning, one digest per run. |
+| Queue summary | `Updatronix_Queue_Summary` provides counters, last run, next worker, next queued job, stale leases, last error, and warnings. It is embedded in the Shield payload and returned by the existing `/queue/summary` route. |
+| Shield UI | Existing queue card shows counters/dates/warnings; retry/cancel/run use the existing routes and are hidden while `queue_live` is false; the switch stays disabled. No new tab or screen. |
+| Health | Free `updatronix_health_checks` filter; Pro appends five read-only queue checks on the main site with an active license. Dormant queue with actionable jobs is attention. |
+| Correctness | Scheduler passes the filtered `max_attempts` to planned jobs; nullable queue inserts write SQL `NULL`; Health registration is testable. |
+
+### Verification
+
+| Check | Result |
+|---|---|
+| Pro `bin/harness test` | 313 tests, 1107 assertions, pass. |
+| Pro `bin/harness integration` | 95 tests, 900 assertions, pass; 1 intentional Multisite-only skip. |
+| Pro `bin/harness test:js` | 53 tests, pass. |
+| Pro `bin/harness lint:js` | Pass, 0 warnings. |
+| Pro `bin/harness lint:files` on modified PHP | Pass, 0 errors. |
+| Pro `bin/harness build` | Pass. |
+| Pro `bin/harness counterfactual` | 200 of 200 executed changed lines checked; 92 killed, 107 survived, 1 equivalent. Seven survivors manually killed; 100 documented. **Not a pass.** |
+| Free `bin/harness test` | 216 tests, 422 assertions, pass. |
+| Free `bin/harness integration` | 78 tests, 212 assertions, pass, 13 pre-existing skips. |
+| Free `bin/harness lint:files` on modified PHP | Pass, 0 errors. |
+| Free `bin/harness build` | Pass. |
+| E2E | Not run; still blocked by `libnspr4.so`. Not claimed. |
+
+### Dormancy and decision
+
+The local fixture sets `queue_enabled` directly in the test database only. It
+does not change `queue_live`, the production default, the save path, or the
+engine kill switch. The owner chose on 2026-10-26 to keep the queue dormant;
+activation requires a new explicit decision after a staged run.
+
+### Known gaps
+
+1. The live fixture is local, not a staged host with real cron.
+2. No live Multisite run.
+3. The counterfactual has 107 survivors; 7 are manually killed, 100 documented.
+4. Flow still bypasses Shield; 4.4 closes it.
+5. E2E remains blocked.
+
+### Next
+
+1. Owner decision recorded: keep dormant (2026-10-26). Revisit only after a
+   staged run and a new explicit decision.
+2. Phase 4.4: Flow planner, `POST /flow/run`, and runner removal. Stop before
+   4.4 until the owner asks for it.

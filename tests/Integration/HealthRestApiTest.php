@@ -63,6 +63,42 @@ final class HealthRestApiTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * The Health check filter can append a row with the canonical shape.
+	 *
+	 * @return void
+	 */
+	public function test_health_check_filter_appends_checks(): void {
+		$this->create_admin();
+
+		$filter = static function ( array $checks ): array {
+			$checks[] = array(
+				'id'     => 'test_extra',
+				'label'  => 'Test extra check',
+				'value'  => 'Present',
+				'status' => 'good',
+				'detail' => 'Appended by the filter.',
+			);
+
+			return $checks;
+		};
+
+		add_filter( 'updatronix_health_checks', $filter );
+
+		try {
+			$request  = new WP_REST_Request( 'GET', '/updatronix/v1/health' );
+			$response = rest_do_request( $request );
+			$data     = $response->get_data();
+		} finally {
+			remove_filter( 'updatronix_health_checks', $filter );
+		}
+
+		self::assertSame( 200, $response->get_status() );
+		self::assertCount( 7, $data['checks'] );
+		self::assertSame( 'test_extra', $data['checks'][6]['id'] );
+		self::assertSame( 'stable', $data['checks'][6]['intent'] );
+	}
+
+	/**
 	 * Diagnostics return the environment table and a text bundle.
 	 *
 	 * @return void

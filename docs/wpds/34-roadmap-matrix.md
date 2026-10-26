@@ -20,7 +20,7 @@ the backend exists, hide the control or label the state truthfully.
 | ID | Feature | Edition | Screen / module | Status | Depends on | Owning brief |
 |---|---|---|---|---|---|---|
 | R-01 | Complete data deletion on uninstall, as an opt-in setting | Free | Settings → Data | Implemented; audit pending | Settings screen audit | `FEAT-F-SETTINGS` (contract §9) |
-| R-02 | Automatic update queue to avoid disk-write errors | Pro | Update Shield + shared update kernel | Partial: table, scheduler, worker, and `/queue` routes implemented in 4.3a; `queue_live` false and the switch disabled until the live fixture | 4.1 discovery, 4.2 kernel, 4.3b live fixture | `FEAT-P-QUEUE` |
+| R-02 | Automatic update queue to avoid disk-write errors | Pro | Update Shield + shared update kernel | Partial: table, scheduler, worker, `/queue` routes, local live fixture, Shield summary, and Health checks implemented in 4.3b; `queue_live` false, switch disabled, owner decided dormant 2026-10-26; activation requires staging + a new decision | 4.1 discovery, 4.2 kernel, 4.3b local fixture, owner decision, 4.4 Flow | `FEAT-P-QUEUE` |
 | R-03 | Log manual updates from FTP or any external source | Free | Update logs + Settings | Planned | 2.2 Update logs, 2.1 Settings | New `FEAT-F-EXTERNAL-LOGGING` |
 | R-04 | Version-controlled items (git, svn) and abandoned-extension alerts | Pro | Update Shield | Partial: native VCS/Composer detector and cached abandoned advisory implemented in 4.3a; Flow bypass remains 4.4 | 4.1, 4.3a backend, 4.4 Flow | `FEAT-P-SHIELD` |
 | R-05 | Direct changelog links from the update log | Free | Update logs → details | Partial: readme changelog is rendered; direct external links are not | 2.2 Update logs | New `FEAT-F-CHANGELOG-LINKS` |
@@ -39,7 +39,7 @@ the backend exists, hide the control or label the state truthfully.
 | Pro bootstrap | Safe Mode, Flow, White Label, and Shield REST register only with an active license. | R-02, R-04, R-07, and R-08 cannot execute without a license. |
 | Pro assets | Panel chunks are dynamic; an inactive license downloads only the activation panel. | New Pro features must use their own panel chunk, not the activation chunk. |
 | Export formats | Free offers `txt` only; the REST allowlist rejects JSON in Free; Pro adds `csv`, `json`, and `xml` when licensed. The XML branch renders CSV and downloads `.txt`, so only CSV and JSON are claimed. | R-08 is Partial; XML needs a Free export-dialog fix before it can be claimed. |
-| Shield settings | `queue_enabled` is false by default, forced false while `queue_live` is false, and the switch is disabled. `flag_abandoned`, `re_enable`, `version_control_lock`, and `incompatible_behavior` now have 4.3a backends. | R-02, R-04, and R-07 are partial: backend present, live/screen pass pending. |
+| Shield settings | `queue_enabled` is false by default, forced false while `queue_live` is false, and the switch is disabled. The queue summary and five queue Health checks now exist on the existing surfaces. `flag_abandoned`, `re_enable`, `version_control_lock`, and `incompatible_behavior` have 4.3a backends. | R-02 is partial: local fixture passed; owner decided dormant; staging + new decision required. R-04 and R-07 have backends; live/screen pass pending. |
 | Flow runner | Runs before the update check, one chain at a time, with a transient lock; no live fixture test. | R-09 depends on the shared kernel and failure-path tests. |
 
 ## Dependencies and sequencing

@@ -1343,6 +1343,31 @@ decisions above.
 - **Notifications.** Engine runs keep the one-digest-per-run path. Adapter
   blocks send one digest per request and only for new event-key rows.
 
+**Implementation decisions (2026-10-26, 4.3b)**
+
+These prepare the live decision without flipping the gate.
+
+- **Local live fixture.** The fixture is a real WordPress integration test with
+  local plugin/theme zips and synthetic WordPress.org update-check responses.
+  No package or API socket is opened. It is not a staged host run.
+- **Read-only summary.** `Updatronix_Queue_Summary` is shared by the Shield
+  settings payload, the existing `/queue/summary` route, and Health. It never
+  claims, schedules, cancels, or executes.
+- **Existing surfaces only.** The Shield queue card uses the existing
+  retry/cancel/run routes; the actions are hidden while `queue_live` is false.
+  No new tab, screen, or route was added.
+- **Health filter.** Free exposes `updatronix_health_checks`; Pro appends five
+  read-only queue checks on the main site with an active license. The existing
+  Health surface is the only Health screen.
+- **Nullable insert.** Nullable queue fields are written as literal SQL `NULL`;
+  a zero datetime is not a lease.
+- **Max attempts.** The scheduler passes the kernel's filtered `max_attempts`
+  to planned jobs; the filter is no longer ignored by the plan.
+- **Live gate.** `queue_live` remains false, the switch remains disabled, the
+  save path forces false, and the engine kill switch remains false by default.
+  The owner decided on 2026-10-26 to keep the queue dormant.
+- **Flow.** No Flow file was touched; 4.4 owns the planner and runner removal.
+
 ### 12.3 Phase 4.4 — Flow planner and runner removal
 
 **Scope**
@@ -1491,8 +1516,10 @@ The owner delegated the remaining choices. These are final for 4.2–4.4.
 | 14 | License inactive | Cancel pending `origin=automatic` jobs with `license_inactive`, unschedule the worker, keep data. No execution while inactive. |
 
 **Product revisit point:** the queue default may be flipped to `true` only after
-the 4.3 live fixture passes and the owner makes a new explicit decision. No other
-decision in this table is open.
+the 4.3 live fixture passes and the owner makes a new explicit decision. The
+local 4.3b fixture passed on 2026-10-26; the owner decided the same day to keep
+the queue dormant. Activation needs a new explicit decision after a staged run.
+No other decision in this table is open.
 
 ---
 
@@ -1533,7 +1560,8 @@ decision in this table is open.
 | Claim | Where | Code path | Verdict | Action |
 |---|---|---|---|---|
 | “Blocks updates for plugins and themes tracked in Git or Composer.” | Shield lock card | Native VCS + Composer detector in the policy adapter; Flow still bypasses | **Partial** | Automatic path implemented in 4.3a; Flow closes the bypass in 4.4 |
-| “Queue automatic updates.” | Shield queue card | Queue table, scheduler, worker, and REST routes exist; `queue_live` false, switch disabled | **Dormant** | Implemented in 4.3a behind the live gate; advertise only after the live fixture |
+| “Queue automatic updates.” | Shield queue card | Queue table, scheduler, worker, REST routes, local live fixture, summary, and Health checks exist; `queue_live` false, switch disabled | **Dormant** | Local fixture passed 2026-10-26; owner decision pending; advertise only after activation |
+| “Queue health is reported.” | Health | Free `updatronix_health_checks` filter; Pro five read-only checks on the existing surface | **True** | Dormant jobs produce an attention row |
 | “Flag abandoned plugins.” | Shield switch | Cached WordPress.org `last_updated`, advisory, capped | **True** | Advisory rows appear only when the switch is on |
 | “Re-enable auto-updates automatically.” | Shield switch | Ledger + newer-target policy check + native toggle | **True** | Same-target re-enable stays manual |
 | “Cancel this update only.” | Shield radio | `cancel` leaves the native toggle untouched; core always cancels | **True** | — |
@@ -1587,6 +1615,6 @@ decision in this table is open.
 
 ---
 
-**End of ADR.** Phase 4.2 may start: no owner decision remains. The first gate is
-the Pro integration suite and the dormant kernel; 4.3 and 4.4 follow only after
-their exit criteria pass.
+**End of ADR.** Phases 4.2, 4.3a, and 4.3b are implemented. The queue remains
+dormant by owner decision (2026-10-26); activation requires a new decision after
+a staged run. 4.4 follows only after that.
