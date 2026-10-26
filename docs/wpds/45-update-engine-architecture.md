@@ -1303,10 +1303,45 @@ decision.
 - **4.3-D7 — Notifications.** One digest per run; event-key dedupe; no
   client-supplied recipients.
 - **4.3-D8 — Queue default.** Change the default to **false** for new installs
-  and for sites that never saved the key; preserve an explicitly saved `true`.
-  Activate the worker only after the exit criteria pass. The UI must not claim
-  queueing before the worker is active. `queue_enabled` only controls automatic
-  (non-Flow) jobs; Flow jobs always use the queue and drain one per worker run.
+  and for sites that never saved the key. During the dormant period, migrate a
+  stored `true` to `false` once; the save path rejects `true` while
+  `updatronix_pro_queue_live` is false, and the UI disables the switch. The
+  queue can be advertised and the switch re-enabled only after the live
+  end-to-end fixture passes and the owner makes a new explicit decision.
+  `queue_enabled` only controls automatic (non-Flow) jobs; Flow jobs always use
+  the queue and drain one per worker run. This supersedes the earlier
+  “preserve an explicitly saved `true`” wording (owner decision, 2026-10-26).
+
+**Implementation decisions (2026-10-26, 4.3a)**
+
+These pin the points 4.3a had to resolve. They do not change the 4.3/4.4
+decisions above.
+
+- **Policy source.** Safe Mode delegates compatibility to
+  `Updatronix_Compatibility`; there is no second rule implementation.
+- **Engine vs adapter chain.** The engine chain is the full ten-policy list.
+  The adapter chain is the blocking subset (native guards, WordPress/PHP
+  compatibility, version control, abandoned advisory); delay is already in
+  Free's native filter chain, and ownership is the handshake.
+- **Native opt-in.** Automatic plugin/theme jobs must still be in the native
+  `auto_update_plugins`/`auto_update_themes` option. This is part of
+  `engine_enabled`, not a new policy.
+- **Abandoned is cache-only on the execution path.** The recheck endpoint is
+  the only network entry point; the 20-lookup cap applies there.
+- **Recheck requeues the same target only.** A newer target is left to the
+  scheduler; `failed`/`uncertain` still need an explicit retry.
+- **Run guard.** “One active run” means a claimed or running row, not a
+  pending one. Pending rows are queued work; treating them as active would
+  deadlock the worker.
+- **Queue off still drains Flow/manual.** The worker cancels pending automatic
+  rows but continues to drain explicit jobs, as 4.3-D8 requires.
+- **Queue live gate.** `updatronix_pro_queue_live` is false by default; the
+  Shield switch is disabled and the save path forces `queue_enabled=false`.
+  Only a recorded live fixture and a new owner decision flip it.
+- **Blocked history.** `GET /shield/blocked` uses the Free logger's DB-level
+  action/date filters and SQL pagination; no 200-row post-filter remains.
+- **Notifications.** Engine runs keep the one-digest-per-run path. Adapter
+  blocks send one digest per request and only for new event-key rows.
 
 ### 12.3 Phase 4.4 — Flow planner and runner removal
 
@@ -1442,7 +1477,7 @@ The owner delegated the remaining choices. These are final for 4.2–4.4.
 |---|---|---|
 | 1 | Executor | Native `WP_Automatic_Updater::update()` adapter; raw upgraders forbidden. |
 | 2 | Scheduler anchor | `wp_maybe_auto_update` priority 1, after discovery, before core's run; chain steps are serialized one per worker run. D-16 is amended accordingly. |
-| 3 | Queue default | `false` for new installs and for sites that never saved the key; preserve an explicitly saved `true`. Activate the worker only after the 4.3 exit criteria. |
+| 3 | Queue default | `false` for new installs and for sites that never saved the key. A stored `true` is migrated to `false` once while the queue is dormant; the save path forces false until the live fixture passes. Activate the worker only after the 4.3 exit criteria. |
 | 4 | Queue disabled | Cancel pending `origin=automatic` jobs; Flow jobs continue because they are explicit. |
 | 5 | Uninstall | Always drop the queue table, from the main site, with the network-admin/WP-CLI guard. Settings/logs keep the Free opt-in. |
 | 6 | VCS lock off | Native VCS checkouts are always denied, automatic and Flow. Lock off only removes the Composer block; it never overrides WordPress's VCS refusal. |
@@ -1479,7 +1514,7 @@ decision in this table is open.
 | 4.3-D5 | Re-enable only a newer release, only Shield-disabled items. | 4.3 | Resolved |
 | 4.3-D6 | Blocked history reads the Free log at DB level; no second table. | 4.3 | Resolved |
 | 4.3-D7 | Notifications are one deduped digest per run. | 4.3 | Resolved |
-| 4.3-D8 | Queue default is false for new/unsaved installs; activate after exit criteria; UI cannot claim it earlier. | 4.3 | Resolved |
+| 4.3-D8 | Queue default is false for new/unsaved installs; a stored true is migrated to false once while dormant; the save path and switch stay off until the live fixture passes. | 4.3 | Resolved |
 | 4.4-D1 | Flow planner owns ordering; topological, stable, deduplicated. | 4.4 | Resolved |
 | 4.4-D2 | `POST /flow/run` + `GET /flow/runs/{run_id}` + UI run action. | 4.4 | Resolved |
 | 4.4-D3 | Every Flow job passes Shield policies; no bypass. | 4.4 | Resolved |
@@ -1497,16 +1532,16 @@ decision in this table is open.
 
 | Claim | Where | Code path | Verdict | Action |
 |---|---|---|---|---|
-| “Blocks updates for plugins and themes tracked in Git or Composer.” | Shield lock card | No detector; Flow bypasses native VCS | **False** | Implement in 4.3; native VCS is never overridden |
-| “Queue automatic updates.” | Shield queue card | `queue_enabled` stored; no consumer | **False** | Implement in 4.3; default off until the live test |
-| “Flag abandoned plugins.” | Shield switch | `flag_abandoned` stored; no consumer | **False** | Implement advisory in 4.3 |
-| “Re-enable auto-updates automatically.” | Shield switch | `re_enable` stored; no consumer | **False** | Implement in 4.3 |
-| “Cancel this update only.” | Shield radio | `incompatible_behavior` stored; no consumer | **False** | Implement in 4.3 |
+| “Blocks updates for plugins and themes tracked in Git or Composer.” | Shield lock card | Native VCS + Composer detector in the policy adapter; Flow still bypasses | **Partial** | Automatic path implemented in 4.3a; Flow closes the bypass in 4.4 |
+| “Queue automatic updates.” | Shield queue card | Queue table, scheduler, worker, and REST routes exist; `queue_live` false, switch disabled | **Dormant** | Implemented in 4.3a behind the live gate; advertise only after the live fixture |
+| “Flag abandoned plugins.” | Shield switch | Cached WordPress.org `last_updated`, advisory, capped | **True** | Advisory rows appear only when the switch is on |
+| “Re-enable auto-updates automatically.” | Shield switch | Ledger + newer-target policy check + native toggle | **True** | Same-target re-enable stays manual |
+| “Cancel this update only.” | Shield radio | `cancel` leaves the native toggle untouched; core always cancels | **True** | — |
 | “Run %s.” | Flow card | Toggles `enabled`; no run route | **False** | Rename in 4.4; add run in 4.4/5.2 |
 | “Chains run before the regular update schedule.” | Flow copy | Runner on pre-check hook | **True but stale data** | Move anchor or refresh in 4.4 |
 | “Stops on the first failure.” | Flow copy | Runner returns on first error | **True** | Keep, add per-step state |
-| “Update Shield stops incompatible updates.” | License feature list | Auto filter only; Flow bypasses | **Partial** | 4.4 closes the bypass |
-| “Blocked history last 30 days.” | Shield table | 200-row post-filter | **Partial** | 4.3 DB-level query |
+| “Update Shield stops incompatible updates.” | License feature list | Automatic path implemented; Flow bypass remains | **Partial** | 4.4 closes the bypass |
+| “Blocked history last 30 days.” | Shield table | DB-level action/date filter and SQL pagination | **True** | — |
 
 ### 15.2 File inventory
 

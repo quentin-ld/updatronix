@@ -1291,3 +1291,79 @@ Super-Admin rule is covered by the pure capability matrix.
 2. Phase 4.4: the Flow planner, `POST /flow/run`, run summaries, and removal of
    the old runner.
 3. Phase 6: Pro E2E and the live Multisite pass when the environment allows.
+
+## 2026-10-26 · Phase 4.3a — Shield policies on the shared kernel
+
+Branch `major/wpds`, Free and Pro. No version bump, no commit.
+
+### What landed
+
+| Area | Change |
+|---|---|
+| Policies | Ordered engine chain: license, engine/native opt-in, native guards, WordPress compatibility, PHP compatibility, Free delay, VCS/Composer, abandoned advisory, pending offer, chain dependency. The adapter chain is the blocking subset for non-engine items. |
+| Compatibility | `Updatronix_Compatibility` is the only rule source; Safe Mode delegates to it. |
+| Ownership | `auto_update_*` handshake at `PHP_INT_MAX`; the queue table is the source of truth; active and unresolved terminal rows are barriers; the executor's scoped flag passes its own job; no second lock. |
+| Behavior | `disable` writes the native toggle and the ledger; `cancel` does not; core always cancels. Recheck honors the setting. |
+| Re-enable | Shield-disabled items only, newer target only, blocking-policy check, ledger removal, `auto_update_reenabled`. |
+| VCS/Composer | Native VCS is authoritative. Composer requires the item-root pair, realpath containment, no symlinks, cache invalidation, fail-open, and the extension filter. |
+| Abandoned | Fixed WordPress.org data, 12 months, 7-day bounded cache, 20 lookups, advisory only; policies are cache-only. |
+| Scheduler | `wp_maybe_auto_update` priority 1, hourly worker + earliest-availability follow-ups, one claimed/running run, expired-lease sweep, retention, queue-off automatic cancellation, Flow/manual drainage. |
+| Queue REST | List, summary, retry, cancel, run; capability + Super Admin + license + engine availability; per-user cooldown; 404/409/429. |
+| Blocked history | DB-level action/date filter and SQL pagination; the UI loads more pages. |
+| Notifier | Engine one digest per run; adapter one digest per request for new event-key rows; no per-item email. |
+| Settings | `queue_enabled` default false; one-shot stored-true migration; forced false while `queue_live` is false; `version_control_lock` default true. |
+| UI | Disabled queue switch with honest dormant copy; real Composer lock; core cancel note; newer-release re-enable copy; abandoned advisories; blocked pagination; license copy. |
+| Uninstall | Removes the Shield ledger, migration flag, and abandoned cache in addition to the queue table/settings/license. |
+
+### Verification
+
+| Check | Result |
+|---|---|
+| Pro `bin/harness test` | 310 tests, 1097 assertions, pass. |
+| Pro `bin/harness integration` | 79 tests, 733 assertions, pass; 1 intentional Multisite-only skip. |
+| Pro `bin/harness test:js` | 41 tests, pass. |
+| Pro `bin/harness lint:js` | Pass, 0 warnings. |
+| Pro `bin/harness lint:files` on modified PHP | Pass. |
+| Pro `bin/harness lint` (full) | Pass; PHPStan no errors. |
+| Pro `bin/harness build` | Pass. |
+| Pro `bin/harness counterfactual` | Recorded coverage finding: 12 of 61 executed changed lines checked (4 killed, 8 reported surviving); manual substitutions kill six, one is equivalent, two are covered by the new defaults test; the remaining 49 were not asked. Not claimed as a pass. |
+| Pro `bin/harness mutation` | Not run in 4.3a; the counterfactual gate was chosen for this diff. |
+| Free `bin/harness test` | No Free code changed; baseline 216 tests / 422 assertions. |
+| Free `bin/harness integration` | No Free code changed; baseline 77 tests / 208 assertions, 13 skips. |
+| E2E | Not run; still blocked by `libnspr4.so`. Not claimed. |
+
+The integration proof covers the real policy chain on a blocked plugin, a
+blocked theme, `disable` vs `cancel`, recheck requeue, scheduler idempotence,
+one worker run, queue-off manual drainage, expired-lease recovery, the
+cross-request handshake, `/queue` gates and callbacks, DB-level blocked history,
+and the one-shot queue migration. Unit coverage covers every policy, the chain
+order/short-circuit, re-enable, Composer detection, abandoned cache/cap, the
+ledger, and the ownership handshake.
+
+### Dormancy
+
+The queue is dormant for three independent reasons:
+
+1. `updatronix_pro_update_engine_enabled` is still false by default.
+2. `queue_enabled` is false by default, forced false on save while
+   `updatronix_pro_queue_live` is false, and a stored true is migrated once.
+3. The Shield switch is disabled with honest copy.
+
+No live queue run, no live Multisite run, and no real disk-full test were
+available. E2E remains blocked.
+
+### Known gaps
+
+1. 4.3b/5.1 still owns the live queue fixture, the queue summary, and Site
+   Health queue checks.
+2. Flow still uses the old runner and bypasses Shield; 4.4 closes it.
+3. The queue switch is disabled, not removed.
+4. The Multisite live guard is skipped in the single-site run; the Super-Admin
+   matrix covers the rule.
+5. No version bump and no commit.
+
+### Next
+
+1. Phase 4.3b: live queue fixture, Screen claims, queue summary, and Site
+   Health, still behind the live gate.
+2. Phase 4.4: Flow planner, `POST /flow/run`, and runner removal.
