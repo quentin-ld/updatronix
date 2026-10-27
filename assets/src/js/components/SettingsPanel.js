@@ -11,7 +11,7 @@ import PageHeader from '../shell/PageHeader';
 import SaveBar, { SaveButton } from '../shell/SaveBar';
 import Section from '../shell/Section';
 import wpds from '../shell/wpds';
-import { isSettingsDirty } from './settingsDraft';
+import { canLeaveDraft, isSettingsDirty } from './settingsDraft';
 
 const {
 	CheckboxControl,
@@ -78,6 +78,7 @@ export const SettingsPanel = memo( function SettingsPanelForm( {
 	settings,
 	saveSettings,
 	saving,
+	onDirtyChange,
 } ) {
 	const [ draft, setDraft ] = useState( settings );
 	const [ recipientQuery, setRecipientQuery ] = useState( '' );
@@ -91,6 +92,51 @@ export const SettingsPanel = memo( function SettingsPanelForm( {
 	}, [ settings ] );
 
 	const isDirty = isSettingsDirty( draft, savedRef.current );
+
+	useEffect( () => {
+		if ( ! isDirty ) {
+			return undefined;
+		}
+
+		const guardLink = ( event ) => {
+			const target = event.target;
+			const link =
+				target && target.closest
+					? target.closest(
+							'.updatronix-rail-nav a, .updatronix-breadcrumb a, .updatronix-mobile-bar a'
+						)
+					: null;
+
+			if ( ! link ) {
+				return;
+			}
+
+			if ( ! canLeaveDraft( { dirty: true } ) ) {
+				event.preventDefault();
+				event.stopPropagation();
+			}
+		};
+
+		document.addEventListener( 'click', guardLink, true );
+
+		return () => {
+			document.removeEventListener( 'click', guardLink, true );
+		};
+	}, [ isDirty ] );
+
+	useEffect( () => {
+		onDirtyChange?.( isDirty );
+		window.updatronixDirty = isDirty;
+		window.dispatchEvent(
+			new CustomEvent( 'updatronix:dirty-change', {
+				detail: { dirty: isDirty },
+			} )
+		);
+
+		return () => {
+			window.updatronixDirty = false;
+		};
+	}, [ isDirty, onDirtyChange ] );
 	const emailsOff =
 		! draft.notify_enabled || draft.notificationsMode === 'disabled';
 	const recipients = parseRecipients( draft.notify_emails );

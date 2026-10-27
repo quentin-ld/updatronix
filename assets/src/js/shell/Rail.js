@@ -11,6 +11,7 @@ import { __, sprintf } from '@wordpress/i18n';
 
 import wpds from './wpds';
 import { GROUPS, getTabUrl } from './routes';
+import { canLeaveDraft } from '../components/settingsDraft';
 
 const { Badge, Drawer, Icon, Text } = wpds.ui;
 const { menu } = wpds.icons;
@@ -35,6 +36,11 @@ const brand = settings.brand || {};
 function RailNav( { destinations, currentSlug, onNavigate, className = '' } ) {
 	const handleClick = ( event, slug ) => {
 		event.preventDefault();
+
+		if ( window.updatronixDirty && ! canLeaveDraft( { dirty: true } ) ) {
+			return;
+		}
+
 		onNavigate( slug );
 	};
 

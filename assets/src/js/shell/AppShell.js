@@ -9,6 +9,7 @@ import { useEffect, useRef } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 
 import Rail from './Rail';
+import { canLeaveDraft } from '../components/settingsDraft';
 import { getTabUrl } from './routes';
 
 const settings =
@@ -84,6 +85,16 @@ export default function AppShell( {
 											href={ getTabUrl( 'logs' ) }
 											onClick={ ( event ) => {
 												event.preventDefault();
+
+												if (
+													window.updatronixDirty &&
+													! canLeaveDraft( {
+														dirty: true,
+													} )
+												) {
+													return;
+												}
+
 												onNavigate( 'logs' );
 											} }
 										>

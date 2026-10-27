@@ -283,6 +283,7 @@ export const SchedulePanel = memo( function SchedulePanelComponent( {
 								max={ String( MAX_HOLD_DAYS ) }
 								value={ String( hold ) }
 								onChange={ handleHoldChange }
+								onBlur={ () => setHoldError( '' ) }
 							/>
 							{ holdError && (
 								<Text

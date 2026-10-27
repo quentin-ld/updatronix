@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from '@wordpress/element';
+import { useState, useEffect, useCallback, useRef } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 
 import SnackbarHost from '../components/SnackbarHost';
@@ -88,11 +88,12 @@ export const SettingsPage = () => {
 
 	const destinations = visibleDestinations;
 
-	const [ hasUnsavedChanges, setHasUnsavedChanges ] = useState( false );
+	const hasUnsavedChangesRef = useRef( false );
 
 	useEffect( () => {
 		const handleDirtyChange = ( event ) => {
-			setHasUnsavedChanges( Boolean( event.detail?.dirty ) );
+			const dirty = Boolean( event.detail?.dirty );
+			hasUnsavedChangesRef.current = dirty;
 		};
 
 		window.addEventListener( 'updatronix:dirty-change', handleDirtyChange );
@@ -114,7 +115,7 @@ export const SettingsPage = () => {
 				return;
 			}
 
-			if ( hasUnsavedChanges ) {
+			if ( hasUnsavedChangesRef.current ) {
 				if ( ! canLeaveDraft( { dirty: true } ) ) {
 					return;
 				}
@@ -123,7 +124,7 @@ export const SettingsPage = () => {
 			setSelectedSlug( slug );
 			window.history.pushState( null, '', getTabUrl( slug ) );
 		},
-		[ destinations, hasUnsavedChanges ]
+		[ destinations ]
 	);
 
 	useEffect( () => {
@@ -137,7 +138,7 @@ export const SettingsPage = () => {
 				return;
 			}
 
-			if ( hasUnsavedChanges ) {
+			if ( hasUnsavedChangesRef.current ) {
 				if ( ! canLeaveDraft( { dirty: true } ) ) {
 					window.history.pushState(
 						null,
@@ -154,7 +155,7 @@ export const SettingsPage = () => {
 		window.addEventListener( 'popstate', handlePopState );
 
 		return () => window.removeEventListener( 'popstate', handlePopState );
-	}, [ destinations, hasUnsavedChanges, selectedSlug ] );
+	}, [ destinations, selectedSlug ] );
 
 	useEffect( () => {
 		if ( destinations.some( ( item ) => item.slug === selectedSlug ) ) {
@@ -253,6 +254,9 @@ export const SettingsPage = () => {
 						settings={ pluginSettings }
 						saveSettings={ saveSettings }
 						saving={ saving }
+						onDirtyChange={ ( dirty ) => {
+							hasUnsavedChangesRef.current = Boolean( dirty );
+						} }
 					/>
 				);
 			case 'health':
