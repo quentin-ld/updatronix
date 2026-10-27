@@ -1424,3 +1424,54 @@ activation requires a new explicit decision after a staged run.
    staged run and a new explicit decision.
 2. Phase 4.4: Flow planner, `POST /flow/run`, and runner removal. Stop before
    4.4 until the owner asks for it.
+
+## 2026-10-27 · Phase 4.4 — Flow planner on the shared kernel
+
+Branch `major/wpds`, Free and Pro. No version bump, no commit. The queue is
+still dormant: `queue_live=false`, `queue_enabled=false`, the Shield queue
+switch is disabled. Flow now executes through the shared kernel, so the engine
+kill switch defaults to true (**4.4-D9**); the automatic queue is still off.
+
+### What landed
+
+| Area | Change |
+|---|---|
+| Planner | `Updatronix_Flow_Planner` validates installed items, 20 chains/50 steps, duplicate steps, core-last, and cycles; builds one stable topological order over the merged graph; deduplicates by item and target; resolves native offers. |
+| Plan facts | `Updatronix_Update_Plan` carries `canceled[]` and `errors[]` in addition to skipped/deduplicated/blocked. |
+| Runner | `Updatronix_Flow_Runner` plans above `Updatronix_Update_Kernel`, enqueues every job through the Shield policy chain, starts one step per worker, and stores the run summary in the existing bounded option. |
+| Policy | Chain dependency is allowed at enqueue for a new pending row and remains authoritative before execution; the queue claim already enforces predecessor success. No policy is bypassed. |
+| Scheduling | Flow is planned at `wp_maybe_auto_update` priority 1, after discovery and before `WP_Automatic_Updater::run()`; `queue_enabled` controls only the automatic queue. |
+| REST | `POST /flow/run` and `GET /flow/runs/{run_id}` with capability, Super Admin, license, engine availability, nonce via cookie auth, and a per-user/per-chain 5-minute cooldown. |
+| Storage | `updatronix_pro_flow_chains` is `{version:1, chains:[…]}`; a bare list is migrated once and is not dual-read. |
+| UI | Real Run now per chain, polling, per-step states, run summary, `Enable` toggle, honest one-step/Shield copy; no new tab. |
+| Removal | The old Flow runner file, require, hook registration, and transient lock are deleted. One kernel, one native lock, one journal, one table. |
+| Task 0 | Closed the three Flow-relevant 4.3c gaps: job integer hydration, plan `created_at` fallback, kernel license cast. |
+
+### Verification
+
+| Check | Result |
+|---|---|
+| Pro `bin/harness test` | 348 tests, 1279 assertions, pass. |
+| Pro `bin/harness integration` | 113 tests, 1028 assertions, pass; 1 intentional Multisite-only skip. |
+| Pro `bin/harness test:js` | 61 tests, pass. |
+| Pro `bin/harness lint:js` | Pass, 0 warnings. |
+| Pro `bin/harness lint:files` on changed PHP | Pass, 0 errors and 0 warnings (25 files). |
+| Pro `bin/harness build` | Pass. |
+| Pro `bin/harness counterfactual` | 28 checked of 28 executed changed lines; 22 killed, 0 survived, 6 classified equivalent. 76 lines are substitutable and 28 unit-executed; integration-only lines are outside the gate. **Not a whole-diff pass.** |
+| Free suites | Not re-run: no Free code changed (documentation only). |
+| E2E | `bin/harness e2e --list` OK (2 tests); the full suite was not run or claimed. |
+
+### Known gaps
+
+1. The local live fixture is not a staged host with real cron.
+2. No live Multisite run.
+3. E2E remains blocked by `libnspr4.so`.
+4. The three remaining 4.3c gaps stay Phase 6 debt.
+5. The queue is dormant by owner decision; 4.4 did not activate it.
+
+### Next
+
+1. Phase 5.1/5.2 can wire truthful Shield claims and build on the delivered Flow
+   action; no second Flow screen.
+2. Phase 6: remaining 4.3c gaps, staged live run, Multisite live pass, E2E.
+3. Queue activation still requires a new owner decision after a staged run.

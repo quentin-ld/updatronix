@@ -1434,6 +1434,12 @@ These prepare the live decision without flipping the gate.
 Do not keep the old runner “for one release”. A dormant second runner is a
 second execution path and a false safety guarantee.
 
+**Implementation note (2026-10-27).** 4.4 is implemented as specified, with one
+addition: **4.4-D9** turns the engine kill switch on by default so Flow can
+execute through the kernel. The automatic queue stays dormant; `queue_enabled`,
+`queue_live`, and the Shield switch remain false/disabled. See doc 50 for the
+run lifecycle, tests, and counterfactual.
+
 ### 12.5 Phase 5 handoff (not in scope)
 
 - 5.1 wires the Shield screen claims and queue summary.
@@ -1550,6 +1556,7 @@ No other decision in this table is open.
 | 4.4-D6 | Scheduler anchor is `wp_maybe_auto_update` priority 1 after discovery; chain steps are serialized one per worker run. | 4.4 | Resolved |
 | 4.4-D7 | Core is allowed only as the last step of a chain. | 4.4 | Resolved |
 | 4.4-D8 | One active run; manual run rate limit; 409/429. | 4.4 | Resolved |
+| 4.4-D9 | Engine kill switch defaults true so Flow can execute; `queue_enabled`, `queue_live`, and the Shield queue switch stay false/disabled. | 4.4 | Resolved |
 
 ---
 
@@ -1578,7 +1585,8 @@ No other decision in this table is open.
 | `inc/update-shield/class-updatronix-safe-mode.php` | Filters, compatibility, block records, disable, email |
 | `inc/update-shield/class-updatronix-update-shield.php` | REST, permissions, blocked history, recheck |
 | `inc/update-flow/class-updatronix-update-flow.php` | Storage, validation, cycle, routes |
-| `inc/update-flow/class-updatronix-update-flow-runner.php` | Hook, lock, raw execution, logging |
+| `inc/update-flow/class-updatronix-flow-runner.php` | Plan, enqueue through the kernel, one step per worker, run summary |
+| `inc/update-engine/class-updatronix-flow-planner.php` | Chain graph → ordered, deduplicated plan |
 | `inc/classes/class-updatronix-pro-bootstrap.php` | Gating and load order |
 | `inc/settings/options.php` | Shield defaults and save |
 | `inc/classes/class-updatronix-pro-uninstall.php` | Uninstall today |

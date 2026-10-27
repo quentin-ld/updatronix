@@ -20,14 +20,14 @@ the backend exists, hide the control or label the state truthfully.
 | ID | Feature | Edition | Screen / module | Status | Depends on | Owning brief |
 |---|---|---|---|---|---|---|
 | R-01 | Complete data deletion on uninstall, as an opt-in setting | Free | Settings → Data | Implemented; audit pending | Settings screen audit | `FEAT-F-SETTINGS` (contract §9) |
-| R-02 | Automatic update queue to avoid disk-write errors | Pro | Update Shield + shared update kernel | Partial: table, scheduler, worker, `/queue` routes, local live fixture, Shield summary, and Health checks implemented in 4.3b; `queue_live` false, switch disabled, owner decided dormant 2026-10-26; activation requires staging + a new decision | 4.1 discovery, 4.2 kernel, 4.3b local fixture, owner decision, 4.4 Flow | `FEAT-P-QUEUE` |
+| R-02 | Automatic update queue to avoid disk-write errors | Pro | Update Shield + shared update kernel | Partial: table, scheduler, worker, `/queue` routes, local live fixture, Shield summary, and Health checks implemented; `queue_live` false, switch disabled, owner decided dormant 2026-10-26; activation requires staging + a new decision | 4.1 discovery, 4.2 kernel, 4.3b local fixture, owner decision, 4.4 Flow | `FEAT-P-QUEUE` |
 | R-03 | Log manual updates from FTP or any external source | Free | Update logs + Settings | Planned | 2.2 Update logs, 2.1 Settings | New `FEAT-F-EXTERNAL-LOGGING` |
-| R-04 | Version-controlled items (git, svn) and abandoned-extension alerts | Pro | Update Shield | Partial: native VCS/Composer detector and cached abandoned advisory implemented in 4.3a; Flow bypass remains 4.4 | 4.1, 4.3a backend, 4.4 Flow | `FEAT-P-SHIELD` |
+| R-04 | Version-controlled items (git, svn) and abandoned-extension alerts | Pro | Update Shield | Partial: native VCS/Composer detector and cached abandoned advisory implemented in 4.3a; 4.4 removed the Flow bypass, so every Flow step now passes the same policies | 4.1, 4.3a backend, 4.4 Flow | `FEAT-P-SHIELD` |
 | R-05 | Direct changelog links from the update log | Free | Update logs → details | Partial: readme changelog is rendered; direct external links are not | 2.2 Update logs | New `FEAT-F-CHANGELOG-LINKS` |
 | R-06 | White label: rebrand Updatronix with the agency's name, mark, and colors | Pro | White label | Implemented; audit complete 2026-10-26 (colors applied, real previews, logo limits) | 1.4 gating | `FEAT-P-WHITE-LABEL` |
 | R-07 | Re-enable automatic updates automatically when a newer release is tested and compatible | Pro | Update Shield | Partial: ledger, newer-target policy check, and `auto_update_reenabled` implemented in 4.3a; same target stays manual | 4.1, 4.3a backend | `FEAT-P-SHIELD` |
 | R-08 | Advanced exports: CSV, XML, and JSON | Pro | Update logs → export | Partial: CSV and JSON work; XML selection renders the CSV report and downloads `.txt`, so XML is deferred to Phase 5 | 1.3 format gate, 1.4 Pro format filter | `FEAT-P-EXPORTS` |
-| R-09 | Update Flow: dependency chains between items, e.g. payment gateways before WooCommerce | Pro | Update Flow | Partial: storage, validation, REST, UI, and runner exist; live run and architecture refactor remain | 4.1, 4.4 Flow refactor | `FEAT-P-FLOW` |
+| R-09 | Update Flow: dependency chains between items, e.g. payment gateways before WooCommerce | Pro | Update Flow | Implemented: planner above the shared kernel, stable topological order, Shield on every step, `POST /flow/run` + run summary, per-step UI, v1 storage migration, old runner deleted, local live fixture; staging/E2E pending | 4.1, 4.4 Flow refactor | `FEAT-P-FLOW` |
 | R-10 | License prices 12 $ and 19 $ | Out of code | Readme / sales page | Out of code | Owner copy decision | None |
 
 ## What is already true in the code
@@ -40,7 +40,7 @@ the backend exists, hide the control or label the state truthfully.
 | Pro assets | Panel chunks are dynamic; an inactive license downloads only the activation panel. | New Pro features must use their own panel chunk, not the activation chunk. |
 | Export formats | Free offers `txt` only; the REST allowlist rejects JSON in Free; Pro adds `csv`, `json`, and `xml` when licensed. The XML branch renders CSV and downloads `.txt`, so only CSV and JSON are claimed. | R-08 is Partial; XML needs a Free export-dialog fix before it can be claimed. |
 | Shield settings | `queue_enabled` is false by default, forced false while `queue_live` is false, and the switch is disabled. The queue summary and five queue Health checks now exist on the existing surfaces. `flag_abandoned`, `re_enable`, `version_control_lock`, and `incompatible_behavior` have 4.3a backends. | R-02 is partial: local fixture passed; owner decided dormant; staging + new decision required. R-04 and R-07 have backends; live/screen pass pending. |
-| Flow runner | Runs before the update check, one chain at a time, with a transient lock; no live fixture test. | R-09 depends on the shared kernel and failure-path tests. |
+| Flow runner | 4.4 replaced the inline runner with `Updatronix_Flow_Planner` above the kernel; every step passes the Shield chain, one step runs per worker, and `POST /flow/run` + `GET /flow/runs/{id}` expose the run. The old runner, hook, and transient lock are deleted. | R-09 is implemented; staging/E2E remain. |
 
 ## Dependencies and sequencing
 
@@ -49,7 +49,7 @@ the backend exists, hide the control or label the state truthfully.
 | 1 | 4.1 discovery / ADR | Defines the job model, policy boundaries, failure semantics, and the Shield/Flow split before code. |
 | 2 | 4.2 shared queue and executor | R-02, R-04, R-07, and R-09 need one lock, one retry policy, one log, and one upgrader path. |
 | 3 | 4.3 Shield refactor | R-02, R-04, and R-07 are policies on top of the kernel, not three new hook clusters. |
-| 4 | 4.4 Flow refactor | R-09 becomes a planner on the same kernel; the current inline runner is removed. |
+| 4 | 4.4 Flow refactor | R-09 is a planner on the same kernel; the inline runner is removed. Implemented 2026-10-27; staging/E2E remain. |
 | 5 | 5.1 Shield screen + features | Wires R-02, R-04, and R-07, or hides them until each is real. |
 | 6 | 5.2 Flow screen + features | Wires R-09 and exercises a live fixture run. |
 | 7 | 5.3 advanced exports | R-08; independent of Shield/Flow once the format filter exists. |
