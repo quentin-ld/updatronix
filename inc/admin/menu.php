@@ -36,7 +36,7 @@ function updatronix_admin_body_class( string $classes ): string {
 
 		$brand = updatronix_get_admin_brand();
 
-		if ( ! empty( $brand['replace'] ) && '#F0F0F1' === strtoupper( (string) ( $brand['menuColor'] ?? '' ) ) ) {
+		if ( (bool) ( $brand['replace'] ?? false ) && '#F0F0F1' === strtoupper( (string) ( $brand['menuColor'] ?? '' ) ) ) {
 			$classes .= ' updatronix-brand-menu-light';
 		}
 	}

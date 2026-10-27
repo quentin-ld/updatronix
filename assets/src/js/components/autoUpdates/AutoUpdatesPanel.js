@@ -390,7 +390,10 @@ export function AutoUpdatesPanel( {
 
 				<Section
 					title={ __( 'Themes', 'updatronix' ) }
-					description={ __( 'Per-theme control.', 'updatronix' ) }
+					description={ __(
+						'Choose how each theme updates.',
+						'updatronix'
+					) }
 				>
 					{ ( data.themes || [] ).length === 0 && (
 						<Text variant="body-sm" className="updatronix-muted">
@@ -423,7 +426,10 @@ export function AutoUpdatesPanel( {
 
 				<Section
 					title={ __( 'Plugins', 'updatronix' ) }
-					description={ __( 'Per-plugin control.', 'updatronix' ) }
+					description={ __(
+						'Choose how each plugin updates.',
+						'updatronix'
+					) }
 				>
 					{ ( data.plugins || [] ).length === 0 && (
 						<Text variant="body-sm" className="updatronix-muted">

@@ -125,6 +125,10 @@ export function LogDetailsContent( { log, logId, fetchLogDetails } ) {
 		typeof currentLog.product_url === 'string'
 			? currentLog.product_url
 			: '';
+	const changelogUrl =
+		typeof currentLog.changelog_url === 'string'
+			? currentLog.changelog_url
+			: '';
 
 	const summaryRows = [
 		[ __( 'Item', 'updatronix' ), currentLog.item_name || EMPTY_FALLBACK ],
@@ -168,7 +172,7 @@ export function LogDetailsContent( { log, logId, fetchLogDetails } ) {
 	const changelogTitle =
 		'core' === typeKey
 			? __( 'Release notes', 'updatronix' )
-			: __( 'Latest changelog · readme.txt', 'updatronix' );
+			: __( 'Latest changelog', 'updatronix' );
 
 	return (
 		<div className="updatronix-log-detail">
@@ -220,6 +224,18 @@ export function LogDetailsContent( { log, logId, fetchLogDetails } ) {
 				</Link>
 			) }
 
+			{ changelogUrl && (
+				<Link
+					href={ changelogUrl }
+					openInNewTab
+					className="updatronix-log-detail-link"
+				>
+					{ 'core' === typeKey
+						? __( 'Open release notes', 'updatronix' )
+						: __( 'Open changelog', 'updatronix' ) }
+				</Link>
+			) }
+
 			<dl className="updatronix-log-detail-summary">
 				{ summaryRows.map(
 					( [ label, value ] ) =>
@@ -264,7 +280,7 @@ export function LogDetailsContent( { log, logId, fetchLogDetails } ) {
 						variant="body-md"
 						className="updatronix-log-detail-heading"
 					>
-						{ __( 'Process details', 'updatronix' ) }
+						{ __( 'Update details', 'updatronix' ) }
 					</Text>
 					<pre className="updatronix-log-detail-process">
 						{ currentLog.message }
@@ -275,7 +291,7 @@ export function LogDetailsContent( { log, logId, fetchLogDetails } ) {
 			{ currentLog.trace && (
 				<details className="updatronix-log-detail-trace">
 					<summary className="updatronix-log-detail-toggle">
-						{ __( 'Advanced details', 'updatronix' ) }
+						{ __( 'Technical details', 'updatronix' ) }
 					</summary>
 					<p className="updatronix-log-detail-redaction-note">
 						{ __(

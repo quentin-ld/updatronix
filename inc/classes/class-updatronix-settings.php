@@ -482,12 +482,13 @@ final class Updatronix_Settings {
 	public static function enrich_log_details( \stdClass $log ): \stdClass {
 		$log = self::enrich_log_for_display( $log );
 
-		$log->actor       = $log->performed_by_display;
-		$log->trigger     = $log->performed_as_display;
-		$log->run_type    = $log->update_context_display;
-		$log->description = self::build_detail_description( $log );
-		$log->product_url = self::get_log_product_url( $log );
-		$log->changelog   = self::get_log_changelog( $log );
+		$log->actor         = $log->performed_by_display;
+		$log->trigger       = $log->performed_as_display;
+		$log->run_type      = $log->update_context_display;
+		$log->description   = self::build_detail_description( $log );
+		$log->product_url   = self::get_log_product_url( $log );
+		$log->changelog_url = self::get_log_changelog_url( $log );
+		$log->changelog     = self::get_log_changelog( $log );
 
 		return $log;
 	}
@@ -578,6 +579,30 @@ final class Updatronix_Settings {
 		}
 
 		return '';
+	}
+
+	/**
+	 * Build the direct changelog URL for a log entry.
+	 *
+	 * Plugins and themes use the WordPress.org changelog tab. Core points at the
+	 * release archive, which is the closest stable changelog surface.
+	 *
+	 * @param \stdClass $log Log row.
+	 * @return string URL, or empty when there is no changelog page.
+	 */
+	private static function get_log_changelog_url( \stdClass $log ): string {
+		$type    = (string) ( $log->log_type ?? '' );
+		$product = self::get_log_product_url( $log );
+
+		if ( '' === $product ) {
+			return '';
+		}
+
+		if ( 'core' === $type ) {
+			return $product;
+		}
+
+		return $product . '#changelog';
 	}
 
 	/**

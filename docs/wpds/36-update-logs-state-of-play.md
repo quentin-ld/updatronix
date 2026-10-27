@@ -1,6 +1,6 @@
 # Update logs — state of play
 
-**Date:** 2026-10-26
+**Date:** 2026-10-27
 **Screen:** Update logs (`logs`, Free)
 **Contract:** `04-screen-contracts.md` §1
 **Status:** Audit complete for code and automated tests; the manual
@@ -23,7 +23,9 @@ and links from Pro blocked-history rows with `?tab=logs&log=<id>`.
 | “Search by item or version” | Toolbar | `useLogs.fetchLogs()` sends the search term; the table also filters client-side. | Existing REST tests. | True |
 | “View details” opens the matching entry | Row action | `LogDetailsContent` fetches `GET /logs/{id}` and falls back to the row. | `LogsRestApiTest` covers the enriched detail. | True |
 | Pro blocked-history link opens the entry | `?tab=logs&log=<id>` | `parseDeepLinkLogId()` → `ActivityLogPanel` detail state → `fetchLogDetails()`. | 6 new JS cases plus the existing detail endpoint. | True |
-| CSV/JSON are not offered in Free | Export dialog | `filterExportFormats()` keeps `txt`; the server allowlist rejects `json`. | 6 new JS cases and the Free export integration test. | True |
+| CSV/JSON/XML are not offered in Free | Export dialog | `filterExportFormats()` keeps `txt`; the server allowlist rejects `json` in Free. | 6 `exportFormats` cases and the Free export integration test. | True |
+| Pro CSV, JSON, and XML are real downloads | Export dialog | CSV/XML are rendered client-side from the same NDJSON payload; XML uses `buildXmlReport()` and downloads `.xml`; JSON downloads `.json`. | 4 `exportReports` XML cases; format gate tests. | True |
+| Direct changelog link opens the item’s changelog | Details | `changelog_url` from `item_slug`: plugin/theme `#changelog`, core release archive. | `LogsRestApiTest` covers plugin and core. | True |
 | Delete asks for confirmation | Row action | `AlertDialog` with the entry name and consequence. | Existing interaction review. | True |
 
 ## Internal mechanics
@@ -35,6 +37,7 @@ and links from Pro blocked-history rows with `?tab=logs&log=<id>`.
 | Details | `assets/src/js/components/activityLog/LogDetailsContent.js` | Fetches the enriched detail; renders summary, readme changelog, process, redacted trace. |
 | Export | `assets/src/js/components/activityLog/ExportLogsModal.js` | Scope, merge, columns, format, chunked export, download/copy. |
 | Format gate | `assets/src/js/components/activityLog/exportFormats.js` | Keeps known formats; Free boots with `txt`. |
+| Export reports | `assets/src/js/components/activityLog/exportReports.js` | Builds the XML document from parsed NDJSON rows; CSV stays in the modal. |
 | Deep link | `assets/src/js/components/activityLog/logDeepLink.js` | Positive integer only; invalid values fall back to no detail. |
 | REST | `inc/classes/class-updatronix-settings.php` | Logs list/detail/delete/cleanup/all; capability `manage_updatronix`. |
 | Export REST | `inc/classes/class-updatronix-export.php` | Capability check, format allowlist, rate limit, transient chunks, cursor. |
@@ -49,6 +52,8 @@ and links from Pro blocked-history rows with `?tab=logs&log=<id>`.
 | UL-03 | INFO | The 2026-10-24 QA note said the Free panel did not read `?log=`. | The current panel reads it and fetches the detail; UL-01 adds the missing regression guard. |
 | UL-04 | INFO | The security pass noted that log redaction fails open if `preg_replace()` returns null on a backtrack limit. | Open follow-up; no new exposure was found in this screen pass. |
 | UL-05 | INFO | A live export against a large log table was not run in this pass. | Recorded for Phase 6; the chunked export suite remains the safety net. |
+| UL-06 | MEDIUM | Selecting XML rendered the CSV report and downloaded a `.txt` file. | Added `buildXmlReport()` and the `xml` download branch; 4 JS cases cover structure, escaping, missing columns, and empty rows. |
+| UL-07 | MEDIUM | The details card rendered the readme changelog but had no direct link to the full WordPress.org changelog. | Added `changelog_url` and an “Open changelog” / “Open release notes” link; integration covers plugin and core. |
 
 No P0/P1 defect was found in the filters, row actions, details dialog, or
 delete dialog. Existing reviews 14, 25, and 27 remain the visual record.
@@ -68,8 +73,8 @@ delete dialog. Existing reviews 14, 25, and 27 remain the visual record.
 
 | Suite | Coverage |
 |---|---|
-| JS | `tests/js/logDeepLink.test.js` (6), `tests/js/exportFormats.test.js` (6), plus the shared 27 |
-| Integration | `LogsRestApiTest` (list, detail, delete, cleanup, export, auth), `SettingsUninstallOptInTest` for the adjacent settings path |
+| JS | 67 tests across 9 files, including `tests/js/logDeepLink.test.js` (6), `tests/js/exportFormats.test.js` (6), and `tests/js/exportReports.test.js` (4) |
+| Integration | `LogsRestApiTest` (79 tests total: list, detail, changelog URL, delete, cleanup, export, auth), `SettingsUninstallOptInTest` for the adjacent settings path |
 | Unit | `ExportBodyBuilder*`, `CoreUpdateLogVersionsTest`, `ExportTransientManagerTest` |
 
 ## Feature development guide
@@ -96,12 +101,12 @@ delete dialog. Existing reviews 14, 25, and 27 remain the visual record.
 - No live large-table export run in this pass.
 - No manual screen-reader pass on the details dialog or export dialog.
 - UL-04 redaction fail-open remains an open security follow-up.
-- Pro CSV/XML/JSON are Phase 5; Free stays on plain text.
+- Pro CSV, JSON, and XML are implemented from the same NDJSON payload; Free stays on plain text. A live Pro export run remains Phase 6.
 
 ## Exit
 
 - Claims: all true or explicitly accepted.
 - P0/P1: none found; UL-01/02 covered, UL-03 verified, UL-04/05 recorded.
-- Tests: JS 39, integration 69, unit 213, build pass.
+- Tests: JS 67, integration 79, unit 216, build pass.
 - Review/security: screen diff reviewed; the redaction info item remains open.
 - No version bump.

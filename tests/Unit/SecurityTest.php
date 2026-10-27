@@ -87,6 +87,26 @@ final class SecurityTest extends TestCase {
 	}
 
 	/**
+	 * Redaction fails closed when PCRE cannot complete a replacement.
+	 */
+	public function test_redact_sensitive_text_fails_closed_when_preg_replace_returns_null(): void {
+		// phpcs:ignore WordPress.PHP.IniSet.Risky -- Test forces a PCRE failure.
+		$previous = ini_set( 'pcre.backtrack_limit', '1' );
+
+		try {
+			$result = Updatronix_Security::sanitize_trace( '?token=super-secret' );
+
+			self::assertStringNotContainsString( 'super-secret', $result );
+			self::assertStringContainsString( '[redacted: log text could not be safely redacted]', $result );
+		} finally {
+			if ( false !== $previous ) {
+				// phpcs:ignore WordPress.PHP.IniSet.Risky -- Restore the test setting.
+				ini_set( 'pcre.backtrack_limit', $previous );
+			}
+		}
+	}
+
+	/**
 	 * License and API keys are redacted even when the parameter name does not
 	 * start with a known secret word.
 	 *

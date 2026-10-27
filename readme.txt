@@ -133,6 +133,7 @@ Yes. Network-activate Updatronix and manage everything as a Super Admin from the
 == Changelog ==
 
 = Unreleased =
+* Copy: Clearer, more consistent wording across Settings, Update logs, Auto updates, Schedule, Health, Documentation, and Support.
 * Improvement: Rebuild the admin interface on the WordPress Design System: dark rail, eleven destinations, one page header per screen, and one manual save.
 * Improvement: Add Health, Documentation, Support, Update Shield, Update Flow, and White label.
 * Improvement: The Updatronix 3000 presentation names only the available Pro features and labels the queue, XML export, and development tools as roadmap.

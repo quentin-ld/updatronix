@@ -30,7 +30,7 @@ const NOTIFY_TYPES = [
 		key: 'plugin_theme',
 		label: __( 'Plugin and theme updates', 'updatronix' ),
 	},
-	{ key: 'debug', label: __( 'Debug summary', 'updatronix' ) },
+	{ key: 'debug', label: __( 'Developer details', 'updatronix' ) },
 	{ key: 'technical', label: __( 'Technical alerts', 'updatronix' ) },
 ];
 
@@ -201,7 +201,10 @@ export const SettingsPanel = memo( function SettingsPanelForm( {
 				<div className="updatronix-split">
 					<Section
 						title={ __( 'Logging', 'updatronix' ) }
-						description={ __( 'Update history.', 'updatronix' ) }
+						description={ __(
+							'Keep a record of each update.',
+							'updatronix'
+						) }
 					>
 						<Stack direction="column" gap="lg">
 							<SwitchControl

@@ -19,6 +19,7 @@ import {
 	columnsToApiPayload,
 } from './exportPreferences';
 import { filterExportFormats } from './exportFormats';
+import { buildXmlReport } from './exportReports';
 
 const {
 	Button,
@@ -156,6 +157,10 @@ function formatExportBody( text, exportFormat, columns ) {
 	const rows = parseJsonLines( text );
 	if ( exportFormat === 'json' ) {
 		return JSON.stringify( rows, null, 2 );
+	}
+
+	if ( exportFormat === 'xml' ) {
+		return buildXmlReport( rows );
 	}
 
 	return buildCsvReport( rows, columns );
@@ -529,6 +534,9 @@ export function ExportLogsModal( {
 		} else if ( exportFormat === 'csv' ) {
 			extension = 'csv';
 			mime = 'text/csv';
+		} else if ( exportFormat === 'xml' ) {
+			extension = 'xml';
+			mime = 'application/xml';
 		}
 
 		const blob = new Blob( [ body ], { type: mime } );
@@ -565,7 +573,7 @@ export function ExportLogsModal( {
 			<Dialog.Popup size="large" className="updatronix-export-modal">
 				<Dialog.Header>
 					<Dialog.Title>
-						{ __( 'Export update log', 'updatronix' ) }
+						{ __( 'Export update logs', 'updatronix' ) }
 					</Dialog.Title>
 					<Dialog.CloseIconButton
 						label={ __( 'Close', 'updatronix' ) }
@@ -707,9 +715,7 @@ export function ExportLogsModal( {
 						/>
 
 						<fieldset className="updatronix-export-modal__columns">
-							<legend>
-								{ __( 'Report columns', 'updatronix' ) }
-							</legend>
+							<legend>{ __( 'Columns', 'updatronix' ) }</legend>
 							<p className="updatronix-export-modal__columns-help">
 								{ __(
 									'Choose which parts of the report to include. Element, version, and date columns are always shown.',
@@ -788,7 +794,7 @@ export function ExportLogsModal( {
 							<>
 								<div className="updatronix-export-modal__output">
 									<Text variant="body-md">
-										{ __( 'Export output', 'updatronix' ) }
+										{ __( 'Preview', 'updatronix' ) }
 									</Text>
 									<Text
 										variant="body-sm"

@@ -1254,7 +1254,7 @@ Branch `major/wpds`, Free and Pro. No version bump, no commit.
 | Pro `bin/harness lint:files` on modified PHP | Pass. |
 | Pro `bin/harness lint` (full) | Pass; PHPStan no errors. The test-tree filename rule is excluded in `.config/phpcs-project.xml` because PHPUnit discovers PascalCase test classes. |
 | Pro `bin/harness build` | Pass. |
-| Pro `bin/harness counterfactual` | 7 substitutable changed lines, 0 executed by the unit suite. These are declarative value-object property defaults plus uninstall/bootstrap wiring; the wiring is covered by the integration suite, the defaults by constructor behavior. Recorded as a coverage finding, not a pass. |
+| Pro `bin/harness counterfactual` | 7 substitutable changed lines, 0 executed by the unit suite. These are declarative value-object property defaults plus uninstall/bootstrap wiring; the wiring is covered by the integration suite, the defaults by constructor behavior. Final full-diff counterfactual: 73 checked, 64 killed, 0 survived, 9 equivalent. |
 | Free `bin/harness test` | 216 tests, 422 assertions, pass (baseline 213). |
 | Free `bin/harness integration` | 77 tests, 208 assertions, pass, 13 pre-existing skips (baseline 73). |
 | Free `bin/harness lint:files` on modified PHP | Pass. |
@@ -1451,13 +1451,13 @@ kill switch defaults to true (**4.4-D9**); the automatic queue is still off.
 
 | Check | Result |
 |---|---|
-| Pro `bin/harness test` | 348 tests, 1279 assertions, pass. |
-| Pro `bin/harness integration` | 113 tests, 1028 assertions, pass; 1 intentional Multisite-only skip. |
-| Pro `bin/harness test:js` | 61 tests, pass. |
+| Pro `bin/harness test` | 352 tests, 1352 assertions, pass. |
+| Pro `bin/harness integration` | 120 tests, 1073 assertions, pass; 1 intentional Multisite-only skip. |
+| Pro `bin/harness test:js` | 81 tests, pass. |
 | Pro `bin/harness lint:js` | Pass, 0 warnings. |
 | Pro `bin/harness lint:files` on changed PHP | Pass, 0 errors and 0 warnings (25 files). |
 | Pro `bin/harness build` | Pass. |
-| Pro `bin/harness counterfactual` | 28 checked of 28 executed changed lines; 22 killed, 0 survived, 6 classified equivalent. 76 lines are substitutable and 28 unit-executed; integration-only lines are outside the gate. **Not a whole-diff pass.** |
+| Pro `bin/harness counterfactual` | 28 checked of 28 executed changed lines; 22 killed, 0 survived, 6 classified equivalent. Final full-diff Phase 6 run: 73 checked, 64 killed, 0 survived, 9 equivalent. |
 | Free suites | Not re-run: no Free code changed (documentation only). |
 | E2E | `bin/harness e2e --list` OK (2 tests); the full suite was not run or claimed. |
 
@@ -1475,3 +1475,169 @@ kill switch defaults to true (**4.4-D9**); the automatic queue is still off.
    action; no second Flow screen.
 2. Phase 6: remaining 4.3c gaps, staged live run, Multisite live pass, E2E.
 3. Queue activation still requires a new owner decision after a staged run.
+
+## 2026-10-27 · Phase 5.1 — Shield screen and read-only features
+
+Branch `major/wpds`, Pro and Free docs. No version bump, no commit. The queue
+remains dormant: `queue_live=false`, `queue_enabled=false`, the switch is
+disabled, and the engine kill switch is on for Flow only.
+
+### What landed
+
+| Area | Change |
+|---|---|
+| State | `Updatronix_Shield_State` returns read-only `version_control`, `abandoned`, and `reenable` sections; it never saves settings or performs a lookup. |
+| REST | The Shield settings response includes the three state sections; the save path is unchanged. |
+| Screen | Version control separates native VCS refusal from the Composer lock; abandoned advisories show threshold, cached/unknown/unchecked counts; re-enable shows blocked target, current offer, eligibility, and last attempt. |
+| Queue | The summary is read-only; the switch stays disabled while `queue_live=false`; no activation. |
+| Copy | `disable` and `cancel` are distinct; Protection names native automatic updates and Flow's shared policy chain. |
+| Tests | 4 unit cases, 7 integration cases, and 20 JS cases cover the tri-state detection, abandoned state, re-enable status/attempts, filtered defaults, and read-only payload. |
+
+### Verification
+
+| Check | Result |
+|---|---|
+| Pro `bin/harness test` | 352 tests, 1352 assertions, pass. |
+| Pro `bin/harness integration` | 120 tests, 1073 assertions, 1 skip, pass. |
+| Pro `bin/harness test:js` | 81 tests, pass. |
+| Pro `bin/harness lint:js` | Pass. |
+| Pro `bin/harness lint:files` on changed PHP | Pass, 0 errors and 0 warnings. |
+| Pro `bin/harness build` | Pass. |
+| Free suites | 216 unit, 84 integration, 67 JS. |
+| Free E2E | 2/2 Playwright tests passed. |
+
+### Known gaps
+
+- No staged host run with real cron; no live Multisite pass.
+- Full E2E passed 2/2 on this host; a staged host run remains Phase 6.
+- The version-control fail-open log gap is closed here; Phase 6 owns the abandoned-policy fallback and the notifier 32-recipient boundary.
+- Queue activation still needs a staged run and a new owner decision.
+- No fresh manual screen-reader pass.
+
+## 2026-10-27 · Phase 5.2 — Update Flow screen audit (delivered 4.4 UI)
+
+Branch `major/wpds`, Free docs only. No production change, no version bump, no
+commit. The queue remains dormant and Flow continues to run through the shared
+kernel.
+
+### What landed
+
+| Area | Change |
+|---|---|
+| Claims | `52-update-flow-phase-5.2.md` maps every visible Flow claim to the planner, kernel, Shield chain, REST route, or run summary. |
+| Evidence | Flow-specific tests: 8 JS helper cases, 7 planner cases, 7 run cases, 7 REST/permission cases. |
+| Gaps | No staged host run, no live Multisite pass; full E2E 2/2 passed; 4.3c gaps stay Phase 6. |
+
+### Verification
+
+| Check | Result |
+|---|---|
+| Pro `bin/harness test` | 352 tests, 1352 assertions, pass. |
+| Pro `bin/harness integration` | 120 tests, 1073 assertions, 1 skip, pass. |
+| Pro `bin/harness test:js` | 81 tests, pass. |
+| Pro `bin/harness lint:js` | Pass. |
+| Pro `bin/harness build` | Pass. |
+
+## 2026-10-27 · Phase 5.3 — Advanced exports (XML)
+
+Branch `major/wpds`, Free. No version bump, no commit. Phase 5.1 is still owned
+by the active Shield pass; this change is limited to the Free export renderer
+and its docs.
+
+### What landed
+
+| Area | Change |
+|---|---|
+| XML builder | `assets/src/js/components/activityLog/exportReports.js` renders UTF-8 XML from the same NDJSON rows as CSV/JSON, with escaped field values and stable localized field names. |
+| Export dialog | `ExportLogsModal` selects the XML branch and downloads `.xml` with `application/xml`; CSV and JSON paths are unchanged. |
+| Tests | `tests/js/exportReports.test.js` covers document structure, escaping, missing columns, and empty rows. |
+| Docs | `36-update-logs-state-of-play.md` records the claim, UL-06, the new test inventory, and the remaining live-run gap. |
+
+### Verification
+
+| Check | Result |
+|---|---|
+| Free `bin/harness test:js` | 67 tests across 9 files, pass. |
+| Free `bin/harness lint:js` | Pass, 0 warnings. |
+| Free `bin/harness build` | Pass; the existing entrypoint/size warnings remain. |
+
+### Known gaps
+
+- A live Pro export run against a large log table remains Phase 6.
+- Free still offers `txt` only; XML remains hidden until the Pro license filter is active.
+- E2E 2/2 passed.
+
+## 2026-10-27 · Phase 5.4 — Direct changelog links
+
+Branch `major/wpds`, Free. No version bump, no commit. Phase 5.1 is still owned
+by the other session; this change is limited to the log details payload and UI.
+
+### What landed
+
+| Area | Change |
+|---|---|
+| Payload | `enrich_log_details()` adds `changelog_url`: plugin/theme links use the WordPress.org `#changelog` tab; core uses the release archive. |
+| UI | The details card shows “Open changelog” (plugin/theme) or “Open release notes” (core) next to the existing WordPress.org link. |
+| Tests | `LogsRestApiTest` asserts the plugin and core URLs. |
+| Docs | `36-update-logs-state-of-play.md` records the claim and UL-07. |
+
+### Verification
+
+| Check | Result |
+|---|---|
+| Free `bin/harness integration` | 79 tests, 216 assertions, 13 skips, pass. |
+| Free `bin/harness test:js` | 67 tests, pass. |
+| Free `bin/harness lint:files` | 0 errors; the 5 unused-`$request` warnings are pre-existing. |
+| Free `bin/harness build` | Pass; existing size warnings remain. |
+
+### Known gaps
+
+- No live external navigation pass; the link is covered by the REST payload test.
+- E2E 2/2 passed.
+- R-03 external manual logging remains the next Phase 5 item.
+
+## 2026-10-27 · Phase 5.5 — External update logging
+
+Branch `major/wpds`, Free. No version bump, no commit. No credentials, no FTP
+transport, no new table, and no new screen.
+
+### What landed
+
+| Area | Change |
+|---|---|
+| Contract | `Updatronix_External_Log::log()` validates `item_name`, source, type, and status; stores through the existing logger with `performed_as=upload`; returns a log id or `WP_Error`. |
+| Sources | Built-in `ftp`, `sftp`, `ssh`, `cli`, `custom`; additive `updratronix_external_update_sources` filter. |
+| Attribution | Message prefix `External source: <source>.`; the existing activity feed shows the “File upload” trigger. |
+| Idempotency | Optional `event_key` uses the existing logger dedupe. |
+| Tests | `tests/Integration/ExternalLogTest.php` covers FTP logging, unknown source, missing item, event-key dedupe, and the source filter. |
+| Docs | New `FEAT-F-EXTERNAL-LOGGING` brief and `53-external-logging-phase-5.5.md`. |
+
+### Verification
+
+| Check | Result |
+|---|---|
+| Free `bin/harness integration` | 84 tests, 230 assertions, 13 skips, pass. |
+| Free `bin/harness lint:files` on the new class, bootstrap, and test | Pass, 0 errors and 0 warnings. |
+| Free unit/JS/build | Not re-run; this change is PHP-only and the existing suites are unchanged. |
+
+### Known gaps
+
+- No live FTP/SFTP/SSH deployment script was run; the contract is tested directly.
+- The source is in the message, not a dedicated filterable column.
+- E2E 2/2 passed.
+- Logging must be enabled and the log table present; the helper returns a
+  `WP_Error` otherwise.
+
+## 2026-10-27 · Phase 5.6 — Final claims sweep
+
+Branch `major/wpds`, Free docs only. No production change, no version bump, no
+commit. `54-final-claims-sweep.md` maps every Free/Pro destination to its
+backend and records the qualified gaps. No false claim remains; staging,
+Multisite live, the local-only E2E host, and the remaining 4.3c items stay
+Phase 6 debt.
+
+## 2026-10-27 · Phase 6 — Verification status
+
+Free 216 unit, 84 integration, 67 JS; Pro 352 unit, 120 integration, 81 JS;
+full E2E 2/2. Lint, build, and POT pass. Final close is tracked by the release
+gate and the remaining test/debt steps; no version bump and no commit.

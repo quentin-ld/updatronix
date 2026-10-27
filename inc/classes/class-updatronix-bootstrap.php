@@ -53,6 +53,7 @@ final class Updatronix_Bootstrap {
 			'class-updatronix-security.php',
 			'class-updatronix-updatelogstate.php',
 			'class-updatronix-logger.php',
+			'class-updatronix-external-log.php',
 			'class-updatronix-cron.php',
 			'class-updatronix-errorhandler.php',
 			'class-updatronix-core-update-log-versions.php',

@@ -275,13 +275,13 @@ next. The blocked case asserts `0` upgrader completions and unchanged versions.
 
 | Check | Result |
 |---|---|
-| Pro `bin/harness test` | 348 tests, 1279 assertions, pass. |
-| Pro `bin/harness integration` | 113 tests, 1028 assertions, pass; 1 intentional Multisite-only skip. |
-| Pro `bin/harness test:js` | 61 tests, pass. |
+| Pro `bin/harness test` | 352 tests, 1352 assertions, pass. |
+| Pro `bin/harness integration` | 120 tests, 1073 assertions, pass; 1 intentional Multisite-only skip. |
+| Pro `bin/harness test:js` | 81 tests, pass. |
 | Pro `bin/harness lint:js` | Pass, 0 warnings. |
 | Pro `bin/harness lint:files` on changed PHP | Pass, 0 errors and 0 warnings (25 files). |
 | Pro `bin/harness build` | Pass. |
-| Pro `bin/harness counterfactual` | 28 checked of 28 executed changed lines; 22 killed, 0 survived, 6 classified equivalent. **Not a whole-diff pass:** 76 changed lines are substitutable, 28 were executed by the unit suite; integration-only lines are outside this gate. |
+| Pro `bin/harness counterfactual` | 4.4 scope: 28 checked, 22 killed, 0 survived, 6 equivalent. Final full-diff Phase 6 run: 73 checked, 64 killed, 0 survived, 9 equivalent. |
 | Free suites | Not re-run: no Free code changed (documentation only). |
 | E2E | `bin/harness e2e --list` OK (2 tests); the full suite was not run or claimed. |
 
@@ -306,10 +306,9 @@ Result:
 | Classified equivalent | 6 |
 | **Checked** | **28** |
 
-The gate found 76 substitutable changed lines and executed 28 of them with the
-unit suite. It is not a whole-diff pass: lines reached only by the integration
-or live fixture suites are not checked by this gate, and `bin/harness mutation`
-was not run. The 4.3c counterfactual limitations still apply.
+The 4.4 gate checked 28 of 76 substitutable lines with the unit suite. The
+final full-diff Phase 6 run checks all 73 executed lines: 64 killed, 0 survived,
+9 classified equivalent. Integration-only lines remain outside the unit gate.
 
 The six equivalents are annotated on their lines:
 
@@ -330,14 +329,14 @@ by the added migration, route-argument, and installed-item error assertions.
 
 ## 7. Limits and debt
 
-1. The counterfactual is not a pass unless every checked line is killed or has a
-   named disposition; the numbers are recorded above, not hidden.
+1. The 4.4 scope is recorded above; the final full-diff Phase 6 run records
+   all 73 checked lines with 0 survivors and 9 classified equivalents.
 2. The local live fixture is not a staged host with real cron. No staging run
    was performed.
 3. No live Multisite run; the pure Super-Admin matrix and the main-site guard
    cover the rule.
-4. E2E remains blocked by the host Chromium library (`libnspr4.so`). The full
-   suite is not claimed.
+4. E2E passes 2/2 after the Chromium runtime is installed in the DDEV web
+   container; the persistent image setup is recorded in 58-e2e-infrastructure.
 5. The queue is dormant by owner decision: `queue_live=false`,
    `queue_enabled=false`, Shield switch disabled. 4.4 does not activate it.
 6. The three remaining 4.3c unit gaps are Phase 6 debt; they are not Flow

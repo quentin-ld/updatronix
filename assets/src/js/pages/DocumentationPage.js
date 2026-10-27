@@ -127,7 +127,10 @@ export default function DocumentationPage( { destination, onNavigate } ) {
 
 									<div className="updatronix-doc-foot">
 										<span className="updatronix-doc-read">
-											{ __( 'Read guide', 'updatronix' ) }
+											{ __(
+												'Read the guide',
+												'updatronix'
+											) }
 											<Icon
 												icon={ arrowRight }
 												size={ 16 }
@@ -154,7 +157,7 @@ export default function DocumentationPage( { destination, onNavigate } ) {
 								onNavigate?.( 'support' );
 							} }
 						>
-							{ __( 'Visit Support', 'updatronix' ) }
+							{ __( 'Go to Support', 'updatronix' ) }
 						</a>
 						.
 					</Text>

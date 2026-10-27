@@ -230,6 +230,43 @@ final class LogsRestApiTest extends WP_UnitTestCase {
 		self::assertSame( 'Automatic', $data['log']->performed_as_display );
 		self::assertTrue( $data['log']->detail_available );
 		self::assertSame( '1.0 → 1.1', $data['log']->summary_text );
+		self::assertSame(
+			'https://wordpress.org/plugins/alpha/#changelog',
+			$data['log']->changelog_url
+		);
+	}
+
+	/**
+	 * Core changelog links point at the release archive.
+	 *
+	 * @return void
+	 */
+	public function test_core_log_changelog_url_points_to_releases(): void {
+		$this->create_admin();
+
+		$log_id = Updatronix_Logger::log(
+			'core',
+			'update',
+			'WordPress',
+			'core',
+			'6.7',
+			'6.7.1',
+			'success',
+			'Updated from 6.7 to 6.7.1',
+			'',
+			'automatic'
+		);
+		self::assertIsInt( $log_id );
+
+		$request  = new WP_REST_Request( 'GET', '/updatronix/v1/logs/' . $log_id );
+		$response = rest_do_request( $request );
+
+		self::assertSame( 200, $response->get_status() );
+		$data = $response->get_data();
+		self::assertSame(
+			'https://wordpress.org/download/releases/',
+			$data['log']->changelog_url
+		);
 	}
 
 	/**

@@ -222,7 +222,10 @@ export const SchedulePanel = memo( function SchedulePanelComponent( {
 				<div className="updatronix-split">
 					<Section
 						title={ __( 'Update checks', 'updatronix' ) }
-						description={ __( 'WordPress cron.', 'updatronix' ) }
+						description={ __(
+							'WordPress runs update checks on its own schedule.',
+							'updatronix'
+						) }
 					>
 						<Stack direction="column" gap="lg">
 							<ConstantNotices
@@ -326,7 +329,10 @@ export const SchedulePanel = memo( function SchedulePanelComponent( {
 							</Text>
 							<Notice.Root intent="info">
 								<Notice.Title>
-									{ __( 'Cron is shared', 'updatronix' ) }
+									{ __(
+										'WP-Cron runs other tasks too',
+										'updatronix'
+									) }
 								</Notice.Title>
 								<Notice.Description>
 									{ __(
@@ -340,7 +346,7 @@ export const SchedulePanel = memo( function SchedulePanelComponent( {
 				</div>
 
 				<Section
-					title={ __( 'What the hold does', 'updatronix' ) }
+					title={ __( 'What the hold period does', 'updatronix' ) }
 					description={ __(
 						'Applies to automatic updates only.',
 						'updatronix'

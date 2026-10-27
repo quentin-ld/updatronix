@@ -490,7 +490,7 @@ export default function HealthPage( { destination, onNavigate } ) {
 				</Section>
 
 				<Section
-					title={ __( 'Open issues', 'updatronix' ) }
+					title={ __( 'Issues to review', 'updatronix' ) }
 					description={ __(
 						'Failed updates keep the previous version active until a retry succeeds.',
 						'updatronix'
@@ -646,7 +646,7 @@ export default function HealthPage( { destination, onNavigate } ) {
 				</Section>
 
 				<Section
-					title={ __( 'Recently resolved', 'updatronix' ) }
+					title={ __( 'Recently fixed', 'updatronix' ) }
 					description={ __(
 						'Failures cleared in the last 30 days, with the action that resolved them.',
 						'updatronix'

@@ -24,7 +24,7 @@ const STEPS = [
 		),
 	},
 	{
-		title: __( 'Bring the evidence', 'updatronix' ),
+		title: __( 'Include the details', 'updatronix' ),
 		description: __(
 			'Include the item, versions, error code, and time from the update log.',
 			'updatronix'
@@ -62,7 +62,7 @@ export default function SupportPage( { destination, onNavigate } ) {
 			<div className="updatronix-page-body">
 				<div className="updatronix-support-layout">
 					<Section
-						title={ __( 'Before you post', 'updatronix' ) }
+						title={ __( 'Before you ask', 'updatronix' ) }
 						description={ __(
 							'A few details make a support thread easier to answer.',
 							'updatronix'

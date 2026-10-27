@@ -1623,6 +1623,30 @@ No other decision in this table is open.
 
 ---
 
-**End of ADR.** Phases 4.2, 4.3a, and 4.3b are implemented. The queue remains
-dormant by owner decision (2026-10-26); activation requires a new decision after
-a staged run. 4.4 follows only after that.
+## 16. Phase 5.1 addendum (2026-10-27)
+
+- The Shield screen reads a read-only `Updatronix_Shield_State` payload for
+  version control, abandoned advisories, and re-enable eligibility.
+- Detection is tri-state (`yes|no|unknown`); unknown fails open, is shown as
+  unknown, and a partial Composer pair is `no` and writes no fail-open row.
+- Native VCS refusal is not a toggle; only the Composer lock is a Shield
+  setting. Engine-consumed switches stay usable. Unknown abandoned data is
+  never treated as safe. Re-enable is limited to Shield-disabled items with a
+  newer compatible target; same-target stays manual.
+- The re-enable status and action share `evaluate_entry()`; attempt metadata
+  stays in the bounded ledger.
+- The queue summary is read-only, the queue switch is disabled while
+  `queue_live=false`, and no activation was performed.
+- The 5.1 counterfactual is **green**: 86 substitutable lines, 73
+  unit-executed, 73 checked, 64 killed, 0 survived, 9 classified equivalent,
+  and 13 integration-only lines outside the unit gate.
+- **5.1-D1** read-only state; **5.1-D2** native VCS is not a toggle;
+  **5.1-D3** abandoned is advisory; **5.1-D4** re-enable is narrow;
+  **5.1-D5** queue stays dormant; **5.1-D6** copy names the native adapter and
+  Flow's shared policy chain, and engine-consumed switches stay usable;
+  **5.1-D7** queue stays dormant with no activation control.
+
+**End of ADR.** Phases 4.2, 4.3a, 4.3b, 4.4, and 5.1 are implemented. The
+queue remains dormant by owner decision (2026-10-26); activation requires a new
+decision after a staged run. The 5.1 counterfactual survivor is a documented
+Phase 6 test seam, not a release pass.

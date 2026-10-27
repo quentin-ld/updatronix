@@ -86,7 +86,8 @@ final class Updatronix_Security {
 					array_map(
 						static fn ( $type ): string => sanitize_key( (string) $type ),
 						$types
-					)
+					),
+					static fn ( string $type ): bool => '' !== $type
 				)
 			)
 		);
@@ -203,16 +204,29 @@ final class Updatronix_Security {
 	 * @return string
 	 */
 	private static function redact_sensitive_text( string $value ): string {
+		$failed = '[redacted: log text could not be safely redacted]';
+
 		$redacted = preg_replace(
 			'/([?&](?:[^=&\s]*(?:token|key|secret|password|passwd|pwd|signature|sig)[^=&\s]*|auth|auth_[^=&\s]*|[^=&\s]*_auth)=)[^&\s]+/i',
 			'$1[redacted]',
 			$value
 		);
-		$value    = null !== $redacted ? $redacted : $value;
+		if ( null === $redacted ) {
+			return $failed;
+		}
+		$value = $redacted;
+
 		$redacted = preg_replace( '/(\bBearer\s+)[A-Za-z0-9._~+\/=\-]+/i', '$1[redacted]', $value );
-		$value    = null !== $redacted ? $redacted : $value;
+		if ( null === $redacted ) {
+			return $failed;
+		}
+		$value = $redacted;
+
 		$redacted = preg_replace( '/([A-Z0-9._%+\-]+)@([A-Z0-9.\-]+\.[A-Z]{2,})/i', '[redacted-email]', $value );
-		$value    = null !== $redacted ? $redacted : $value;
+		if ( null === $redacted ) {
+			return $failed;
+		}
+		$value = $redacted;
 
 		// Redact server paths so internal filesystem layout is not exposed in log entries.
 		$path_prefixes = array();
@@ -233,7 +247,10 @@ final class Updatronix_Security {
 			$pattern     = '/(' . implode( '|', $path_prefixes ) . ')[^\s"]*/i';
 			$replacement = basename( untrailingslashit( ABSPATH ) ) . '[redacted]';
 			$redacted    = preg_replace( $pattern, $replacement, $value );
-			$value       = (bool) $redacted ? $redacted : $value;
+			if ( null === $redacted ) {
+				return $failed;
+			}
+			$value = $redacted;
 		}
 
 		return $value;
