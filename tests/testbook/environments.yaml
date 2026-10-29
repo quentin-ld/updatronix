@@ -6,6 +6,20 @@ defaults:
   snapshot: testbook-base2
   base: wp-content/testbook-base
   reset_timeout: 600
+orchestration:
+  catalog: host_python3
+  pyyaml: host_only
+  wordpress: ddev_wp
+  playwright: bin_harness_exec
+  note: >-
+    `bin/harness exec python3` has no PyYAML. Run the test book with host
+    `python3`, WordPress with `ddev wp`, and Playwright with
+    `bin/harness exec`. Do not add a container PyYAML dependency.
+snapshots:
+  single: testbook-base2
+  multisite: testbook-ms
+  refresh: python3 tests/testbook/seed-fixtures.py --refresh-snapshots
+  protocol: seed fixtures -> sync wp-content/testbook-base -> ddev snapshot
 sites:
   single:
     project: updatronix-test

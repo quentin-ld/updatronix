@@ -1,4 +1,5 @@
 const { test, expect } = require( '@playwright/test' );
+const { expectResponsiveLayout, writeMetrics } = require( '../helpers/a11y' );
 
 const surface = process.env.TESTBOOK_SURFACE || 'settings';
 const multisite = process.env.TESTBOOK_MULTISITE === '1';
@@ -94,4 +95,7 @@ test( `surface: ${ surface }`, async ( { page } ) => {
 		default:
 			throw new Error( `unknown surface: ${ surface }` );
 	}
+
+	await expectResponsiveLayout( page );
+	await writeMetrics( page );
 } );

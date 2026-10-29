@@ -22,7 +22,7 @@ cases:
   oracle:
   - ui
   - integration
-  automation: planned
+  automation: implemented
 - id: TB-LOG-104
   title: 'Dimension: Log retention days (free.retention_days)'
   owner: free
@@ -72,7 +72,7 @@ cases:
   oracle:
   - ui
   - integration
-  automation: planned
+  automation: implemented
 - id: TB-SET-106
   title: 'Dimension: Redirect update notification emails (free.notify_enabled)'
   owner: free
@@ -335,7 +335,7 @@ cases:
   oracle:
   - ui
   - integration
-  automation: planned
+  automation: implemented
 - id: TB-SCHED-101
   title: 'Dimension: WP-Cron disabled (free.schedule.cron_disabled)'
   owner: free
@@ -384,7 +384,7 @@ cases:
   oracle:
   - ui
   - integration
-  automation: planned
+  automation: partial
 - id: TB-AUTO-103
   title: 'Dimension: Plugin auto-update opt-ins (wp.auto_update_plugins)'
   owner: shared
@@ -414,7 +414,7 @@ cases:
   oracle:
   - ui
   - integration
-  automation: planned
+  automation: partial
 - id: TB-AUTO-104
   title: 'Dimension: Theme auto-update opt-ins (wp.auto_update_themes)'
   owner: shared

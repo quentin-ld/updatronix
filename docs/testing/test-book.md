@@ -139,9 +139,9 @@ the run. The release gate stays open until every catalog case has one.
 
 | ID | Title | Owner | Risk | Tags | Automation |
 |---|---|---|---|---|---|
-| TB-SET-103 | Dimension: Logging enabled (free.logging_enabled) | free | high | @free @logger @dimension | planned |
+| TB-SET-103 | Dimension: Logging enabled (free.logging_enabled) | free | high | @free @logger @dimension | implemented |
 | TB-LOG-104 | Dimension: Log retention days (free.retention_days) | free | medium | @free @logger @dimension | planned |
-| TB-SET-104 | Dimension: Notification mode (free.notifications_mode) | free | high | @free @mail @dimension | planned |
+| TB-SET-104 | Dimension: Notification mode (free.notifications_mode) | free | high | @free @mail @dimension | implemented |
 | TB-SET-106 | Dimension: Redirect update notification emails (free.notify_enabled) | free | high | @free @mail @dimension | planned |
 | TB-SET-105 | Dimension: Notification recipients (free.notify_emails) | free | high | @free @mail @dimension | planned |
 | TB-SET-107 | Dimension: Notification event allowlist (free.notify_on) | free | medium | @free @mail @dimension | planned |
@@ -151,10 +151,10 @@ the run. The release gate stays open until every catalog case has one.
 | TB-SCHED-104 | Dimension: Update-check recurrence (free.schedule.recurrence) | free | high | @free @schedule @dimension | planned |
 | TB-SCHED-105 | Dimension: Preferred wall-clock time (free.schedule.time) | free | high | @free @schedule @timezone @dimension | planned |
 | TB-SCHED-102 | Dimension: Hold new releases (free.schedule.delay_enabled) | free | high | @free @schedule @hold @dimension | planned |
-| TB-SCHED-103 | Dimension: Hold days (free.schedule.delay_value) | free | high | @free @schedule @hold @dimension | planned |
+| TB-SCHED-103 | Dimension: Hold days (free.schedule.delay_value) | free | high | @free @schedule @hold @dimension | implemented |
 | TB-SCHED-101 | Dimension: WP-Cron disabled (free.schedule.cron_disabled) | free | high | @free @schedule @environment @dimension | planned |
-| TB-AUTO-102 | Dimension: Core auto-update mode (wp.auto_update_core) | shared | critical | @free @auto-updates @invariant @dimension | planned |
-| TB-AUTO-103 | Dimension: Plugin auto-update opt-ins (wp.auto_update_plugins) | shared | critical | @free @pro @auto-updates @invariant @dimension | planned |
+| TB-AUTO-102 | Dimension: Core auto-update mode (wp.auto_update_core) | shared | critical | @free @auto-updates @invariant @dimension | partial |
+| TB-AUTO-103 | Dimension: Plugin auto-update opt-ins (wp.auto_update_plugins) | shared | critical | @free @pro @auto-updates @invariant @dimension | partial |
 | TB-AUTO-104 | Dimension: Theme auto-update opt-ins (wp.auto_update_themes) | shared | critical | @free @pro @auto-updates @invariant @dimension | planned |
 | TB-AUTO-105 | Dimension: Native translation auto-updates (wp.auto_update_translations) | shared | medium | @free @auto-updates @dimension | planned |
 | TB-AUTO-106 | Dimension: AUTOMATIC_UPDATER_DISABLED (wp.constants.automatic_updater_disabled) | shared | critical | @free @pro @constants @invariant @dimension | planned |
@@ -227,27 +227,27 @@ the run. The release gate stays open until every catalog case has one.
 | TB-ROLE-101 | Dimension: Capability (role.capability) | shared | critical | @free @pro @roles @security @dimension | planned |
 | TB-MS-102 | Dimension: Multisite scope (multisite.scope) | shared | critical | @free @pro @multisite @invariant @dimension | planned |
 | TB-MS-101 | Dimension: Pass registration scope (multisite.pass_scope) | pro | critical | @pro @multisite @pass @dimension | planned |
-| TB-UI-001 | Update logs surface | free | high | @free @logger @ui @smoke | planned |
-| TB-UI-002 | Auto updates surface | free | high | @free @auto-updates @ui @smoke | planned |
-| TB-UI-003 | Schedule surface | free | high | @free @schedule @ui @smoke | planned |
+| TB-UI-001 | Update logs surface | free | high | @free @logger @ui @smoke | implemented |
+| TB-UI-002 | Auto updates surface | free | high | @free @auto-updates @ui @smoke | implemented |
+| TB-UI-003 | Schedule surface | free | high | @free @schedule @ui @smoke | implemented |
 | TB-UI-004 | Health surface | free | medium | @free @pro @health @ui | planned |
-| TB-UI-005 | Settings surface | free | high | @free @settings @ui @smoke | planned |
+| TB-UI-005 | Settings surface | free | high | @free @settings @ui @smoke | implemented |
 | TB-UI-006 | Documentation surface | free | low | @free @docs @ui | planned |
 | TB-UI-007 | Support surface | free | low | @free @support @ui | planned |
-| TB-UI-008 | Update Shield surface | pro | critical | @pro @shield @ui @smoke | planned |
-| TB-UI-009 | Update Flow surface | pro | critical | @pro @flow @ui @smoke | planned |
+| TB-UI-008 | Update Shield surface | pro | critical | @pro @shield @ui @smoke | implemented |
+| TB-UI-009 | Update Flow surface | pro | critical | @pro @flow @ui @smoke | implemented |
 | TB-UI-010 | White Label surface | pro | medium | @pro @white-label @ui @a11y | planned |
-| TB-UI-011 | License surface | pro | critical | @pro @license @ui @smoke | planned |
-| TB-UI-012 | Plugins screen | shared | critical | @free @pro @version-lock @ui | planned |
-| TB-UI-013 | Themes screen | shared | critical | @free @pro @version-lock @ui | planned |
-| TB-UI-014 | Update-core screen | shared | critical | @free @pro @version-lock @ui | planned |
-| TB-UI-015 | Network Admin | shared | critical | @free @pro @multisite @ui | planned |
-| TB-UPDATE-001 | Plugin update happy path | shared | critical | @free @pro @update @smoke | planned |
-| TB-UPDATE-002 | Theme update happy path | shared | critical | @free @pro @update | planned |
-| TB-UPDATE-003 | Core update | shared | critical | @free @pro @update | planned |
-| TB-UPDATE-004 | Translation update | shared | medium | @free @pro @update | planned |
-| TB-UPDATE-005 | Failed and rolled-back update | shared | critical | @free @pro @update | planned |
-| TB-PASS-001 | Two items, two invocations | pro | critical | @pro @pass @smoke | planned |
+| TB-UI-011 | License surface | pro | critical | @pro @license @ui @smoke | implemented |
+| TB-UI-012 | Plugins screen | shared | critical | @free @pro @version-lock @ui | implemented |
+| TB-UI-013 | Themes screen | shared | critical | @free @pro @version-lock @ui | implemented |
+| TB-UI-014 | Update-core screen | shared | critical | @free @pro @version-lock @ui | implemented |
+| TB-UI-015 | Network Admin | shared | critical | @free @pro @multisite @ui | implemented |
+| TB-UPDATE-001 | Plugin update happy path | shared | critical | @free @pro @update @smoke | implemented |
+| TB-UPDATE-002 | Theme update happy path | shared | critical | @free @pro @update | implemented |
+| TB-UPDATE-003 | Core update | shared | critical | @free @pro @update | partial |
+| TB-UPDATE-004 | Translation update | shared | medium | @free @pro @update | implemented |
+| TB-UPDATE-005 | Failed and rolled-back update | shared | critical | @free @pro @update | implemented |
+| TB-PASS-001 | Two items, two invocations | pro | critical | @pro @pass @smoke | implemented |
 | TB-PASS-002 | Lock busy and retry | pro | high | @pro @pass | planned |
 | TB-PASS-003 | Failed item retried next pass | pro | high | @pro @pass | planned |
 | TB-PASS-004 | Last pass, stale, expired | pro | high | @pro @pass @flow | planned |
@@ -257,23 +257,23 @@ the run. The release gate stays open until every catalog case has one.
 | TB-FLOW-004 | Chain shapes | pro | high | @pro @flow | planned |
 | TB-SCHED-001 | 24h+60m picker and hold boundaries | free | high | @free @schedule | planned |
 | TB-SCHED-002 | Native time and truthful copy | free | high | @free @schedule @ui | planned |
-| TB-LOG-001 | Decision filters and details | free | high | @free @logger | planned |
+| TB-LOG-001 | Decision filters and details | free | high | @free @logger | implemented |
 | TB-EXPORT-001 | Export formats and columns | shared | high | @free @pro @export | planned |
 | TB-EXPORT-002 | Empty, expired, rate-limited, chunked | free | medium | @free @pro @export | planned |
 | TB-SHIELD-001 | Safe Mode off and on | pro | critical | @pro @shield | planned |
-| TB-SHIELD-002 | Incompatible behavior | pro | critical | @pro @shield | planned |
-| TB-SHIELD-003 | Shield block email | pro | high | @pro @shield @mail | planned |
-| TB-VLOCK-001 | Detection matrix | pro | critical | @pro @version-lock | planned |
-| TB-VLOCK-002 | Manual guard and pass own write | pro | critical | @pro @version-lock | planned |
-| TB-LIC-001 | License gating | pro | critical | @pro @license | planned |
+| TB-SHIELD-002 | Incompatible behavior | pro | critical | @pro @shield | implemented |
+| TB-SHIELD-003 | Shield block email | pro | high | @pro @shield @mail | implemented |
+| TB-VLOCK-001 | Detection matrix | pro | critical | @pro @version-lock | implemented |
+| TB-VLOCK-002 | Manual guard and pass own write | pro | critical | @pro @version-lock | implemented |
+| TB-LIC-001 | License gating | pro | critical | @pro @license | implemented |
 | TB-LIC-002 | Salt rotation and throttle | pro | high | @pro @license | planned |
 | TB-WL-001 | White Label save, reset, logo, sanitize | pro | medium | @pro @white-label @a11y | planned |
-| TB-MS-001 | Network schedule and logs | shared | critical | @free @pro @multisite | planned |
+| TB-MS-001 | Network schedule and logs | shared | critical | @free @pro @multisite | implemented |
 | TB-MS-002 | Site deletion and uninstall | shared | critical | @free @pro @multisite | planned |
 | TB-MS-003 | Main-site pass | pro | critical | @pro @multisite @pass | planned |
-| TB-ROLE-001 | Role and capability matrix | shared | critical | @free @pro @roles @security | planned |
+| TB-ROLE-001 | Role and capability matrix | shared | critical | @free @pro @roles @security | implemented |
 | TB-ENV-001 | Constants and locked controls | shared | critical | @free @pro @constants | planned |
-| TB-ENV-002 | Cron and timezone | free | high | @free @schedule @timezone | planned |
+| TB-ENV-002 | Cron and timezone | free | high | @free @schedule @timezone | implemented |
 | TB-ENV-003 | Filesystem and disk failures | shared | critical | @free @pro @environment | planned |
 | COMBO-001 | Shield off + Version Lock on + locked item | pro | critical | @pro @combo @shield @version-lock | planned |
 | COMBO-002 | Hold 365 + locked item | pro | critical | @pro @combo @schedule @version-lock | planned |

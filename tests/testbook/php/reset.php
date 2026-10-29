@@ -18,6 +18,9 @@ $options = array(
 	'updatronix_network_schedule',
 	'updatronix_pro_update_pass',
 	'updatronix_pro_last_pass',
+	'updatronix_pro_shield_ledger',
+	'updatronix_pro_version_lock_notice_seen',
+	'updatronix_pro_white_label',
 	'auto_update_plugins',
 	'auto_update_themes',
 	'auto_update_core',
@@ -34,17 +37,37 @@ $site_options = array(
 	'updatronix_pro_white_label',
 	'updatronix_pro_update_pass',
 	'updatronix_pro_last_pass',
+	'updatronix_pro_shield_ledger',
+	'updatronix_pro_version_lock_notice_seen',
 );
 
 foreach ( $site_options as $option ) {
 	delete_site_option( $option );
 }
 
-foreach ( array( 'update_plugins', 'update_themes', 'update_core', 'translation_updates', 'updatronix_pro_update_check' ) as $transient ) {
+$transients = array(
+	'update_plugins',
+	'update_themes',
+	'update_core',
+	'translation_updates',
+	'updatronix_pro_update_check',
+);
+
+foreach ( $transients as $transient ) {
 	delete_site_transient( $transient );
 	delete_transient( $transient );
 }
 
+$crons = _get_cron_array();
+if ( is_array( $crons ) ) {
+	foreach ( $crons as $hooks ) {
+		foreach ( array_keys( (array) $hooks ) as $hook ) {
+			if ( 0 === strpos( (string) $hook, 'updatronix' ) ) {
+				wp_clear_scheduled_hook( $hook );
+			}
+		}
+	}
+}
 wp_clear_scheduled_hook( 'updatronix_pro_update_pass_follow_up' );
 wp_clear_scheduled_hook( 'updatronix_pro_update_pass' );
 
@@ -60,6 +83,7 @@ update_site_option(
 );
 
 wp_delete_file( WP_CONTENT_DIR . '/testbook-mail.log' );
+wp_delete_file( WP_CONTENT_DIR . '/debug.log' );
 wp_cache_flush();
 
 echo wp_json_encode( array( 'reset' => true ) );

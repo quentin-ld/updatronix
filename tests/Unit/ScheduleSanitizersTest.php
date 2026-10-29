@@ -149,7 +149,9 @@ final class ScheduleSanitizersTest extends TestCase {
 	 * Invalid recurrence falls back to empty string.
 	 */
 	public function test_sanitize_schedule_array_invalid_recurrence(): void {
-		$result = updatronix_sanitize_schedule_array( array( 'update_check' => array( 'recurrence' => 'monthly' ) ) );
+		$result = updatronix_sanitize_schedule_array(
+			array( 'update_check' => array( 'recurrence' => 'monthly' ) )
+		);
 		$this->assertSame( '', $result['update_check']['recurrence'] );
 	}
 
@@ -157,9 +159,15 @@ final class ScheduleSanitizersTest extends TestCase {
 	 * Delay enabled with no delay_value is off: 0 means off everywhere.
 	 */
 	public function test_sanitize_schedule_array_delay_enabled_no_value(): void {
-		$result = updatronix_sanitize_schedule_array( array( 'delay_updates' => array( 'enabled' => true ) ) );
+		$result = updatronix_sanitize_schedule_array(
+			array( 'delay_updates' => array( 'enabled' => true ) )
+		);
 		$this->assertFalse( $result['delay_updates']['enabled'] );
-		$this->assertSame( 0, $result['delay_updates']['delay_value'], 'An enabled hold with no days is off.' );
+		$this->assertSame(
+			0,
+			$result['delay_updates']['delay_value'],
+			'An enabled hold with no days is off.'
+		);
 	}
 
 	/**
@@ -190,7 +198,12 @@ final class ScheduleSanitizersTest extends TestCase {
 	 * @param bool $want_on  Expected enabled flag.
 	 * @param int  $want_days Expected stored days.
 	 */
-	public function test_sanitize_schedule_array_hold_bounds( bool $enabled, int $days, bool $want_on, int $want_days ): void {
+	public function test_sanitize_schedule_array_hold_bounds(
+		bool $enabled,
+		int $days,
+		bool $want_on,
+		int $want_days
+	): void {
 		$result = updatronix_sanitize_schedule_array(
 			array(
 				'delay_updates' => array(
@@ -257,7 +270,9 @@ final class ScheduleSanitizersTest extends TestCase {
 	 *
 	 * @param string $recurrence Recurrence slug.
 	 */
-	public function test_sanitize_schedule_array_preserves_time_for_every_recurrence( string $recurrence ): void {
+	public function test_sanitize_schedule_array_preserves_time_for_every_recurrence(
+		string $recurrence
+	): void {
 		$result = updatronix_sanitize_schedule_array(
 			array(
 				'update_check' => array(
@@ -315,7 +330,14 @@ final class ScheduleSanitizersTest extends TestCase {
 	 * @return void
 	 */
 	public function test_next_check_weekly_is_in_the_future(): void {
-		$time = gmdate( 'H:i', time() - HOUR_IN_SECONDS );
+		// A wall clock an hour ago can cross midnight; use the start of today
+		// when it would, so the input is always in the past today.
+		$now  = new \DateTimeImmutable( 'now' );
+		$past = $now->modify( '-1 hour' );
+		if ( $past->format( 'Y-m-d' ) !== $now->format( 'Y-m-d' ) ) {
+			$past = $now->setTime( 0, 0 );
+		}
+		$time = $past->format( 'H:i' );
 		$next = updatronix_next_update_check_timestamp( 'weekly', $time );
 
 		$this->assertGreaterThan( time() + 6 * DAY_IN_SECONDS, $next );
@@ -327,7 +349,10 @@ final class ScheduleSanitizersTest extends TestCase {
 	 * @return void
 	 */
 	public function test_next_check_hourly_returns_now(): void {
-		$this->assertLessThanOrEqual( 2, abs( updatronix_next_update_check_timestamp( 'hourly', '02:17' ) - time() ) );
+		$this->assertLessThanOrEqual(
+			2,
+			abs( updatronix_next_update_check_timestamp( 'hourly', '02:17' ) - time() )
+		);
 	}
 
 	/**
@@ -381,7 +406,11 @@ final class ScheduleSanitizersTest extends TestCase {
 			$baseline
 		);
 		$this->assertSame( 'weekly', $result['update_check']['recurrence'] );
-		$this->assertSame( '03:00', $result['update_check']['time'], 'Time should remain from baseline.' );
+		$this->assertSame(
+			'03:00',
+			$result['update_check']['time'],
+			'Time should remain from baseline.'
+		);
 		$this->assertSame( true, $result['delay_updates']['enabled'] );
 		$this->assertSame( 7, $result['delay_updates']['delay_value'] );
 	}
@@ -405,7 +434,11 @@ final class ScheduleSanitizersTest extends TestCase {
 			$baseline
 		);
 		$this->assertFalse( $result['delay_updates']['enabled'] );
-		$this->assertSame( 7, $result['delay_updates']['delay_value'], 'delay_value should stay from baseline.' );
+		$this->assertSame(
+			7,
+			$result['delay_updates']['delay_value'],
+			'delay_value should stay from baseline.'
+		);
 	}
 
 	/**

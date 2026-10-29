@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import json
 import re
+import subprocess
 import sys
 from pathlib import Path
 
@@ -162,27 +163,27 @@ def pairwise(dims: list[dict]) -> tuple[list[dict], int, int]:
     return unique, len(pairs), len(pairs) - len(uncovered)
 
 
-def dimension_case(dim: dict, cid: str) -> dict:
-    values = values_for(dim)
-    return {
-        "id": cid,
-        "title": f"Dimension: {dim['label']} ({dim['id']})",
-        "owner": dim["owner"],
-        "risk": dim["risk"],
-        "tags": list(dim["tags"]) + ["@dimension"],
-        "dimensions": [dim["id"]],
-        "values": values,
-        "steps": [
-            f"Apply {dim['id']} at {values} through the owning surface.",
-            "Run the case's oracle: UI plus the real WordPress effect.",
-        ],
-        "assertions": [
-            f"The behavior matches {dim['source']}.",
-            "The invariants that apply to this dimension hold.",
-        ],
-        "oracle": ["ui", "integration"],
-        "automation": "planned",
-    }
+def dimension_case(dim: dict, cid: str, states: dict[str, str]) -> dict:
+	values = values_for(dim)
+	return {
+		"id": cid,
+		"title": f"Dimension: {dim['label']} ({dim['id']})",
+		"owner": dim["owner"],
+		"risk": dim["risk"],
+		"tags": list(dim["tags"]) + ["@dimension"],
+		"dimensions": [dim["id"]],
+		"values": values,
+		"steps": [
+			f"Apply {dim['id']} at {values} through the owning surface.",
+			"Run the case's oracle: UI plus the real WordPress effect.",
+		],
+		"assertions": [
+			f"The behavior matches {dim['source']}.",
+			"The invariants that apply to this dimension hold.",
+		],
+		"oracle": ["ui", "integration"],
+		"automation": states.get(cid, "planned"),
+	}
 
 
 def write_book(dims, ids, generated, cases, pro, invariants, combos, pair_count) -> None:
@@ -284,14 +285,60 @@ def write_book(dims, ids, generated, cases, pro, invariants, combos, pair_count)
     BOOK.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
+def registry_states() -> dict[str, str]:
+    """Return the automation state of every catalog case from the runner."""
+    completed = subprocess.run(
+        [sys.executable, str(TB / "run.py"), "--list", "--json"],
+        cwd=ROOT,
+        text=True,
+        capture_output=True,
+    )
+    if completed.returncode != 0:
+        raise RuntimeError(
+            "run.py --list --json failed: "
+            f"{completed.stderr.strip() or completed.stdout.strip()}"
+        )
+    return {case["id"]: case["automation"] for case in json.loads(completed.stdout)["cases"]}
+
+
+def sync_automation(states: dict[str, str]) -> int:
+    """Rewrite the `automation:` field of each case in the hand-written YAML.
+
+    A targeted line rewrite keeps the files' formatting and the surrounding
+    prose intact. The generated dimension file is rebuilt by `generate()`.
+    """
+    changed = 0
+    for name in ("cases.yaml", "pro/cases.yaml"):
+        path = TB / name
+        if not path.exists():
+            continue
+        lines = path.read_text(encoding="utf-8").splitlines()
+        current = None
+        for index, line in enumerate(lines):
+            match = re.match(r"^(\s*)- id:\s*(\S+)\s*$", line)
+            if match:
+                current = match.group(2)
+                continue
+            auto = re.match(r"^(\s*)automation:\s*(\S+)\s*$", line)
+            if auto and current in states:
+                desired = states[current]
+                if auto.group(2) != desired:
+                    lines[index] = f"{auto.group(1)}automation: {desired}"
+                    changed += 1
+        path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    return changed
+
+
 def generate() -> int:
     dims_data = load(TB / "dimensions.yaml")
     dims = dims_data["dimensions"]
+    states = registry_states()
+    sync_automation(states)
     cases = load(TB / "cases.yaml")
     pro = load(TB / "pro/cases.yaml")
     invariants = load(TB / "invariants.yaml")
     ids = ensure_case_ids(dims)
-    generated = [dimension_case(dim, ids[dim["id"]]) for dim in dims]
+    generated = [dimension_case(dim, ids[dim["id"]], states) for dim in dims]
     dump(GEN_CASES, {"schema": "updatronix-testbook/generated-cases/v1", "cases": generated})
     combos, pair_count, covered = pairwise(dims)
     rows = []
@@ -395,6 +442,23 @@ def validate() -> int:
         ids_set.add(case.get("id"))
         if not all(str(tag).startswith("@") for tag in case.get("tags", [])):
             errors.append(f"{case.get('id')}: invalid tag")
+    manifest = load(TB / "manifest.yaml")
+    allowed_states = set(manifest.get("automation_states", []))
+    try:
+        states = registry_states()
+    except RuntimeError as error:
+        errors.append(str(error))
+        states = {}
+    for case in all_cases:
+        automation = case.get("automation")
+        if automation not in allowed_states:
+            errors.append(f"{case.get('id')}: unknown automation state {automation!r}")
+        expected = states.get(case.get("id"), "planned")
+        if automation != expected:
+            errors.append(
+                f"{case.get('id')}: automation {automation!r} but the registry says "
+                f"{expected!r}; run `testbook.py sync-automation`"
+            )
     sys.path.insert(0, str(TB))
     from runners import RUNNERS
 
@@ -445,6 +509,12 @@ def main() -> int:
         return generate()
     if command == "validate":
         return validate()
+    if command == "sync-automation":
+        states = registry_states()
+        changed = sync_automation(states)
+        counts = {state: sum(1 for value in states.values() if value == state) for state in ("implemented", "partial", "planned")}
+        print(f"synced {changed} automation field(s); registry: {counts}")
+        return 0
     print(__doc__)
     return 0
 

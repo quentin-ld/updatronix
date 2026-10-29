@@ -1,9 +1,11 @@
 schema: updatronix-testbook/fixtures/v1
 updated: 2026-10-29
 notes: >-
-  Provisioned 2026-10-29 on two disposable DDEV sites. This file records the
-  live contract and the reset protocol; secrets and the live license key are
-  never stored here. Planned gaps are marked `contract` and are phase-4 work.
+  Provisioned and re-synced 2026-10-29 on two disposable DDEV sites. This file
+  records the live contract and the reset protocol; secrets and the live license
+  key are never stored here. `python3 tests/testbook/seed-fixtures.py` writes
+  the live fixture tier, `wp-content/testbook-base`, and (with
+  `--refresh-snapshots`) the two DB snapshots in one pass.
 
 environments:
   single:
@@ -13,6 +15,8 @@ environments:
     wp: "7.1.4"
     php: "8.4"
     db: mariadb
+    snapshot: testbook-base2
+    file_baseline: wp-content/testbook-base
     reset: db_snapshot_and_state_restore
   multisite:
     status: provisioned
@@ -20,7 +24,20 @@ environments:
     type: multisite
     sites: [main, subsite-a]
     roles: [super_admin, subsite_admin]
+    snapshot: testbook-ms
+    file_baseline: wp-content/testbook-base
     reset: db_snapshot_and_state_restore
+
+orchestration:
+  catalog: host_python3
+  pyyaml: host_only
+  wordpress: ddev_wp
+  playwright: bin_harness_exec
+  note: >-
+    `bin/harness exec python3` has no PyYAML module. The catalog and runner run
+    on host `python3`; WordPress work runs through `ddev wp`; Playwright runs
+    through `bin/harness exec`. Do not add a hidden container PyYAML
+    dependency.
 
 tiers:
   deterministic:
@@ -33,6 +50,7 @@ tiers:
       - id: fixture-bravo/fixture-bravo.php
         version: "1.0.0"
         offer: "2.0.0"
+        package: fixture-bravo-2.0.0.zip
       - id: fixture-locked/fixture-locked.php
         version: "1.0.0"
         offer: "2.0.0"
@@ -40,7 +58,7 @@ tiers:
       - id: fixture-incompatible/fixture-incompatible.php
         version: "1.0.0"
         offer: "2.0.0"
-        offer_constraints: {requires_php: "9.9", requires: "99.0"}
+        offer_constraints: { requires_php: "9.9", requires: "99.0" }
       - id: fixture-abandoned/fixture-abandoned.php
         version: "1.0.0"
         offer: "2.0.0"
@@ -57,14 +75,44 @@ tiers:
       - id: fixture-bzr/fixture-bzr.php
         version: "1.0.0"
         marker: bzr
+      - id: fixture-broken/fixture-broken.php
+        version: "1.0.0"
+        offer: "2.0.0"
+        package: fixture-broken-2.0.0-missing.zip
+        note: download_404 path
+      - id: fixture-corrupt/fixture-corrupt.php
+        version: "1.0.0"
+        offer: "2.0.0"
+        package: fixture-corrupt-2.0.0.zip
+        note: invalid ZIP bytes
+      - id: fixture-partial/fixture-partial.php
+        version: "1.0.0"
+        offer: "2.0.0"
+        package: fixture-partial-2.0.0.zip
+        note: readme-only package
+      - id: fixture-git-ancestor-parent/plugin/fixture-git-ancestor.php
+        version: "1.0.0"
+        marker: git_ancestor
+        note: .git sits above the item root, inside the item subtree
+      - id: fixture-symlink-inside/fixture-symlink-inside.php
+        marker: symlink_inside_root
+        note: symlinked item root resolving inside WP_PLUGIN_DIR
+      - id: fixture-symlink-outside/fixture-symlink-outside.php
+        marker: symlink_outside_root
+        note: symlinked item root resolving to wp-content/testbook-symlink-target
+      - id: fixture-unreadable/fixture-unreadable.php
+        version: "1.0.0"
+        marker: unreadable
+        note: item root chmod 000; restored by the file baseline
     themes:
       - id: fixture-theme
         version: "1.0.0"
         offer: "2.0.0"
         package: fixture-theme-2.0.0.zip
+        index_php: true
     vcs:
-      implemented: [git_item_root, composer_project, svn, hg, bzr]
-      contract: [git_ancestor, symlink_inside_root, symlink_outside_root, unreadable]
+      implemented: [git_item_root, git_ancestor, composer_project, svn, hg, bzr, symlink_inside_root, symlink_outside_root, unreadable]
+      contract: []
     offers:
       implemented: [compatible, incompatible_php, incompatible_wp, abandoned]
       contract: [no_offer, stale, target_mismatch]
@@ -87,8 +135,18 @@ tiers:
     theme: fixture-theme-2.0.0.zip (installed 1.0.0)
     core: wordpress-7.1.3.zip (installed 7.1.4; older core)
     translation: fixture-alpha-fr_FR.zip (fr_FR)
-    failure_modes: [download_404, invalid_zip, partial_write, rollback, timeout, disk_full, uncertain]
-    note: Failure-mode packages are contract entries for phase 4; the four real packages above exist now.
+    failure_modes:
+      download_404: fixture-broken-2.0.0-missing.zip
+      invalid_zip: fixture-corrupt-2.0.0.zip
+      partial_write: fixture-partial-2.0.0.zip
+      rollback: fixture-broken-2.0.0.zip (readme-only)
+      timeout: contract
+      disk_full: contract
+      uncertain: contract
+    note: >-
+      The first four failure modes have real packages. `TB-UPDATE-005` covers
+      `download_404` and `invalid_zip`; `TB-ENV-003` covers partial-write,
+      read-only and disk-full probes.
 
 mail:
   status: provisioned
@@ -108,19 +166,22 @@ cron:
   cases: [enabled, disabled, delayed, overlap, manual_run]
 
 clock:
-  status: contract
-  control: mu-plugin time freeze or a WP-CLI option
+  status: provisioned
+  control: rewrite `updatronix_pro_last_pass` timestamps and next-eligible options
   cases: [hold_start, next_eligible, retry, stale_pass, expired_pass]
+  note: No time-freeze mu-plugin; cases move stored timestamps, which is the real state the UI reads.
 
 reset:
-  status: contract
-  steps:
-    - restore_db_snapshot
-    - delete_updatronix_options
-    - delete_transients
-    - clear_cron
-    - truncate_logs
-    - purge_mail
-    - reset_license
-    - restore_uploads_and_fixtures
+  status: provisioned
+  modes:
+    full: db snapshot + file baseline + state
+    state: options, transients, logs, mail, cron, license
+    files: file baseline only
+    none: nothing
+  file_baseline: wp-content/testbook-base (plugins, themes, mu-plugins, uploads/testbook)
+  snapshot_refresh: python3 tests/testbook/seed-fixtures.py --refresh-snapshots
+  protocol:
+    - seed the live fixture tier
+    - sync wp-content/testbook-base from the live fixtures
+    - refresh testbook-base2 and testbook-ms snapshots
   target_seconds: 60

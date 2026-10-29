@@ -28,12 +28,9 @@
 <ruleset name="updatronix-project">
 	<!--
 		Test support fixtures use PascalCase file names by convention; the
-		WordPress file-name sniff expects class-*.php. Keep the other sniffs
-		active for tests, but exclude these fixtures from the naming rule.
+		WordPress file-name sniff expects class-*.php. The broad tests
+		exception at the end of this file covers this folder too.
 	-->
-	<rule ref="WordPress.Files.FileName">
-		<exclude-pattern>*/tests/Support/*</exclude-pattern>
-	</rule>
 	<!--
 		Test-book PHP files are WP-CLI eval fixtures, not plugin code. Their
 		docblock is a file comment, but the Squiz file-comment sniff does not
@@ -45,12 +42,10 @@
 	<!--
 		This unit test deliberately declares small WordPress/log-state stubs
 		alongside the test class so the logger failure path can run without a
-		full WordPress runtime. The one-object/function and file-name rules do
-		not apply to that test fixture shape.
+		full WordPress runtime. The one-object/function rules do not apply to
+		that test fixture shape; the broad tests file-name exception below
+		covers the name rule.
 	-->
-	<rule ref="WordPress.Files.FileName">
-		<exclude-pattern>*/tests/Unit/UpdateLoggerFailureTest.php</exclude-pattern>
-	</rule>
 	<rule ref="Generic.Files.OneObjectStructurePerFile">
 		<exclude-pattern>*/tests/Unit/UpdateLoggerFailureTest.php</exclude-pattern>
 	</rule>
@@ -65,11 +60,27 @@
 		<exclude-pattern>*/inc/classes/class-updatronix-update-logger.php</exclude-pattern>
 	</rule>
 	<!--
-		The project standard enables both EndFileNewline and EndFileNoNewline.
-		Keep the standard newline rule for this file and drop the contradictory
-		no-newline rule.
+		Test files use PascalCase names by convention; the WordPress file-name
+		sniff expects class-*.php. Pro already carries this narrow
+		test-infrastructure exception, and the test suite is not plugin source.
+	-->
+	<rule ref="WordPress.Files.FileName">
+		<exclude-pattern>*/tests/*</exclude-pattern>
+	</rule>
+	<!--
+		The Generic filename rule flags every PascalCase test file. Test files
+		use PascalCase by convention across both plugins; keep the rule for
+		plugin source only.
+	-->
+	<rule ref="Generic.Files.LowercasedFilename">
+		<exclude-pattern>*/tests/*</exclude-pattern>
+	</rule>
+	<!--
+		The project standard enables both EndFileNewline and EndFileNoNewline;
+		keeping both makes every file fail one of them. WordPress requires the
+		final newline, so drop the contradictory no-newline rule project-wide.
 	-->
 	<rule ref="Generic.Files.EndFileNoNewline">
-		<exclude-pattern>*/inc/classes/class-updatronix-update-logger.php</exclude-pattern>
+		<severity>0</severity>
 	</rule>
 </ruleset>

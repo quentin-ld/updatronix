@@ -23,7 +23,7 @@ surface_cases:
       - The details section shows state, reason, origin, stage, pass, chain, predecessor, target, next eligible.
       - The export offers reason, state, origin, pass, chain, next eligible, decision context, and retained.
     oracle: [ui, log, export]
-    automation: planned
+    automation: implemented
 
   - id: TB-UI-002
     title: Auto updates surface
@@ -38,7 +38,7 @@ surface_cases:
       - The save order is one mutation per staged change.
       - A partial failure is surfaced, not hidden.
     oracle: [ui, options]
-    automation: planned
+    automation: implemented
 
   - id: TB-UI-003
     title: Schedule surface
@@ -53,7 +53,7 @@ surface_cases:
       - The hold accepts 0–365 and 0 turns it off.
       - The next-run copy says it is a check, not an install time.
     oracle: [ui, options, cron]
-    automation: planned
+    automation: implemented
 
   - id: TB-UI-004
     title: Health surface
@@ -83,7 +83,7 @@ surface_cases:
       - Retention stays 1–365; uninstall opt-in is explicit.
       - The recipient list is sanitized and capped.
     oracle: [ui, options]
-    automation: planned
+    automation: implemented
 
   - id: TB-UI-006
     title: Documentation surface
@@ -120,7 +120,7 @@ surface_cases:
       - Safe Mode off disables the Shield/Version Lock controls and says why.
       - The incompatible behavior and re-enable choices persist.
     oracle: [ui, options, log]
-    automation: planned
+    automation: implemented
 
   - id: TB-UI-009
     title: Update Flow surface
@@ -135,7 +135,7 @@ surface_cases:
       - Waiting/Blocked steps show the predecessor, reason, eligible time, and manager.
       - The Last pass card is read-only and shows the pass id, times, counters, and first waiting reason.
     oracle: [ui, pass, log]
-    automation: planned
+    automation: implemented
 
   - id: TB-UI-010
     title: White Label surface
@@ -165,7 +165,7 @@ surface_cases:
       - Activation reloads the Pro destinations and routes.
       - Deactivation removes them and leaves the license page usable.
     oracle: [ui, options, http]
-    automation: planned
+    automation: implemented
 
   - id: TB-UI-012
     title: Plugins screen
@@ -180,7 +180,7 @@ surface_cases:
       - An unlocked row keeps its normal controls.
       - No fatal/500.
     oracle: [ui, log, http]
-    automation: planned
+    automation: implemented
 
   - id: TB-UI-013
     title: Themes screen
@@ -194,7 +194,7 @@ surface_cases:
       - The locked card names the manager and disables Update.
       - The unlocked theme keeps its controls.
     oracle: [ui, log]
-    automation: planned
+    automation: implemented
 
   - id: TB-UI-014
     title: Update-core screen
@@ -209,7 +209,7 @@ surface_cases:
       - Locked rows lose the checkbox/update link.
       - The WP-Cron hint is one line when disabled.
     oracle: [ui, log]
-    automation: planned
+    automation: implemented
 
   - id: TB-UI-015
     title: Network Admin
@@ -224,7 +224,7 @@ surface_cases:
       - The pass is main-site only; the network schedule is shared.
       - Site deletion removes that site's rows.
     oracle: [ui, db, log]
-    automation: planned
+    automation: implemented
 
 flow_cases:
   - id: TB-UPDATE-001
@@ -236,7 +236,7 @@ flow_cases:
     steps: [Offer a local plugin 1.0.0 to 2.0.0; run one automatic pass.]
     assertions: [The plugin is installed once; one item row and one pass row; one native email.]
     oracle: [disk, log, pass, mail]
-    automation: planned
+    automation: implemented
 
   - id: TB-UPDATE-002
     title: Theme update happy path
@@ -247,7 +247,7 @@ flow_cases:
     steps: [Offer a local theme update; run one pass.]
     assertions: [The theme is installed once; one row; one email.]
     oracle: [disk, log, pass, mail]
-    automation: planned
+    automation: implemented
 
   - id: TB-UPDATE-003
     title: Core update
@@ -258,7 +258,7 @@ flow_cases:
     steps: [Offer a controlled core update; run one pass.]
     assertions: [The core update is selected only when the native mode allows it; one row; one email.]
     oracle: [disk, log, mail]
-    automation: planned
+    automation: partial
 
   - id: TB-UPDATE-004
     title: Translation update
@@ -269,7 +269,7 @@ flow_cases:
     steps: [Offer a translation update; run one pass.]
     assertions: [The translation is installed once; the row is categorized as a translation.]
     oracle: [disk, log]
-    automation: planned
+    automation: implemented
 
   - id: TB-UPDATE-005
     title: Failed and rolled-back update
@@ -280,7 +280,7 @@ flow_cases:
     steps: [Offer an invalid zip, a partial write, and a rollback; run the pass.]
     assertions: [No false success; the failure/rollback is logged; the next pass retries once.]
     oracle: [disk, log, mail]
-    automation: planned
+    automation: implemented
 
   - id: TB-PASS-001
     title: Two items, two invocations
@@ -291,7 +291,7 @@ flow_cases:
     steps: [Seed two eligible items; run one pass to completion.]
     assertions: [Two native invocations; two installs; two emails; one item row each; one pass row.]
     oracle: [disk, log, pass, mail]
-    automation: planned
+    automation: implemented
 
   - id: TB-PASS-002
     title: Lock busy and retry
@@ -401,7 +401,7 @@ flow_cases:
     steps: [Seed blocked, waiting, held, and legacy rows; filter and open details.]
     assertions: [Reason, state, origin, pass, chain, predecessor, target, next eligible are correct; legacy is labeled.]
     oracle: [ui, log]
-    automation: planned
+    automation: implemented
 
   - id: TB-EXPORT-001
     title: Export formats and columns
@@ -445,7 +445,7 @@ flow_cases:
     steps: [Offer an incompatible PHP/WP update; try disable and cancel; re-enable after a passing release.]
     assertions: [Disable turns the toggle off; cancel skips one release; re-enable only after a pass.]
     oracle: [options, log, ui]
-    automation: planned
+    automation: implemented
 
   - id: TB-SHIELD-003
     title: Shield block email
@@ -456,7 +456,7 @@ flow_cases:
     steps: [Block an update with each notification combination.]
     assertions: [The email is sent only when enabled; the recipient is the configured one; the body is truthful.]
     oracle: [mail, log]
-    automation: planned
+    automation: implemented
 
   - id: TB-VLOCK-001
     title: Detection matrix
@@ -467,7 +467,7 @@ flow_cases:
     steps: [Create Git item-root, Git ancestor, SVN, Composer project, Composer package, symlink, and unreadable fixtures.]
     assertions: [Each detection maps to the canonical reason/manager; unknown fails closed; unverified writes one advisory.]
     oracle: [ui, log, options]
-    automation: planned
+    automation: implemented
 
   - id: TB-VLOCK-002
     title: Manual guard and pass own write
@@ -478,7 +478,7 @@ flow_cases:
     steps: [Block manual updates; try direct URL, bulk, and WP-CLI; let the pass write.]
     assertions: [Admin manual is blocked only with the switch on; WP-CLI works; the pass is exempt; the option is unchanged.]
     oracle: [disk, log, options]
-    automation: planned
+    automation: implemented
 
   - id: TB-LIC-001
     title: License gating
@@ -489,7 +489,7 @@ flow_cases:
     steps: [Run with free-only, inactive, invalid, active, and dev-mode licenses.]
     assertions: [Pro routes/screens appear only when active; inactive fails closed; the recovery path works.]
     oracle: [ui, http, pass]
-    automation: planned
+    automation: implemented
 
   - id: TB-LIC-002
     title: Salt rotation and throttle
@@ -522,7 +522,7 @@ flow_cases:
     steps: [Save the network schedule as Super Admin; view from a subsite; generate a subsite log row.]
     assertions: [The network option is shared; a subsite admin cannot save; network logs include subsite rows.]
     oracle: [ui, db, options]
-    automation: planned
+    automation: implemented
 
   - id: TB-MS-002
     title: Site deletion and uninstall
@@ -555,7 +555,7 @@ flow_cases:
     steps: [Open every destination as admin, editor, subscriber, Super Admin, and subsite admin.]
     assertions: [Only the allowed roles see the destination; direct URLs are denied; REST is denied; no fatal.]
     oracle: [ui, http]
-    automation: planned
+    automation: implemented
 
   - id: TB-ENV-001
     title: Constants and locked controls
@@ -577,7 +577,7 @@ flow_cases:
     steps: [Disable WP-Cron; set UTC and a DST boundary; run the check.]
     assertions: [The hint is one line; the next check uses the site timezone; DST is documented; no false install time.]
     oracle: [ui, cron, options]
-    automation: planned
+    automation: implemented
 
   - id: TB-ENV-003
     title: Filesystem and disk failures

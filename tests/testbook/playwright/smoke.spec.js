@@ -1,4 +1,5 @@
 const { test, expect } = require( '@playwright/test' );
+const { expectResponsiveLayout, writeMetrics } = require( './helpers/a11y' );
 
 const multisite = process.env.TESTBOOK_MULTISITE === '1';
 const adminBase = multisite
@@ -19,4 +20,7 @@ test( 'test-book UI smoke: seeded log and settings render', async ( {
 	await expect(
 		page.getByText( 'Logging', { exact: true } ).first()
 	).toBeVisible();
+
+	await expectResponsiveLayout( page );
+	await writeMetrics( page );
 } );
