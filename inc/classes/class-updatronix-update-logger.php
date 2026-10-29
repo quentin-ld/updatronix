@@ -358,7 +358,16 @@ final class Updatronix_Update_Logger {
 		}
 		$trace        = Updatronix_ErrorHandler::capture_trace();
 		$performed_as = self::$auto_update ? 'automatic' : 'manual';
-		$status       = 'error';
+
+		// Core first: the disk decides, never the absence of a finalize event.
+		// The engine calls WP_Automatic_Updater::update(), so
+		// `automatic_updates_complete` does not fire; a completed core update
+		// must not be flushed as "may not have completed".
+		if ( isset( self::$pending_logs['core']['core'] ) ) {
+			self::finalize_pending_core_log_auto();
+			unset( self::$pending_logs['core']['core'] );
+		}
+
 		foreach ( self::$pending_logs as $log_type => $items ) {
 			foreach ( $items as $key => $data ) {
 				$data      = array_merge(
@@ -379,24 +388,116 @@ final class Updatronix_Update_Logger {
 				$slug           = $data['slug'];
 				$version_before = $data['version_before'];
 				$version_after  = $data['version_after'];
-				Updatronix_Logger::log(
-					$log_type,
-					'update',
-					$name,
-					$slug,
-					$version_before,
-					$version_after,
-					$status,
-					__( 'This update may not have completed. It was logged when the process ended unexpectedly.', 'updatronix' ),
-					$trace,
-					$performed_as,
-					'',
-					$event_key
+				Updatronix_Logger::log_event(
+					array(
+						'log_type'       => $log_type,
+						'action_type'    => 'failed',
+						'item_name'      => $name,
+						'item_slug'      => $slug,
+						'version_before' => $version_before,
+						'target_version' => $version_after,
+						'status'         => 'error',
+						'message'        => __( 'This update may not have completed. It was logged when the process ended unexpectedly.', 'updatronix' ),
+						'trace'          => $trace,
+						'performed_as'   => $performed_as,
+						'reason_code'    => 'update_failed',
+						'decision_state' => 'failed',
+						'origin'         => 'automatic' === $performed_as ? 'automatic' : 'manual',
+						'decision_stage' => 'finalize',
+					)
 				);
 				self::finalize_pending_log( $event_key, $log_type, (string) $key );
 			}
 		}
 		self::$pending_logs = array();
+	}
+
+	/**
+	 * Finalize the pending core event when the engine reports completion.
+	 *
+	 * The engine calls `WP_Automatic_Updater::update()`, so the native
+	 * `automatic_updates_complete` action never fires and the shutdown
+	 * fallback would otherwise write a false "may not have completed" error.
+	 * A successful result — or an installed version that already equals the
+	 * target — writes one success row; anything else writes one error row.
+	 *
+	 * Idempotent: the pending key is marked finalized, so a second call and
+	 * the shutdown fallback both no-op.
+	 *
+	 * @since 1.6.0
+	 *
+	 * @param bool                 $success Whether the engine reported success.
+	 * @param array<string, mixed> $result  Optional engine result (e.g. `error`).
+	 * @return void
+	 */
+	public static function finalize_pending_core_log( bool $success, array $result = array() ): void {
+		if ( ! isset( self::$pending_logs['core']['core'] ) ) {
+			return;
+		}
+
+		if ( ! updatronix_get_settings()['logging_enabled'] || ! Updatronix_Database::table_exists() ) {
+			return;
+		}
+
+		$pending   = self::$pending_logs['core']['core'];
+		$event_key = (string) ( $pending['event_key'] ?? '' );
+		$target    = (string) ( $pending['version_after'] ?? '' );
+		$installed = self::get_installed_core_version_from_disk();
+		$completed = $success || ( '' !== $target && '' !== $installed && $installed === $target );
+		$after     = '' !== $installed ? $installed : $target;
+		$before    = (string) ( $pending['version_before'] ?? '' );
+
+		$context = array();
+		if ( ! $completed && isset( $result['error'] ) && is_string( $result['error'] ) ) {
+			$context['last_error'] = $result['error'];
+		}
+
+		Updatronix_Logger::log_event(
+			array(
+				'log_type'       => 'core',
+				'action_type'    => $completed ? 'update' : 'failed',
+				'item_name'      => 'WordPress',
+				'item_slug'      => 'core:wordpress',
+				'version_before' => $before,
+				'version_after'  => $completed ? $after : '',
+				'target_version' => $target,
+				'status'         => $completed ? 'success' : 'error',
+				'message'        => $completed
+					? sprintf(
+						/* translators: %s: WordPress version number */
+						__( 'Core update to WordPress %s', 'updatronix' ),
+						$after
+					)
+					: __( 'This update may not have completed. It was logged when the process ended unexpectedly.', 'updatronix' ),
+				'trace'          => Updatronix_ErrorHandler::capture_trace(),
+				'performed_as'   => 'automatic',
+				'reason_code'    => $completed ? 'updated' : 'update_failed',
+				'decision_state' => $completed ? 'done' : 'failed',
+				'origin'         => 'automatic',
+				'decision_stage' => 'finalize',
+				'context'        => $context,
+			)
+		);
+
+		self::$already_logged['core:wordpress'] = true;
+		self::finalize_pending_log( $event_key, 'core', 'core' );
+
+		self::schedule_core_version_before_cleanup();
+		self::$core_feedback    = array();
+		self::$core_package_url = '';
+	}
+
+	/**
+	 * Finalize the pending core event from the disk state (shutdown fallback).
+	 *
+	 * @return void
+	 */
+	private static function finalize_pending_core_log_auto(): void {
+		$pending   = self::$pending_logs['core']['core'] ?? array();
+		$target    = (string) ( $pending['version_after'] ?? '' );
+		$installed = self::get_installed_core_version_from_disk();
+
+		self::finalize_pending_core_log( '' !== $target && '' !== $installed && $installed === $target );
 	}
 
 	/**
@@ -492,7 +593,7 @@ final class Updatronix_Update_Logger {
 						}
 					} elseif ( 'core' === $type ) {
 						$event_key = self::get_pending_event_key( 'core', 'core' );
-						if ( isset( self::$already_logged['core:core'] ) || self::should_skip_event( $event_key ) ) {
+						if ( isset( self::$already_logged['core:wordpress'] ) || self::should_skip_event( $event_key ) ) {
 							self::finalize_pending_log( $event_key, 'core', 'core' );
 							continue;
 						}
@@ -520,22 +621,28 @@ final class Updatronix_Update_Logger {
 					$messages,
 					$result->result ?? null
 				);
-				Updatronix_Logger::log(
-					'translation' === $type ? 'translation' : $type,
-					$action_type,
-					$name,
-					$slug,
-					$version_before,
-					$version_after,
-					$status,
-					$notes,
-					$trace,
-					$performed_as,
-					'',
-					$event_key
+				Updatronix_Logger::log_event(
+					array(
+						'log_type'       => 'translation' === $type ? 'translation' : $type,
+						'action_type'    => $action_type,
+						'item_name'      => $name,
+						'item_slug'      => 'core' === $type ? 'core:wordpress' : $slug,
+						'version_before' => $version_before,
+						'version_after'  => $version_after,
+						'target_version' => $version_after,
+						'status'         => $status,
+						'message'        => $notes,
+						'trace'          => $trace,
+						'performed_as'   => $performed_as,
+						'update_context' => '',
+						'reason_code'    => 'error' === $status ? 'update_failed' : self::reason_for_action( $action_type ),
+						'decision_state' => 'error' === $status ? 'failed' : 'done',
+						'origin'         => 'automatic',
+						'decision_stage' => 'execute',
+					)
 				);
 				if ( 'core' === $type ) {
-					self::$already_logged['core:core'] = true;
+					self::$already_logged['core:wordpress'] = true;
 					self::schedule_core_version_before_cleanup();
 					self::$core_feedback    = array();
 					self::$core_package_url = '';
@@ -1239,7 +1346,7 @@ final class Updatronix_Update_Logger {
 
 			$event_key = self::get_pending_event_key( 'core', 'core' );
 			self::log_core_update( $upgrader, $process_message, $trace, $performed_as, $event_key );
-			self::$already_logged['core:core'] = true;
+			self::$already_logged['core:wordpress'] = true;
 			self::finalize_pending_log( $event_key, 'core', 'core' );
 
 			return;
@@ -1332,19 +1439,25 @@ final class Updatronix_Update_Logger {
 					self::finalize_pending_log( $event_key, 'translation', $key );
 					continue;
 				}
-				Updatronix_Logger::log(
-					'translation',
-					'update',
-					$name,
-					$slug,
-					$version_before,
-					$version_after,
-					'success',
-					$process_message,
-					$trace,
-					$performed_as,
-					'',
-					$event_key
+				Updatronix_Logger::log_event(
+					array(
+						'log_type'       => 'translation',
+						'action_type'    => 'update',
+						'item_name'      => $name,
+						'item_slug'      => $slug,
+						'version_before' => $version_before,
+						'version_after'  => $version_after,
+						'target_version' => $version_after,
+						'status'         => 'success',
+						'message'        => $process_message,
+						'trace'          => $trace,
+						'performed_as'   => $performed_as,
+						'update_context' => '',
+						'reason_code'    => 'updated',
+						'decision_state' => 'done',
+						'origin'         => 'automatic' === $performed_as ? 'automatic' : 'manual',
+						'decision_stage' => 'execute',
+					)
 				);
 				self::finalize_pending_log( $event_key, 'translation', $key );
 				self::$already_logged[ 'translation:' . $key ] = true;
@@ -1502,19 +1615,25 @@ final class Updatronix_Update_Logger {
 			$process_message
 		);
 
-		Updatronix_Logger::log(
-			'core',
-			$action_type,
-			'WordPress',
-			'core',
-			$version_before,
-			$version_after,
-			'success',
-			$message,
-			$trace,
-			$performed_as,
-			'',
-			$event_key
+		Updatronix_Logger::log_event(
+			array(
+				'log_type'       => 'core',
+				'action_type'    => $action_type,
+				'item_name'      => 'WordPress',
+				'item_slug'      => 'core:wordpress',
+				'version_before' => $version_before,
+				'version_after'  => $version_after,
+				'target_version' => $version_after,
+				'status'         => 'success',
+				'message'        => $message,
+				'trace'          => $trace,
+				'performed_as'   => $performed_as,
+				'update_context' => '',
+				'reason_code'    => 'same_version' === $action_type ? 'already_installed' : 'updated',
+				'decision_state' => 'done',
+				'origin'         => 'automatic' === $performed_as ? 'automatic' : 'manual',
+				'decision_stage' => 'execute',
+			)
 		);
 
 		// Defer cleanup so a second core update step in the same request (e.g. partial then full)
@@ -1652,19 +1771,25 @@ final class Updatronix_Update_Logger {
 		$title   = self::format_plugin_log_title( $action_type, $name, $version_after );
 		$message = self::format_plugin_log_message( $title, $process_message );
 
-		Updatronix_Logger::log(
-			'plugin',
-			$action_type,
-			$name,
-			$slug,
-			$version_before,
-			$version_after,
-			'success',
-			$message,
-			$trace,
-			$performed_as,
-			$update_context,
-			$event_key
+		Updatronix_Logger::log_event(
+			array(
+				'log_type'       => 'plugin',
+				'action_type'    => $action_type,
+				'item_name'      => $name,
+				'item_slug'      => $slug,
+				'version_before' => $version_before,
+				'version_after'  => $version_after,
+				'target_version' => $version_after,
+				'status'         => 'success',
+				'message'        => $message,
+				'trace'          => $trace,
+				'performed_as'   => $performed_as,
+				'update_context' => $update_context,
+				'reason_code'    => self::reason_for_action( $action_type ),
+				'decision_state' => 'done',
+				'origin'         => 'automatic' === $performed_as ? 'automatic' : 'manual',
+				'decision_stage' => 'execute',
+			)
 		);
 
 		unset( $stored[ $plugin_file ] );
@@ -1706,18 +1831,22 @@ final class Updatronix_Update_Logger {
 		$title = self::format_plugin_log_title( 'uninstall', $name, $version_before );
 		$trace = Updatronix_ErrorHandler::capture_trace();
 
-		Updatronix_Logger::log(
-			'plugin',
-			'uninstall',
-			$name,
-			$slug,
-			$version_before,
-			'',
-			'success',
-			$title,
-			$trace,
-			'manual',
-			''
+		Updatronix_Logger::log_event(
+			array(
+				'log_type'       => 'plugin',
+				'action_type'    => 'uninstall',
+				'item_name'      => $name,
+				'item_slug'      => $slug,
+				'version_before' => $version_before,
+				'status'         => 'success',
+				'message'        => $title,
+				'trace'          => $trace,
+				'performed_as'   => 'manual',
+				'reason_code'    => 'uninstalled',
+				'decision_state' => 'done',
+				'origin'         => 'manual',
+				'decision_stage' => 'execute',
+			)
 		);
 	}
 
@@ -1747,18 +1876,22 @@ final class Updatronix_Update_Logger {
 		$title = self::format_plugin_log_title( 'uninstall', $name, $version_before );
 		$trace = Updatronix_ErrorHandler::capture_trace();
 
-		Updatronix_Logger::log(
-			'theme',
-			'uninstall',
-			$name,
-			$stylesheet,
-			$version_before,
-			'',
-			'success',
-			$title,
-			$trace,
-			'manual',
-			''
+		Updatronix_Logger::log_event(
+			array(
+				'log_type'       => 'theme',
+				'action_type'    => 'uninstall',
+				'item_name'      => $name,
+				'item_slug'      => $stylesheet,
+				'version_before' => $version_before,
+				'status'         => 'success',
+				'message'        => $title,
+				'trace'          => $trace,
+				'performed_as'   => 'manual',
+				'reason_code'    => 'uninstalled',
+				'decision_state' => 'done',
+				'origin'         => 'manual',
+				'decision_stage' => 'execute',
+			)
 		);
 	}
 
@@ -1840,23 +1973,47 @@ final class Updatronix_Update_Logger {
 		$title   = self::format_plugin_log_title( $action_type, $name, $version_after );
 		$message = self::format_note_like_wp_screen( $title, array(), $process_message );
 
-		Updatronix_Logger::log(
-			'theme',
-			$action_type,
-			$name,
-			$theme_slug,
-			$version_before,
-			$version_after,
-			'success',
-			$message,
-			$trace,
-			$performed_as,
-			$update_context,
-			$event_key
+		Updatronix_Logger::log_event(
+			array(
+				'log_type'       => 'theme',
+				'action_type'    => $action_type,
+				'item_name'      => $name,
+				'item_slug'      => $theme_slug,
+				'version_before' => $version_before,
+				'version_after'  => $version_after,
+				'target_version' => $version_after,
+				'status'         => 'success',
+				'message'        => $message,
+				'trace'          => $trace,
+				'performed_as'   => $performed_as,
+				'update_context' => $update_context,
+				'reason_code'    => self::reason_for_action( $action_type ),
+				'decision_state' => 'done',
+				'origin'         => 'automatic' === $performed_as ? 'automatic' : 'manual',
+				'decision_stage' => 'execute',
+			)
 		);
 
 		unset( $stored[ $theme_slug ] );
 		self::finalize_pending_log( $event_key, 'theme', $theme_slug );
 		updatronix_update_plugin_option( self::OPTION_THEME_VERSIONS_BEFORE, $stored );
+	}
+
+	/**
+	 * Canonical reason code for a native actual-update action.
+	 *
+	 * @param string $action_type install, update, downgrade, same_version.
+	 * @return string
+	 */
+	private static function reason_for_action( string $action_type ): string {
+		if ( 'install' === $action_type ) {
+			return 'installed';
+		}
+
+		if ( 'same_version' === $action_type ) {
+			return 'already_installed';
+		}
+
+		return 'updated';
 	}
 }

@@ -100,6 +100,15 @@ success the ledger entry is removed and the Free log receives
 - Cache invalidation is registered on `upgrader_process_complete`,
   `activated_plugin`, `switch_theme`, `deleted_plugin`, and `deleted_theme`.
 
+### Version Lock precedence (2026-10-28)
+
+The chain is native guards, version control, WP compatibility, PHP
+compatibility, delay. The native adapter at priority 19 evaluates the same
+order. `version_locked_native` and `version_locked_composer` are the public
+codes; `native_vcs` and `version_controlled` are legacy aliases.
+`version_lock_unknown` blocks; `version_lock_unverified` allows with one
+advisory row.
+
 ### Abandoned advisory
 
 - Source is WordPress.org `last_updated` through the fixed `plugins_api` /
@@ -138,6 +147,11 @@ adapter at `PHP_INT_MAX - 5`.
 
 The only execution lock is still `WP_Upgrader::create_lock( 'auto_updater' )`
 inside the 4.2 executor. No second transient lock was added.
+
+**Version Lock (2026-10-28):** the ordered adapter marks each item it
+evaluates; Safe Mode's `PHP_INT_MAX - 5` fallback skips those items, so one
+block produces one row. The optional manual guard covers plugin, theme, and
+core and exempts the executor and the pass flag.
 
 ---
 
@@ -217,6 +231,13 @@ recipient. `target_version` comes from the native transient.
 - License inactive: the copy no longer promises the update queue.
 
 No screen redesign was made.
+
+**Version Lock (2026-10-28):** the native plugin row, single-site theme
+card, network theme row, update-core tables, Auto updates row, and Shield card
+show the manager label and one notice. The native toggle is a lock label; the
+stored option is unchanged. "Block manual updates" is an opt-in switch; when
+Update Shield is off, both Version Lock switches are disabled and the card says
+"Requires Update Shield".
 
 ---
 

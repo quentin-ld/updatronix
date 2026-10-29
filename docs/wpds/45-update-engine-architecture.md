@@ -424,6 +424,25 @@ Policy semantics:
   active, the queue continues; a successful later revalidation may mark it
   invalid, and the next worker cancels.
 
+#### Version Lock rework (2026-10-28)
+
+- Detection is item-root first, then ancestors to `ABSPATH`; `.git` may be a
+  file or directory, the other markers must be directories. The direct scan is
+  the authority and `WP_Automatic_Updater::is_vcs_checkout()` is a cross-check.
+  Composer provenance is project-level `installed.json` / `installed.php` with
+  a package type and a realpath match to the item root.
+- Policy order is native guards, Version Lock, WP compatibility, PHP
+  compatibility, delay. One ordered Pro adapter at priority 19 owns the native
+  chain; Free delay stays at 21; Safe Mode stays at `PHP_INT_MAX - 5` as a
+  fallback and skips items the ordered adapter evaluated.
+- `version_locked_native` / `version_locked_composer` are the public reason
+  codes; `native_vcs` / `version_controlled` remain legacy aliases.
+  `version_lock_unknown` is fail-closed; `version_lock_unverified` is the
+  fail-open advisory.
+- Version Lock is subordinate to `safe_mode`. `version_lock_manual_updates`
+  (default false) adds the native admin manual block; WP-CLI stays the escape
+  hatch. The stored `auto_update_*` option is never rewritten.
+
 ### 5.5 Flow planner
 
 The planner is deterministic and side-effect free except for reading the
@@ -461,6 +480,16 @@ Planning occurs:
 - for retries, not re-planned: the persisted job is retried.
 
 ### 5.6 Kernel lifecycle
+
+> **Implementation addendum (2026-10-29, Step 4).** The kernel is deleted. The
+> automatic path is one pass: a non-autoloaded `updatronix_pro_update_pass`
+> option (pass id, order, per-node state, attempts, lock waits, next check), a
+> selection-only `auto_update_plugin|theme|core` gate at `PHP_INT_MAX`, one
+> follow-up event at `time() + 1`, and a `shutdown` finalizer. The gate never
+> returns `true`; native `WP_Automatic_Updater::run()` writes. `Updatronix_Decision_Log`
+> is the only Pro writer; `Updatronix_Update_Pass_Log` replaces the journal.
+> Three pass Health checks replace the five queue checks. The section below is
+> the retired 4.2 kernel contract.
 
 **Automatic ownership handshake.** At `wp_maybe_auto_update` priority 1, the
 scheduler persists the plan and records the planned item keys in a request-cached
@@ -632,15 +661,34 @@ and acquires/releases the lock internally; it cannot be used for a queue.
 | Surface | Target |
 |---|---|
 | Shield page | Truthful policy rows; queue summary (pending/running/failed/next run); blocked table with working deep links; retry/cancel only when the queue exists. |
-| Flow page | Chains with `enabled` (not “Run”); a real Run action calls `POST /flow/run` and polls the run summary; per-step `success/failed/skipped/blocked/canceled`; no claims of automatic dependency discovery. |
+| Flow page | Chains with `enabled` (not “Run”); no manual Run action, route, cooldown, or polling. Steps show their pass state, `Waiting` vs `Blocked`, the predecessor, reason, eligible time, and manager; a read-only Last pass card shows the pass id, start/finish, status, eight counters, first waiting reason, and a log link. |
 | Update logs | Filter by source (`queue`, `flow`, `shield`) and by run; deep link from Shield/Flow. |
 | Site Health | Queue table exists, cron scheduled, WP-Cron disabled, stale leases, failed jobs, license inactive; use `WP_Debug_Data`/Site Health test shape. |
 | Admin notices | Actionable failures only; capability-gated; dismissible; link to the queue/log. |
 | License screen | Update the feature claims to what is actually shipped (already reduced in Phase 3.1). |
 
+**Flow (2026-10-29, Step 5):** Flow is the ordering function of the one
+automatic pass. The planner emits `flow_nodes`, `flow_edges`, `flow_snapshot`,
+`flow_errors`, and `flow_overflow`; the pass order puts Flow nodes first, then
+native offers, and the one-item gate executes them. A node waits for every
+incoming edge; a failed predecessor affects only its descendants. `Run now`,
+`POST /flow/run`, `GET /flow/runs/{id}`, the cooldown, and polling are removed.
+The last pass is read-only and cached in `updatronix_pro_last_pass`.
+
+**Version Lock (2026-10-28):** plugin/theme rows, single-site theme cards,
+the update-core tables, the Auto updates row, and the Shield card render one
+manager notice and replace the auto-update toggle with a lock label. The
+Shield card names the manager and evidence; the manual toggle is shown with
+"Requires Update Shield" when `safe_mode` is off.
+
 ---
 
 ## 6. Queue data model
+
+> **Historical (2026-10-29, Step 4).** This data model, its table, its statuses,
+> its lease/claim model, and its retry schedule are removed. Operational state
+> is discarded on upgrade (one-shot `updatronix_pro_queue_removed`). Do not
+> build against anything in this section.
 
 ### 6.1 Why a custom table
 
@@ -1650,3 +1698,13 @@ No other decision in this table is open.
 queue remains dormant by owner decision (2026-10-26); activation requires a new
 decision after a staged run. The 5.1 counterfactual survivor is a documented
 Phase 6 test seam, not a release pass.
+
+### 5.8.1 Decision log (Step 2, 2026-10-28)
+
+The log is the single audit sink. Free owns the schema, the taxonomy, the v2
+event key, `log_event()`/`attach_context()`/`update_summary()`, the activity log,
+the export, the external log, and retention. Pro owns `Updatronix_Decision_Log`
+and calls it from the journal (interim), Shield, Safe Mode, and the re-enable
+path. The native logger writes one actual-update row per disk change; Pro
+enriches that row, never inserts a second success row. One automatic pass writes
+one `system`/`pass` summary row; `updatronix_pro_last_pass` is a one-entry cache.

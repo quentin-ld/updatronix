@@ -1,5 +1,11 @@
 # Update engine — Phase 4.3b queue live preparation
 
+> **Superseded (2026-10-29, Step 4).** The queue switch, the queue table, the
+> queue REST routes, the manual actions, and the queue Health checks are
+> deleted. `queue_live`/`queue_enabled` no longer exist; the pass is always on
+> unless the `updatronix_pro_update_pass_enabled` filter says otherwise. Keep
+> this file as history.
+
 **Date:** 2026-10-26
 **Scope:** Pro `inc/update-engine/`, `inc/update-shield/`, Pro bootstrap,
 settings/UI, the local live fixture, and the Free Health filter. Free receives

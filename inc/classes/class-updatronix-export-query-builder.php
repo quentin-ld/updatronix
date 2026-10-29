@@ -28,6 +28,14 @@ final class Updatronix_Export_Query_Builder {
 		'update_context',
 		'created_at',
 		'user_id',
+		'reason_code',
+		'decision_state',
+		'origin',
+		'pass_id',
+		'chain_id',
+		'next_eligible_at',
+		'retained',
+		'network',
 	);
 
 	/**
@@ -85,7 +93,7 @@ final class Updatronix_Export_Query_Builder {
 
 		$sort_column = isset( $validated['sort_column'] ) ? (string) $validated['sort_column'] : 'created_at';
 		$orderby_col = match ( $sort_column ) {
-			'created_at', 'log_type', 'item_name', 'status', 'performed_as' => $sort_column,
+			'created_at', 'log_type', 'item_name', 'status', 'performed_as', 'reason_code', 'decision_state', 'origin', 'pass_id' => $sort_column,
 			default => 'created_at',
 		};
 
@@ -97,7 +105,8 @@ final class Updatronix_Export_Query_Builder {
 		$values_out = array_merge( array( $table ), $values, array( $limit, $offset ) );
 
 		// Concatenate allowlisted fragments (no "{$var}" interpolation) so Plugin Check does not flag PreparedSQL.InterpolatedNotPrepared.
-		$sql = 'SELECT id, site_id, log_type, action_type, item_name, item_slug, version_before, version_after, status, '
+		$sql = 'SELECT id, site_id, log_type, action_type, item_name, item_slug, version_before, version_after, target_version, status, '
+			. 'reason_code, decision_state, origin, decision_stage, pass_id, chain_id, predecessor, next_eligible_at, attempt, network, retained, context, '
 			. 'user_id, performed_by, performed_as, update_context, created_at '
 			. 'FROM %i WHERE '
 			. $where_sql

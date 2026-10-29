@@ -13,7 +13,7 @@ import {
 	useCallback,
 	useRef,
 } from '@wordpress/element';
-import { DataViews, filterSortAndPaginate } from '@wordpress/dataviews';
+import { DataViews } from '@wordpress/dataviews';
 import { dateI18n } from '@wordpress/date';
 import { speak } from '@wordpress/a11y';
 import { __, sprintf } from '@wordpress/i18n';
@@ -22,11 +22,20 @@ import wpds from '../../shell/wpds';
 import PageHeader from '../../shell/PageHeader';
 import Section from '../../shell/Section';
 import { useLogs, getFilterValue } from '../../hooks/useLogs';
-import { buildFilterFields, PER_PAGE_SIZES } from './logFilters';
+import {
+	buildFilterFields,
+	PER_PAGE_SIZES,
+	toServerFilters,
+} from './logFilters';
 import { LOG_TYPE_PREFIX } from './constants';
 import {
 	statusToBadgeIntent,
 	getStatusLabel,
+	getStateLabel,
+	getReasonLabel,
+	getOriginLabel,
+	getNextEligibleLabel,
+	stateToBadgeIntent,
 	formatDate,
 	EMPTY_FALLBACK,
 } from './utils';
@@ -181,6 +190,8 @@ function formatTime( value ) {
  * @param {number}   [props.logsVersion=0]         Incremented to trigger a logs refetch.
  * @param {number}   [props.retentionDays=90]      Retention period for the header badge.
  * @param {number}   [props.deepLinkLogId=0]       Log id from a deep link.
+ * @param {string}   [props.deepLinkPassId='']     Pass id from a `?pass=` deep link.
+ * @param {string}   [props.deepLinkChainId='']    Chain id from a `?chain=` deep link.
  * @param {string[]} [props.exportFormats=['txt']] Formats the current edition may export.
  * @return {import('react').JSX.Element} The update log screen.
  */
@@ -190,6 +201,8 @@ export function ActivityLogPanel( {
 	logsVersion = 0,
 	retentionDays = 90,
 	deepLinkLogId = 0,
+	deepLinkPassId = '',
+	deepLinkChainId = '',
 	exportFormats = [ 'txt' ],
 } ) {
 	const {
@@ -299,12 +312,19 @@ export function ActivityLogPanel( {
 		previewRef.current?.focus( { preventScroll: true } );
 	}, [ detail, isNarrow ] );
 
-	const [ view, setView ] = useState( {
+	const [ view, setView ] = useState( () => ( {
 		type: 'activity',
 		page: 1,
 		perPage: 25,
 		search: '',
-		filters: [],
+		filters: [
+			...( deepLinkPassId
+				? [ { field: 'pass', operator: 'is', value: deepLinkPassId } ]
+				: [] ),
+			...( deepLinkChainId
+				? [ { field: 'chain', operator: 'is', value: deepLinkChainId } ]
+				: [] ),
+		],
 		sort: FIXED_SORT,
 		fields: [ 'status', 'time' ],
 		layout: { density: 'balanced' },
@@ -312,15 +332,55 @@ export function ActivityLogPanel( {
 		descriptionField: 'summary',
 		mediaField: 'typeIcon',
 		groupBy: { field: 'day', direction: 'desc', showLabel: false },
-	} );
+	} ) );
 
 	const handleChangeView = useCallback( ( nextView ) => {
-		setView( () => ( {
-			...nextView,
-			type: 'activity',
-			sort: FIXED_SORT,
-		} ) );
+		setView( ( current ) => {
+			// DataViews may emit its own initial view on mount; keep a deep-link
+			// pass/chain filter when the incoming view does not carry it.
+			const incoming = Array.isArray( nextView.filters )
+				? nextView.filters
+				: [];
+			const pinned = ( current.filters || [] ).filter(
+				( f ) =>
+					( f?.field === 'pass' || f?.field === 'chain' ) &&
+					! incoming.some( ( i ) => i?.field === f?.field )
+			);
+
+			return {
+				...nextView,
+				type: 'activity',
+				sort: FIXED_SORT,
+				filters: [ ...pinned, ...incoming ],
+			};
+		} );
 	}, [] );
+
+	// A `?pass=<id>` link filters the feed to one pass.
+	const passLinkHandled = useRef( false );
+	useEffect( () => {
+		if ( ! deepLinkPassId || passLinkHandled.current ) {
+			return;
+		}
+		passLinkHandled.current = true;
+
+		const url = new URL( window.location.href );
+		url.searchParams.delete( 'pass' );
+		window.history.replaceState( {}, '', url.toString() );
+	}, [ deepLinkPassId ] );
+
+	// A `?chain=<id>` link filters the feed to one Flow chain.
+	const chainLinkHandled = useRef( false );
+	useEffect( () => {
+		if ( ! deepLinkChainId || chainLinkHandled.current ) {
+			return;
+		}
+		chainLinkHandled.current = true;
+
+		const url = new URL( window.location.href );
+		url.searchParams.delete( 'chain' );
+		window.history.replaceState( {}, '', url.toString() );
+	}, [ deepLinkChainId ] );
 
 	useEffect( () => {
 		const filters = view.filters || [];
@@ -330,6 +390,8 @@ export function ActivityLogPanel( {
 			log_type: getFilterValue( filters, 'category' ),
 			status: getFilterValue( filters, 'status' ),
 			performed_as: getFilterValue( filters, 'triggeredBy' ),
+			action_type: getFilterValue( filters, 'actionType' ),
+			filters: toServerFilters( view, logs ),
 			search: view.search || '',
 		} );
 	}, [
@@ -374,20 +436,29 @@ export function ActivityLogPanel( {
 				label: __( 'Summary', 'updatronix' ),
 				getValue: ( { item } ) =>
 					`${ getVersionLabel( item ) } ${
-						item.performed_as_display || ''
-					} ${ item.performed_by_display || '' }`,
+						item.reason_label || ''
+					} ${ item.performed_as_display || '' } ${
+						item.performed_by_display || ''
+					}`,
 				render: ( { item } ) => (
 					<span className="updatronix-log-entry-summary">
 						<Text variant="body-md">
 							{ getVersionLabel( item ) }
 						</Text>
 						<span className="updatronix-log-entry-meta">
-							{ sprintf(
-								/* translators: 1: trigger label, 2: actor label. */
-								__( '%1$s · %2$s', 'updatronix' ),
-								item.performed_as_display || EMPTY_FALLBACK,
-								item.performed_by_display || EMPTY_FALLBACK
-							) }
+							{ item.has_decision
+								? getReasonLabel(
+										item.reason_code,
+										item.reason_label
+									)
+								: sprintf(
+										/* translators: 1: trigger label, 2: actor label. */
+										__( '%1$s · %2$s', 'updatronix' ),
+										item.performed_as_display ||
+											EMPTY_FALLBACK,
+										item.performed_by_display ||
+											EMPTY_FALLBACK
+									) }
 						</span>
 					</span>
 				),
@@ -498,15 +569,114 @@ export function ActivityLogPanel( {
 				label: __( 'Status', 'updatronix' ),
 				getValue: ( { item } ) =>
 					item.status ? String( item.status ).toLowerCase() : '',
-				render: ( { item } ) => (
-					<Badge intent={ statusToBadgeIntent( item.status ) }>
-						{ getStatusLabel( item.status ) }
-					</Badge>
-				),
+				render: ( { item } ) =>
+					item.decision_state ? (
+						<Badge
+							intent={ stateToBadgeIntent( item.decision_state ) }
+						>
+							{ getStateLabel( item.decision_state ) }
+						</Badge>
+					) : (
+						<Badge intent={ statusToBadgeIntent( item.status ) }>
+							{ getStatusLabel( item.status ) }
+						</Badge>
+					),
 				enableSorting: false,
 				enableHiding: false,
 				enableGlobalSearch: false,
 				...filterFields.status,
+			},
+			{
+				id: 'state',
+				label: __( 'State', 'updatronix' ),
+				getValue: ( { item } ) => item.decision_state || '',
+				render: ( { item } ) =>
+					item.decision_state ? (
+						<Badge
+							intent={ stateToBadgeIntent( item.decision_state ) }
+						>
+							{ item.decision_state_label ||
+								getStateLabel( item.decision_state ) }
+						</Badge>
+					) : (
+						EMPTY_FALLBACK
+					),
+				enableSorting: false,
+				enableHiding: true,
+				enableGlobalSearch: false,
+				...filterFields.state,
+			},
+			{
+				id: 'reason',
+				label: __( 'Reason', 'updatronix' ),
+				getValue: ( { item } ) => item.reason_code || '',
+				render: ( { item } ) => (
+					<span className="updatronix-log-entry-reason">
+						{ getReasonLabel(
+							item.reason_code,
+							item.reason_label
+						) }
+					</span>
+				),
+				enableSorting: false,
+				enableHiding: true,
+				enableGlobalSearch: false,
+				...filterFields.reason,
+			},
+			{
+				id: 'origin',
+				label: __( 'Origin', 'updatronix' ),
+				getValue: ( { item } ) => item.origin || '',
+				render: ( { item } ) =>
+					item.origin
+						? getOriginLabel( item.origin, item.origin_label )
+						: EMPTY_FALLBACK,
+				enableSorting: false,
+				enableHiding: true,
+				enableGlobalSearch: false,
+				...filterFields.origin,
+			},
+			{
+				id: 'pass',
+				label: __( 'Pass', 'updatronix' ),
+				getValue: ( { item } ) => item.pass_id || '',
+				render: ( { item } ) => {
+					if ( ! item.pass_id ) {
+						return EMPTY_FALLBACK;
+					}
+
+					const url = new URL( window.location.href );
+					url.searchParams.set( 'pass', item.pass_id );
+
+					return (
+						<a
+							href={ url.toString() }
+							className="updatronix-log-entry-pass"
+						>
+							{ String( item.pass_id ).slice( 0, 8 ) }
+						</a>
+					);
+				},
+				enableSorting: false,
+				enableHiding: true,
+				enableGlobalSearch: false,
+				...filterFields.pass,
+			},
+			{
+				id: 'nextEligible',
+				label: __( 'Next eligible', 'updatronix' ),
+				getValue: ( { item } ) => item.next_eligible_at || '',
+				render: ( { item } ) =>
+					item.next_eligible_at
+						? getNextEligibleLabel(
+								item.next_eligible_at,
+								item.next_eligible_at_display
+							)
+						: EMPTY_FALLBACK,
+				enableSorting: false,
+				enableHiding: true,
+				enableGlobalSearch: false,
+				...filterFields.nextEligible,
 			},
 			{
 				id: 'time',
@@ -563,15 +733,9 @@ export function ActivityLogPanel( {
 		[]
 	);
 
-	const { data: shownData } = useMemo(
-		() =>
-			filterSortAndPaginate(
-				logs,
-				{ ...view, page: undefined, perPage: undefined },
-				fields
-			),
-		[ logs, view, fields ]
-	);
+	// The REST result is the authority: the server applies every filter, the
+	// total, and the page. Local filtering would only hide server rows.
+	const shownData = logs;
 
 	const paginationInfo = useMemo(
 		() => ( {

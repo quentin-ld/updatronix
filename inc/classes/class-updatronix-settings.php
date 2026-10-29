@@ -47,34 +47,91 @@ final class Updatronix_Settings {
 				'callback'            => array( self::class, 'rest_get_logs' ),
 				'permission_callback' => array( self::class, 'rest_can_manage_logs' ),
 				'args'                => array(
-					'per_page'     => array(
+					'per_page'                => array(
 						'type'    => 'integer',
 						'default' => 50,
 						'minimum' => 1,
 						'maximum' => 200,
 					),
-					'page'         => array(
+					'page'                    => array(
 						'type'    => 'integer',
 						'default' => 1,
 						'minimum' => 1,
 					),
-					'log_type'     => array(
+					'log_type'                => array(
 						'type' => 'string',
-						'enum' => array( '', 'core', 'plugin', 'theme', 'translation' ),
+						'enum' => array( '', 'core', 'plugin', 'theme', 'translation', 'system' ),
 					),
-					'performed_as' => array(
+					'performed_as'            => array(
 						'type' => 'string',
 						'enum' => array( '', 'manual', 'automatic', 'upload' ),
 					),
-					'status'       => array(
+					'status'                  => array(
 						'type' => 'string',
 						'enum' => array( '', 'success', 'error', 'cancelled', 'delayed', 'info', 'warning' ),
 					),
-					'site_id'      => array(
+					'action_type'             => array(
+						'type' => 'string',
+					),
+					'user'                    => array(
+						'type'    => 'integer',
+						'minimum' => 0,
+					),
+					'reason_code'             => array(
+						'type' => 'string',
+					),
+					'decision_state'          => array(
+						'type' => 'string',
+					),
+					'origin'                  => array(
+						'type' => 'string',
+					),
+					'pass_id'                 => array(
+						'type' => 'string',
+					),
+					'chain_id'                => array(
+						'type' => 'string',
+					),
+					'created_at_after'        => array(
+						'type'   => 'string',
+						'format' => 'date-time',
+					),
+					'created_at_before'       => array(
+						'type'   => 'string',
+						'format' => 'date-time',
+					),
+					'next_eligible_at_after'  => array(
+						'type'   => 'string',
+						'format' => 'date-time',
+					),
+					'next_eligible_at_before' => array(
+						'type'   => 'string',
+						'format' => 'date-time',
+					),
+					'retained'                => array(
+						'type' => 'integer',
+						'enum' => array( 0, 1 ),
+					),
+					'network'                 => array(
+						'type' => 'integer',
+						'enum' => array( 0, 1 ),
+					),
+					'filters'                 => array(
+						'required'          => false,
+						'validate_callback' => static function ( $value ): bool {
+							// The feed sends a JSON string in the query string; a
+							// JSON body may carry a real array.
+							return is_string( $value ) || is_array( $value );
+						},
+						'sanitize_callback' => static function ( $value ) {
+							return is_array( $value ) ? $value : (string) $value;
+						},
+					),
+					'site_id'                 => array(
 						'type'    => 'integer',
 						'default' => null,
 					),
-					'search'       => array(
+					'search'                  => array(
 						'type'      => 'string',
 						'default'   => '',
 						'maxLength' => 200,
@@ -181,7 +238,13 @@ final class Updatronix_Settings {
 											'type' => 'string',
 											'enum' => array( '', 'hourly', 'twicedaily', 'daily', 'weekly' ),
 										),
-										'time'       => array( 'type' => 'string' ),
+										'time'       => array(
+											'type'    => 'string',
+											// Every minute is selectable; the picker stores HH:MM.
+											// An empty value is the server default on a fresh
+											// install and must round-trip on the first save.
+											'pattern' => '^(([01][0-9]|2[0-3]):[0-5][0-9])?$',
+										),
 									),
 								),
 								'delay_updates' => array(
@@ -373,6 +436,7 @@ final class Updatronix_Settings {
 			array(
 				'options'       => $options,
 				'schedule_meta' => self::schedule_meta_response_payload(),
+				'log_taxonomy'  => Updatronix_Log_Taxonomy::client_payload(),
 			),
 			200
 		);
@@ -402,14 +466,35 @@ final class Updatronix_Settings {
 			'order'    => 'DESC',
 			'site_id'  => self::resolve_site_id( $request ),
 		);
-		if ( $request->get_param( 'log_type' ) !== '' ) {
-			$args['log_type'] = $request->get_param( 'log_type' );
+
+		$string_params = array( 'log_type', 'status', 'performed_as', 'action_type', 'reason_code', 'decision_state', 'origin', 'pass_id', 'chain_id', 'created_at_after', 'created_at_before', 'next_eligible_at_after', 'next_eligible_at_before' );
+
+		foreach ( $string_params as $param ) {
+			$value = $request->get_param( $param );
+			if ( is_string( $value ) && '' !== $value ) {
+				$args[ $param ] = $value;
+			}
 		}
-		if ( $request->get_param( 'status' ) !== '' ) {
-			$args['status'] = $request->get_param( 'status' );
+
+		$user = $request->get_param( 'user' );
+		if ( null !== $user && '' !== $user ) {
+			$args['user_ids'] = array( absint( (string) $user ) );
 		}
-		if ( $request->get_param( 'performed_as' ) !== '' ) {
-			$args['performed_as'] = $request->get_param( 'performed_as' );
+
+		foreach ( array( 'retained', 'network' ) as $flag ) {
+			$value = $request->get_param( $flag );
+			if ( null !== $value && '' !== $value ) {
+				$args[ $flag ] = (int) $value > 0 ? 1 : 0;
+			}
+		}
+
+		$filters = $request->get_param( 'filters' );
+		if ( is_string( $filters ) && '' !== $filters ) {
+			$decoded = json_decode( $filters, true );
+			$filters = is_array( $decoded ) ? $decoded : array();
+		}
+		if ( is_array( $filters ) && array() !== $filters ) {
+			$args = array_merge( $args, Updatronix_Log_Query::parse_filters( $filters ) );
 		}
 
 		$search = $request->get_param( 'search' );
@@ -490,7 +575,52 @@ final class Updatronix_Settings {
 		$log->changelog_url = self::get_log_changelog_url( $log );
 		$log->changelog     = self::get_log_changelog( $log );
 
+		// Decoded, already redacted when stored; details only.
+		$log->decision_context = Updatronix_Security::decode_context( (string) ( $log->context ?? '' ) );
+		$log->policy_detail    = self::build_policy_detail( $log->decision_context );
+
 		return $log;
+	}
+
+	/**
+	 * Build a one-line policy detail from the stored decision context.
+	 *
+	 * @param array<string|int, mixed> $context Decoded context.
+	 * @return string Empty when there is nothing to say.
+	 */
+	private static function build_policy_detail( array $context ): string {
+		if ( isset( $context['policy_message'] ) && is_string( $context['policy_message'] ) && '' !== $context['policy_message'] ) {
+			return $context['policy_message'];
+		}
+
+		$parts = array();
+
+		if ( isset( $context['required_php'], $context['installed_php'] ) ) {
+			/* translators: 1: required PHP version, 2: installed PHP version */
+			$parts[] = sprintf( __( 'PHP %1$s required (installed %2$s)', 'updatronix' ), (string) $context['required_php'], (string) $context['installed_php'] );
+		}
+
+		if ( isset( $context['required_wp'], $context['installed_wp'] ) ) {
+			/* translators: 1: required WordPress version, 2: installed WordPress version */
+			$parts[] = sprintf( __( 'WordPress %1$s required (installed %2$s)', 'updatronix' ), (string) $context['required_wp'], (string) $context['installed_wp'] );
+		}
+
+		if ( isset( $context['manager'] ) && is_string( $context['manager'] ) && '' !== $context['manager'] ) {
+			/* translators: %s: version-control manager name (Git, Composer, …) */
+			$parts[] = sprintf( __( 'Managed by %s', 'updatronix' ), $context['manager'] );
+		}
+
+		if ( isset( $context['queue_position'], $context['queue_total'] ) ) {
+			/* translators: 1: position in the queue, 2: total items in the queue */
+			$parts[] = sprintf( __( 'Queue position %1$d of %2$d', 'updatronix' ), (int) $context['queue_position'], (int) $context['queue_total'] );
+		}
+
+		if ( isset( $context['chain_name'] ) && is_string( $context['chain_name'] ) && '' !== $context['chain_name'] ) {
+			/* translators: %s: Flow chain name */
+			$parts[] = sprintf( __( 'Chain: %s', 'updatronix' ), $context['chain_name'] );
+		}
+
+		return implode( ' · ', $parts );
 	}
 
 	/**
@@ -642,6 +772,9 @@ final class Updatronix_Settings {
 				$html = (string) $info->sections['changelog'];
 			}
 		} else {
+			// `themes_api()` lives in theme.php; theme-install.php alone does
+			// not define it, and the REST log-details request never loads it.
+			require_once ABSPATH . 'wp-admin/includes/theme.php';
 			require_once ABSPATH . 'wp-admin/includes/theme-install.php';
 			$info = themes_api(
 				'theme_information',
@@ -745,6 +878,62 @@ final class Updatronix_Settings {
 			$log->detail_available = (bool) ( $log->message ?? null ) || (bool) ( $log->trace ?? null );
 		} else {
 			$log->detail_available = (bool) $log->detail_available;
+		}
+
+		$log = self::enrich_decision_fields( $log );
+
+		return $log;
+	}
+
+	/**
+	 * Add the decision-layer display fields to a log object.
+	 *
+	 * The raw codes stay on the object; the labels are translated here so the
+	 * feed and the details read one vocabulary. A row with no reason and no
+	 * state is a legacy row and says so instead of guessing.
+	 *
+	 * @since 1.6.0
+	 *
+	 * @param \stdClass $log Log row.
+	 * @return \stdClass
+	 */
+	public static function enrich_decision_fields( \stdClass $log ): \stdClass {
+		$decision_state = (string) ( $log->decision_state ?? '' );
+		$reason_code    = (string) ( $log->reason_code ?? '' );
+		$origin         = (string) ( $log->origin ?? '' );
+		$stage          = (string) ( $log->decision_stage ?? '' );
+
+		$log->decision_state        = $decision_state;
+		$log->decision_state_label  = Updatronix_Log_Taxonomy::state_label( $decision_state );
+		$log->decision_state_intent = Updatronix_Log_Taxonomy::state_intent( $decision_state );
+		$log->reason_code           = $reason_code;
+		$log->reason_label          = Updatronix_Log_Taxonomy::reason_label( $reason_code );
+		$log->origin                = $origin;
+		$log->origin_label          = Updatronix_Log_Taxonomy::origin_label( $origin );
+		$log->decision_stage        = $stage;
+		$log->stage_label           = Updatronix_Log_Taxonomy::stage_label( $stage );
+		$log->is_legacy             = '' === $reason_code && '' === $decision_state;
+		$log->has_decision          = ! $log->is_legacy;
+		$log->retained              = (int) ( $log->retained ?? 0 );
+		$log->network               = (int) ( $log->network ?? 0 );
+		$log->attempt               = (int) ( $log->attempt ?? 0 );
+
+		$log->next_eligible_at_display = '';
+		if ( isset( $log->next_eligible_at ) && '' !== (string) $log->next_eligible_at ) {
+			$utc = strtotime( (string) $log->next_eligible_at . ' UTC' );
+
+			if ( false !== $utc ) {
+				$log->next_eligible_at_display = wp_date( 'Y-m-d H:i:s', $utc );
+			}
+		}
+
+		$created_at              = (string) ( $log->created_at ?? '' );
+		$log->created_at_display = '';
+		if ( '' !== $created_at ) {
+			$local = strtotime( $created_at );
+			if ( false !== $local ) {
+				$log->created_at_display = wp_date( 'Y-m-d H:i:s', $local );
+			}
 		}
 
 		return $log;
@@ -1074,7 +1263,19 @@ final class Updatronix_Settings {
 
 		$plugin = sanitize_text_field( $request->get_param( 'plugin' ) );
 		$enable = (bool) $request->get_param( 'enable' );
-		$ok     = Updatronix_AutoUpdates::toggle_plugin( $plugin, $enable );
+
+		$can_toggle = apply_filters( 'updatronix_auto_update_can_toggle', true, 'plugin', $plugin, $enable );
+		if ( is_wp_error( $can_toggle ) ) {
+			return new WP_REST_Response( array( 'message' => $can_toggle->get_error_message() ), 403 );
+		}
+		if ( false === $can_toggle ) {
+			return new WP_REST_Response(
+				array( 'message' => __( 'This item is managed by an external update manager and cannot be toggled here.', 'updatronix' ) ),
+				403
+			);
+		}
+
+		$ok = Updatronix_AutoUpdates::toggle_plugin( $plugin, $enable );
 
 		if ( ! $ok ) {
 			return new WP_REST_Response(
@@ -1102,7 +1303,19 @@ final class Updatronix_Settings {
 
 		$stylesheet = sanitize_text_field( $request->get_param( 'stylesheet' ) );
 		$enable     = (bool) $request->get_param( 'enable' );
-		$ok         = Updatronix_AutoUpdates::toggle_theme( $stylesheet, $enable );
+
+		$can_toggle = apply_filters( 'updatronix_auto_update_can_toggle', true, 'theme', $stylesheet, $enable );
+		if ( is_wp_error( $can_toggle ) ) {
+			return new WP_REST_Response( array( 'message' => $can_toggle->get_error_message() ), 403 );
+		}
+		if ( false === $can_toggle ) {
+			return new WP_REST_Response(
+				array( 'message' => __( 'This item is managed by an external update manager and cannot be toggled here.', 'updatronix' ) ),
+				403
+			);
+		}
+
+		$ok = Updatronix_AutoUpdates::toggle_theme( $stylesheet, $enable );
 
 		if ( ! $ok ) {
 			return new WP_REST_Response(

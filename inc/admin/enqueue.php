@@ -380,6 +380,7 @@ function updatronix_localize_settings( string $admin_page ): void {
 			'licenseActive'          => (bool) apply_filters( 'updatronix_license_active', false ),
 			'canManagePro'           => (bool) apply_filters( 'updatronix_can_manage_pro', false ),
 			'exportFormats'          => updatronix_get_export_formats(),
+			'logTaxonomy'            => Updatronix_Log_Taxonomy::client_payload(),
 			// Global window property populated by Pro's admin JS for the panel registry; Free reads it via ProTabPanel.
 			'proPanelRegistryGlobal' => 'updatronixProPanelRegistry',
 		)

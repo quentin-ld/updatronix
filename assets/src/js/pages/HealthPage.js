@@ -224,7 +224,7 @@ export default function HealthPage( { destination, onNavigate } ) {
 		} catch ( queueError ) {
 			setRetryError(
 				queueError?.message ||
-					__( 'The retry could not be queued.', 'updatronix' )
+					__( 'The retry could not be scheduled.', 'updatronix' )
 			);
 		} finally {
 			setRetryBusy( false );
@@ -876,7 +876,7 @@ export default function HealthPage( { destination, onNavigate } ) {
 									{ sprintf(
 										/* translators: %s: item name. */
 										__(
-											'Queue %s for another attempt. The current version stays active until the retry succeeds.',
+											'Schedule %s for another attempt. The current version stays active until the retry succeeds.',
 											'updatronix'
 										),
 										retry.item
@@ -941,8 +941,8 @@ export default function HealthPage( { destination, onNavigate } ) {
 							disabled={ retryBusy }
 						>
 							{ retryBusy
-								? __( 'Queueing…', 'updatronix' )
-								: __( 'Queue retry', 'updatronix' ) }
+								? __( 'Scheduling…', 'updatronix' )
+								: __( 'Schedule retry', 'updatronix' ) }
 						</Button>
 					</Dialog.Footer>
 				</Dialog.Popup>

@@ -154,12 +154,54 @@ final class ScheduleSanitizersTest extends TestCase {
 	}
 
 	/**
-	 * Delay enabled with no delay_value defaults to 0 (then sanitized to 0 because enabled=false).
+	 * Delay enabled with no delay_value is off: 0 means off everywhere.
 	 */
 	public function test_sanitize_schedule_array_delay_enabled_no_value(): void {
 		$result = updatronix_sanitize_schedule_array( array( 'delay_updates' => array( 'enabled' => true ) ) );
-		$this->assertTrue( $result['delay_updates']['enabled'] );
-		$this->assertSame( 1, $result['delay_updates']['delay_value'], 'When enabled and no value given, should default to 1.' );
+		$this->assertFalse( $result['delay_updates']['enabled'] );
+		$this->assertSame( 0, $result['delay_updates']['delay_value'], 'An enabled hold with no days is off.' );
+	}
+
+	/**
+	 * The canonical hold range 0..365, with 0 meaning off.
+	 *
+	 * @return array<string, array{bool, int, bool, int}>
+	 */
+	public static function provide_hold_bounds(): array {
+		return array(
+			'enabled 0 is off'        => array( true, 0, false, 0 ),
+			'enabled 1'               => array( true, 1, true, 1 ),
+			'enabled 30'              => array( true, 30, true, 30 ),
+			'enabled 31'              => array( true, 31, true, 31 ),
+			'enabled 365'             => array( true, 365, true, 365 ),
+			'enabled 366 clamps'      => array( true, 366, true, 365 ),
+			'enabled negative is off' => array( true, -5, false, 0 ),
+			'disabled 31 is off'      => array( false, 31, false, 0 ),
+		);
+	}
+
+	/**
+	 * Every bound agrees on client, server, and REST semantics.
+	 *
+	 * @dataProvider provide_hold_bounds
+	 *
+	 * @param bool $enabled  Raw enabled flag.
+	 * @param int  $days     Raw hold days.
+	 * @param bool $want_on  Expected enabled flag.
+	 * @param int  $want_days Expected stored days.
+	 */
+	public function test_sanitize_schedule_array_hold_bounds( bool $enabled, int $days, bool $want_on, int $want_days ): void {
+		$result = updatronix_sanitize_schedule_array(
+			array(
+				'delay_updates' => array(
+					'enabled'     => $enabled,
+					'delay_value' => $days,
+				),
+			)
+		);
+
+		$this->assertSame( $want_on, $result['delay_updates']['enabled'] );
+		$this->assertSame( $want_days, $result['delay_updates']['delay_value'] );
 	}
 
 	/**
@@ -194,19 +236,110 @@ final class ScheduleSanitizersTest extends TestCase {
 	}
 
 	/**
-	 * Hourly recurrence strips time regardless of what was passed.
+	 * Every recurrence keeps the preferred time, so a switch back restores it.
+	 *
+	 * @return array<string, array{string}>
 	 */
-	public function test_sanitize_schedule_array_hourly_clears_time(): void {
+	public static function provide_recurrences(): array {
+		return array(
+			'hourly'     => array( 'hourly' ),
+			'twicedaily' => array( 'twicedaily' ),
+			'daily'      => array( 'daily' ),
+			'weekly'     => array( 'weekly' ),
+			'wp default' => array( '' ),
+		);
+	}
+
+	/**
+	 * The preferred time survives a recurrence switch for every slug.
+	 *
+	 * @dataProvider provide_recurrences
+	 *
+	 * @param string $recurrence Recurrence slug.
+	 */
+	public function test_sanitize_schedule_array_preserves_time_for_every_recurrence( string $recurrence ): void {
 		$result = updatronix_sanitize_schedule_array(
 			array(
 				'update_check' => array(
-					'recurrence' => 'hourly',
-					'time'       => '05:00',
+					'recurrence' => $recurrence,
+					'time'       => '02:17',
 				),
 			)
 		);
-		$this->assertSame( 'hourly', $result['update_check']['recurrence'] );
+
+		$this->assertSame( $recurrence, $result['update_check']['recurrence'] );
+		$this->assertSame( '02:17', $result['update_check']['time'] );
+	}
+
+	/**
+	 * A fresh install keeps the empty server default.
+	 *
+	 * @return void
+	 */
+	public function test_sanitize_schedule_array_fresh_install_keeps_empty_time(): void {
+		$result = updatronix_sanitize_schedule_array( array() );
+
 		$this->assertSame( '', $result['update_check']['time'] );
+	}
+
+	// --- updatronix_next_update_check_timestamp ---
+
+	/**
+	 * Twice daily never returns a timestamp in the past.
+	 *
+	 * @return void
+	 */
+	public function test_next_check_twicedaily_is_always_in_the_future(): void {
+		$time = gmdate( 'H:i', time() - 13 * HOUR_IN_SECONDS );
+		$next = updatronix_next_update_check_timestamp( 'twicedaily', $time );
+
+		$this->assertGreaterThan( time(), $next );
+	}
+
+	/**
+	 * Daily moves to tomorrow when today's time has passed.
+	 *
+	 * @return void
+	 */
+	public function test_next_check_daily_is_in_the_future(): void {
+		$time = gmdate( 'H:i', time() - HOUR_IN_SECONDS );
+		$next = updatronix_next_update_check_timestamp( 'daily', $time );
+
+		$this->assertGreaterThan( time(), $next );
+		$this->assertLessThanOrEqual( time() + DAY_IN_SECONDS, $next );
+	}
+
+	/**
+	 * Weekly moves a full seven days when today's time has passed.
+	 *
+	 * @return void
+	 */
+	public function test_next_check_weekly_is_in_the_future(): void {
+		$time = gmdate( 'H:i', time() - HOUR_IN_SECONDS );
+		$next = updatronix_next_update_check_timestamp( 'weekly', $time );
+
+		$this->assertGreaterThan( time() + 6 * DAY_IN_SECONDS, $next );
+	}
+
+	/**
+	 * Hourly returns now.
+	 *
+	 * @return void
+	 */
+	public function test_next_check_hourly_returns_now(): void {
+		$this->assertLessThanOrEqual( 2, abs( updatronix_next_update_check_timestamp( 'hourly', '02:17' ) - time() ) );
+	}
+
+	/**
+	 * A time that is still ahead today stays today.
+	 *
+	 * @return void
+	 */
+	public function test_next_check_daily_keeps_a_future_time_today(): void {
+		$time = gmdate( 'H:i', time() + 2 * HOUR_IN_SECONDS );
+		$next = updatronix_next_update_check_timestamp( 'daily', $time );
+
+		$this->assertLessThan( DAY_IN_SECONDS, $next - time() );
 	}
 
 	// --- updatronix_merge_partial_schedule_into ---

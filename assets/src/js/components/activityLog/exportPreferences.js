@@ -13,6 +13,14 @@ export const DEFAULT_EXPORT_COLUMNS = {
 	user: true,
 	status: true,
 	category: true,
+	reason: true,
+	state: true,
+	origin: true,
+	pass: true,
+	chain: true,
+	nextEligible: true,
+	decisionContext: false,
+	retained: true,
 };
 
 /**
@@ -116,5 +124,13 @@ export function columnsToApiPayload( columns ) {
 		user: columns.user,
 		status: columns.status,
 		category: columns.category,
+		reason: columns.reason,
+		state: columns.state,
+		origin: columns.origin,
+		pass: columns.pass,
+		chain: columns.chain,
+		next_eligible: columns.nextEligible,
+		decision_context: columns.decisionContext,
+		retained: columns.retained,
 	};
 }

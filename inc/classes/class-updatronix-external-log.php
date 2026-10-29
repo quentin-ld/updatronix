@@ -71,22 +71,42 @@ final class Updatronix_External_Log {
 	 * (default `plugin`), `item_slug`, `version_before`, `version_after`,
 	 * `status` (default `success`), `message`, and `event_key` for idempotency.
 	 *
+	 * Optional decision fields (additive, since 1.6.0): `target_version`,
+	 * `reason_code` (default `external_update`), `decision_state` (default from
+	 * status), `origin` (default `external`), `decision_stage` (default
+	 * `observe`), `pass_id`, `chain_id`, `predecessor`, `next_eligible_at`,
+	 * `attempt`, `network`, and `context` (the source is added to it).
+	 *
 	 * @since 1.4.0
+	 * @since 1.6.0 Added the optional decision fields; the old arguments and the
+	 *              `upload` trigger are unchanged.
 	 *
 	 * @param array<string, mixed> $args External update fields.
 	 * @return int|\WP_Error Log id, or an error when validation/storage fails.
 	 */
 	public static function log( array $args ): int|\WP_Error {
 		$defaults = array(
-			'source'         => 'custom',
-			'log_type'       => 'plugin',
-			'item_name'      => '',
-			'item_slug'      => '',
-			'version_before' => '',
-			'version_after'  => '',
-			'status'         => 'success',
-			'message'        => '',
-			'event_key'      => '',
+			'source'           => 'custom',
+			'log_type'         => 'plugin',
+			'item_name'        => '',
+			'item_slug'        => '',
+			'version_before'   => '',
+			'version_after'    => '',
+			'status'           => 'success',
+			'message'          => '',
+			'event_key'        => '',
+			'target_version'   => '',
+			'reason_code'      => '',
+			'decision_state'   => '',
+			'origin'           => 'external',
+			'decision_stage'   => 'observe',
+			'pass_id'          => '',
+			'chain_id'         => '',
+			'predecessor'      => '',
+			'next_eligible_at' => '',
+			'attempt'          => 0,
+			'network'          => 0,
+			'context'          => array(),
 		);
 		$args     = array_merge( $defaults, $args );
 
@@ -120,19 +140,56 @@ final class Updatronix_External_Log {
 		);
 		$message = '' !== $message ? $prefix . ' ' . $message : $prefix;
 
-		$log_id = Updatronix_Logger::log(
-			$log_type,
-			'update',
-			$item_name,
-			(string) $args['item_slug'],
-			(string) $args['version_before'],
-			(string) $args['version_after'],
-			$status,
-			$message,
-			'',
-			'upload',
-			'',
-			(string) $args['event_key']
+		$reason_code    = (string) $args['reason_code'];
+		$decision_state = (string) $args['decision_state'];
+
+		if ( '' === $reason_code ) {
+			$reason_code = 'external_update';
+		}
+
+		if ( '' === $decision_state ) {
+			$decision_state = match ( $status ) {
+				'error' => 'failed',
+				'cancelled' => 'canceled',
+				'delayed' => 'delayed',
+				'warning' => 'info',
+				'info' => 'info',
+				default => 'done',
+			};
+		}
+
+		$context = $args['context'];
+		if ( is_string( $context ) ) {
+			$context = Updatronix_Security::decode_context( $context );
+		}
+		$context           = is_array( $context ) ? $context : array();
+		$context['source'] = $source;
+
+		$log_id = Updatronix_Logger::log_event(
+			array(
+				'log_type'         => $log_type,
+				'action_type'      => 'update',
+				'item_name'        => $item_name,
+				'item_slug'        => (string) $args['item_slug'],
+				'version_before'   => (string) $args['version_before'],
+				'version_after'    => (string) $args['version_after'],
+				'target_version'   => '' !== (string) $args['target_version'] ? (string) $args['target_version'] : (string) $args['version_after'],
+				'status'           => $status,
+				'message'          => $message,
+				'performed_as'     => 'upload',
+				'event_key'        => (string) $args['event_key'],
+				'reason_code'      => $reason_code,
+				'decision_state'   => $decision_state,
+				'origin'           => (string) $args['origin'],
+				'decision_stage'   => (string) $args['decision_stage'],
+				'pass_id'          => (string) $args['pass_id'],
+				'chain_id'         => (string) $args['chain_id'],
+				'predecessor'      => (string) $args['predecessor'],
+				'next_eligible_at' => $args['next_eligible_at'],
+				'attempt'          => (int) $args['attempt'],
+				'network'          => (int) $args['network'],
+				'context'          => $context,
+			)
 		);
 
 		if ( false === $log_id ) {

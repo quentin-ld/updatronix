@@ -5,7 +5,7 @@
 [![WordPress tested](https://img.shields.io/badge/WordPress%20tested-7.1-21759b)](https://wordpress.org/plugins/updatronix/)
 [![WordPress requires](https://img.shields.io/badge/WordPress%20requires-6.2%2B-21759b)](https://wordpress.org/plugins/updatronix/)
 [![PHP](https://img.shields.io/badge/PHP-8.1%2B-8892BF)](https://www.php.net/)
-[![Version](https://img.shields.io/badge/version-1.3.0-2E77BC)](https://wordpress.org/plugins/updatronix/)
+[![Version](https://img.shields.io/badge/version-2.0.0-2E77BC)](https://wordpress.org/plugins/updatronix/)
 [![License](https://img.shields.io/badge/license-GPL--2.0--or--later-brightgreen)](https://www.gnu.org/licenses/gpl-2.0.html)
 [![WordPress downloads](https://img.shields.io/wordpress/plugin/dt/updatronix)](https://wordpress.org/plugins/updatronix/)
 
@@ -57,7 +57,7 @@ Set how long the log is kept, route WordPress update emails to the right address
 
 ## Updatronix 3000 (Pro)
 
-**Updatronix 3000** is the Pro edition of Updatronix. **Update Shield** checks every automatic update against your WordPress and PHP versions before it runs, so an incompatible automatic update won't break your site. More is on the roadmap: Update Flow, Development Tools, Advanced Exports, Queue List, and White Label. One license, one site, updates for life.
+**Updatronix 3000** is the Pro edition of Updatronix. **Update Shield** checks every automatic update against your WordPress and PHP versions before it runs, so an incompatible automatic update won't break your site. **Update Flow** orders automatic updates, **Advanced Exports** adds CSV and JSON reports, and **White Label** rebrands the admin. XML export and Development Tools are on the roadmap. One license, one site, updates for life.
 
 ## Compatibility & Multisite
 
@@ -66,7 +66,7 @@ Set how long the log is kept, route WordPress update emails to the right address
 <!-- harness:compat:start -->
 - WordPress **6.2+** (tested up to **7.1**)
 - PHP **8.1+**
-- Version **1.3.0**
+- Version **2.0.0**
 <!-- harness:compat:end -->
 
 ### License

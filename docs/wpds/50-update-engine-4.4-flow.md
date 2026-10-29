@@ -3,9 +3,11 @@
 **Date:** 2026-10-27
 **Scope:** Pro `inc/update-engine/`, `inc/update-flow/`, `inc/classes/`,
 `assets/src/`, and the unit/integration/JS suites. Free documentation only.
-**Status:** Implemented and verified by the local suites. The queue is still
-dormant: `queue_live=false`, `queue_enabled=false`, the Shield switch is
-disabled, and no version was bumped.
+**Status:** Superseded by Step 5 (2026-10-29). This document records the 4.4
+planner/runner design; the runner, `Run now`, `POST /flow/run`,
+`GET /flow/runs/{id}`, the cooldown, manual resume, and polling are removed.
+Flow now orders the one automatic pass. The queue/kernel references below are
+historical.
 **Related:** `45-update-engine-architecture.md` §5.5, §5.8, §6, §7, §8, §10,
 §11, §12.3, §14; `49-update-engine-4.3c-counterfactual.md`; Pro
 `.agents/tasks/2026-10-27-update-engine-flow.md`.
@@ -88,7 +90,10 @@ Offer resolution:
 `add_canceled()` records a step that will not run because the run stopped;
 `add_error()` marks the plan non-executable. This is additive to the 4.2 shape.
 
-### 2.3 Runner
+### 2.3 Runner (superseded 2026-10-29)
+
+> The runner described here is deleted. The pass order and pass runner in
+> `inc/update-engine/` own execution; Flow only plans.
 
 `inc/update-flow/class-updatronix-flow-runner.php` (`Updatronix_Flow_Runner`)
 plans, enqueues, persists the plan summary, and starts one worker step.
@@ -125,6 +130,11 @@ succeeded. The policy is not bypassed; it is evaluated at the point where the
 predecessor state is meaningful.
 
 ### 2.5 Scheduler
+
+> **Superseded (2026-10-29, Step 4).** The scheduler is deleted. The automatic
+> order is built once per pass at the first gate call, drained by one
+> `updatronix_pro_update_pass_follow_up` event, and Flow execution is frozen
+> until Step 5. The paragraph below describes the retired scheduler.
 
 `Updatronix_Queue_Scheduler::tick()` plans and starts one Flow step at
 `wp_maybe_auto_update` priority 1. Flow planning is independent of
@@ -165,7 +175,11 @@ discovery.
 - an unknown/future shape is not read;
 - `get_saved_chains()` reads v1 only; there is no legacy shim.
 
-### 2.8 UI
+### 2.8 UI (superseded 2026-10-29)
+
+> The Run now action, polling, and run card below are removed. The page is
+> read-only for execution and renders Waiting/Blocked step facts plus a
+> read-only Last pass card.
 
 `UpdateFlowPage.js`:
 

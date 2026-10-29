@@ -83,9 +83,10 @@ final class ExportBodyBuilderStatusTest extends TestCase {
 	}
 
 	/**
-	 * Unknown statuses still fall back to "Success" (original default).
+	 * Unknown statuses never render as "Success"; the raw key is shown instead.
 	 */
-	public function test_status_label_unknown_falls_back_to_success(): void {
-		self::assertSame( 'Success', $this->status_label( 'mystery' ) );
+	public function test_status_label_unknown_is_not_success(): void {
+		self::assertSame( 'Mystery', $this->status_label( 'mystery' ) );
+		self::assertSame( 'Info', $this->status_label( '' ) );
 	}
 }

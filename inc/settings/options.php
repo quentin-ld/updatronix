@@ -183,14 +183,18 @@ function updatronix_sanitize_schedule_array( array $in ): array {
 		: '';
 
 	$time_raw = trim( (string) ( $uc_in['time'] ?? $defaults['update_check']['time'] ) );
-	$time     = '';
-	if ( 'daily' === $recurrence || 'twicedaily' === $recurrence || 'weekly' === $recurrence ) {
-		$time = updatronix_sanitize_schedule_wall_time( $time_raw );
-	}
+	// The preferred time is stored for every recurrence, so switching to hourly
+	// or the WordPress default and back preserves it. A fresh install keeps the
+	// empty server default; the screen falls back to 03:00 for display (T8).
+	$time = '' !== $time_raw ? updatronix_sanitize_schedule_wall_time( $time_raw ) : '';
 
 	$delay_enabled   = (bool) ( $du_in['enabled'] ?? false );
 	$delay_value_raw = isset( $du_in['delay_value'] ) ? (int) $du_in['delay_value'] : (int) $defaults['delay_updates']['delay_value'];
-	$delay_value     = $delay_enabled ? max( 1, min( 365, $delay_value_raw ) ) : 0;
+	// Canonical range: 0..365 on the client, the REST schema, and here.
+	// 0 means off, even when `enabled` is true (analysis 04 §6.4, T7).
+	$delay_value = $delay_enabled && $delay_value_raw > 0
+		? max( 0, min( 365, $delay_value_raw ) )
+		: 0;
 
 	return array(
 		'update_check'  => array(
@@ -198,7 +202,7 @@ function updatronix_sanitize_schedule_array( array $in ): array {
 			'time'       => $time,
 		),
 		'delay_updates' => array(
-			'enabled'     => $delay_enabled,
+			'enabled'     => $delay_value > 0,
 			'delay_value' => $delay_value,
 		),
 	);
@@ -264,7 +268,13 @@ function updatronix_next_update_check_timestamp( string $recurrence, string $tim
 			if ( 'weekly' === $recurrence ) {
 				$run = $run->modify( '+7 days' );
 			} elseif ( 'twicedaily' === $recurrence ) {
-				$run = $run->modify( '+12 hours' );
+				// Add 12 hours in a bounded loop: a preferred time more than 12
+				// hours in the past used to return a timestamp in the past.
+				$guard = 0;
+				while ( $run->getTimestamp() <= $now->getTimestamp() && $guard < 3 ) {
+					$run = $run->modify( '+12 hours' );
+					++$guard;
+				}
 			} else {
 				$run = $run->modify( '+1 day' );
 			}

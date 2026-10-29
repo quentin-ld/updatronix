@@ -27,6 +27,11 @@
 -->
 <ruleset name="updatronix-project">
 	<!--
-		Nothing yet. Delete this comment when you add the first one.
+		Test support fixtures use PascalCase file names by convention; the
+		WordPress file-name sniff expects class-*.php. Keep the other sniffs
+		active for tests, but exclude these fixtures from the naming rule.
 	-->
+	<rule ref="WordPress.Files.FileName">
+		<exclude-pattern>*/tests/Support/*</exclude-pattern>
+	</rule>
 </ruleset>

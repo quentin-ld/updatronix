@@ -34,6 +34,7 @@ final class Updatronix_Bootstrap {
 		Updatronix_Notifications::register();
 		Updatronix_AutoUpdates::register();
 		Updatronix_AutoUpdateDelay::register();
+		Updatronix_Schedule_Context::register();
 
 		// Network-global log table: purge a deleted subsite's rows so stale site_id tags don't linger.
 		if ( is_multisite() ) {
@@ -50,6 +51,10 @@ final class Updatronix_Bootstrap {
 		$dir     = __DIR__;
 		$classes = array(
 			'class-updatronix-database.php',
+			'class-updatronix-log-taxonomy.php',
+			'class-updatronix-log-event.php',
+			'class-updatronix-log-query.php',
+			'class-updatronix-log-retention.php',
 			'class-updatronix-security.php',
 			'class-updatronix-updatelogstate.php',
 			'class-updatronix-logger.php',
@@ -64,6 +69,9 @@ final class Updatronix_Bootstrap {
 			'class-updatronix-health.php',
 			'class-updatronix-autoupdates.php',
 			'class-updatronix-autoupdatedelay.php',
+			'class-updatronix-item-state.php',
+			'class-updatronix-schedule-state.php',
+			'class-updatronix-schedule-context.php',
 			'class-updatronix-export.php',
 			'class-updatronix-export-request-schema.php',
 			'class-updatronix-export-query-builder.php',
@@ -82,16 +90,19 @@ final class Updatronix_Bootstrap {
 	}
 
 	/**
-	 * Ensure log table exists (on init, after plugins loaded).
+	 * Ensure the log table exists and its schema is current.
+	 *
+	 * Runs the additive schema upgrade once per stored schema version; a
+	 * request whose stored version already matches is a no-op.
 	 *
 	 * @return void
 	 */
 	private static function on_activation_create_table(): void {
 		$version = updatronix_get_plugin_option( Updatronix_Database::OPTION_DB_VERSION, '' );
-		if ( Updatronix_Database::DB_VERSION === $version && Updatronix_Database::table_exists() ) {
+		if ( Updatronix_Database::SCHEMA_VERSION === $version && Updatronix_Database::table_exists() ) {
 			return;
 		}
 
-		Updatronix_Database::create_table();
+		Updatronix_Database::maybe_upgrade();
 	}
 }

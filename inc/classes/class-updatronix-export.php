@@ -50,7 +50,7 @@ final class Updatronix_Export {
 	 *
 	 * @var list<string>
 	 */
-	public const SORT_FIELDS = array( 'date', 'created_at', 'log_type', 'item_name', 'status', 'performed_as' );
+	public const SORT_FIELDS = array( 'date', 'created_at', 'log_type', 'item_name', 'status', 'performed_as', 'reason_code', 'decision_state', 'origin', 'pass_id' );
 
 	/**
 	 * Valid sort directions for the export API.
@@ -64,7 +64,7 @@ final class Updatronix_Export {
 	 *
 	 * @var list<string>
 	 */
-	public const FILTER_FIELDS = array( 'category', 'actionType', 'status', 'triggeredBy', 'runType', 'user', 'date' );
+	public const FILTER_FIELDS = array( 'category', 'actionType', 'status', 'triggeredBy', 'runType', 'user', 'date', 'reason', 'state', 'origin', 'pass', 'chain', 'nextEligible' );
 
 	/**
 	 * Categorical filter operators.
@@ -92,6 +92,14 @@ final class Updatronix_Export {
 		'user',
 		'status',
 		'category',
+		'reason',
+		'state',
+		'origin',
+		'pass',
+		'chain',
+		'next_eligible',
+		'decision_context',
+		'retained',
 	);
 
 	/**

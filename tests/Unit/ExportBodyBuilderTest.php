@@ -68,12 +68,20 @@ final class ExportBodyBuilderTest extends TestCase {
 	public function test_default_export_columns_are_all_visible(): void {
 		self::assertSame(
 			array(
-				'table_heading' => true,
-				'action_type'   => true,
-				'run_context'   => true,
-				'user'          => true,
-				'status'        => true,
-				'category'      => true,
+				'table_heading'    => true,
+				'action_type'      => true,
+				'run_context'      => true,
+				'user'             => true,
+				'status'           => true,
+				'category'         => true,
+				'reason'           => true,
+				'state'            => true,
+				'origin'           => true,
+				'pass'             => true,
+				'chain'            => true,
+				'next_eligible'    => true,
+				'decision_context' => false,
+				'retained'         => true,
 			),
 			Updatronix_Export_Body_Builder::default_export_columns()
 		);
@@ -112,7 +120,7 @@ final class ExportBodyBuilderTest extends TestCase {
 
 		self::assertArrayNotHasKey( 'bogus', $result );
 		self::assertFalse( $result['user'] );
-		self::assertCount( 6, $result );
+		self::assertCount( 14, $result );
 	}
 
 	/**

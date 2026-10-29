@@ -4,16 +4,92 @@
  * @module updatronix
  */
 
-import { __ } from '@wordpress/i18n';
+import { __, _n, sprintf } from '@wordpress/i18n';
 
 /** Maximum hold in days. */
-export const MAX_HOLD_DAYS = 30;
+export const MAX_HOLD_DAYS = 365;
+
+/** Preferred time used when the stored value is empty or invalid. */
+export const DEFAULT_TIME = '03:00';
+
+/** The `HH:MM` shape the server stores. */
+export const TIME_PATTERN = /^([01][0-9]|2[0-3]):[0-5][0-9]$/;
+
+/** Every hour the picker offers, `00`–`23`. */
+export const HOURS = Array.from( { length: 24 }, ( _, index ) =>
+	String( index ).padStart( 2, '0' )
+);
+
+/** Every minute the picker offers, `00`–`59`. */
+export const MINUTES = Array.from( { length: 60 }, ( _, index ) =>
+	String( index ).padStart( 2, '0' )
+);
+
+/**
+ * Whether a value is a valid `HH:MM` wall-clock time.
+ *
+ * @param {unknown} value Raw value.
+ * @return {boolean} True when valid.
+ */
+export function isTimeValue( value ) {
+	return typeof value === 'string' && TIME_PATTERN.test( value );
+}
+
+/**
+ * Normalizes a stored time, falling back to the UI default.
+ *
+ * @param {unknown} value Raw value.
+ * @return {string} A valid `HH:MM` string.
+ */
+export function normalizeTime( value ) {
+	return isTimeValue( value ) ? value : DEFAULT_TIME;
+}
+
+/**
+ * Splits a stored `HH:MM` into the two picker values.
+ *
+ * @param {unknown} value Raw value.
+ * @return {{hour: string, minute: string}} Picker values.
+ */
+export function splitTime( value ) {
+	const [ hour, minute ] = normalizeTime( value ).split( ':' );
+
+	return { hour, minute };
+}
+
+/**
+ * Joins the two picker values back into `HH:MM`.
+ *
+ * Invalid input falls back to the default rather than storing a partial value.
+ *
+ * @param {unknown} hour   Hour, `00`–`23`.
+ * @param {unknown} minute Minute, `00`–`59`.
+ * @return {string} A valid `HH:MM` string.
+ */
+export function joinTime( hour, minute ) {
+	if (
+		hour === '' ||
+		hour === null ||
+		hour === undefined ||
+		minute === '' ||
+		minute === null ||
+		minute === undefined
+	) {
+		return DEFAULT_TIME;
+	}
+
+	const value = `${ String( hour ).padStart( 2, '0' ) }:${ String(
+		minute
+	).padStart( 2, '0' ) }`;
+
+	return isTimeValue( value ) ? value : DEFAULT_TIME;
+}
 
 /** Fallback schedule when the settings payload is incomplete. */
 export const SCHEDULE_FALLBACK = {
 	update_check: {
 		recurrence: '',
-		time: '03:00',
+		time: DEFAULT_TIME,
 	},
 	delay_updates: {
 		enabled: false,
@@ -52,7 +128,7 @@ export function getHoldDays( schedule ) {
 export function scheduleSignature( schedule ) {
 	return JSON.stringify( {
 		recurrence: String( schedule.update_check?.recurrence ?? '' ),
-		time: String( schedule.update_check?.time ?? '03:00' ),
+		time: normalizeTime( schedule.update_check?.time ),
 		enabled: !! schedule.delay_updates?.enabled,
 		delay_value: Number( schedule.delay_updates?.delay_value ?? 0 ) || 0,
 	} );
@@ -67,6 +143,56 @@ export function scheduleSignature( schedule ) {
  */
 export function isScheduleDirty( draft, saved ) {
 	return scheduleSignature( draft ) !== scheduleSignature( saved );
+}
+
+/**
+ * Whether a recurrence uses the preferred time.
+ *
+ * Hourly and the WordPress default follow WordPress's own schedule; the
+ * preferred time is kept but ignored.
+ *
+ * @param {string} recurrence Recurrence slug.
+ * @return {boolean} True when the preferred time is used.
+ */
+export function recurrenceUsesPreferredTime( recurrence ) {
+	return (
+		recurrence === 'daily' ||
+		recurrence === 'twicedaily' ||
+		recurrence === 'weekly'
+	);
+}
+
+/**
+ * One-line explanation of a recurrence's semantics.
+ *
+ * @param {string} recurrence Recurrence slug.
+ * @return {string} Translated sentence.
+ */
+export function recurrenceDescription( recurrence ) {
+	switch ( recurrence ) {
+		case 'daily':
+			return __( 'Runs every day at the preferred time.', 'updatronix' );
+		case 'twicedaily':
+			return __(
+				'The first run anchors at the preferred time; the second runs 12 hours later.',
+				'updatronix'
+			);
+		case 'hourly':
+			return __(
+				'Runs every hour and ignores the preferred time. The saved time is kept for when you switch back.',
+				'updatronix'
+			);
+		case 'weekly':
+			return __(
+				'Runs on the same weekday and time every seven days.',
+				'updatronix'
+			);
+		default:
+			return __(
+				'Follows the schedule WordPress itself uses for update checks. The saved preferred time is kept.',
+				'updatronix'
+			);
+	}
 }
 
 /**
@@ -94,8 +220,91 @@ export function validateHoldDays( value ) {
 	return parsed;
 }
 
+/**
+ * Hold rule shown in the "Next run" card.
+ *
+ * The card describes the next automatic check and the hold rule; it never
+ * presents the check as the install time (T10).
+ *
+ * @param {number} days Hold days, 0 when off.
+ * @return {string} Translated sentence.
+ */
+export function holdRuleCopy( days ) {
+	if ( days > 0 ) {
+		return sprintf(
+			/* translators: %d: number of hold days. */
+			_n(
+				'New releases are held for %d day after the first automatic check sees them; the earliest install is the first check at or after that.',
+				'New releases are held for %d days after the first automatic check sees them; the earliest install is the first check at or after that.',
+				days,
+				'updatronix'
+			),
+			days
+		);
+	}
+
+	return __(
+		'No hold is applied. New releases install at the next automatic check.',
+		'updatronix'
+	);
+}
+
+/**
+ * Description for the "Run a check now" action.
+ *
+ * @return {string} Translated sentence.
+ */
+export function manualCheckCopy() {
+	return __(
+		'Run a check now refreshes the update data. It does not start the hold; the hold starts at the next automatic pass.',
+		'updatronix'
+	);
+}
+
+/**
+ * Rows for the "What the hold period does" table.
+ *
+ * The old table claimed core security releases were installed immediately; the
+ * delay gate holds every core offer, so that claim is gone (T9, analysis 04
+ * §6.4). The copy is exported so a test can pin it.
+ *
+ * @return {Array<{type: string, withHold: string, manual: string}>} Rows.
+ */
+export function holdRuleRows() {
+	return [
+		{
+			type: __( 'Core releases', 'updatronix' ),
+			withHold: __(
+				'Deferred by the selected number of days',
+				'updatronix'
+			),
+			manual: __( 'Optional', 'updatronix' ),
+		},
+		{
+			type: __( 'Plugin and theme updates', 'updatronix' ),
+			withHold: __(
+				'Deferred by the selected number of days',
+				'updatronix'
+			),
+			manual: __( 'Available from the update log', 'updatronix' ),
+		},
+	];
+}
+
+/**
+ * Closing note under the hold table.
+ *
+ * @return {string} Translated sentence.
+ */
+export function holdRuleNote() {
+	return __(
+		'The hold applies after the first automatic check sees a release. It applies to every core automatic update; WordPress does not expose a reliable security-release flag.',
+		'updatronix'
+	);
+}
+
 /** Translation for the shared hold validation message. */
 export const HOLD_VALIDATION_MESSAGE = __(
-	'Enter a whole number from 0 to 30.',
+	'Enter a whole number from 0 to 365.',
 	'updatronix'
 );

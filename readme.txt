@@ -4,7 +4,7 @@ Donate link: https://buymeacoffee.com/quentinld
 Tags: updates, auto-update, maintenance, security, audit-log
 Requires at least: 6.2
 Tested up to: 7.1
-Stable tag: 1.3.0
+Stable tag: 2.0.0
 Requires PHP: 8.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -46,7 +46,7 @@ Set how long the log is kept, route WordPress update emails to the right address
 
 == Updatronix 3000 ==
 
-**Updatronix 3000** is the Pro edition of Updatronix. **Update Shield** checks every automatic update against your WordPress and PHP versions before it runs, so an incompatible automatic update won't break your site. More is on the roadmap: Update Flow, Development Tools, Advanced Exports, Queue List, and White Label. One license, one site, updates for life.
+**Updatronix 3000** is the Pro edition of Updatronix. **Update Shield** checks every automatic update against your WordPress and PHP versions before it runs, so an incompatible automatic update won't break your site. **Update Flow** orders automatic updates, **Advanced Exports** adds CSV and JSON reports, and **White Label** rebrands the admin. XML export and Development Tools are on the roadmap. One license, one site, updates for life.
 
 == Privacy ==
 
@@ -132,14 +132,25 @@ Yes. Network-activate Updatronix and manage everything as a Super Admin from the
 
 == Changelog ==
 
-= Unreleased =
-* Copy: Clearer, more consistent wording across Settings, Update logs, Auto updates, Schedule, Health, Documentation, and Support.
-* Improvement: Rebuild the admin interface on the WordPress Design System: dark rail, eleven destinations, one page header per screen, and one manual save.
-* Improvement: Add Health, Documentation, Support, Update Shield, Update Flow, and White label.
-* Improvement: The Updatronix 3000 presentation names only the available Pro features and labels the queue, XML export, and development tools as roadmap.
-* Improvement: White label brand and menu colors apply to the shared admin shell; the rail adapts to a light menu background.
+= 2.0.0 =
+* New: The activity log records the decision behind each update: reason, state, origin, stage, pass, chain, predecessor, next eligible time, and attempt. Filter by reason, state, or origin, or open a pass or chain deep link; the details panel and export include the same fields.
+* New: Existing log rows keep working and show “Legacy — reason not recorded” where the new fields do not apply. The schema upgrade only adds columns and indexes.
+* New: Schedule offers every hour and every minute, keeps the preferred time when the frequency ignores it, and holds new releases for 0 to 365 days (0 turns the hold off).
+* Fix: The plugin, theme, and update-core screens show whether an update will install automatically, or that it is waiting, held, queued, blocked, or managed. The next update check is no longer shown as the install time.
+* Fix: Update-core shows a one-paragraph next-pass summary. The large notice is gone; a single line appears only when WP-Cron is disabled.
+* Fix: Removed the claim that core security releases skip the hold. The hold applies to every core automatic update because WordPress exposes no reliable security-release flag.
+* Fix: Theme log details load `themes_api()` before fetching a theme changelog, so the REST details request no longer fatals.
+* Improvement: The admin interface uses the WordPress Design System: a dark rail, eleven destinations, one header per screen, and one save button.
+* Improvement: Added Health, Documentation, Support, Update Shield, Update Flow, and White label destinations.
+* Improvement: The Updatronix 3000 screen names only the Pro features that are available and marks XML export and Development Tools as roadmap.
+* Improvement: White label brand and menu colors apply to the shared admin shell, and the rail adapts to a light menu background.
 * Fix: The shell breadcrumb uses the configured brand name.
+* Copy: Clearer, more consistent wording across Settings, Update logs, Auto updates, Schedule, Health, Documentation, and Support.
+* Copy: The Health retry action now says “Schedule retry”, and the Update Shield description says “order automatic updates”.
+* Note: Updatronix 3000 0.8.0 runs one automatic update pass, one item per native invocation, and sends WordPress's own email for each item. Its queue table is dropped; take a database backup before upgrading. Legacy queue rows are not migrated by design.
 * Dev: Bundle the pinned WPDS packages and share one runtime with Updatronix 3000.
+* Dev: `updatronix_log_decision_layer_enabled` turns the decision layer off, and `updatronix_native_update_time_enabled` turns the native time display off.
+* i18n: Updated translations.
 * Compatibility: WordPress 6.2 or later.
 
 = 1.3.0 =
@@ -240,6 +251,9 @@ Yes. Network-activate Updatronix and manage everything as a Super Admin from the
 * Add: Initial release of Updatronix.
 
 == Upgrade Notice ==
+
+= 2.0.0 =
+Before upgrading, take a database backup. Updatronix 3000 0.8.0 drops the legacy queue table; queue rows are not migrated by design. The update log remains the history.
 
 = 1.1.3 =
 On sites with automatic update delay enabled, a bug could interrupt the scheduled update process. This version fix it.

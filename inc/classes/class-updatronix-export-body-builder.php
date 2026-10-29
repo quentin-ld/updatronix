@@ -42,7 +42,7 @@ final class Updatronix_Export_Body_Builder {
 	 *
 	 * @var list<string>
 	 */
-	private const CATEGORY_ORDER = array( 'core', 'plugin', 'theme', 'translation' );
+	private const CATEGORY_ORDER = array( 'core', 'plugin', 'theme', 'translation', 'system' );
 
 	/**
 	 * Sort rank per action type (lower sorts first).
@@ -60,13 +60,13 @@ final class Updatronix_Export_Body_Builder {
 	);
 
 	/** Column keys for merged (sectioned) export rows. */
-	private const ROW_PART_KEYS = array( 'name', 'action', 'versions', 'dates', 'context', 'user', 'status' );
+	private const ROW_PART_KEYS = array( 'name', 'action', 'versions', 'dates', 'context', 'user', 'status', 'reason', 'state', 'origin', 'pass', 'chain', 'next_eligible', 'retained' );
 
 	/** Column keys for flat (non-merged) export rows — category first. */
-	private const ROW_PART_KEYS_FLAT = array( 'category', 'name', 'action', 'versions', 'dates', 'context', 'user', 'status' );
+	private const ROW_PART_KEYS_FLAT = array( 'category', 'name', 'action', 'versions', 'dates', 'context', 'user', 'status', 'reason', 'state', 'origin', 'pass', 'chain', 'next_eligible', 'retained' );
 
 	/** Optional columns omitted from a section when every row value is empty. */
-	private const OPTIONAL_ROW_PART_KEYS = array( 'versions', 'context' );
+	private const OPTIONAL_ROW_PART_KEYS = array( 'versions', 'context', 'reason', 'state', 'origin', 'pass', 'chain', 'next_eligible', 'retained' );
 
 	/** Non-breaking space — padding and gaps survive rich-text paste (Word, email). */
 	private const PAD_CHAR = "\u{00A0}";
@@ -76,11 +76,18 @@ final class Updatronix_Export_Body_Builder {
 
 	/** Maps export row part keys to REST `columns` toggle keys. */
 	private const ROW_PART_COLUMN_MAP = array(
-		'category' => 'category',
-		'action'   => 'action_type',
-		'context'  => 'run_context',
-		'user'     => 'user',
-		'status'   => 'status',
+		'category'      => 'category',
+		'action'        => 'action_type',
+		'context'       => 'run_context',
+		'user'          => 'user',
+		'status'        => 'status',
+		'reason'        => 'reason',
+		'state'         => 'state',
+		'origin'        => 'origin',
+		'pass'          => 'pass',
+		'chain'         => 'chain',
+		'next_eligible' => 'next_eligible',
+		'retained'      => 'retained',
 	);
 
 	/**
@@ -90,12 +97,20 @@ final class Updatronix_Export_Body_Builder {
 	 */
 	public static function default_export_columns(): array {
 		return array(
-			'table_heading' => true,
-			'action_type'   => true,
-			'run_context'   => true,
-			'user'          => true,
-			'status'        => true,
-			'category'      => true,
+			'table_heading'    => true,
+			'action_type'      => true,
+			'run_context'      => true,
+			'user'             => true,
+			'status'           => true,
+			'category'         => true,
+			'reason'           => true,
+			'state'            => true,
+			'origin'           => true,
+			'pass'             => true,
+			'chain'            => true,
+			'next_eligible'    => true,
+			'decision_context' => false,
+			'retained'         => true,
 		);
 	}
 
@@ -490,6 +505,27 @@ final class Updatronix_Export_Body_Builder {
 		if ( $columns['category'] ?? true ) {
 			$data['category'] = $parts['category'] ?? self::category_label_for( $log_type );
 		}
+		if ( $columns['reason'] ?? true ) {
+			$data['reason'] = $parts['reason'] ?? '';
+		}
+		if ( $columns['state'] ?? true ) {
+			$data['state'] = $parts['state'] ?? '';
+		}
+		if ( $columns['origin'] ?? true ) {
+			$data['origin'] = $parts['origin'] ?? '';
+		}
+		if ( $columns['pass'] ?? true ) {
+			$data['pass'] = $parts['pass'] ?? '';
+		}
+		if ( $columns['chain'] ?? true ) {
+			$data['chain'] = $parts['chain'] ?? '';
+		}
+		if ( $columns['next_eligible'] ?? true ) {
+			$data['next_eligible'] = $parts['next_eligible'] ?? '';
+		}
+		if ( $columns['retained'] ?? true ) {
+			$data['retained'] = $parts['retained'] ?? '';
+		}
 
 		return $data;
 	}
@@ -624,7 +660,7 @@ final class Updatronix_Export_Body_Builder {
 		 */
 		$all_items = array();
 		foreach ( self::CATEGORY_ORDER as $lt ) {
-			foreach ( $by_category[ $lt ] as $item ) {
+			foreach ( $by_category[ $lt ] ?? array() as $item ) {
 				$all_items[] = $item;
 			}
 		}
@@ -632,7 +668,7 @@ final class Updatronix_Export_Body_Builder {
 		$widths = self::column_widths_for_rows( $all_items, $keys );
 
 		foreach ( self::CATEGORY_ORDER as $lt ) {
-			$items = $by_category[ $lt ];
+			$items = $by_category[ $lt ] ?? array();
 			if ( array() === $items ) {
 				continue;
 			}
@@ -697,17 +733,25 @@ final class Updatronix_Export_Body_Builder {
 			$group,
 			static fn ( object $a, object $b ): int => strcmp( (string) ( $a->created_at ?? '' ), (string) ( $b->created_at ?? '' ) )
 		);
-		$first = $group[0];
-		$last  = $group[ count( $group ) - 1 ];
+		$first     = $group[0];
+		$last      = $group[ count( $group ) - 1 ];
+		$first_row = (array) $first;
 
 		$parts = array(
-			'name'     => self::real_name( $last ),
-			'action'   => self::action_type_display_label( sanitize_key( (string) ( $first->action_type ?? '' ) ) ),
-			'versions' => self::compact_version_plain( $group, $first ),
-			'dates'    => self::format_dates_list( $group ),
-			'context'  => self::trigger_context_suffix( $group ),
-			'user'     => self::format_users_list( $group ),
-			'status'   => self::status_label( (string) ( $first->status ?? '' ) ),
+			'name'          => self::real_name( $last ),
+			'action'        => self::action_type_display_label( sanitize_key( (string) ( $first_row['action_type'] ?? '' ) ) ),
+			'versions'      => self::compact_version_plain( $group, $first ),
+			'dates'         => self::format_dates_list( $group ),
+			'context'       => self::trigger_context_suffix( $group ),
+			'user'          => self::format_users_list( $group ),
+			'status'        => self::status_label( (string) ( $first_row['status'] ?? '' ) ),
+			'reason'        => '' !== (string) ( $first_row['reason_code'] ?? '' ) ? Updatronix_Log_Taxonomy::reason_label( (string) $first_row['reason_code'] ) : '',
+			'state'         => '' !== (string) ( $first_row['decision_state'] ?? '' ) ? Updatronix_Log_Taxonomy::state_label( (string) $first_row['decision_state'] ) : '',
+			'origin'        => '' !== (string) ( $first_row['origin'] ?? '' ) ? Updatronix_Log_Taxonomy::origin_label( (string) $first_row['origin'] ) : '',
+			'pass'          => (string) ( $first_row['pass_id'] ?? '' ),
+			'chain'         => (string) ( $first_row['chain_id'] ?? '' ),
+			'next_eligible' => isset( $first_row['next_eligible_at'] ) && '' !== (string) $first_row['next_eligible_at'] ? self::format_next_eligible( (string) $first_row['next_eligible_at'] ) : '',
+			'retained'      => (int) ( $first_row['retained'] ?? 0 ) > 0 ? __( 'Retained', 'updatronix' ) : '',
 		);
 
 		if ( $flat ) {
@@ -715,6 +759,23 @@ final class Updatronix_Export_Body_Builder {
 		}
 
 		return $parts;
+	}
+
+	/**
+	 * Format a stored UTC `next_eligible_at` for the export (site time zone).
+	 *
+	 * @param string $utc Stored UTC datetime.
+	 * @return string Empty when the value cannot be parsed.
+	 */
+	private static function format_next_eligible( string $utc ): string {
+		$timestamp = strtotime( $utc . ' UTC' );
+		if ( false === $timestamp ) {
+			return '';
+		}
+
+		$formatted = wp_date( 'Y-m-d H:i:s', $timestamp );
+
+		return false === $formatted ? '' : $formatted;
 	}
 
 	/**
@@ -729,6 +790,7 @@ final class Updatronix_Export_Body_Builder {
 			'plugin' => __( 'Plugin', 'updatronix' ),
 			'theme' => __( 'Theme', 'updatronix' ),
 			'translation' => __( 'Translation', 'updatronix' ),
+			'system' => __( 'System', 'updatronix' ),
 			default => self::normalize_field( $log_type ),
 		};
 	}
@@ -861,6 +923,13 @@ final class Updatronix_Export_Body_Builder {
 			'context' => __( 'Run context', 'updatronix' ),
 			'user' => __( 'User', 'updatronix' ),
 			'status' => __( 'Status', 'updatronix' ),
+			'reason' => __( 'Reason', 'updatronix' ),
+			'state' => __( 'State', 'updatronix' ),
+			'origin' => __( 'Origin', 'updatronix' ),
+			'pass' => __( 'Pass', 'updatronix' ),
+			'chain' => __( 'Chain', 'updatronix' ),
+			'next_eligible' => __( 'Next eligible', 'updatronix' ),
+			'retained' => __( 'Retained', 'updatronix' ),
 			default => '',
 		};
 	}
@@ -966,10 +1035,13 @@ final class Updatronix_Export_Body_Builder {
 	 */
 	private static function status_label( string $status ): string {
 		return match ( strtolower( sanitize_key( $status ) ) ) {
+			'success' => __( 'Success', 'updatronix' ),
 			'error', 'failed', 'errors' => __( 'Failed', 'updatronix' ),
 			'cancelled' => __( 'Cancelled', 'updatronix' ),
 			'delayed'   => __( 'Delayed', 'updatronix' ),
-			default => __( 'Success', 'updatronix' ),
+			'info'      => __( 'Info', 'updatronix' ),
+			'warning'   => __( 'Warning', 'updatronix' ),
+			default     => '' !== sanitize_key( $status ) ? ucfirst( sanitize_key( $status ) ) : __( 'Info', 'updatronix' ),
 		};
 	}
 

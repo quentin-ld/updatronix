@@ -107,60 +107,302 @@ final class Updatronix_Logger {
 			}
 		}
 
-		$site_id      = (int) get_current_blog_id();
+		return self::insert_row(
+			array(
+				'log_type'       => $log_type,
+				'action_type'    => $action_type,
+				'item_name'      => $item_name,
+				'item_slug'      => $item_slug,
+				'version_before' => $version_before,
+				'version_after'  => $version_after,
+				'status'         => $status,
+				'message'        => $message,
+				'trace'          => $trace,
+				'performed_as'   => $performed_as,
+				'update_context' => $update_context,
+				'event_key'      => $event_key,
+			)
+		);
+	}
+
+	/**
+	 * Insert a log entry from a structured decision event.
+	 *
+	 * The canonical writer for the decision layer. It applies the
+	 * `updatronix_log_context` filter so Pro can supply the pass, chain,
+	 * predecessor, attempt, origin, and stage before the row is written,
+	 * sanitizes every field, builds the v2 event key, and compares the
+	 * previous state for the same item and target so a repeated wait or block
+	 * is not inserted again.
+	 *
+	 * Old callers keep using {@see self::log()}; both paths share
+	 * {@see self::insert_row()}.
+	 *
+	 * @since 1.6.0
+	 *
+	 * @param array<string, mixed> $event Event fields. See analysis §8.4.
+	 * @return int|false Log ID (new or existing) on success, false on failure.
+	 */
+	public static function log_event( array $event ): int|false {
+		if ( ! updatronix_get_settings()['logging_enabled'] ) {
+			return false;
+		}
+
+		if ( ! Updatronix_Database::table_exists() ) {
+			return false;
+		}
+
+		$event = self::prepare_event( $event );
+
+		if ( ! self::decision_layer_enabled() ) {
+			return self::log(
+				(string) $event['log_type'],
+				(string) $event['action_type'],
+				(string) $event['item_name'],
+				(string) $event['item_slug'],
+				(string) $event['version_before'],
+				(string) $event['version_after'],
+				(string) $event['status'],
+				(string) $event['message'],
+				(string) $event['trace'],
+				(string) $event['performed_as'],
+				(string) $event['update_context'],
+				(string) $event['event_key']
+			);
+		}
+
+		if ( '' === $event['event_key'] ) {
+			$event['event_key'] = Updatronix_Log_Event::key( $event );
+		}
+
+		$existing_id = self::get_log_id_by_event_key( (string) $event['event_key'] );
+		if ( $existing_id > 0 ) {
+			return $existing_id;
+		}
+
+		$previous = self::get_latest_for_item(
+			(int) $event['site_id'],
+			(string) $event['log_type'],
+			(string) $event['item_slug'],
+			(string) $event['target_version']
+		);
+
+		if ( (bool) $previous && Updatronix_Log_Event::is_same_state( $previous, $event ) ) {
+			$previous_row = (array) $previous;
+
+			return (int) ( $previous_row['id'] ?? 0 );
+		}
+
+		return self::insert_row( $event );
+	}
+
+	/**
+	 * Whether the decision layer is enabled (staged-rollout switch).
+	 *
+	 * When false, `log_event()` delegates to the legacy `log()` shape and no
+	 * new column is written. The columns and old rows stay readable.
+	 *
+	 * @since 1.6.0
+	 *
+	 * @return bool
+	 */
+	public static function decision_layer_enabled(): bool {
+		$enabled = updatronix_get_plugin_option( 'updatronix_log_decision_layer_enabled', true );
+
+		/**
+		 * Filters whether the decision-layer writer is active.
+		 *
+		 * @since 1.6.0
+		 *
+		 * @param bool $enabled Whether new decision columns are written.
+		 */
+		return (bool) apply_filters( 'updatronix_log_decision_layer_enabled', (bool) $enabled );
+	}
+
+	/**
+	 * Apply the context filter and sanitize every event field.
+	 *
+	 * @param array<string, mixed> $event Raw event.
+	 * @return array<string, mixed> Sanitized event with every known key present.
+	 */
+	private static function prepare_event( array $event ): array {
+		$event = array_merge(
+			array(
+				'site_id'          => (int) get_current_blog_id(),
+				'log_type'         => 'plugin',
+				'action_type'      => '',
+				'item_name'        => '',
+				'item_slug'        => '',
+				'version_before'   => '',
+				'version_after'    => '',
+				'target_version'   => '',
+				'status'           => '',
+				'message'          => '',
+				'trace'            => '',
+				'performed_as'     => 'manual',
+				'update_context'   => '',
+				'event_key'        => '',
+				'reason_code'      => '',
+				'decision_state'   => '',
+				'origin'           => '',
+				'decision_stage'   => '',
+				'pass_id'          => '',
+				'request_id'       => '',
+				'chain_id'         => '',
+				'predecessor'      => '',
+				'next_eligible_at' => '',
+				'attempt'          => 0,
+				'network'          => 0,
+				'context'          => array(),
+			),
+			$event
+		);
+
+		$log_type       = Updatronix_Security::sanitize_log_type( (string) $event['log_type'] );
+		$item_slug      = Updatronix_Security::sanitize_string( (string) $event['item_slug'], 255 );
+		$target_version = Updatronix_Security::sanitize_version( (string) $event['target_version'] );
+
+		/**
+		 * Filters a decision-log event before it is sanitized and stored.
+		 *
+		 * The native logger calls this before insert so the actual-update row
+		 * already carries the pass, chain, predecessor, attempt, origin, and
+		 * stage rather than being enriched afterwards.
+		 *
+		 * @since 1.6.0
+		 *
+		 * @param array<string, mixed> $event   Event fields.
+		 * @param string               $type    Item type.
+		 * @param string               $item_id Item id (slug or core key).
+		 * @param string               $target  Offered target version.
+		 */
+		$event = (array) apply_filters( 'updatronix_log_context', $event, $log_type, $item_slug, $target_version );
+
+		$reason_code    = Updatronix_Security::sanitize_reason_code( (string) ( $event['reason_code'] ?? '' ) );
+		$decision_state = Updatronix_Security::sanitize_decision_state( (string) ( $event['decision_state'] ?? '' ) );
+
+		if ( '' === $decision_state && '' !== $reason_code ) {
+			$decision_state = Updatronix_Log_Taxonomy::state_for( $reason_code );
+		}
+
+		$action_type = (string) ( $event['action_type'] ?? '' );
+		$action_type = '' !== $action_type
+			? Updatronix_Security::sanitize_action_type( $action_type )
+			: ( '' !== $reason_code ? Updatronix_Log_Taxonomy::action_for( $reason_code ) : 'update' );
+
+		$status = (string) ( $event['status'] ?? '' );
+		$status = '' !== $status
+			? Updatronix_Security::sanitize_status( $status )
+			: ( '' !== $reason_code ? Updatronix_Log_Taxonomy::status_for( $reason_code ) : 'success' );
+
+		$context = $event['context'] ?? array();
+		if ( is_string( $context ) ) {
+			$context = Updatronix_Security::decode_context( $context );
+		}
+		$context = is_array( $context ) ? Updatronix_Security::sanitize_context( $context ) : '';
+
+		$request_id = Updatronix_Log_Event::normalize_request_id( (string) ( $event['request_id'] ?? '' ) );
+		$pass_id    = Updatronix_Log_Event::normalize_pass_id( (string) ( $event['pass_id'] ?? '' ) );
+
+		if ( '' === $pass_id && '' === $request_id && class_exists( 'Updatronix_UpdateLogState' ) ) {
+			$request_id = Updatronix_Log_Event::normalize_request_id( Updatronix_UpdateLogState::get_request_run_id() );
+		}
+
+		$normalized = array(
+			'site_id'          => (int) ( $event['site_id'] ?? get_current_blog_id() ),
+			'log_type'         => $log_type,
+			'action_type'      => $action_type,
+			'item_name'        => Updatronix_Security::sanitize_string( (string) ( $event['item_name'] ?? '' ), 255 ),
+			'item_slug'        => $item_slug,
+			'version_before'   => Updatronix_Security::sanitize_version( (string) ( $event['version_before'] ?? '' ) ),
+			'version_after'    => Updatronix_Security::sanitize_version( (string) ( $event['version_after'] ?? '' ) ),
+			'target_version'   => $target_version,
+			'status'           => $status,
+			'message'          => Updatronix_Security::sanitize_message( (string) ( $event['message'] ?? '' ) ),
+			'trace'            => Updatronix_Security::sanitize_trace( (string) ( $event['trace'] ?? '' ) ),
+			'performed_as'     => Updatronix_Security::sanitize_performed_as( (string) ( $event['performed_as'] ?? 'manual' ) ),
+			'update_context'   => Updatronix_Security::sanitize_update_context( (string) ( $event['update_context'] ?? '' ) ),
+			'event_key'        => Updatronix_Security::sanitize_string( (string) ( $event['event_key'] ?? '' ), 191 ),
+			'reason_code'      => $reason_code,
+			'decision_state'   => $decision_state,
+			'origin'           => Updatronix_Security::sanitize_origin( (string) ( $event['origin'] ?? '' ) ),
+			'decision_stage'   => Updatronix_Security::sanitize_stage( (string) ( $event['decision_stage'] ?? '' ) ),
+			'pass_id'          => $pass_id,
+			'request_id'       => $request_id,
+			'chain_id'         => Updatronix_Security::sanitize_string( (string) ( $event['chain_id'] ?? '' ), 64 ),
+			'predecessor'      => Updatronix_Security::sanitize_string( (string) ( $event['predecessor'] ?? '' ), 191 ),
+			'next_eligible_at' => Updatronix_Log_Event::normalize_utc( $event['next_eligible_at'] ?? '' ),
+			'attempt'          => max( 0, (int) ( $event['attempt'] ?? 0 ) ),
+			'network'          => (int) ( $event['network'] ?? 0 ) > 0 ? 1 : 0,
+			'context'          => $context,
+		);
+
+		return array_merge( $event, $normalized );
+	}
+
+	/**
+	 * Insert one row and fire the insert hook.
+	 *
+	 * Shared by {@see self::log()} and {@see self::log_event()}. Only the
+	 * columns present in `$fields` are written, so the legacy call shape keeps
+	 * its exact behavior (empty key inserts every time).
+	 *
+	 * @param array<string, mixed> $fields Sanitized fields.
+	 * @return int|false
+	 */
+	private static function insert_row( array $fields ): int|false {
+		$site_id      = (int) ( $fields['site_id'] ?? get_current_blog_id() );
 		$user_id      = (int) get_current_user_id();
 		$performed_by = $user_id > 0 ? 'user' : 'system';
+		$event_key    = (string) ( $fields['event_key'] ?? '' );
+		$created_at   = current_time( 'mysql' ); // Must match wp_date() timezone in delete_older_than().
 
-		return self::with_logs_table(
-			static function () use (
-				$log_type,
-				$action_type,
-				$item_name,
-				$item_slug,
-				$version_before,
-				$version_after,
-				$status,
-				$message,
-				$trace,
-				$performed_as,
-				$update_context,
-				$event_key,
-				$site_id,
-				$user_id,
-				$performed_by
-			): int|false {
+		$insert_data = array(
+			'site_id'        => $site_id,
+			'log_type'       => (string) $fields['log_type'],
+			'action_type'    => (string) $fields['action_type'],
+			'item_name'      => (string) $fields['item_name'],
+			'item_slug'      => (string) $fields['item_slug'],
+			'version_before' => (string) $fields['version_before'],
+			'version_after'  => (string) $fields['version_after'],
+			'status'         => (string) $fields['status'],
+			'message'        => (string) $fields['message'],
+			'trace'          => (string) $fields['trace'],
+			'user_id'        => $user_id,
+			'performed_by'   => $performed_by,
+			'performed_as'   => (string) $fields['performed_as'],
+			'update_context' => (string) $fields['update_context'],
+			'created_at'     => $created_at,
+		);
+
+		if ( array_key_exists( 'target_version', $fields ) ) {
+			$insert_data['target_version']   = (string) $fields['target_version'];
+			$insert_data['reason_code']      = (string) $fields['reason_code'];
+			$insert_data['decision_state']   = (string) $fields['decision_state'];
+			$insert_data['origin']           = (string) $fields['origin'];
+			$insert_data['decision_stage']   = (string) $fields['decision_stage'];
+			$insert_data['pass_id']          = (string) $fields['pass_id'];
+			$insert_data['chain_id']         = '' !== (string) $fields['chain_id'] ? (string) $fields['chain_id'] : null;
+			$insert_data['predecessor']      = '' !== (string) $fields['predecessor'] ? (string) $fields['predecessor'] : null;
+			$insert_data['next_eligible_at'] = '' !== (string) $fields['next_eligible_at'] ? (string) $fields['next_eligible_at'] : null;
+			$insert_data['attempt']          = (int) $fields['attempt'];
+			$insert_data['network']          = (int) $fields['network'];
+			$insert_data['context']          = '' !== (string) $fields['context'] ? (string) $fields['context'] : null;
+		}
+
+		if ( '' !== $event_key ) {
+			$insert_data['event_key'] = $event_key;
+		}
+
+		$inserted = false;
+
+		$log_id = self::with_logs_table(
+			static function () use ( $insert_data, $event_key, &$inserted ): int|false {
 				global $wpdb;
-				$table       = Updatronix_Database::get_table_name();
-				$insert_data = array(
-					'site_id'        => $site_id,
-					'log_type'       => $log_type,
-					'action_type'    => $action_type,
-					'item_name'      => $item_name,
-					'item_slug'      => $item_slug,
-					'version_before' => $version_before,
-					'version_after'  => $version_after,
-					'status'         => $status,
-					'message'        => $message,
-					'trace'          => $trace,
-					'user_id'        => $user_id,
-					'performed_by'   => $performed_by,
-					'performed_as'   => $performed_as,
-					'update_context' => $update_context,
-					'created_at'     => current_time( 'mysql' ), // Must match wp_date() timezone in delete_older_than().
-				);
-				$format      = array( '%d', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d', '%s', '%s', '%s', '%s' );
+				$table = Updatronix_Database::get_table_name();
 
-				if ( '' !== $event_key ) {
-					$insert_data['event_key'] = $event_key;
-					$format[]                 = '%s';
-				}
-
-            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom table; $wpdb->insert is the correct API, prepared internally.
-				$result = $wpdb->insert(
-					$table,
-					$insert_data,
-					$format
-				);
+				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom table; $wpdb->insert is the correct API, prepared internally.
+				$result = $wpdb->insert( $table, $insert_data );
 
 				if ( false === $result ) {
 					if ( '' !== $event_key ) {
@@ -173,36 +415,327 @@ final class Updatronix_Logger {
 					return false;
 				}
 
-				$log_id = (int) $wpdb->insert_id;
-				$data   = array(
-					'log_type'       => $log_type,
-					'action_type'    => $action_type,
-					'item_name'      => $item_name,
-					'item_slug'      => $item_slug,
-					'version_before' => $version_before,
-					'version_after'  => $version_after,
-					'status'         => $status,
-					'message'        => $message,
-					'trace'          => $trace,
-					'update_context' => $update_context,
-					'event_key'      => $event_key,
-					'created_at'     => current_time( 'mysql' ), // Must match wp_date() timezone in delete_older_than().
+				$inserted = true;
+
+				return (int) $wpdb->insert_id;
+			}
+		);
+
+		if ( false === $log_id ) {
+			return false;
+		}
+
+		self::bump_logs_cache_last_changed();
+
+		if ( ! $inserted ) {
+			// A duplicate event key resolved to the existing row: nothing was
+			// written, so the insert hook must not report a new entry.
+			return $log_id;
+		}
+
+		$data = self::build_hook_payload( $insert_data, $log_id, $created_at );
+
+		/**
+		 * Fires after a log entry is stored in the custom audit log table.
+		 *
+		 * Hook for integrations that should react when a new row is persisted.
+		 * Additive: the original 12 keys are always present; the decision and
+		 * identity keys follow them.
+		 *
+		 * @since 1.0.0
+		 * @since 1.6.0 Added target, decision, identity, and context keys.
+		 *
+		 * @param int                  $log_id New log row ID.
+		 * @param array<string, mixed> $data   Snapshot of stored fields.
+		 */
+		do_action( 'updatronix_after_log', $log_id, $data );
+
+		return $log_id;
+	}
+
+	/**
+	 * Build the additive `updatronix_after_log` payload.
+	 *
+	 * @param array<string, mixed> $insert_data Stored fields.
+	 * @param int                  $log_id      Row ID.
+	 * @param string               $created_at  Stored (site-local) creation time.
+	 * @return array<string, mixed>
+	 */
+	private static function build_hook_payload( array $insert_data, int $log_id, string $created_at ): array {
+		$has_decision = array_key_exists( 'decision_state', $insert_data );
+
+		return array(
+			'log_type'         => (string) $insert_data['log_type'],
+			'action_type'      => (string) $insert_data['action_type'],
+			'item_name'        => (string) $insert_data['item_name'],
+			'item_slug'        => (string) $insert_data['item_slug'],
+			'version_before'   => (string) $insert_data['version_before'],
+			'version_after'    => (string) $insert_data['version_after'],
+			'status'           => (string) $insert_data['status'],
+			'message'          => (string) $insert_data['message'],
+			'trace'            => (string) $insert_data['trace'],
+			'update_context'   => (string) $insert_data['update_context'],
+			'event_key'        => (string) ( $insert_data['event_key'] ?? '' ),
+			'created_at'       => $created_at,
+			'id'               => $log_id,
+			'site_id'          => (int) $insert_data['site_id'],
+			'user_id'          => (int) $insert_data['user_id'],
+			'performed_by'     => (string) $insert_data['performed_by'],
+			'target_version'   => $has_decision ? (string) $insert_data['target_version'] : '',
+			'reason_code'      => $has_decision ? (string) $insert_data['reason_code'] : '',
+			'decision_state'   => $has_decision ? (string) $insert_data['decision_state'] : '',
+			'origin'           => $has_decision ? (string) $insert_data['origin'] : '',
+			'decision_stage'   => $has_decision ? (string) $insert_data['decision_stage'] : '',
+			'pass_id'          => $has_decision ? (string) $insert_data['pass_id'] : '',
+			'chain_id'         => $has_decision ? (string) ( $insert_data['chain_id'] ?? '' ) : '',
+			'predecessor'      => $has_decision ? (string) ( $insert_data['predecessor'] ?? '' ) : '',
+			'next_eligible_at' => $has_decision ? (string) ( $insert_data['next_eligible_at'] ?? '' ) : '',
+			'attempt'          => $has_decision ? (int) $insert_data['attempt'] : 0,
+			'network'          => $has_decision ? (int) $insert_data['network'] : 0,
+			'context'          => $has_decision ? Updatronix_Security::decode_context( (string) ( $insert_data['context'] ?? '' ) ) : array(),
+		);
+	}
+
+	/**
+	 * Enrich an existing row with decision context.
+	 *
+	 * Fallback for a native row written before Pro knew the pass. Updates only
+	 * the decision columns and merges the context; it never changes the item,
+	 * the installed versions, the action, the status, or the message. Fires
+	 * `updatronix_log_updated`; the insert hook does not fire again.
+	 *
+	 * @since 1.6.0
+	 *
+	 * @param int                  $log_id Row ID.
+	 * @param array<string, mixed> $fields Decision fields to attach.
+	 * @return bool True when the row was updated.
+	 */
+	public static function attach_context( int $log_id, array $fields ): bool {
+		if ( $log_id < 1 || ! Updatronix_Database::table_exists() || ! self::decision_layer_enabled() ) {
+			return false;
+		}
+
+		$row = self::get_log( $log_id, true );
+		if ( ! (bool) $row ) {
+			return false;
+		}
+
+		$updates = self::build_decision_updates( $row, $fields );
+
+		if ( array() === $updates ) {
+			return false;
+		}
+
+		return self::apply_updates( $log_id, $updates );
+	}
+
+	/**
+	 * Update a pass summary row's status and counts.
+	 *
+	 * Only `status`, `decision_state`, and the merged `context` counts are
+	 * accepted; the row must be a `system`/`pass` summary.
+	 *
+	 * @since 1.6.0
+	 *
+	 * @param int                  $log_id Row ID.
+	 * @param array<string, mixed> $fields  Status/count fields.
+	 * @return bool True when the row was updated.
+	 */
+	public static function update_summary( int $log_id, array $fields ): bool {
+		if ( $log_id < 1 || ! Updatronix_Database::table_exists() || ! self::decision_layer_enabled() ) {
+			return false;
+		}
+
+		$row = self::get_log( $log_id, true );
+		if ( ! (bool) $row || 'system' !== (string) ( $row->log_type ?? '' ) || 'pass' !== (string) ( $row->action_type ?? '' ) ) {
+			return false;
+		}
+
+		$updates = array();
+
+		if ( array_key_exists( 'status', $fields ) ) {
+			$updates['status'] = Updatronix_Security::sanitize_status( (string) $fields['status'] );
+		}
+
+		if ( array_key_exists( 'decision_state', $fields ) ) {
+			$updates['decision_state'] = Updatronix_Security::sanitize_decision_state( (string) $fields['decision_state'] );
+		}
+
+		if ( array_key_exists( 'context', $fields ) ) {
+			$context            = is_array( $fields['context'] ) ? $fields['context'] : Updatronix_Security::decode_context( (string) $fields['context'] );
+			$merged             = array_merge( Updatronix_Security::decode_context( (string) ( $row->context ?? '' ) ), $context );
+			$updates['context'] = Updatronix_Security::sanitize_context( $merged );
+		}
+
+		if ( array() === $updates ) {
+			return false;
+		}
+
+		return self::apply_updates( $log_id, $updates );
+	}
+
+	/**
+	 * Build the decision-column update set for one row.
+	 *
+	 * @param object               $row    Existing row.
+	 * @param array<string, mixed> $fields Requested fields.
+	 * @return array<string, mixed>
+	 */
+	private static function build_decision_updates( object $row, array $fields ): array {
+		$updates = array();
+
+		if ( array_key_exists( 'reason_code', $fields ) ) {
+			$updates['reason_code'] = Updatronix_Security::sanitize_reason_code( (string) $fields['reason_code'] );
+		}
+
+		if ( array_key_exists( 'decision_state', $fields ) ) {
+			$updates['decision_state'] = Updatronix_Security::sanitize_decision_state( (string) $fields['decision_state'] );
+		} elseif ( isset( $updates['reason_code'] ) && '' !== $updates['reason_code'] ) {
+			$updates['decision_state'] = Updatronix_Log_Taxonomy::state_for( $updates['reason_code'] );
+		}
+
+		if ( array_key_exists( 'origin', $fields ) ) {
+			$updates['origin'] = Updatronix_Security::sanitize_origin( (string) $fields['origin'] );
+		}
+
+		if ( array_key_exists( 'decision_stage', $fields ) ) {
+			$updates['decision_stage'] = Updatronix_Security::sanitize_stage( (string) $fields['decision_stage'] );
+		}
+
+		if ( array_key_exists( 'pass_id', $fields ) ) {
+			$updates['pass_id'] = Updatronix_Log_Event::normalize_pass_id( (string) $fields['pass_id'] );
+		}
+
+		if ( array_key_exists( 'chain_id', $fields ) ) {
+			$value               = Updatronix_Security::sanitize_string( (string) $fields['chain_id'], 64 );
+			$updates['chain_id'] = '' !== $value ? $value : null;
+		}
+
+		if ( array_key_exists( 'predecessor', $fields ) ) {
+			$value                  = Updatronix_Security::sanitize_string( (string) $fields['predecessor'], 191 );
+			$updates['predecessor'] = '' !== $value ? $value : null;
+		}
+
+		if ( array_key_exists( 'next_eligible_at', $fields ) ) {
+			$value                       = Updatronix_Log_Event::normalize_utc( $fields['next_eligible_at'] );
+			$updates['next_eligible_at'] = '' !== $value ? $value : null;
+		}
+
+		if ( array_key_exists( 'attempt', $fields ) ) {
+			$updates['attempt'] = max( 0, (int) $fields['attempt'] );
+		}
+
+		if ( array_key_exists( 'network', $fields ) ) {
+			$updates['network'] = (int) $fields['network'] > 0 ? 1 : 0;
+		}
+
+		// The target is a new decision column, but it must never overwrite a
+		// recorded version on the native row.
+		if ( array_key_exists( 'target_version', $fields ) && '' === (string) ( $row->target_version ?? '' ) ) {
+			$updates['target_version'] = Updatronix_Security::sanitize_version( (string) $fields['target_version'] );
+		}
+
+		if ( array_key_exists( 'context', $fields ) ) {
+			$context            = is_array( $fields['context'] ) ? $fields['context'] : Updatronix_Security::decode_context( (string) $fields['context'] );
+			$merged             = array_merge( Updatronix_Security::decode_context( (string) ( $row->context ?? '' ) ), $context );
+			$updates['context'] = Updatronix_Security::sanitize_context( $merged );
+		}
+
+		return array_filter(
+			$updates,
+			static fn ( $value ): bool => null !== $value
+		);
+	}
+
+	/**
+	 * Persist a decision-column update and fire the enrichment hook.
+	 *
+	 * @param int                  $log_id  Row ID.
+	 * @param array<string, mixed> $updates Column values.
+	 * @return bool
+	 */
+	private static function apply_updates( int $log_id, array $updates ): bool {
+		$updated = self::with_logs_table(
+			static function () use ( $log_id, $updates ): bool {
+				global $wpdb;
+
+				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom table; $wpdb->update is the correct API, prepared.
+				$result = $wpdb->update( Updatronix_Database::get_table_name(), $updates, array( 'id' => $log_id ), null, array( '%d' ) );
+
+				return false !== $result;
+			}
+		);
+
+		if ( ! $updated ) {
+			return false;
+		}
+
+		$payload = $updates;
+		if ( array_key_exists( 'context', $payload ) ) {
+			$payload['context'] = Updatronix_Security::decode_context( (string) $payload['context'] );
+		}
+
+		self::delete_log_cache( $log_id );
+		self::bump_logs_cache_last_changed();
+
+		/**
+		 * Fires when an existing log row is enriched with decision context.
+		 *
+		 * The insert hook does not fire again. Consumers that mirror rows can
+		 * refresh their copy from the fields in this payload.
+		 *
+		 * @since 1.6.0
+		 *
+		 * @param int                  $log_id  Row ID.
+		 * @param array<string, mixed> $payload Updated columns; `context` is decoded.
+		 */
+		do_action( 'updatronix_log_updated', $log_id, $payload );
+
+		return true;
+	}
+
+	/**
+	 * Get the latest row for one item and target.
+	 *
+	 * Used by the previous-state comparator and by the screens/truthfulness
+	 * audit. The row may be a legacy row (empty decision fields); the
+	 * comparator rejects it.
+	 *
+	 * @since 1.6.0
+	 *
+	 * @param int    $site_id        Execution site ID.
+	 * @param string $log_type       Item type.
+	 * @param string $item_slug      Item id.
+	 * @param string $target_version Offered target version ('' for legacy).
+	 * @return object|null
+	 */
+	public static function get_latest_for_item( int $site_id, string $log_type, string $item_slug, string $target_version ): ?object {
+		if ( ! Updatronix_Database::table_exists() ) {
+			return null;
+		}
+
+		$site_id        = absint( $site_id );
+		$log_type       = Updatronix_Security::sanitize_log_type( $log_type );
+		$item_slug      = Updatronix_Security::sanitize_string( $item_slug, 255 );
+		$target_version = Updatronix_Security::sanitize_version( $target_version );
+
+		return self::with_logs_table(
+			static function () use ( $site_id, $log_type, $item_slug, $target_version ): ?object {
+				global $wpdb;
+
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Prepared below; custom table access is required here.
+				$row = $wpdb->get_row(
+					$wpdb->prepare(
+						'SELECT * FROM %i WHERE site_id = %d AND log_type = %s AND item_slug = %s AND target_version = %s ORDER BY created_at DESC, id DESC LIMIT 1',
+						Updatronix_Database::get_table_name(),
+						$site_id,
+						$log_type,
+						$item_slug,
+						$target_version
+					)
 				);
-				self::bump_logs_cache_last_changed();
 
-				/**
-				 * Fires after a log entry is stored in the custom audit log table.
-				 *
-				 * Hook for integrations that should react when a new row is persisted.
-				 *
-				 * @since 1.0.0
-				 *
-				 * @param int                    $log_id New log row ID.
-				 * @param array<string, mixed>   $data   Snapshot of stored fields (log_type, action_type, item_name, item_slug, version_before, version_after, status, message, trace, update_context, event_key, created_at).
-				 */
-				do_action( 'updatronix_after_log', $log_id, $data );
-
-				return $log_id;
+				return $row instanceof \stdClass ? $row : null;
 			}
 		);
 	}
@@ -210,81 +743,14 @@ final class Updatronix_Logger {
 	/**
 	 * Build WHERE clause and placeholder values for log queries.
 	 *
-	 * @param array<string, mixed> $args Keys: site_id, log_type, action_type, action_types, status, performed_as, search, created_at_after, created_at_before.
+	 * Delegates to {@see Updatronix_Log_Query} so the feed, its total, and the
+	 * export share one parser and one WHERE builder.
+	 *
+	 * @param array<string, mixed> $args Query args.
 	 * @return array{where_sql: string, values: array<int, int|string>}
 	 */
 	private static function build_logs_where( array $args ): array {
-		global $wpdb;
-
-		$where   = array( '1=1' );
-		$values  = array();
-		$site_id = $args['site_id'] ?? null;
-		// A site_id of 0 (or negative) is the network-global sentinel: no scope filter,
-		// so a Super Admin sees every originating site's rows. See Updatronix_Settings::resolve_site_id().
-		if ( null !== $site_id && 0 < (int) $site_id ) {
-			$where[]  = 'site_id = %d';
-			$values[] = (int) $site_id;
-		}
-		$log_type = $args['log_type'] ?? null;
-		if ( null !== $log_type && '' !== $log_type ) {
-			$where[]  = 'log_type = %s';
-			$values[] = Updatronix_Security::sanitize_log_type( (string) $log_type );
-		}
-		$action_type = $args['action_type'] ?? null;
-		if ( null !== $action_type && '' !== $action_type ) {
-			$where[]  = 'action_type = %s';
-			$values[] = Updatronix_Security::sanitize_action_type( (string) $action_type );
-		}
-		$action_types = $args['action_types'] ?? null;
-		if ( is_array( $action_types ) && array() !== $action_types ) {
-			$allowed = Updatronix_Security::get_allowed_action_types();
-			$clean   = array();
-			foreach ( $action_types as $candidate ) {
-				$candidate = sanitize_key( (string) $candidate );
-				if ( in_array( $candidate, $allowed, true ) ) {
-					$clean[] = $candidate;
-				}
-			}
-			$clean = array_values( array_unique( $clean ) );
-			if ( array() !== $clean ) {
-				$where[] = 'action_type IN (' . implode( ',', array_fill( 0, count( $clean ), '%s' ) ) . ')';
-				$values  = array_merge( $values, $clean );
-			}
-		}
-		$status = $args['status'] ?? null;
-		if ( null !== $status && '' !== $status ) {
-			$where[]  = 'status = %s';
-			$values[] = Updatronix_Security::sanitize_status( (string) $status );
-		}
-		$performed_as = $args['performed_as'] ?? null;
-		if ( null !== $performed_as && '' !== $performed_as ) {
-			$where[]  = 'performed_as = %s';
-			$values[] = Updatronix_Security::sanitize_performed_as( (string) $performed_as );
-		}
-		$created_at_after = $args['created_at_after'] ?? null;
-		if ( null !== $created_at_after && '' !== $created_at_after ) {
-			$where[]  = 'created_at >= %s';
-			$values[] = (string) $created_at_after;
-		}
-		$created_at_before = $args['created_at_before'] ?? null;
-		if ( null !== $created_at_before && '' !== $created_at_before ) {
-			$where[]  = 'created_at <= %s';
-			$values[] = (string) $created_at_before;
-		}
-
-		$search = $args['search'] ?? null;
-		if ( null !== $search && '' !== $search ) {
-			$like     = '%' . $wpdb->esc_like( $search ) . '%';
-			$where[]  = '(item_name LIKE %s OR item_slug LIKE %s OR COALESCE(message, \'\') LIKE %s)';
-			$values[] = $like;
-			$values[] = $like;
-			$values[] = $like;
-		}
-
-		return array(
-			'where_sql' => implode( ' AND ', $where ),
-			'values'    => $values,
-		);
+		return Updatronix_Log_Query::build_where( $args );
 	}
 
 	/**
@@ -319,6 +785,10 @@ final class Updatronix_Logger {
 				);
 				$args     = wp_parse_args( $args, $defaults );
 
+				if ( isset( $args['filters'] ) && is_array( $args['filters'] ) ) {
+					$args = array_merge( $args, Updatronix_Log_Query::parse_filters( $args['filters'] ) );
+				}
+
 				/**
 				 * Filters the log query arguments.
 				 *
@@ -341,7 +811,7 @@ final class Updatronix_Logger {
 				$offset   = max( 0, ( (int) $args['page'] ) - 1 ) * $per_page;
 				$select   = $include_details
 				? '*'
-				: "id, site_id, log_type, action_type, item_name, item_slug, version_before, version_after, status, user_id, performed_by, performed_as, update_context, created_at, event_key, CASE WHEN COALESCE(message, '') <> '' OR COALESCE(trace, '') <> '' THEN 1 ELSE 0 END AS detail_available";
+				: "id, site_id, log_type, action_type, item_name, item_slug, version_before, version_after, target_version, status, reason_code, decision_state, origin, decision_stage, pass_id, chain_id, predecessor, next_eligible_at, attempt, network, retained, user_id, performed_by, performed_as, update_context, created_at, event_key, CASE WHEN COALESCE(message, '') <> '' OR COALESCE(trace, '') <> '' THEN 1 ELSE 0 END AS detail_available";
 
 				$values = array_merge( array( $table ), $built['values'], array( $per_page, $offset ) );
 
@@ -377,6 +847,10 @@ final class Updatronix_Logger {
 
 				/** This filter is documented in inc/classes/class-updatronix-logger.php */
 				$args = (array) apply_filters( 'updatronix_log_query_args', $args );
+
+				if ( isset( $args['filters'] ) && is_array( $args['filters'] ) ) {
+					$args = array_merge( $args, Updatronix_Log_Query::parse_filters( $args['filters'] ) );
+				}
 
 				$built  = self::build_logs_where( $args );
 				$values = array_merge( array( $table ), $built['values'] );
@@ -432,7 +906,7 @@ final class Updatronix_Logger {
 					// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery -- Prepared below; custom table read for plugin-owned table, cached via wp_cache_*.
 					$row = $wpdb->get_row(
 						$wpdb->prepare(
-							"SELECT id, site_id, log_type, action_type, item_name, item_slug, version_before, version_after, status, user_id, performed_by, performed_as, update_context, created_at, event_key, CASE WHEN COALESCE(message, '') <> '' OR COALESCE(trace, '') <> '' THEN 1 ELSE 0 END AS detail_available FROM %i WHERE id = %d LIMIT 1",
+							"SELECT id, site_id, log_type, action_type, item_name, item_slug, version_before, version_after, target_version, status, reason_code, decision_state, origin, decision_stage, pass_id, chain_id, predecessor, next_eligible_at, attempt, network, retained, user_id, performed_by, performed_as, update_context, created_at, event_key, CASE WHEN COALESCE(message, '') <> '' OR COALESCE(trace, '') <> '' THEN 1 ELSE 0 END AS detail_available FROM %i WHERE id = %d LIMIT 1",
 							$table,
 							$id
 						)
@@ -499,6 +973,19 @@ final class Updatronix_Logger {
 	public static function delete_older_than( int $days ): int {
 		if ( ! Updatronix_Database::table_exists() || $days < 1 ) {
 			return 0;
+		}
+
+		// Pin the newest blocking row per item/target before deleting. The
+		// pin and the cap live in one place so the cron job and a manual
+		// cleanup cannot disagree.
+		if ( class_exists( 'Updatronix_Log_Retention' ) ) {
+			$deleted = Updatronix_Log_Retention::cleanup( $days );
+
+			if ( $deleted > 0 ) {
+				self::bump_logs_cache_last_changed();
+			}
+
+			return $deleted;
 		}
 
 		return self::with_logs_table(

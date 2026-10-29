@@ -183,7 +183,7 @@ export default function ProDestination( {
 				</EmptyState.Title>
 				<EmptyState.Description>
 					{ __(
-						'It adds Update Shield, Update Flow, white label, and advanced exports (CSV and JSON). Queue list, XML export, and development tools are on the roadmap. No Pro feature is active on this site.',
+						'It adds Update Shield, Update Flow, white label, and advanced exports (CSV and JSON). XML export and development tools are on the roadmap. No Pro feature is active on this site.',
 						'updatronix'
 					) }
 				</EmptyState.Description>

@@ -3,7 +3,11 @@ import { __ } from '@wordpress/i18n';
 
 import SnackbarHost from '../components/SnackbarHost';
 import { ActivityLogPanel } from '../components/activityLog';
-import { parseDeepLinkLogId } from '../components/activityLog/logDeepLink';
+import {
+	parseDeepLinkLogId,
+	parseDeepLinkPassId,
+	parseDeepLinkChainId,
+} from '../components/activityLog/logDeepLink';
 import { AutoUpdatesPanel } from '../components/autoUpdates';
 import { SchedulePanel } from '../components/schedule';
 import { SettingsPanel } from '../components/SettingsPanel';
@@ -65,6 +69,12 @@ function getProPanelRegistry() {
 export const SettingsPage = () => {
 	const [ deepLinkLogId ] = useState( () =>
 		parseDeepLinkLogId( window.location.search )
+	);
+	const [ deepLinkPassId ] = useState( () =>
+		parseDeepLinkPassId( window.location.search )
+	);
+	const [ deepLinkChainId ] = useState( () =>
+		parseDeepLinkChainId( window.location.search )
 	);
 	const {
 		settings: pluginSettings,
@@ -220,6 +230,8 @@ export const SettingsPage = () => {
 						loggingEnabled={ pluginSettings.logging_enabled }
 						retentionDays={ retentionDays }
 						deepLinkLogId={ deepLinkLogId }
+						deepLinkPassId={ deepLinkPassId }
+						deepLinkChainId={ deepLinkChainId }
 						exportFormats={
 							bootSettings.exportFormats || [ 'txt' ]
 						}

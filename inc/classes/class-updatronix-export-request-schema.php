@@ -103,12 +103,16 @@ final class Updatronix_Export_Request_Schema {
 		}
 
 		$sort_column_map = array(
-			'date'         => 'created_at',
-			'created_at'   => 'created_at',
-			'log_type'     => 'log_type',
-			'item_name'    => 'item_name',
-			'status'       => 'status',
-			'performed_as' => 'performed_as',
+			'date'           => 'created_at',
+			'created_at'     => 'created_at',
+			'log_type'       => 'log_type',
+			'item_name'      => 'item_name',
+			'status'         => 'status',
+			'performed_as'   => 'performed_as',
+			'reason_code'    => 'reason_code',
+			'decision_state' => 'decision_state',
+			'origin'         => 'origin',
+			'pass_id'        => 'pass_id',
 		);
 		$sort_column     = $sort_column_map[ $sort_field ];
 		$sort_dir_sql    = strtoupper( $sort_direction ) === 'ASC' ? 'ASC' : 'DESC';
@@ -295,6 +299,12 @@ final class Updatronix_Export_Request_Schema {
 			'runType' => self::parse_run_context_filter( $operator, $f['value'] ?? null ),
 			'user' => self::parse_user_filter( $operator, $f['value'] ?? null ),
 			'date' => self::parse_date_filter( $operator, $f['value'] ?? null ),
+			'reason' => self::parse_categorical_filter( 'reason_code', $operator, $f['value'] ?? null ),
+			'state' => self::parse_categorical_filter( 'decision_state', $operator, $f['value'] ?? null ),
+			'origin' => self::parse_categorical_filter( 'origin', $operator, $f['value'] ?? null ),
+			'pass' => self::parse_categorical_filter( 'pass_id', $operator, $f['value'] ?? null ),
+			'chain' => self::parse_categorical_filter( 'chain_id', $operator, $f['value'] ?? null ),
+			'nextEligible' => self::parse_date_filter( $operator, $f['value'] ?? null, 'next_eligible_at' ),
 		};
 	}
 
@@ -356,6 +366,11 @@ final class Updatronix_Export_Request_Schema {
 			'action_type' => static fn ( $v ): string => Updatronix_Security::sanitize_action_type( (string) $v ),
 			'status' => static fn ( $v ): string => Updatronix_Security::sanitize_status( (string) $v ),
 			'performed_as' => static fn ( $v ): string => Updatronix_Security::sanitize_performed_as( (string) $v ),
+			'reason_code' => static fn ( $v ): string => Updatronix_Security::sanitize_reason_code( (string) $v ),
+			'decision_state' => static fn ( $v ): string => Updatronix_Security::sanitize_decision_state( (string) $v ),
+			'origin' => static fn ( $v ): string => Updatronix_Security::sanitize_origin( (string) $v ),
+			'pass_id' => static fn ( $v ): string => Updatronix_Log_Event::normalize_pass_id( (string) $v ),
+			'chain_id' => static fn ( $v ): string => Updatronix_Security::sanitize_string( (string) $v, 64 ),
 			default => static fn ( $v ): string => sanitize_text_field( (string) $v ),
 		};
 
@@ -471,13 +486,15 @@ final class Updatronix_Export_Request_Schema {
 	 *
 	 * @param string $operator Date operator from DataViews.
 	 * @param mixed  $value    Operator-specific payload.
+	 * @param string $column   Column to compare (created_at or next_eligible_at).
 	 * @return array<string, mixed>|null
 	 */
-	private static function parse_date_filter( string $operator, mixed $value ): ?array {
+	private static function parse_date_filter( string $operator, mixed $value, string $column = 'created_at' ): ?array {
 		if ( ! in_array( $operator, Updatronix_Export::DATE_OPERATORS, true ) ) {
 			return null;
 		}
 
+		$column  = 'next_eligible_at' === $column ? 'next_eligible_at' : 'created_at';
 		$fmt_out = 'Y-m-d H:i:s';
 
 		try {
@@ -493,7 +510,7 @@ final class Updatronix_Export_Request_Schema {
 
 				return array(
 					'type'   => 'between_time',
-					'column' => 'created_at',
+					'column' => $column,
 					'start'  => $start->format( $fmt_out ),
 					'end'    => $end->format( $fmt_out ),
 				);
@@ -512,7 +529,7 @@ final class Updatronix_Export_Request_Schema {
 
 				return array(
 					'type'   => 'between_time',
-					'column' => 'created_at',
+					'column' => $column,
 					'start'  => $now->modify( '-' . $num . ' ' . $unit )->format( $fmt_out ),
 					'end'    => $now->format( $fmt_out ),
 				);
@@ -530,7 +547,7 @@ final class Updatronix_Export_Request_Schema {
 			if ( 'on' === $operator ) {
 				return array(
 					'type'   => 'between_time',
-					'column' => 'created_at',
+					'column' => $column,
 					'start'  => $dt->setTime( 0, 0, 0 )->format( $fmt_out ),
 					'end'    => $dt->setTime( 23, 59, 59 )->format( $fmt_out ),
 				);
@@ -539,7 +556,7 @@ final class Updatronix_Export_Request_Schema {
 			if ( 'before' === $operator ) {
 				return array(
 					'type'   => 'lt_time',
-					'column' => 'created_at',
+					'column' => $column,
 					'bound'  => $bound,
 				);
 			}
@@ -547,7 +564,7 @@ final class Updatronix_Export_Request_Schema {
 			if ( 'after' === $operator ) {
 				return array(
 					'type'   => 'gt_time',
-					'column' => 'created_at',
+					'column' => $column,
 					'bound'  => $bound,
 				);
 			}
@@ -555,14 +572,14 @@ final class Updatronix_Export_Request_Schema {
 			if ( 'beforeInc' === $operator ) {
 				return array(
 					'type'   => 'lte_time',
-					'column' => 'created_at',
+					'column' => $column,
 					'bound'  => $bound,
 				);
 			}
 
 			return array(
 				'type'   => 'gte_time',
-				'column' => 'created_at',
+				'column' => $column,
 				'bound'  => $bound,
 			);
 		} catch ( \Throwable $e ) {

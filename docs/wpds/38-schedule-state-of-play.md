@@ -17,22 +17,68 @@ draft. The schedule subtree is network-scoped on Multisite.
 | Claim | Where | Code path | Runtime proof | Verdict |
 |---|---|---|---|---|
 | “Choose how often WordPress checks for updates” | Header | `SetRecurrence` writes `schedule.update_check.recurrence`; `Updatronix_Cron` applies it. | Integration covers the unified schedule. | True |
-| “How long new releases are held” | Header | Hold writes `delay_updates.enabled`/`delay_value`; the server sanitizes 0–30. | Unit sanitizer tests + 11 new JS cases. | True |
+| “How long new releases are held” | Header | Hold writes `delay_updates.enabled`/`delay_value`; the server, REST schema, and client sanitize 0–365, where 0 = off. | Unit sanitizer data provider + JS bounds tests + REST round-trip. | True |
 | “The next-run summary uses the saved values” | Next run | `scheduleMeta` is refreshed from the save response; the draft is not used. | Code path; existing review 16. | True |
 | “Times use the site timezone” | Preferred time | `scheduleMeta.timezone_string` is now printed under the select. | Code path; explicit copy. | True |
 | “WP-Cron disabled” is visible | Next run | `scheduleMeta.wp_cron_disabled` renders a warning notice. | Code path; meta field covered by `CronUnifiedScheduleTest`. | True |
-| An out-of-range hold is a validation error | Hold input | `validateHoldDays()` rejects non-integers and values outside 0–30; the panel shows an alert. | 11 new JS cases. | True |
+| An out-of-range hold is a validation error | Hold input | `validateHoldDays()` rejects non-integers and values outside 0–365; the panel shows an alert. | JS bounds tests. | True |
 | One save for the whole surface | Surface note | The panel keeps a local draft and calls `saveSettings` only on Save. | Code path; `usePluginSettings` updates only on success. | True |
 
 ## Internal mechanics
 
 | Layer | Path | Notes |
 |---|---|---|
-| Screen | `assets/src/js/components/schedule/SchedulePanel.js` | Frequency, preferred time, hold, next-run summary, hold table. |
-| Draft/validation | `assets/src/js/components/schedule/scheduleDraft.js` | `getSchedule`, `getHoldDays`, `scheduleSignature`, `isScheduleDirty`, `validateHoldDays`. |
+| Screen | `assets/src/js/components/schedule/SchedulePanel.js` | Frequency, hour/minute picker (00–23 / 00–59), hold 0–365, next-run summary, hold table. |
+| Draft/validation | `assets/src/js/components/schedule/scheduleDraft.js` | `getSchedule`, `getHoldDays`, `scheduleSignature`, `isScheduleDirty`, `validateHoldDays`, `splitTime`, `joinTime`, `recurrenceDescription`. |
 | Save | `assets/src/js/hooks/usePluginSettings.js` | `PUT /updatronix/v1/settings` with the schedule subtree. |
 | REST/storage | `inc/classes/class-updatronix-settings.php`, `inc/settings/options.php` | Site option/network schedule option; server sanitizes recurrence and hold. |
 | Cron | `inc/classes/class-updatronix-cron.php` | Unified schedule, next-run meta, timezone string, WP-Cron disabled flag. |
+
+## Read-only Schedule API
+
+The calculator and the facts filter are the public contract (analysis 04 §6,
+synthesis §6.5/§6.6). Both are read-only: neither writes an option, a log row,
+or a transient, and neither makes an HTTP request.
+
+| Surface | Signature | Notes |
+|---|---|---|
+| Calculator | `Updatronix_Schedule_State::calculate( array $input ): array` | Pure; 18 display states; deterministic for the same input. |
+| Item state | `Updatronix_Schedule_Context::get_item( string $type, string $id ): array` | One item; cached per request. |
+| Map | `Updatronix_Schedule_Context::get_map( string $surface, int $limit = 0 ): array` | `plugins`, `themes`, `core`, or `all`; capped at 200 by `updatronix_schedule_map_limit`; reports `truncated`. |
+| Canonical reader | `Updatronix_Item_State::get( string $type, string $id ): array` | The only reader for installed/target version and offer freshness. |
+| Ledger peek | `Updatronix_AutoUpdateDelay::peek_first_seen( string $type, object $offer ): ?int` | Never writes, prunes, or logs. |
+| Observation | `Updatronix_AutoUpdateDelay::observe_offer( string $type, object $offer ): ?int` | Idempotent; sets `first_seen` only when the row is absent. |
+
+### `updatronix_schedule_item_state`
+
+`apply_filters( 'updatronix_schedule_item_state', $facts, $type, $id )` returns
+the read-only facts for one item. Keys are `plugin:{plugin_file}`,
+`theme:{stylesheet}`, and `core:wordpress`; `core:core` is a read-only alias.
+
+Free defaults:
+
+```php
+array(
+    'lock'   => array( 'state' => 'none' ),
+    'policy' => array( 'state' => 'none' ),
+    'flow'   => array( 'state' => 'none' ),
+    'queue'  => array( 'state' => 'none' ),
+)
+```
+
+Pro's single callback, `Updatronix_Schedule_Facts::filter()` at priority 20,
+returns:
+
+| Fact | Shape |
+|---|---|
+| `lock` | `state` (`none`/`locked`), `manager`, `scope`, `reason`, `reason_code`. Version Lock owns it; an incoming lock fact is preserved. |
+| `policy` | `state` (`none`/`blocked`), `reason_code` (`shield_incompatible_wp`/`shield_incompatible_php`), `message`, `policy_id`. |
+| `flow` | `state` (`none` until Step 5). |
+| `queue` | `state` (`none`/`active`), `node_state`, `position`, `total`, `pass_id`, `started_at`. Read from `updatronix_pro_update_pass` when it exists. |
+
+Steps 4 and 5 extend `Updatronix_Schedule_Facts`; no second callback is
+registered. When Pro is inactive, Free shows its own schedule state and cannot
+know about Pro locks.
 
 ## Findings and fixes
 

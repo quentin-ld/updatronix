@@ -110,3 +110,14 @@ delete dialog. Existing reviews 14, 25, and 27 remain the visual record.
 - Tests: JS 67, integration 79, unit 216, build pass.
 - Review/security: screen diff reviewed; the redaction info item remains open.
 - No version bump.
+
+## 17. After Step 2 (2026-10-28)
+
+The decision layer is implemented. The table carries reason, state, origin,
+stage, pass, chain, predecessor, next-eligible, attempt, network, context, and
+retained; old rows stay legacy. The feed and the export are server-filtered and
+agree on the total. One disk change is one row; one pass is one summary. Shield,
+Safe Mode, and the Version Lock outcome write through `Updatronix_Decision_Log`.
+Remaining Step 3–5 work: the Schedule calculator owns the delayed-row write, the
+Queue pass owns `record_pass()` at pass end, and Flow owns the wait/cancel call
+sites.

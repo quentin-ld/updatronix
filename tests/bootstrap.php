@@ -113,6 +113,21 @@ if (!function_exists('__')) {
     }
 }
 
+if (!function_exists('_n')) {
+    /**
+     * Identity stub for the i18n `_n()` function (unit suite has no WordPress).
+     *
+     * @param string $single Singular form.
+     * @param string $plural Plural form.
+     * @param int    $number Count.
+     * @param string $domain Text domain (ignored).
+     * @return string The singular form when $number is 1, else the plural.
+     */
+    function _n(string $single, string $plural, int $number, string $domain = 'default'): string {
+        return 1 === $number ? $single : $plural;
+    }
+}
+
 if (!function_exists('add_filter')) {
     /**
      * Minimal filter registry stub for unit tests without WordPress.
@@ -617,6 +632,40 @@ if (!class_exists('Updatronix_Logger', false)) {
                 'dedup_key'   => $dedup_key,
             );
         }
+
+        /**
+         * Stub log_event method.
+         *
+         * Records the event in the same shape as log(), plus the decision
+         * fields the Schedule delayed row asserts on.
+         *
+         * @param array<string, mixed> $event Event.
+         * @return int Fake row id.
+         */
+        public static function log_event( array $event ): int {
+            self::$calls[] = array(
+                'type'             => (string) ( $event['log_type'] ?? '' ),
+                'action'           => (string) ( $event['action_type'] ?? '' ),
+                'name'             => (string) ( $event['item_name'] ?? '' ),
+                'slug'             => (string) ( $event['item_slug'] ?? '' ),
+                'old_version'      => (string) ( $event['version_before'] ?? '' ),
+                'new_version'      => (string) ( $event['version_after'] ?? '' ),
+                'level'            => (string) ( $event['status'] ?? '' ),
+                'message'          => (string) ( $event['message'] ?? '' ),
+                'file'             => (string) ( $event['trace'] ?? '' ),
+                'method'           => (string) ( $event['performed_as'] ?? '' ),
+                'mode'             => (string) ( $event['update_context'] ?? '' ),
+                'dedup_key'        => (string) ( $event['event_key'] ?? '' ),
+                'reason_code'      => (string) ( $event['reason_code'] ?? '' ),
+                'decision_state'   => (string) ( $event['decision_state'] ?? '' ),
+                'decision_stage'   => (string) ( $event['decision_stage'] ?? '' ),
+                'origin'           => (string) ( $event['origin'] ?? '' ),
+                'next_eligible_at' => (string) ( $event['next_eligible_at'] ?? '' ),
+                'event'            => $event,
+            );
+
+            return count( self::$calls );
+        }
     }
 }
 
@@ -748,6 +797,18 @@ if (!function_exists('wp_date')) {
 
 if (!defined('DAY_IN_SECONDS')) {
     define('DAY_IN_SECONDS', 86400);
+}
+
+if (!defined('HOUR_IN_SECONDS')) {
+    define('HOUR_IN_SECONDS', 3600);
+}
+
+if (!defined('MINUTE_IN_SECONDS')) {
+    define('MINUTE_IN_SECONDS', 60);
+}
+
+if (!defined('WEEK_IN_SECONDS')) {
+    define('WEEK_IN_SECONDS', 604800);
 }
 
 if (!defined('WP_PLUGIN_DIR')) {

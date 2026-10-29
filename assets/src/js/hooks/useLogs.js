@@ -51,16 +51,27 @@ export function useLogs() {
 		setLoading( true );
 		setError( null );
 		try {
-			const query = new URLSearchParams( {
+			const search = new URLSearchParams( {
 				per_page: String( params.per_page || 50 ),
 				page: String( params.page || 1 ),
 				log_type: params.log_type || '',
 				status: params.status || '',
 				performed_as: params.performed_as || '',
+				action_type: params.action_type || '',
 				search: params.search || '',
-			} ).toString();
+			} );
+
+			// The normalized filter array is the authority; the scalar params
+			// above stay for compatibility with old call sites.
+			if (
+				Array.isArray( params.filters ) &&
+				params.filters.length > 0
+			) {
+				search.set( 'filters', JSON.stringify( params.filters ) );
+			}
+
 			const response = await apiFetch( {
-				path: `updatronix/v1/logs?${ query }`,
+				path: `updatronix/v1/logs?${ search.toString() }`,
 			} );
 			setLogs( response.logs || [] );
 			setTotal( response.total ?? 0 );

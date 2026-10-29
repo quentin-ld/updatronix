@@ -14,7 +14,13 @@
  */
 
 import { __, sprintf } from '@wordpress/i18n';
-import { LOG_TYPE_PREFIX, ACTION_LABELS } from './constants';
+import {
+	LOG_TYPE_PREFIX,
+	ACTION_LABELS,
+	ORIGIN_LABELS,
+	REASON_LABELS,
+	STATE_LABELS,
+} from './constants';
 
 /**
  * Per-page sizes for the logs DataView and the export pagination summary.
@@ -175,6 +181,7 @@ export const LOG_FILTERS = [
 	{
 		id: 'category',
 		restField: 'category',
+		serverField: 'log_type',
 		label: __( 'Type', 'updatronix' ),
 		operators: CATEGORICAL_OPERATORS,
 		filterable: true,
@@ -188,6 +195,7 @@ export const LOG_FILTERS = [
 	{
 		id: 'actionType',
 		restField: 'actionType',
+		serverField: 'action_type',
 		label: __( 'Action', 'updatronix' ),
 		operators: CATEGORICAL_OPERATORS,
 		filterable: true,
@@ -201,6 +209,7 @@ export const LOG_FILTERS = [
 	{
 		id: 'status',
 		restField: 'status',
+		serverField: 'status',
 		label: __( 'Status', 'updatronix' ),
 		operators: CATEGORICAL_OPERATORS,
 		filterable: true,
@@ -217,6 +226,7 @@ export const LOG_FILTERS = [
 	{
 		id: 'user',
 		restField: 'user',
+		serverField: 'user_id',
 		label: __( 'Triggered by', 'updatronix' ),
 		operators: CATEGORICAL_OPERATORS,
 		filterable: true,
@@ -242,6 +252,7 @@ export const LOG_FILTERS = [
 	{
 		id: 'date',
 		restField: 'date',
+		serverField: 'created_at',
 		label: __( 'Day', 'updatronix' ),
 		operators: DATE_OPERATORS,
 		filterable: true,
@@ -253,6 +264,7 @@ export const LOG_FILTERS = [
 	{
 		id: 'triggeredBy',
 		restField: 'triggeredBy',
+		serverField: 'performed_as',
 		label: __( 'Triggered by', 'updatronix' ),
 		operators: CATEGORICAL_OPERATORS,
 		filterable: false,
@@ -265,6 +277,7 @@ export const LOG_FILTERS = [
 	{
 		id: 'runType',
 		restField: 'runType',
+		serverField: 'update_context',
 		label: __( 'Run type', 'updatronix' ),
 		operators: CATEGORICAL_OPERATORS,
 		filterable: false,
@@ -273,6 +286,78 @@ export const LOG_FILTERS = [
 				? value.map( normalizeScalarRunType )
 				: normalizeScalarRunType( value ),
 		formatSummary: summarizeValueOnly,
+	},
+	{
+		id: 'reason',
+		restField: 'reason',
+		serverField: 'reason_code',
+		label: __( 'Reason', 'updatronix' ),
+		operators: [ 'is', 'isNot', 'isAny', 'isNone' ],
+		filterable: true,
+		getElements: () =>
+			Object.entries( REASON_LABELS ).map( ( [ value, label ] ) => ( {
+				value,
+				label: String( label ),
+			} ) ),
+		formatSummary: summarizeValueOnly,
+	},
+	{
+		id: 'state',
+		restField: 'state',
+		serverField: 'decision_state',
+		label: __( 'State', 'updatronix' ),
+		operators: [ 'is', 'isNot', 'isAny', 'isNone' ],
+		filterable: true,
+		getElements: () =>
+			Object.entries( STATE_LABELS ).map( ( [ value, label ] ) => ( {
+				value,
+				label: String( label ),
+			} ) ),
+		formatSummary: summarizeValueOnly,
+	},
+	{
+		id: 'origin',
+		restField: 'origin',
+		serverField: 'origin',
+		label: __( 'Origin', 'updatronix' ),
+		operators: [ 'is', 'isNot', 'isAny', 'isNone' ],
+		filterable: true,
+		getElements: () =>
+			Object.entries( ORIGIN_LABELS ).map( ( [ value, label ] ) => ( {
+				value,
+				label: String( label ),
+			} ) ),
+		formatSummary: summarizeValueOnly,
+	},
+	{
+		id: 'pass',
+		restField: 'pass',
+		serverField: 'pass_id',
+		label: __( 'Pass', 'updatronix' ),
+		operators: CATEGORICAL_OPERATORS,
+		filterable: true,
+		formatSummary: summarizeValueOnly,
+	},
+	{
+		id: 'chain',
+		restField: 'chain',
+		serverField: 'chain_id',
+		label: __( 'Chain', 'updatronix' ),
+		operators: CATEGORICAL_OPERATORS,
+		filterable: true,
+		formatSummary: summarizeValueOnly,
+	},
+	{
+		id: 'nextEligible',
+		restField: 'nextEligible',
+		serverField: 'next_eligible_at',
+		label: __( 'Next eligible', 'updatronix' ),
+		operators: DATE_OPERATORS,
+		filterable: true,
+		formatSummary: ( filter ) =>
+			`${ String( filter.operator ?? '' ) }: ${ describeValues(
+				filter.value
+			) }`,
 	},
 ];
 
@@ -299,6 +384,46 @@ export function buildFilterFields( ctx = { logs: [] } ) {
 			props.elements = descriptor.getElements( ctx );
 		}
 		out[ descriptor.id ] = props;
+	}
+
+	return out;
+}
+
+/**
+ * Map DataView filters to the REST feed's filter array.
+ *
+ * The feed accepts the same dimensions as the export but under the server
+ * field names (`log_type`, `reason_code`, …). Values are normalized with the
+ * descriptor's export normalizer where one exists, so a translated label is
+ * never sent to the server.
+ *
+ * @param {Object}        view View snapshot from DataViews.
+ * @param {Array<Object>} logs Loaded logs (resolves display-name filters to IDs).
+ * @return {Array<{ field: string, operator: string, value: unknown }>} Server filters.
+ */
+export function toServerFilters( view, logs = [] ) {
+	const filters = Array.isArray( view?.filters ) ? view.filters : [];
+	const out = [];
+
+	for ( const f of filters ) {
+		if ( ! f || typeof f !== 'object' ) {
+			continue;
+		}
+		const descriptor = DESCRIPTOR_BY_REST_FIELD[ String( f.field ?? '' ) ];
+		if ( ! descriptor || ! descriptor.serverField ) {
+			continue;
+		}
+
+		const value =
+			typeof descriptor.normalizeValueForExport === 'function'
+				? descriptor.normalizeValueForExport( f.value, { logs } )
+				: f.value;
+
+		out.push( {
+			field: descriptor.serverField,
+			operator: String( f.operator ?? 'is' ),
+			value,
+		} );
 	}
 
 	return out;

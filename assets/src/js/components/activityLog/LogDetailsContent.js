@@ -9,6 +9,9 @@ import {
 	EMPTY_FALLBACK,
 	formatDate,
 	getStatusLabel,
+	getDecisionFacts,
+	shouldShowRetained,
+	stateToBadgeIntent,
 	statusToBadgeIntent,
 } from './utils';
 
@@ -174,6 +177,63 @@ export function LogDetailsContent( { log, logId, fetchLogDetails } ) {
 			? __( 'Release notes', 'updatronix' )
 			: __( 'Latest changelog', 'updatronix' );
 
+	const passUrl = currentLog.pass_id
+		? ( () => {
+				const url = new URL( window.location.href );
+				url.searchParams.set( 'pass', String( currentLog.pass_id ) );
+				return url.toString();
+			} )()
+		: '';
+	const chainUrl = currentLog.chain_id
+		? ( () => {
+				const url = new URL( window.location.href );
+				url.searchParams.set( 'chain', String( currentLog.chain_id ) );
+				return url.toString();
+			} )()
+		: '';
+
+	const decisionRows = getDecisionFacts( currentLog ).map( ( fact ) => {
+		if ( fact.key === 'state' ) {
+			return [
+				fact.label,
+				<Badge
+					key={ fact.key }
+					intent={ stateToBadgeIntent( currentLog.decision_state ) }
+				>
+					{ fact.value }
+				</Badge>,
+			];
+		}
+
+		if ( fact.key === 'pass' && passUrl ) {
+			return [
+				fact.label,
+				<Link
+					key={ fact.key }
+					href={ passUrl }
+					className="updatronix-log-detail-link"
+				>
+					{ fact.value }
+				</Link>,
+			];
+		}
+
+		if ( fact.key === 'chain' && chainUrl ) {
+			return [
+				fact.label,
+				<Link
+					key={ fact.key }
+					href={ chainUrl }
+					className="updatronix-log-detail-link"
+				>
+					{ fact.value }
+				</Link>,
+			];
+		}
+
+		return [ fact.label, fact.value ];
+	} );
+
 	return (
 		<div className="updatronix-log-detail">
 			<div className="updatronix-log-detail-identity">
@@ -247,6 +307,39 @@ export function LogDetailsContent( { log, logId, fetchLogDetails } ) {
 						)
 				) }
 			</dl>
+
+			{ decisionRows.length > 0 && (
+				<div className="updatronix-log-detail-decision">
+					<Text
+						variant="body-md"
+						className="updatronix-log-detail-heading"
+					>
+						{ __( 'Decision', 'updatronix' ) }
+					</Text>
+					{ shouldShowRetained( currentLog ) ? (
+						<p className="updatronix-log-detail-retained">
+							<Badge intent="informational">
+								{ __( 'Retained', 'updatronix' ) }
+							</Badge>{ ' ' }
+							{ __(
+								'Kept beyond retention because it records a block.',
+								'updatronix'
+							) }
+						</p>
+					) : null }
+					<dl className="updatronix-log-detail-summary">
+						{ decisionRows.map(
+							( [ label, value ] ) =>
+								value && (
+									<div key={ label }>
+										<dt>{ label }</dt>
+										<dd>{ value }</dd>
+									</div>
+								)
+						) }
+					</dl>
+				</div>
+			) }
 
 			{ changelog.length > 0 && (
 				<div className="updatronix-log-detail-changelog">

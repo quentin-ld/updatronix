@@ -215,12 +215,11 @@ non-Super-Admin (no access; the contract is Super-Admin-only).
 
 ## 5. Update Shield
 
-**Target.** A dedicated destination with Protection, Update queue, and Recently
+**Target.** A dedicated destination with Protection, Version Lock, and Recently
 blocked sections. One manual save.
 
-**Page header.** Title `Update Shield`; description “Stop incompatible updates,
-queue automatic updates, and protect version-controlled extensions.”; primary
-action `Save changes`.
+**Page header.** Title `Update Shield`; description “Stop incompatible updates
+and protect version-controlled extensions.”; primary action `Save changes`.
 
 **Working surface.**
 
@@ -233,7 +232,6 @@ action `Save changes`.
     disable-and-reenable behavior.
   - `Email the technical manager` switch, with the recipient and a link to Settings.
   - `Flag abandoned plugins` switch, with the 12-month rule.
-- Update queue card: `Queue automatic updates` switch.
 - Recently blocked card: item, version, reason, blocked date; link to the update
   log. Last 30 days.
 - A note explains that checks use WordPress.org compatibility data and that
@@ -242,7 +240,7 @@ action `Save changes`.
 **Data.** Existing `/shield/settings` and `/shield/recheck`. The current option
 has `safe_mode`, `notify_on_block`, `control_php_version`, and
 `control_wp_version`. The target adds `incompatible_behavior`, `re_enable`,
-`notify_email`, `queue_enabled`, and `flag_abandoned`. Add `/shield/blocked` for
+`notify_email`, and `flag_abandoned`. Add `/shield/blocked` for
 the table. Preserve the existing keys and defaults for upgrades.
 
 **States.** License inactive (the panel is unavailable; link to the license
@@ -261,6 +259,10 @@ multisite non-super-admin.
 
 ## 6. Update Flow
 
+> **Implementation note (2026-10-29).** Flow now orders the one automatic update
+> pass. The manual run action, its routes, the cooldown, and polling are removed;
+> the Last pass card is read-only. See `50-update-engine-4.4-flow.md`.
+
 **Target.** Dependency chains with ordered, reorderable steps. Add and edit in a
 `Dialog` with an editable chain name and description. Deletion uses
 `AlertDialog`. Validation covers names, duplicates, and circular requirements
@@ -272,23 +274,22 @@ your site depends on.”; primary action `Save changes`.
 **Working surface.**
 
 - Chain list: name, description, step count, enabled state.
-- Each chain: ordered steps with move up, move down, remove, and run actions.
+- Each chain: ordered steps with move up, move down, and remove actions.
 - Add chain: opens the editor dialog.
 - Editor dialog: chain name, description, step picker, ordered step list, inline
   validation, save and cancel.
-- Knowledge check card: explains that chains run before the regular schedule,
+- Knowledge check card: explains that chains order the one automatic update pass,
   top to bottom, and that all chains are checked together for cycles.
 - A note explains that edits are staged until Save changes.
 
 **Data.** New option `updatronix_pro_update_flow` (network scope), new REST
-routes `GET/POST /flow/chains` and `POST /flow/run`. The item catalogue comes
-from installed plugins, themes, and core. Execution semantics are settled by
-`D-16`: chains run before the regular check, on the same cron tick, and stop on
-failure. The first implementation must not claim behavior the backend does not
-provide.
+routes `GET/POST /flow/chains`. The item catalogue comes
+from installed plugins, themes, and core. Flow orders the automatic pass: each
+node waits for every incoming edge, and independent branches continue. The first
+implementation must not claim behavior the backend does not provide.
 
-**States.** Empty chain list; editor validation error; cycle conflict; run in
-progress; run failure; license inactive; save error.
+**States.** Empty chain list; editor validation error; cycle conflict; waiting
+or blocked step; license inactive; save error.
 
 **Acceptance.**
 
@@ -509,3 +510,22 @@ destination and needs its own route, capability, and acceptance criteria.
 - i18n: English source; no concatenated sentences; text domain correct.
 - Multisite: the destination respects the network capability model.
 - No new remote request, telemetry, or third-party asset.
+
+## 16. Activity log — decision history (Step 2, 2026-10-28)
+
+- **Filters.** Type, Action, Status, Triggered by, Day, Reason, State, Origin,
+  Pass, Chain, and Next eligible. Every filter is sent to
+  `GET /updatronix/v1/logs` (`filters` array plus compatibility scalars) and
+  applied in SQL by `Updatronix_Log_Query`; the loaded page is not the filter
+  authority. The total and the export use the same query.
+- **Feed.** The state badge is rendered first and falls back to the status for
+  legacy rows; the reason label, pass link, and next-eligible column follow.
+- **Details.** A Decision section shows State, Reason, Origin, Stage, Pass,
+  Chain, Predecessor, Target version, Next eligible, Policy, Attempt, Scope,
+  and the retained badge. Legacy rows show “Legacy — reason not recorded”.
+  Pass and chain values link to `?pass=<id>` and `?chain=<id>`.
+- **Export.** Old columns keep their order; Reason, State, Origin, Pass, Chain,
+  Next eligible, and Retained are appended; the decision context is opt-in. The
+  status map never labels `info`, `warning`, or an unknown status as “Success”.
+- **Deep links.** `?log=<id>`, `?pass=<32 hex>`, and `?chain=<id>`; invalid
+  values are ignored.

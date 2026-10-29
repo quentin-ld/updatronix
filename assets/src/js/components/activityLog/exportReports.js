@@ -20,6 +20,13 @@ const XML_COLUMNS = [
 	[ 'user', __( 'User', 'updatronix' ) ],
 	[ 'status', __( 'Status', 'updatronix' ) ],
 	[ 'category', __( 'Category', 'updatronix' ) ],
+	[ 'reason', __( 'Reason', 'updatronix' ) ],
+	[ 'state', __( 'State', 'updatronix' ) ],
+	[ 'origin', __( 'Origin', 'updatronix' ) ],
+	[ 'pass', __( 'Pass', 'updatronix' ) ],
+	[ 'chain', __( 'Chain', 'updatronix' ) ],
+	[ 'next_eligible', __( 'Next eligible', 'updatronix' ) ],
+	[ 'retained', __( 'Retained', 'updatronix' ) ],
 ];
 
 /**

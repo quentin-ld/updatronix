@@ -8,7 +8,7 @@
 import apiFetch from '@wordpress/api-fetch';
 import { useDispatch } from '@wordpress/data';
 import { memo, useEffect, useMemo, useRef, useState } from '@wordpress/element';
-import { __, _n, sprintf } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { store as noticesStore } from '@wordpress/notices';
 
 import SaveBar, { SaveButton } from '../../shell/SaveBar';
@@ -18,10 +18,20 @@ import wpds from '../../shell/wpds';
 import { ConstantNotices } from '../autoUpdates/ConstantNotices';
 import {
 	HOLD_VALIDATION_MESSAGE,
+	HOURS,
+	holdRuleCopy,
 	MAX_HOLD_DAYS,
+	MINUTES,
+	joinTime,
 	getHoldDays,
+	manualCheckCopy,
 	getSchedule,
+	holdRuleNote,
+	holdRuleRows,
 	isScheduleDirty,
+	recurrenceDescription,
+	recurrenceUsesPreferredTime,
+	splitTime,
 	validateHoldDays,
 } from './scheduleDraft';
 
@@ -35,7 +45,8 @@ const FREQUENCIES = [
 	{ value: '', label: __( 'WordPress default', 'updatronix' ) },
 ];
 
-const PREFERRED_TIMES = [ '03:00', '06:00', '12:00', '21:00' ];
+const HOUR_ITEMS = HOURS.map( ( value ) => ( { value, label: value } ) );
+const MINUTE_ITEMS = MINUTES.map( ( value ) => ( { value, label: value } ) );
 
 /**
  * Render the Schedule destination.
@@ -76,23 +87,15 @@ export const SchedulePanel = memo( function SchedulePanelComponent( {
 	const isDirty = isScheduleDirty( draft, savedRef.current );
 	const hold = getHoldDays( draft );
 
-	const timeItems = useMemo( () => {
-		const current = draft.update_check.time || '03:00';
-		const values = PREFERRED_TIMES.includes( current )
-			? PREFERRED_TIMES
-			: [ ...PREFERRED_TIMES, current ].sort();
-
-		return values.map( ( value ) => ( { value, label: value } ) );
-	}, [ draft.update_check.time ] );
-
 	const selectedFrequency =
 		FREQUENCIES.find(
 			( item ) => item.value === ( draft.update_check.recurrence ?? '' )
 		) || FREQUENCIES[ 0 ];
-	const selectedTime =
-		timeItems.find(
-			( item ) => item.value === ( draft.update_check.time || '03:00' )
-		) || timeItems[ 0 ];
+
+	const { hour, minute } = splitTime( draft.update_check.time );
+	const usesPreferredTime = recurrenceUsesPreferredTime(
+		draft.update_check.recurrence ?? ''
+	);
 
 	const updateSchedule = ( updater ) => {
 		setDraft( ( previous ) => updater( previous ) );
@@ -174,26 +177,15 @@ export const SchedulePanel = memo( function SchedulePanelComponent( {
 			)
 		: __( 'Next check: not scheduled', 'updatronix' );
 
-	const nextRunCopy =
-		scheduleMeta.update_check_next_human ||
-		__( 'WordPress picks when update checks run.', 'updatronix' );
+	const nextRunCopy = scheduleMeta.update_check_next_human
+		? sprintf(
+				/* translators: %s: next automatic update check date/time. */
+				__( 'Next automatic check: %s', 'updatronix' ),
+				scheduleMeta.update_check_next_human
+			)
+		: __( 'Not scheduled', 'updatronix' );
 
-	const holdCopy =
-		hold > 0
-			? sprintf(
-					/* translators: %d: number of days. */
-					_n(
-						'The %d-day hold applies after a release is detected.',
-						'The %d-day hold applies after a release is detected.',
-						hold,
-						'updatronix'
-					),
-					hold
-				)
-			: __(
-					'No hold is applied. New releases install on the next automatic run.',
-					'updatronix'
-				);
+	const holdCopy = holdRuleCopy( hold );
 
 	return (
 		<div className="updatronix-schedule">
@@ -244,19 +236,59 @@ export const SchedulePanel = memo( function SchedulePanelComponent( {
 									setRecurrence( item.value )
 								}
 							/>
-
-							<SelectControl
-								label={ __( 'Preferred time', 'updatronix' ) }
-								description={ __(
-									'The check runs on the next cron tick after this time. Twice daily runs again 12 hours later.',
-									'updatronix'
+							<Text
+								variant="body-sm"
+								className="updatronix-muted"
+							>
+								{ recurrenceDescription(
+									draft.update_check.recurrence ?? ''
 								) }
-								value={ selectedTime }
-								items={ timeItems }
-								onValueChange={ ( item ) =>
-									setTime( item.value )
-								}
-							/>
+							</Text>
+
+							<div className="updatronix-time-picker">
+								<SelectControl
+									label={ __( 'Hour', 'updatronix' ) }
+									value={
+										HOUR_ITEMS.find(
+											( item ) => item.value === hour
+										) ?? HOUR_ITEMS[ 0 ]
+									}
+									items={ HOUR_ITEMS }
+									onValueChange={ ( item ) =>
+										setTime(
+											joinTime( item.value, minute )
+										)
+									}
+									disabled={ ! usesPreferredTime }
+								/>
+								<SelectControl
+									label={ __( 'Minute', 'updatronix' ) }
+									value={
+										MINUTE_ITEMS.find(
+											( item ) => item.value === minute
+										) ?? MINUTE_ITEMS[ 0 ]
+									}
+									items={ MINUTE_ITEMS }
+									onValueChange={ ( item ) =>
+										setTime( joinTime( hour, item.value ) )
+									}
+									disabled={ ! usesPreferredTime }
+								/>
+							</div>
+							<Text
+								variant="body-sm"
+								className="updatronix-muted"
+							>
+								{ usesPreferredTime
+									? __(
+											'The check runs on the next cron tick after this time. Twice daily runs again 12 hours later.',
+											'updatronix'
+										)
+									: __(
+											'This frequency ignores the preferred time. The saved time is kept for when you switch back.',
+											'updatronix'
+										) }
+							</Text>
 							<Text
 								variant="body-sm"
 								className="updatronix-muted"
@@ -274,10 +306,17 @@ export const SchedulePanel = memo( function SchedulePanelComponent( {
 									'Hold new releases for (days)',
 									'updatronix'
 								) }
-								description={ __(
-									'Updates stay automatic; they are deferred so unstable builds can be fixed first.',
-									'updatronix'
-								) }
+								description={
+									hold > 0
+										? __(
+												'Updates stay automatic; they are deferred so unstable builds can be fixed first.',
+												'updatronix'
+											)
+										: __(
+												'Off. New releases install on the next automatic run.',
+												'updatronix'
+											)
+								}
 								type="number"
 								min="0"
 								max={ String( MAX_HOLD_DAYS ) }
@@ -300,7 +339,7 @@ export const SchedulePanel = memo( function SchedulePanelComponent( {
 					<Section
 						title={ __( 'Next run', 'updatronix' ) }
 						description={ __(
-							'Computed from the saved schedule.',
+							'The saved next automatic check. It is not the install time.',
 							'updatronix'
 						) }
 					>
@@ -327,6 +366,12 @@ export const SchedulePanel = memo( function SchedulePanelComponent( {
 								className="updatronix-muted"
 							>
 								{ holdCopy }
+							</Text>
+							<Text
+								variant="body-sm"
+								className="updatronix-muted"
+							>
+								{ manualCheckCopy() }
 							</Text>
 							<Notice.Root intent="info">
 								<Notice.Title>
@@ -369,66 +414,20 @@ export const SchedulePanel = memo( function SchedulePanelComponent( {
 								</tr>
 							</thead>
 							<tbody>
-								<tr>
-									<td>
-										{ __(
-											'Core security releases',
-											'updatronix'
-										) }
-									</td>
-									<td>
-										{ __(
-											'Installed immediately, the hold is ignored',
-											'updatronix'
-										) }
-									</td>
-									<td>{ __( 'Optional', 'updatronix' ) }</td>
-								</tr>
-								<tr>
-									<td>
-										{ __(
-											'Minor core releases',
-											'updatronix'
-										) }
-									</td>
-									<td>
-										{ __(
-											'Deferred by the selected number of days',
-											'updatronix'
-										) }
-									</td>
-									<td>{ __( 'Optional', 'updatronix' ) }</td>
-								</tr>
-								<tr>
-									<td>
-										{ __(
-											'Plugin and theme updates',
-											'updatronix'
-										) }
-									</td>
-									<td>
-										{ __(
-											'Deferred by the selected number of days',
-											'updatronix'
-										) }
-									</td>
-									<td>
-										{ __(
-											'Available from the update log',
-											'updatronix'
-										) }
-									</td>
-								</tr>
+								{ holdRuleRows().map( ( row ) => (
+									<tr key={ row.type }>
+										<td>{ row.type }</td>
+										<td>{ row.withHold }</td>
+										<td>{ row.manual }</td>
+									</tr>
+								) ) }
 							</tbody>
 						</table>
 					</div>
 				</Section>
 
 				<Text variant="body-sm" className="updatronix-surface-note">
-					{ __(
-						'The hold applies after a release is detected. Core security releases skip the hold.',
-						'updatronix'
-					) }
+					{ holdRuleNote() }
 				</Text>
 			</div>
 

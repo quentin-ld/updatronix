@@ -79,6 +79,109 @@ final class Updatronix_AutoUpdateDelay {
 	}
 
 	/**
+	 * Drops every per-request cache.
+	 *
+	 * Used by the Schedule context and the tests after a settings save, an
+	 * offer refresh, a pass change, or a lock change.
+	 *
+	 * @since 1.3.0
+	 * @return void
+	 */
+	public static function reset_cache(): void {
+		self::$ledger_cache         = null;
+		self::$delay_enabled_cache  = null;
+		self::$delay_settings_slice = null;
+		self::$pruned_this_request  = false;
+	}
+
+	/**
+	 * Returns the stable ledger hash for an offer.
+	 *
+	 * Reuses the exact `sha256` input the gate hashes, so the display and the
+	 * gate agree on the row (analysis 04 §6.9).
+	 *
+	 * @since 1.3.0
+	 * @param 'plugin'|'theme'|'core'|'translation' $type Offer type.
+	 * @param object                                $offer Offer object.
+	 * @return string Hex hash.
+	 */
+	public static function ledger_hash( string $type, object $offer ): string {
+		return self::stable_ledger_hash( $type, $offer );
+	}
+
+	/**
+	 * Reads the ledger without writing, pruning, or logging.
+	 *
+	 * A page render must never start the hold. This is the only read path the
+	 * Schedule uses (analysis 04 §6.9, synthesis §6.6).
+	 *
+	 * @since 1.3.0
+	 * @param 'plugin'|'theme'|'core'|'translation' $type  Offer type.
+	 * @param object                                $offer Offer object.
+	 * @return int|null First-seen timestamp, or null when the hold is off, the
+	 *                  row is absent, the target changed, or the row is more
+	 *                  than 300 seconds in the future.
+	 */
+	public static function peek_first_seen( string $type, object $offer ): ?int {
+		if ( ! self::delay_gate_should_run() ) {
+			return null;
+		}
+
+		$hash   = self::stable_ledger_hash( $type, $offer );
+		$ledger = self::ledger_decode_mutate();
+
+		if ( ! isset( $ledger[ $hash ] ) ) {
+			return null;
+		}
+
+		$timestamp = (int) $ledger[ $hash ];
+		if ( $timestamp > time() + 300 ) {
+			return null;
+		}
+
+		return $timestamp;
+	}
+
+	/**
+	 * Records the first time the pass saw this exact offer.
+	 *
+	 * Idempotent: it sets `first_seen` only when the row is absent, writes
+	 * nothing else, and logs nothing. The Pro pass calls it once per offer at
+	 * plan time, before policy evaluation, so the hold starts when the check
+	 * first sees the release rather than when the delay gate finally runs
+	 * (synthesis C10).
+	 *
+	 * @since 1.3.0
+	 * @param 'plugin'|'theme'|'core'|'translation' $type  Offer type.
+	 * @param object                                $offer Offer object.
+	 * @return int|null The existing or new first-seen timestamp, or null when
+	 *                  the hold is off.
+	 */
+	public static function observe_offer( string $type, object $offer ): ?int {
+		if ( ! self::delay_gate_should_run() ) {
+			return null;
+		}
+
+		if ( self::is_excluded_auto_update_offer( $type, $offer ) ) {
+			return null;
+		}
+
+		$hash   = self::stable_ledger_hash( $type, $offer );
+		$ledger = self::ledger_decode_mutate();
+
+		if ( isset( $ledger[ $hash ] ) ) {
+			return (int) $ledger[ $hash ];
+		}
+
+		$now                = time();
+		$ledger[ $hash ]    = $now;
+		self::$ledger_cache = null;
+		self::ledger_flush( $ledger );
+
+		return $now;
+	}
+
+	/**
 	 * Expose ledger option key for uninstall.
 	 *
 	 * @since 1.1.0
@@ -427,6 +530,8 @@ final class Updatronix_AutoUpdateDelay {
 			'days'    => 7,
 		);
 		$days_setting = max( 1, (int) $slice['days'] );
+		$hold_until   = $first_seen_unix + $delay_seconds;
+		$now          = time();
 
 		$date_fragment = sprintf(
 			'%s %s',
@@ -439,7 +544,7 @@ final class Updatronix_AutoUpdateDelay {
 		}
 
 		[$name, $slug, $vb, $va] = self::resolve_offer_dimensions( $type, $item );
-		$eligible_at_ts          = max( $first_seen_unix + $delay_seconds, time() );
+		$eligible_at_ts          = self::eligible_at_for_log( $hold_until, $now );
 
 		$msg = sprintf(
 			/* translators: 1: number of soak days configured, 2: datetime string when eligibility starts if the update is still offered. */
@@ -453,20 +558,57 @@ final class Updatronix_AutoUpdateDelay {
 
 		$log_type_safe = ( 'translation' === $type ) ? 'translation' : $type;
 
-		Updatronix_Logger::log(
-			$log_type_safe,
-			'update',
-			$name,
-			$slug,
-			$vb,
-			$va,
-			'delayed',
-			$msg,
-			'',
-			'automatic',
-			'',
-			$event_key,
+		// One time source: the calculator's eligible_at, never
+		// max( first_seen + delay, time() ) (analysis 04 §6.4, synthesis C8).
+		Updatronix_Logger::log_event(
+			array(
+				'log_type'         => $log_type_safe,
+				'action_type'      => 'update',
+				'item_name'        => $name,
+				'item_slug'        => $slug,
+				'version_before'   => $vb,
+				'version_after'    => $va,
+				'target_version'   => $va,
+				'status'           => 'delayed',
+				'message'          => $msg,
+				'trace'            => '',
+				'performed_as'     => 'automatic',
+				'update_context'   => '',
+				'event_key'        => $event_key,
+				'reason_code'      => 'schedule_hold',
+				'decision_state'   => 'delayed',
+				'origin'           => 'automatic',
+				'decision_stage'   => 'policy',
+				'next_eligible_at' => gmdate( 'Y-m-d H:i:s', $eligible_at_ts ),
+			)
 		);
+	}
+
+	/**
+	 * Returns the first scheduled check at or after the hold floor.
+	 *
+	 * When the next check is overdue or missing the actual run is unknown, so
+	 * the row says “no earlier than the hold end” instead of inventing a time.
+	 *
+	 * @since 1.3.0
+	 * @param int $hold_until Hold expiry timestamp.
+	 * @param int $now        Current timestamp.
+	 * @return int Timestamp used in the delayed row.
+	 */
+	private static function eligible_at_for_log( int $hold_until, int $now ): int {
+		if ( ! class_exists( 'Updatronix_Schedule_State' ) || ! class_exists( 'Updatronix_Schedule_Context' ) ) {
+			return max( $hold_until, $now );
+		}
+
+		$next_check = Updatronix_Schedule_Context::next_check();
+		$schedule   = updatronix_get_settings()['schedule'];
+		$interval   = Updatronix_Schedule_State::interval_for(
+			(string) $schedule['update_check']['recurrence'],
+			$next_check
+		);
+		$eligible   = Updatronix_Schedule_State::first_check_at_or_after( $hold_until, $next_check, $interval, $now );
+
+		return null === $eligible ? $hold_until : $eligible;
 	}
 
 	/**

@@ -298,7 +298,7 @@ final class AutoUpdateDelayBehaviorTest extends TestCase {
 	public function test_schedule_slice_coerces_the_stored_flag_and_clamps_the_window(): void {
 		$cases = array(
 			'string flag, ordinary window'     => array( '1', 5, true, 5 ),
-			'zero means one day'               => array( true, 0, true, 1 ),
+			'zero means off'                   => array( true, 0, false, 1 ),
 			'a year is the ceiling'            => array( true, 1000, true, 365 ),
 			'delay off, the window is one day' => array( false, 0, false, 1 ),
 		);

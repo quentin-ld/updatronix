@@ -1,0 +1,16 @@
+{
+  "nativeMessages": {
+    "scheduled": "Automatic update scheduled in 3 hours.",
+    "overdue": "Automatic update overdue by 2 hours. There may be a problem with WP-Cron.",
+    "notScheduled": "Automatic update not scheduled. There may be a problem with WP-Cron."
+  },
+  "pluginRow": "<div class=\"plugin-autoupdate\"><a href=\"plugins.php?action=disable-auto-update&#038;plugin=example%2Fexample.php\" class=\"toggle-auto-update aria-button-if-js\" data-wp-action=\"disable\"><span class=\"dashicons dashicons-update spin hidden\" aria-hidden=\"true\"></span><span class=\"label\">Disable auto-updates</span></a><div class=\"auto-update-time\">Automatic update scheduled in 3 hours.</div></div>",
+  "pluginRowHidden": "<div class=\"plugin-autoupdate\"><a href=\"plugins.php?action=enable-auto-update&#038;plugin=example%2Fexample.php\" class=\"toggle-auto-update aria-button-if-js\" data-wp-action=\"enable\"><span class=\"dashicons dashicons-update spin hidden\" aria-hidden=\"true\"></span><span class=\"label\">Enable auto-updates</span></a><div class=\"auto-update-time hidden\">Automatic update scheduled in 3 hours.</div></div>",
+  "networkThemeRow": "<div class=\"theme-autoupdate\"><a href=\"themes.php?action=disable-auto-update&#038;stylesheet=example-theme\" class=\"toggle-auto-update aria-button-if-js\" data-wp-action=\"disable\"><span class=\"dashicons dashicons-update spin hidden\" aria-hidden=\"true\"></span><span class=\"label\">Disable auto-updates</span></a><div class=\"auto-update-time\">Automatic update scheduled in 3 hours.</div></div>",
+  "themeTemplate": "<span class=\"auto-update-time\">\n\t\t\t\t<br />Automatic update scheduled in 3 hours.</span>",
+  "updateCoreP": "<p>Automatic update scheduled in 3 hours.</p>\n<p class=\"auto-update-status\"><a href=\"update-core.php?action=core-major-auto-updates-settings\">Switch to automatic updates for all new versions of WordPress</a></p>",
+  "updateCorePluginRow": "<tr><td class=\"plugin-update colspanchange\"><p>You have version 1.0.0 installed. Update to 1.1.0. <a href=\"plugin-install.php?tab=plugin-information&amp;plugin=example\">View version 1.1.0 details</a>. | Automatic update scheduled in 3 hours.</p></td></tr>",
+  "updateCoreThemeRow": "<tr><td class=\"plugin-update colspanchange\"><p>You have version 2.0 installed. Update to 2.1. | Automatic update scheduled in 3 hours.</p></td></tr>",
+  "updateCorePluginRowWithoutCheckbox": "<tr><td class=\"plugin-update colspanchange\"><p>You have version 1.0.0 installed. Update to 1.1.0. | Automatic update scheduled in 3 hours.</p></td></tr>",
+  "anotherPluginNotice": "<div class=\"notice notice-info\"><p>Another plugin says: Automatic update scheduled in 3 hours.</p></div>"
+}

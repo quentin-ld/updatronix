@@ -67,7 +67,7 @@ export const DESTINATIONS = [
 		slug: 'update-shield',
 		label: __( 'Update Shield', 'updatronix' ),
 		description: __(
-			'Stop incompatible updates, queue automatic updates, and protect version-controlled extensions.',
+			'Stop incompatible updates, order automatic updates, and protect version-controlled extensions.',
 			'updatronix'
 		),
 		group: 'automations',

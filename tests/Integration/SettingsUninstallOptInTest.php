@@ -83,6 +83,10 @@ final class SettingsUninstallOptInTest extends WP_UnitTestCase {
 	 */
 	public function test_rest_route_persists_opt_in(): void {
 		$admin_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		if ( is_multisite() && function_exists( 'grant_super_admin' ) ) {
+			// The settings route is Super Admin only on Multisite.
+			grant_super_admin( $admin_id );
+		}
 		wp_set_current_user( $admin_id );
 
 		$request = new WP_REST_Request( 'PUT', '/updatronix/v1/settings' );

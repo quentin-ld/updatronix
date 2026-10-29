@@ -1,5 +1,11 @@
 # Update engine — Phase 4.2 kernel, dormant
 
+> **Superseded (2026-10-29, Step 4).** The kernel, the queue table, the queue
+> REST routes, the queue summary, the notifier, the journal, and the queue
+> Health checks are deleted. One pass (`updatronix_pro_update_pass`) replaced
+> them; `WP_Automatic_Updater::run()` is the only execution path, selected by a
+> one-item `auto_update_plugin|theme|core` gate. Keep this file as history.
+
 **Date:** 2026-10-26
 **Scope:** Pro `inc/update-engine/`, the queue table and schema option, the
 uninstall decision, the additive Free logger query/allowlist filters, and the

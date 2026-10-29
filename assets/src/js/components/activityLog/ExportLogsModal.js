@@ -64,6 +64,38 @@ const COLUMN_OPTIONS = [
 		id: 'category',
 		label: __( 'Category', 'updatronix' ),
 	},
+	{
+		id: 'reason',
+		label: __( 'Reason', 'updatronix' ),
+	},
+	{
+		id: 'state',
+		label: __( 'State', 'updatronix' ),
+	},
+	{
+		id: 'origin',
+		label: __( 'Origin', 'updatronix' ),
+	},
+	{
+		id: 'pass',
+		label: __( 'Pass', 'updatronix' ),
+	},
+	{
+		id: 'chain',
+		label: __( 'Chain', 'updatronix' ),
+	},
+	{
+		id: 'nextEligible',
+		label: __( 'Next eligible', 'updatronix' ),
+	},
+	{
+		id: 'decisionContext',
+		label: __( 'Decision context', 'updatronix' ),
+	},
+	{
+		id: 'retained',
+		label: __( 'Retained', 'updatronix' ),
+	},
 ];
 
 /** @type {Readonly<Object<string, string>>} */
