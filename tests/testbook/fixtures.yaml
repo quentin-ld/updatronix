@@ -1,68 +1,77 @@
 schema: updatronix-testbook/fixtures/v1
 updated: 2026-10-29
 notes: >-
-  The fixture contract. Provisioning is phase 3; this file names what must exist
-  and how it is reset. Secrets and the live license key are never stored here.
+  Provisioned 2026-10-29 on two disposable DDEV sites. This file records the
+  live contract and the reset protocol; secrets and the live license key are
+  never stored here. Planned gaps are marked `contract` and are phase-4 work.
 
 environments:
   single:
-    status: planned
+    status: provisioned
     url: https://updatronix-test.ddev.site
     type: single_site
-    wp: "7.1"
+    wp: "7.1.4"
     php: "8.4"
     db: mariadb
     reset: db_snapshot_and_state_restore
   multisite:
-    status: planned
+    status: provisioned
     url: https://updatronix-ms.ddev.site
     type: multisite
-    sites: [main, subsite-a, subsite-b]
+    sites: [main, subsite-a]
     roles: [super_admin, subsite_admin]
     reset: db_snapshot_and_state_restore
 
 tiers:
   deterministic:
+    status: provisioned
     plugins:
-      - id: fixture-alpha/alpha.php
+      - id: fixture-alpha/fixture-alpha.php
         version: "1.0.0"
         offer: "2.0.0"
-      - id: fixture-bravo/bravo.php
+        package: fixture-alpha-2.0.0.zip
+      - id: fixture-bravo/fixture-bravo.php
         version: "1.0.0"
         offer: "2.0.0"
-      - id: fixture-locked/locked.php
+      - id: fixture-locked/fixture-locked.php
         version: "1.0.0"
         offer: "2.0.0"
         marker: git_item_root
-      - id: fixture-broken/broken.php
+      - id: fixture-incompatible/fixture-incompatible.php
         version: "1.0.0"
         offer: "2.0.0"
-        package: invalid_zip
+        offer_constraints: {requires_php: "9.9", requires: "99.0"}
+      - id: fixture-abandoned/fixture-abandoned.php
+        version: "1.0.0"
+        offer: "2.0.0"
+        abandoned_since: "2020-01-01"
+      - id: fixture-composer/fixture-composer.php
+        version: "1.0.0"
+        marker: composer_project
+      - id: fixture-svn/fixture-svn.php
+        version: "1.0.0"
+        marker: svn
+      - id: fixture-hg/fixture-hg.php
+        version: "1.0.0"
+        marker: hg
+      - id: fixture-bzr/fixture-bzr.php
+        version: "1.0.0"
+        marker: bzr
     themes:
       - id: fixture-theme
         version: "1.0.0"
         offer: "2.0.0"
+        package: fixture-theme-2.0.0.zip
     vcs:
-      - git_item_root
-      - git_ancestor
-      - svn
-      - hg
-      - bzr
-      - composer_project
-      - composer_package
-      - symlink_inside_root
-      - symlink_outside_root
-      - unreadable
+      implemented: [git_item_root, composer_project, svn, hg, bzr]
+      contract: [git_ancestor, symlink_inside_root, symlink_outside_root, unreadable]
     offers:
-      - compatible
-      - incompatible_wp
-      - incompatible_php
-      - abandoned
-      - no_offer
-      - stale
-      - target_mismatch
+      implemented: [compatible, incompatible_php, incompatible_wp, abandoned]
+      contract: [no_offer, stale, target_mismatch]
   community:
+    status: provisioned
     pinned: true
+    versions: community-versions.yaml
     plugins:
       - woocommerce
       - contact-form-7
@@ -71,22 +80,18 @@ tiers:
     themes:
       - twentytwentyfour
       - twentytwentyone
-    note: Pin exact versions at provisioning time; no "latest" in a test run.
+    note: Exact versions are recorded in community-versions.yaml; no "latest" in a test run.
   update_packages:
-    plugin: local zip, known older to known newer
-    theme: local zip, known older to known newer
-    core: local core package or a controlled core update fixture
-    translation: local translation package
-    failure_modes:
-      - download_404
-      - invalid_zip
-      - partial_write
-      - rollback
-      - timeout
-      - disk_full
-      - uncertain
+    status: provisioned
+    plugin: fixture-alpha-2.0.0.zip (installed 1.0.0)
+    theme: fixture-theme-2.0.0.zip (installed 1.0.0)
+    core: wordpress-7.1.3.zip (installed 7.1.4; older core)
+    translation: fixture-alpha-fr_FR.zip (fr_FR)
+    failure_modes: [download_404, invalid_zip, partial_write, rollback, timeout, disk_full, uncertain]
+    note: Failure-mode packages are contract entries for phase 4; the four real packages above exist now.
 
 mail:
+  status: provisioned
   capture: mu-plugin on pre_wp_mail, one JSON line per message
   cases:
     - native_per_item
@@ -98,14 +103,17 @@ mail:
     - recipient_cap
 
 cron:
-  control: mu-plugin + wp cron event run
+  status: disabled_real_cron
+  control: DISABLE_WP_CRON true; wp cron event run for manual execution
   cases: [enabled, disabled, delayed, overlap, manual_run]
 
 clock:
+  status: contract
   control: mu-plugin time freeze or a WP-CLI option
   cases: [hold_start, next_eligible, retry, stale_pass, expired_pass]
 
 reset:
+  status: contract
   steps:
     - restore_db_snapshot
     - delete_updatronix_options

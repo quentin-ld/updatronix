@@ -1,0 +1,10 @@
+schema: updatronix-testbook/community-versions/v1
+provisioned: '2026-10-29'
+plugins:
+  akismet: 5.7.2
+  contact-form-7: 6.2.4.1
+  woocommerce: 11.2.1
+  wordpress-seo: '28.8'
+themes:
+  twentytwentyfour: '1.6'
+  twentytwentyone: '2.9'
