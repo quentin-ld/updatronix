@@ -13,7 +13,7 @@ global $wpdb;
 
 $plugin_versions = array();
 
-foreach ( array( 'fixture-alpha', 'fixture-incompatible', 'fixture-composer', 'fixture-locked', 'fixture-abandoned' ) as $slug ) {
+foreach ( array( 'fixture-alpha', 'fixture-bravo', 'fixture-broken', 'fixture-incompatible', 'fixture-composer', 'fixture-locked', 'fixture-abandoned' ) as $slug ) {
 	$file                     = WP_PLUGIN_DIR . '/' . $slug . '/' . $slug . '.php';
 	$data                     = file_exists( $file ) ? get_plugin_data( $file, false, false ) : array();
 	$plugin_versions[ $slug ] = isset( $data['Version'] ) ? $data['Version'] : '';

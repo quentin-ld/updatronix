@@ -42,6 +42,27 @@ $p->response['fixture-incompatible/fixture-incompatible.php'] = (object) array(
     'icons' => array(), 'banners' => array(), 'banners_rtl' => array(),
     'tested' => '7.1', 'requires_php' => '9.9', 'requires' => '99.0', 'compatibility' => new stdClass(),
 );
+$p->response['fixture-bravo/fixture-bravo.php'] = (object) array(
+    'id' => 'wordpress.org/plugins/fixture-bravo/', 'slug' => 'fixture-bravo',
+    'plugin' => 'fixture-bravo/fixture-bravo.php', 'new_version' => '2.0.0',
+    'url' => 'https://example.test/fixture-bravo', 'package' => $base . 'fixture-bravo-2.0.0.zip',
+    'icons' => array(), 'banners' => array(), 'banners_rtl' => array(),
+    'tested' => '7.1', 'requires_php' => '8.0', 'requires' => '6.2', 'compatibility' => new stdClass(),
+);
+$p->response['fixture-locked/fixture-locked.php'] = (object) array(
+    'id' => 'wordpress.org/plugins/fixture-locked/', 'slug' => 'fixture-locked',
+    'plugin' => 'fixture-locked/fixture-locked.php', 'new_version' => '2.0.0',
+    'url' => 'https://example.test/fixture-locked', 'package' => $base . 'fixture-locked-2.0.0.zip',
+    'icons' => array(), 'banners' => array(), 'banners_rtl' => array(),
+    'tested' => '7.1', 'requires_php' => '8.0', 'requires' => '6.2', 'compatibility' => new stdClass(),
+);
+$p->response['fixture-broken/fixture-broken.php'] = (object) array(
+    'id' => 'wordpress.org/plugins/fixture-broken/', 'slug' => 'fixture-broken',
+    'plugin' => 'fixture-broken/fixture-broken.php', 'new_version' => '2.0.0',
+    'url' => 'https://example.test/fixture-broken', 'package' => $base . 'fixture-broken-2.0.0.zip',
+    'icons' => array(), 'banners' => array(), 'banners_rtl' => array(),
+    'tested' => '7.1', 'requires_php' => '8.0', 'requires' => '6.2', 'compatibility' => new stdClass(),
+);
 $p->translations = array(
     array(
         'type' => 'plugin', 'slug' => 'fixture-alpha', 'language' => 'fr_FR', 'version' => '1.0.0',
@@ -81,6 +102,11 @@ add_filter( 'updatronix_pro_abandoned_data', static function ( $data, $type, $id
     return $data;
 }, 10, 3 );
 
+add_filter( 'updatronix_pro_composer_project_roots', static function ( $roots ) {
+    $roots[] = WP_CONTENT_DIR . '/testbook-composer-project';
+    return $roots;
+} );
+
 add_filter( 'site_transient_update_plugins', static function ( $value ) {
     if ( ! is_object( $value ) ) { $value = new stdClass(); }
     if ( ! isset( $value->response ) || ! is_array( $value->response ) ) { $value->response = array(); }
@@ -98,6 +124,27 @@ add_filter( 'site_transient_update_plugins', static function ( $value ) {
         'url' => 'https://example.test/fixture-incompatible', 'package' => $base . 'fixture-incompatible-2.0.0.zip',
         'icons' => array(), 'banners' => array(), 'banners_rtl' => array(),
         'tested' => '7.1', 'requires_php' => '9.9', 'requires' => '99.0', 'compatibility' => new stdClass(),
+    );
+    $value->response['fixture-bravo/fixture-bravo.php'] = (object) array(
+        'id' => 'wordpress.org/plugins/fixture-bravo/', 'slug' => 'fixture-bravo',
+        'plugin' => 'fixture-bravo/fixture-bravo.php', 'new_version' => '2.0.0',
+        'url' => 'https://example.test/fixture-bravo', 'package' => $base . 'fixture-bravo-2.0.0.zip',
+        'icons' => array(), 'banners' => array(), 'banners_rtl' => array(),
+        'tested' => '7.1', 'requires_php' => '8.0', 'requires' => '6.2', 'compatibility' => new stdClass(),
+    );
+    $value->response['fixture-locked/fixture-locked.php'] = (object) array(
+        'id' => 'wordpress.org/plugins/fixture-locked/', 'slug' => 'fixture-locked',
+        'plugin' => 'fixture-locked/fixture-locked.php', 'new_version' => '2.0.0',
+        'url' => 'https://example.test/fixture-locked', 'package' => $base . 'fixture-locked-2.0.0.zip',
+        'icons' => array(), 'banners' => array(), 'banners_rtl' => array(),
+        'tested' => '7.1', 'requires_php' => '8.0', 'requires' => '6.2', 'compatibility' => new stdClass(),
+    );
+    $value->response['fixture-broken/fixture-broken.php'] = (object) array(
+        'id' => 'wordpress.org/plugins/fixture-broken/', 'slug' => 'fixture-broken',
+        'plugin' => 'fixture-broken/fixture-broken.php', 'new_version' => '2.0.0',
+        'url' => 'https://example.test/fixture-broken', 'package' => $base . 'fixture-broken-2.0.0.zip',
+        'icons' => array(), 'banners' => array(), 'banners_rtl' => array(),
+        'tested' => '7.1', 'requires_php' => '8.0', 'requires' => '6.2', 'compatibility' => new stdClass(),
     );
     if ( ! isset( $value->translations ) || ! is_array( $value->translations ) ) { $value->translations = array(); }
     $value->translations[] = array(
@@ -185,10 +232,14 @@ def seed(site: Path) -> dict:
     sync_runtime(site)
     plugins = site / "wp-content/plugins"
     uploads = site / "wp-content/uploads/testbook"
-    for name in ("fixture-alpha", "fixture-bravo", "fixture-incompatible", "fixture-abandoned"):
+    for name in ("fixture-alpha", "fixture-bravo", "fixture-incompatible", "fixture-abandoned", "fixture-broken"):
         directory = plugins / name
         directory.mkdir(parents=True, exist_ok=True)
         (directory / f"{name}.php").write_text(plugin_php(name, "1.0.0"), encoding="utf-8")
+    locked = plugins / "fixture-locked"
+    locked.mkdir(parents=True, exist_ok=True)
+    (locked / "fixture-locked.php").write_text(plugin_php("fixture-locked", "1.0.0"), encoding="utf-8")
+    (locked / ".git").mkdir(exist_ok=True)
     theme = site / "wp-content/themes/fixture-theme"
     theme.mkdir(parents=True, exist_ok=True)
     (theme / "style.css").write_text(theme_css("1.0.0"), encoding="utf-8")
@@ -199,15 +250,22 @@ def seed(site: Path) -> dict:
         (directory / f"{name}.php").write_text(plugin_php(name, "1.0.0"), encoding="utf-8")
         (directory / marker).mkdir(exist_ok=True)
     composer = plugins / "fixture-composer"
-    (composer / "vendor/composer").mkdir(parents=True, exist_ok=True)
+    composer.mkdir(parents=True, exist_ok=True)
     (composer / "fixture-composer.php").write_text(plugin_php("fixture-composer", "1.0.0"), encoding="utf-8")
-    (composer / "composer.json").write_text('{"name":"fixture/project","config":{"vendor-dir":"vendor"}}', encoding="utf-8")
-    (composer / "vendor/composer/installed.json").write_text(
+    (composer / "composer.json").unlink(missing_ok=True)
+    shutil.rmtree(composer / "vendor", ignore_errors=True)
+    project = site / "wp-content/testbook-composer-project"
+    (project / "vendor/composer").mkdir(parents=True, exist_ok=True)
+    (project / "composer.json").write_text('{"name":"fixture/project","config":{"vendor-dir":"vendor"}}', encoding="utf-8")
+    (project / "vendor/composer/installed.json").write_text(
         json.dumps({"packages": [{"name": "fixture/composer", "type": "wordpress-plugin", "version": "1.0.0", "install-path": f"{CONTAINER}/wp-content/plugins/fixture-composer"}]}),
         encoding="utf-8",
     )
     make_zip(uploads / "fixture-alpha-2.0.0.zip", {"fixture-alpha/fixture-alpha.php": plugin_php("fixture-alpha", "2.0.0").encode()})
     make_zip(uploads / "fixture-incompatible-2.0.0.zip", {"fixture-incompatible/fixture-incompatible.php": plugin_php("fixture-incompatible", "2.0.0").encode()})
+    make_zip(uploads / "fixture-bravo-2.0.0.zip", {"fixture-bravo/fixture-bravo.php": plugin_php("fixture-bravo", "2.0.0").encode()})
+    make_zip(uploads / "fixture-locked-2.0.0.zip", {"fixture-locked/fixture-locked.php": plugin_php("fixture-locked", "2.0.0").encode()})
+    make_zip(uploads / "fixture-broken-2.0.0.zip", {"fixture-broken/readme.txt": b"not a plugin\n"})
     make_zip(uploads / "fixture-theme-2.0.0.zip", {
         "fixture-theme/style.css": theme_css("2.0.0").encode(),
         "fixture-theme/index.php": b"<?php\n// Silence is golden.\n",
