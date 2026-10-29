@@ -1,0 +1,2364 @@
+schema: updatronix-testbook/generated-cases/v1
+cases:
+- id: TB-SET-103
+  title: 'Dimension: Logging enabled (free.logging_enabled)'
+  owner: free
+  risk: high
+  tags:
+  - '@free'
+  - '@logger'
+  - '@dimension'
+  dimensions:
+  - free.logging_enabled
+  values:
+  - true
+  - false
+  steps:
+  - Apply free.logging_enabled at [True, False] through the owning surface.
+  - 'Run the case''s oracle: UI plus the real WordPress effect.'
+  assertions:
+  - The behavior matches inc/settings/options.php:26.
+  - The invariants that apply to this dimension hold.
+  oracle:
+  - ui
+  - integration
+  automation: planned
+- id: TB-LOG-104
+  title: 'Dimension: Log retention days (free.retention_days)'
+  owner: free
+  risk: medium
+  tags:
+  - '@free'
+  - '@logger'
+  - '@dimension'
+  dimensions:
+  - free.retention_days
+  values:
+  - 1
+  - 2
+  - 7
+  - 30
+  - 90
+  - 180
+  steps:
+  - Apply free.retention_days at [1, 2, 7, 30, 90, 180] through the owning surface.
+  - 'Run the case''s oracle: UI plus the real WordPress effect.'
+  assertions:
+  - The behavior matches inc/settings/options.php:360.
+  - The invariants that apply to this dimension hold.
+  oracle:
+  - ui
+  - integration
+  automation: planned
+- id: TB-SET-104
+  title: 'Dimension: Notification mode (free.notifications_mode)'
+  owner: free
+  risk: high
+  tags:
+  - '@free'
+  - '@mail'
+  - '@dimension'
+  dimensions:
+  - free.notifications_mode
+  values:
+  - default
+  - disabled
+  steps:
+  - Apply free.notifications_mode at ['default', 'disabled'] through the owning surface.
+  - 'Run the case''s oracle: UI plus the real WordPress effect.'
+  assertions:
+  - The behavior matches inc/settings/options.php:592.
+  - The invariants that apply to this dimension hold.
+  oracle:
+  - ui
+  - integration
+  automation: planned
+- id: TB-SET-106
+  title: 'Dimension: Redirect update notification emails (free.notify_enabled)'
+  owner: free
+  risk: high
+  tags:
+  - '@free'
+  - '@mail'
+  - '@dimension'
+  dimensions:
+  - free.notify_enabled
+  values:
+  - true
+  - false
+  steps:
+  - Apply free.notify_enabled at [True, False] through the owning surface.
+  - 'Run the case''s oracle: UI plus the real WordPress effect.'
+  assertions:
+  - The behavior matches inc/settings/options.php:32.
+  - The invariants that apply to this dimension hold.
+  oracle:
+  - ui
+  - integration
+  automation: planned
+- id: TB-SET-105
+  title: 'Dimension: Notification recipients (free.notify_emails)'
+  owner: free
+  risk: high
+  tags:
+  - '@free'
+  - '@mail'
+  - '@dimension'
+  dimensions:
+  - free.notify_emails
+  values:
+  - none
+  - one_valid
+  - two_valid
+  - duplicate
+  - invalid
+  - header_injection
+  steps:
+  - Apply free.notify_emails at ['none', 'one_valid', 'two_valid', 'duplicate', 'invalid',
+    'header_injection'] through the owning surface.
+  - 'Run the case''s oracle: UI plus the real WordPress effect.'
+  assertions:
+  - The behavior matches inc/settings/options.php:546.
+  - The invariants that apply to this dimension hold.
+  oracle:
+  - ui
+  - integration
+  automation: planned
+- id: TB-SET-107
+  title: 'Dimension: Notification event allowlist (free.notify_on)'
+  owner: free
+  risk: medium
+  tags:
+  - '@free'
+  - '@mail'
+  - '@dimension'
+  dimensions:
+  - free.notify_on
+  values:
+  - []
+  - - core
+  - - core
+    - plugin_theme
+    - debug
+    - technical
+  steps:
+  - Apply free.notify_on at [[], ['core'], ['core', 'plugin_theme', 'debug', 'technical']]
+    through the owning surface.
+  - 'Run the case''s oracle: UI plus the real WordPress effect.'
+  assertions:
+  - The behavior matches inc/settings/options.php:613.
+  - The invariants that apply to this dimension hold.
+  oracle:
+  - ui
+  - integration
+  automation: planned
+- id: TB-AUTO-101
+  title: 'Dimension: Auto-update translations (free.auto_update_translations)'
+  owner: free
+  risk: medium
+  tags:
+  - '@free'
+  - '@auto-updates'
+  - '@dimension'
+  dimensions:
+  - free.auto_update_translations
+  values:
+  - true
+  - false
+  steps:
+  - Apply free.auto_update_translations at [True, False] through the owning surface.
+  - 'Run the case''s oracle: UI plus the real WordPress effect.'
+  assertions:
+  - The behavior matches inc/settings/options.php:35.
+  - The invariants that apply to this dimension hold.
+  oracle:
+  - ui
+  - integration
+  automation: planned
+- id: TB-SET-102
+  title: 'Dimension: Dismissed constant notices (free.dismissed_constants)'
+  owner: free
+  risk: low
+  tags:
+  - '@free'
+  - '@settings'
+  - '@dimension'
+  dimensions:
+  - free.dismissed_constants
+  values:
+  - []
+  - - WP_AUTO_UPDATE_CORE
+  - - WP_AUTO_UPDATE_CORE
+    - AUTOMATIC_UPDATER_DISABLED
+    - DISALLOW_FILE_MODS
+    - DISABLE_WP_CRON
+  steps:
+  - Apply free.dismissed_constants at [[], ['WP_AUTO_UPDATE_CORE'], ['WP_AUTO_UPDATE_CORE',
+    'AUTOMATIC_UPDATER_DISABLED', 'DISALLOW_FILE_MODS', 'DISABLE_WP_CRON']] through
+    the owning surface.
+  - 'Run the case''s oracle: UI plus the real WordPress effect.'
+  assertions:
+  - The behavior matches inc/settings/options.php:628.
+  - The invariants that apply to this dimension hold.
+  oracle:
+  - ui
+  - integration
+  automation: planned
+- id: TB-SET-101
+  title: 'Dimension: Delete data on uninstall (free.delete_data_on_uninstall)'
+  owner: free
+  risk: critical
+  tags:
+  - '@free'
+  - '@uninstall'
+  - '@data'
+  - '@dimension'
+  dimensions:
+  - free.delete_data_on_uninstall
+  values:
+  - true
+  - false
+  steps:
+  - Apply free.delete_data_on_uninstall at [True, False] through the owning surface.
+  - 'Run the case''s oracle: UI plus the real WordPress effect.'
+  assertions:
+  - The behavior matches inc/settings/options.php:37.
+  - The invariants that apply to this dimension hold.
+  oracle:
+  - ui
+  - integration
+  automation: planned
+- id: TB-SCHED-104
+  title: 'Dimension: Update-check recurrence (free.schedule.recurrence)'
+  owner: free
+  risk: high
+  tags:
+  - '@free'
+  - '@schedule'
+  - '@dimension'
+  dimensions:
+  - free.schedule.recurrence
+  values:
+  - ''
+  - hourly
+  - twicedaily
+  - daily
+  - weekly
+  steps:
+  - Apply free.schedule.recurrence at ['', 'hourly', 'twicedaily', 'daily', 'weekly']
+    through the owning surface.
+  - 'Run the case''s oracle: UI plus the real WordPress effect.'
+  assertions:
+  - The behavior matches inc/settings/options.php:67.
+  - The invariants that apply to this dimension hold.
+  oracle:
+  - ui
+  - integration
+  automation: planned
+- id: TB-SCHED-105
+  title: 'Dimension: Preferred wall-clock time (free.schedule.time)'
+  owner: free
+  risk: high
+  tags:
+  - '@free'
+  - '@schedule'
+  - '@timezone'
+  - '@dimension'
+  dimensions:
+  - free.schedule.time
+  values:
+  - 00:00
+  - 00:59
+  - 02:00
+  - 03:00
+  - '12:00'
+  - '23:59'
+  steps:
+  - Apply free.schedule.time at ['00:00', '00:59', '02:00', '03:00', '12:00', '23:59']
+    through the owning surface.
+  - 'Run the case''s oracle: UI plus the real WordPress effect.'
+  assertions:
+  - The behavior matches inc/settings/options.php:218.
+  - The invariants that apply to this dimension hold.
+  oracle:
+  - ui
+  - integration
+  automation: planned
+- id: TB-SCHED-102
+  title: 'Dimension: Hold new releases (free.schedule.delay_enabled)'
+  owner: free
+  risk: high
+  tags:
+  - '@free'
+  - '@schedule'
+  - '@hold'
+  - '@dimension'
+  dimensions:
+  - free.schedule.delay_enabled
+  values:
+  - true
+  - false
+  steps:
+  - Apply free.schedule.delay_enabled at [True, False] through the owning surface.
+  - 'Run the case''s oracle: UI plus the real WordPress effect.'
+  assertions:
+  - The behavior matches inc/settings/options.php:52.
+  - The invariants that apply to this dimension hold.
+  oracle:
+  - ui
+  - integration
+  automation: planned
+- id: TB-SCHED-103
+  title: 'Dimension: Hold days (free.schedule.delay_value)'
+  owner: free
+  risk: high
+  tags:
+  - '@free'
+  - '@schedule'
+  - '@hold'
+  - '@dimension'
+  dimensions:
+  - free.schedule.delay_value
+  values:
+  - 0
+  - 1
+  - 2
+  - 7
+  - 30
+  - 90
+  steps:
+  - Apply free.schedule.delay_value at [0, 1, 2, 7, 30, 90] through the owning surface.
+  - 'Run the case''s oracle: UI plus the real WordPress effect.'
+  assertions:
+  - The behavior matches inc/settings/options.php:191.
+  - The invariants that apply to this dimension hold.
+  oracle:
+  - ui
+  - integration
+  automation: planned
+- id: TB-SCHED-101
+  title: 'Dimension: WP-Cron disabled (free.schedule.cron_disabled)'
+  owner: free
+  risk: high
+  tags:
+  - '@free'
+  - '@schedule'
+  - '@environment'
+  - '@dimension'
+  dimensions:
+  - free.schedule.cron_disabled
+  values:
+  - true
+  - false
+  steps:
+  - Apply free.schedule.cron_disabled at [True, False] through the owning surface.
+  - 'Run the case''s oracle: UI plus the real WordPress effect.'
+  assertions:
+  - The behavior matches inc/classes/class-updatronix-schedule-context.php.
+  - The invariants that apply to this dimension hold.
+  oracle:
+  - ui
+  - integration
+  automation: planned
+- id: TB-AUTO-102
+  title: 'Dimension: Core auto-update mode (wp.auto_update_core)'
+  owner: shared
+  risk: critical
+  tags:
+  - '@free'
+  - '@auto-updates'
+  - '@invariant'
+  - '@dimension'
+  dimensions:
+  - wp.auto_update_core
+  values:
+  - 'true'
+  - 'false'
+  - minor
+  steps:
+  - Apply wp.auto_update_core at ['true', 'false', 'minor'] through the owning surface.
+  - 'Run the case''s oracle: UI plus the real WordPress effect.'
+  assertions:
+  - The behavior matches WordPress `auto_update_core` / `WP_AUTO_UPDATE_CORE`.
+  - The invariants that apply to this dimension hold.
+  oracle:
+  - ui
+  - integration
+  automation: planned
+- id: TB-AUTO-103
+  title: 'Dimension: Plugin auto-update opt-ins (wp.auto_update_plugins)'
+  owner: shared
+  risk: critical
+  tags:
+  - '@free'
+  - '@pro'
+  - '@auto-updates'
+  - '@invariant'
+  - '@dimension'
+  dimensions:
+  - wp.auto_update_plugins
+  values:
+  - empty
+  - one
+  - all
+  - deleted_item
+  - locked_item
+  - composer_item
+  steps:
+  - Apply wp.auto_update_plugins at ['empty', 'one', 'all', 'deleted_item', 'locked_item',
+    'composer_item'] through the owning surface.
+  - 'Run the case''s oracle: UI plus the real WordPress effect.'
+  assertions:
+  - The behavior matches WordPress `auto_update_plugins`.
+  - The invariants that apply to this dimension hold.
+  oracle:
+  - ui
+  - integration
+  automation: planned
+- id: TB-AUTO-104
+  title: 'Dimension: Theme auto-update opt-ins (wp.auto_update_themes)'
+  owner: shared
+  risk: critical
+  tags:
+  - '@free'
+  - '@pro'
+  - '@auto-updates'
+  - '@invariant'
+  - '@dimension'
+  dimensions:
+  - wp.auto_update_themes
+  values:
+  - empty
+  - one
+  - all
+  - deleted_item
+  - locked_item
+  steps:
+  - Apply wp.auto_update_themes at ['empty', 'one', 'all', 'deleted_item', 'locked_item']
+    through the owning surface.
+  - 'Run the case''s oracle: UI plus the real WordPress effect.'
+  assertions:
+  - The behavior matches WordPress `auto_update_themes`.
+  - The invariants that apply to this dimension hold.
+  oracle:
+  - ui
+  - integration
+  automation: planned
+- id: TB-AUTO-105
+  title: 'Dimension: Native translation auto-updates (wp.auto_update_translations)'
+  owner: shared
+  risk: medium
+  tags:
+  - '@free'
+  - '@auto-updates'
+  - '@dimension'
+  dimensions:
+  - wp.auto_update_translations
+  values:
+  - true
+  - false
+  steps:
+  - Apply wp.auto_update_translations at [True, False] through the owning surface.
+  - 'Run the case''s oracle: UI plus the real WordPress effect.'
+  assertions:
+  - The behavior matches WordPress `auto_update_translations`.
+  - The invariants that apply to this dimension hold.
+  oracle:
+  - ui
+  - integration
+  automation: planned
+- id: TB-AUTO-106
+  title: 'Dimension: AUTOMATIC_UPDATER_DISABLED (wp.constants.automatic_updater_disabled)'
+  owner: shared
+  risk: critical
+  tags:
+  - '@free'
+  - '@pro'
+  - '@constants'
+  - '@invariant'
+  - '@dimension'
+  dimensions:
+  - wp.constants.automatic_updater_disabled
+  values:
+  - true
+  - false
+  steps:
+  - Apply wp.constants.automatic_updater_disabled at [True, False] through the owning
+    surface.
+  - 'Run the case''s oracle: UI plus the real WordPress effect.'
+  assertions:
+  - The behavior matches wp-config.php.
+  - The invariants that apply to this dimension hold.
+  oracle:
+  - ui
+  - integration
+  automation: planned
+- id: TB-AUTO-108
+  title: 'Dimension: DISALLOW_FILE_MODS (wp.constants.disallow_file_mods)'
+  owner: shared
+  risk: critical
+  tags:
+  - '@free'
+  - '@pro'
+  - '@constants'
+  - '@invariant'
+  - '@dimension'
+  dimensions:
+  - wp.constants.disallow_file_mods
+  values:
+  - true
+  - false
+  steps:
+  - Apply wp.constants.disallow_file_mods at [True, False] through the owning surface.
+  - 'Run the case''s oracle: UI plus the real WordPress effect.'
+  assertions:
+  - The behavior matches wp-config.php.
+  - The invariants that apply to this dimension hold.
+  oracle:
+  - ui
+  - integration
+  automation: planned
+- id: TB-AUTO-109
+  title: 'Dimension: WP_AUTO_UPDATE_CORE (wp.constants.wp_auto_update_core)'
+  owner: shared
+  risk: critical
+  tags:
+  - '@free'
+  - '@constants'
+  - '@invariant'
+  - '@dimension'
+  dimensions:
+  - wp.constants.wp_auto_update_core
+  values:
+  - 'true'
+  - 'false'
+  - minor
+  steps:
+  - Apply wp.constants.wp_auto_update_core at ['true', 'false', 'minor'] through the
+    owning surface.
+  - 'Run the case''s oracle: UI plus the real WordPress effect.'
+  assertions:
+  - The behavior matches wp-config.php.
+  - The invariants that apply to this dimension hold.
+  oracle:
+  - ui
+  - integration
+  automation: planned
+- id: TB-AUTO-107
+  title: 'Dimension: DISABLE_WP_CRON (wp.constants.disable_wp_cron)'
+  owner: shared
+  risk: high
+  tags:
+  - '@free'
+  - '@schedule'
+  - '@constants'
+  - '@dimension'
+  dimensions:
+  - wp.constants.disable_wp_cron
+  values:
+  - true
+  - false
+  steps:
+  - Apply wp.constants.disable_wp_cron at [True, False] through the owning surface.
+  - 'Run the case''s oracle: UI plus the real WordPress effect.'
+  assertions:
+  - The behavior matches wp-config.php.
+  - The invariants that apply to this dimension hold.
+  oracle:
+  - ui
+  - integration
+  automation: planned
+- id: TB-LOG-101
+  title: 'Dimension: Decision layer enabled (free.kill_switch.log_decision_layer)'
+  owner: free
+  risk: high
+  tags:
+  - '@free'
+  - '@logger'
+  - '@kill-switch'
+  - '@dimension'
+  dimensions:
+  - free.kill_switch.log_decision_layer
+  values:
+  - true
+  - false
+  steps:
+  - Apply free.kill_switch.log_decision_layer at [True, False] through the owning
+    surface.
+  - 'Run the case''s oracle: UI plus the real WordPress effect.'
+  assertions:
+  - The behavior matches inc/classes/class-updatronix-logger.php:219.
+  - The invariants that apply to this dimension hold.
+  oracle:
+  - ui
+  - integration
+  automation: planned
+- id: TB-UI-101
+  title: 'Dimension: Native update time display enabled (free.kill_switch.native_update_time)'
+  owner: free
+  risk: medium
+  tags:
+  - '@free'
+  - '@schedule'
+  - '@kill-switch'
+  - '@dimension'
+  dimensions:
+  - free.kill_switch.native_update_time
+  values:
+  - true
+  - false
+  steps:
+  - Apply free.kill_switch.native_update_time at [True, False] through the owning
+    surface.
+  - 'Run the case''s oracle: UI plus the real WordPress effect.'
+  assertions:
+  - The behavior matches inc/admin/native-update-time.php:36.
+  - The invariants that apply to this dimension hold.
+  oracle:
+  - ui
+  - integration
+  automation: planned
+- id: TB-LOG-103
+  title: 'Dimension: Log row kind (free.log.row_kind)'
+  owner: free
+  risk: high
+  tags:
+  - '@free'
+  - '@logger'
+  - '@dimension'
+  dimensions:
+  - free.log.row_kind
+  values:
+  - legacy
+  - decision
+  - native_actual_update
+  - pass_summary
+  - external
+  steps:
+  - Apply free.log.row_kind at ['legacy', 'decision', 'native_actual_update', 'pass_summary',
+    'external'] through the owning surface.
+  - 'Run the case''s oracle: UI plus the real WordPress effect.'
+  assertions:
+  - The behavior matches inc/classes/class-updatronix-log-taxonomy.php.
+  - The invariants that apply to this dimension hold.
+  oracle:
+  - ui
+  - integration
+  automation: planned
+- id: TB-LOG-102
+  title: 'Dimension: Activity-log filters (free.log.filters)'
+  owner: free
+  risk: medium
+  tags:
+  - '@free'
+  - '@logger'
+  - '@ui'
+  - '@dimension'
+  dimensions:
+  - free.log.filters
+  values:
+  - []
+  - - type
+  - - type
+    - action
+    - status
+    - triggered_by
+    - day
+    - reason
+    - state
+    - origin
+    - pass_deep_link
+    - chain_deep_link
+    - next_eligible
+  steps:
+  - Apply free.log.filters at [[], ['type'], ['type', 'action', 'status', 'triggered_by',
+    'day', 'reason', 'state', 'origin', 'pass_deep_link', 'chain_deep_link', 'next_eligible']]
+    through the owning surface.
+  - 'Run the case''s oracle: UI plus the real WordPress effect.'
+  assertions:
+  - The behavior matches assets/src/js/components/activityLog/logFilters.js.
+  - The invariants that apply to this dimension hold.
+  oracle:
+  - ui
+  - integration
+  automation: planned
+- id: TB-EXPORT-103
+  title: 'Dimension: Export format (free.export.format)'
+  owner: shared
+  risk: high
+  tags:
+  - '@free'
+  - '@pro'
+  - '@export'
+  - '@dimension'
+  dimensions:
+  - free.export.format
+  values:
+  - txt
+  - csv
+  - json
+  - xml
+  steps:
+  - Apply free.export.format at ['txt', 'csv', 'json', 'xml'] through the owning surface.
+  - 'Run the case''s oracle: UI plus the real WordPress effect.'
+  assertions:
+  - The behavior matches inc/settings/options.php:673.
+  - The invariants that apply to this dimension hold.
+  oracle:
+  - ui
+  - integration
+  automation: planned
+- id: TB-EXPORT-105
+  title: 'Dimension: Export scope (free.export.scope)'
+  owner: free
+  risk: high
+  tags:
+  - '@free'
+  - '@export'
+  - '@dimension'
+  dimensions:
+  - free.export.scope
+  values:
+  - current
+  - all
+  - last_30_days
+  steps:
+  - Apply free.export.scope at ['current', 'all', 'last_30_days'] through the owning
+    surface.
+  - 'Run the case''s oracle: UI plus the real WordPress effect.'
+  assertions:
+  - The behavior matches assets/src/js/components/activityLog/ExportLogsModal.js.
+  - The invariants that apply to this dimension hold.
+  oracle:
+  - ui
+  - integration
+  automation: planned
+- id: TB-EXPORT-104
+  title: 'Dimension: Merge same-item rows (free.export.merge)'
+  owner: free
+  risk: medium
+  tags:
+  - '@free'
+  - '@export'
+  - '@dimension'
+  dimensions:
+  - free.export.merge
+  values:
+  - true
+  - false
+  steps:
+  - Apply free.export.merge at [True, False] through the owning surface.
+  - 'Run the case''s oracle: UI plus the real WordPress effect.'
+  assertions:
+  - The behavior matches assets/src/js/components/activityLog/exportReports.js.
+  - The invariants that apply to this dimension hold.
+  oracle:
+  - ui
+  - integration
+  automation: planned
+- id: TB-EXPORT-101
+  title: 'Dimension: Export columns (free.export.columns)'
+  owner: free
+  risk: medium
+  tags:
+  - '@free'
+  - '@pro'
+  - '@export'
+  - '@dimension'
+  dimensions:
+  - free.export.columns
+  values:
+  - []
+  - - action
+  - - action
+    - run_context
+    - user
+    - status
+    - category
+    - reason
+    - state
+    - origin
+    - pass
+    - chain
+    - next_eligible
+    - decision_context
+    - retained
+  steps:
+  - Apply free.export.columns at [[], ['action'], ['action', 'run_context', 'user',
+    'status', 'category', 'reason', 'state', 'origin', 'pass', 'chain', 'next_eligible',
+    'decision_context', 'retained']] through the owning surface.
+  - 'Run the case''s oracle: UI plus the real WordPress effect.'
+  assertions:
+  - The behavior matches assets/src/js/components/activityLog/constants.js.
+  - The invariants that apply to this dimension hold.
+  oracle:
+  - ui
+  - integration
+  automation: planned
+- id: TB-EXPORT-102
+  title: 'Dimension: Empty export (free.export.empty)'
+  owner: free
+  risk: medium
+  tags:
+  - '@free'
+  - '@export'
+  - '@dimension'
+  dimensions:
+  - free.export.empty
+  values:
+  - no_matches
+  - expired
+  - rate_limited
+  - chunked_continuation
+  steps:
+  - Apply free.export.empty at ['no_matches', 'expired', 'rate_limited', 'chunked_continuation']
+    through the owning surface.
+  - 'Run the case''s oracle: UI plus the real WordPress effect.'
+  assertions:
+  - The behavior matches inc/classes/class-updatronix-export.php.
+  - The invariants that apply to this dimension hold.
+  oracle:
+  - ui
+  - integration
+  automation: planned
+- id: TB-HEALTH-101
+  title: 'Dimension: Health checks (free.health.checks)'
+  owner: free
+  risk: medium
+  tags:
+  - '@free'
+  - '@pro'
+  - '@health'
+  - '@dimension'
+  dimensions:
+  - free.health.checks
+  values:
+  - []
+  - - wordpress_version
+  - - wordpress_version
+    - php_version
+    - disk_space
+    - wp_cron
+    - update_lock
+    - automatic_retries
+    - automatic_update_pass
+    - automatic_update_last_pass
+    - automatic_update_drain
+  steps:
+  - Apply free.health.checks at [[], ['wordpress_version'], ['wordpress_version',
+    'php_version', 'disk_space', 'wp_cron', 'update_lock', 'automatic_retries', 'automatic_update_pass',
+    'automatic_update_last_pass', 'automatic_update_drain']] through the owning surface.
+  - 'Run the case''s oracle: UI plus the real WordPress effect.'
+  assertions:
+  - The behavior matches inc/classes/class-updatronix-health.php, Pro pass health.
+  - The invariants that apply to this dimension hold.
+  oracle:
+  - ui
+  - integration
+  automation: planned
+- id: TB-UI-102
+  title: 'Dimension: Admin surface (free.ui.surface)'
+  owner: shared
+  risk: high
+  tags:
+  - '@free'
+  - '@pro'
+  - '@ui'
+  - '@dimension'
+  dimensions:
+  - free.ui.surface
+  values:
+  - logs
+  - auto_updates
+  - schedule
+  - health
+  - settings
+  - documentation
+  steps:
+  - Apply free.ui.surface at ['logs', 'auto_updates', 'schedule', 'health', 'settings',
+    'documentation'] through the owning surface.
+  - 'Run the case''s oracle: UI plus the real WordPress effect.'
+  assertions:
+  - The behavior matches assets/src/js/shell/routes.js, inc/admin/menu.php.
+  - The invariants that apply to this dimension hold.
+  oracle:
+  - ui
+  - integration
+  automation: planned
+- id: TB-UI-103
+  title: 'Dimension: Viewport (free.ui.viewport)'
+  owner: shared
+  risk: low
+  tags:
+  - '@free'
+  - '@pro'
+  - '@a11y'
+  - '@dimension'
+  dimensions:
+  - free.ui.viewport
+  values:
+  - '390'
+  - '760'
+  - desktop
+  steps:
+  - Apply free.ui.viewport at ['390', '760', 'desktop'] through the owning surface.
+  - 'Run the case''s oracle: UI plus the real WordPress effect.'
+  assertions:
+  - The behavior matches tests/e2e/helpers/a11y.js.
+  - The invariants that apply to this dimension hold.
+  oracle:
+  - ui
+  - integration
+  automation: planned
+- id: TB-SHIELD-109
+  title: 'Dimension: Protect this site (pro.shield.safe_mode)'
+  owner: pro
+  risk: critical
+  tags:
+  - '@pro'
+  - '@shield'
+  - '@invariant'
+  - '@dimension'
+  dimensions:
+  - pro.shield.safe_mode
+  values:
+  - true
+  - false
+  steps:
+  - Apply pro.shield.safe_mode at [True, False] through the owning surface.
+  - 'Run the case''s oracle: UI plus the real WordPress effect.'
+  assertions:
+  - The behavior matches inc/settings/options.php:29.
+  - The invariants that apply to this dimension hold.
+  oracle:
+  - ui
+  - integration
+  automation: planned
+- id: TB-SHIELD-102
+  title: 'Dimension: Check PHP compatibility (pro.shield.control_php_version)'
+  owner: pro
+  risk: critical
+  tags:
+  - '@pro'
+  - '@shield'
+  - '@dimension'
+  dimensions:
+  - pro.shield.control_php_version
+  values:
+  - true
+  - false
+  steps:
+  - Apply pro.shield.control_php_version at [True, False] through the owning surface.
+  - 'Run the case''s oracle: UI plus the real WordPress effect.'
+  assertions:
+  - The behavior matches inc/settings/options.php:31.
+  - The invariants that apply to this dimension hold.
+  oracle:
+  - ui
+  - integration
+  automation: planned
+- id: TB-SHIELD-103
+  title: 'Dimension: Check WordPress compatibility (pro.shield.control_wp_version)'
+  owner: pro
+  risk: critical
+  tags:
+  - '@pro'
+  - '@shield'
+  - '@dimension'
+  dimensions:
+  - pro.shield.control_wp_version
+  values:
+  - true
+  - false
+  steps:
+  - Apply pro.shield.control_wp_version at [True, False] through the owning surface.
+  - 'Run the case''s oracle: UI plus the real WordPress effect.'
+  assertions:
+  - The behavior matches inc/settings/options.php:32.
+  - The invariants that apply to this dimension hold.
+  oracle:
+  - ui
+  - integration
+  automation: planned
+- id: TB-SHIELD-105
+  title: 'Dimension: Incompatible update behavior (pro.shield.incompatible_behavior)'
+  owner: pro
+  risk: critical
+  tags:
+  - '@pro'
+  - '@shield'
+  - '@dimension'
+  dimensions:
+  - pro.shield.incompatible_behavior
+  values:
+  - disable
+  - cancel
+  steps:
+  - Apply pro.shield.incompatible_behavior at ['disable', 'cancel'] through the owning
+    surface.
+  - 'Run the case''s oracle: UI plus the real WordPress effect.'
+  assertions:
+  - The behavior matches inc/settings/options.php:33.
+  - The invariants that apply to this dimension hold.
+  oracle:
+  - ui
+  - integration
+  automation: planned
+- id: TB-SHIELD-108
+  title: 'Dimension: Re-enable auto-updates automatically (pro.shield.re_enable)'
+  owner: pro
+  risk: high
+  tags:
+  - '@pro'
+  - '@shield'
+  - '@dimension'
+  dimensions:
+  - pro.shield.re_enable
+  values:
+  - true
+  - false
+  steps:
+  - Apply pro.shield.re_enable at [True, False] through the owning surface.
+  - 'Run the case''s oracle: UI plus the real WordPress effect.'
+  assertions:
+  - The behavior matches inc/settings/options.php:34.
+  - The invariants that apply to this dimension hold.
+  oracle:
+  - ui
+  - integration
+  automation: planned
+- id: TB-SHIELD-107
+  title: 'Dimension: Notify the technical manager on block (pro.shield.notify_on_block)'
+  owner: pro
+  risk: high
+  tags:
+  - '@pro'
+  - '@shield'
+  - '@mail'
+  - '@dimension'
+  dimensions:
+  - pro.shield.notify_on_block
+  values:
+  - true
+  - false
+  steps:
+  - Apply pro.shield.notify_on_block at [True, False] through the owning surface.
+  - 'Run the case''s oracle: UI plus the real WordPress effect.'
+  assertions:
+  - The behavior matches inc/settings/options.php:30.
+  - The invariants that apply to this dimension hold.
+  oracle:
+  - ui
+  - integration
+  automation: planned
+- id: TB-SHIELD-106
+  title: 'Dimension: Email the technical manager (pro.shield.notify_email)'
+  owner: pro
+  risk: high
+  tags:
+  - '@pro'
+  - '@shield'
+  - '@mail'
+  - '@dimension'
+  dimensions:
+  - pro.shield.notify_email
+  values:
+  - true
+  - false
+  steps:
+  - Apply pro.shield.notify_email at [True, False] through the owning surface.
+  - 'Run the case''s oracle: UI plus the real WordPress effect.'
+  assertions:
+  - The behavior matches inc/settings/options.php:35.
+  - The invariants that apply to this dimension hold.
+  oracle:
+  - ui
+  - integration
+  automation: planned
+- id: TB-SHIELD-104
+  title: 'Dimension: Flag abandoned plugins (pro.shield.flag_abandoned)'
+  owner: pro
+  risk: medium
+  tags:
+  - '@pro'
+  - '@shield'
+  - '@dimension'
+  dimensions:
+  - pro.shield.flag_abandoned
+  values:
+  - true
+  - false
+  steps:
+  - Apply pro.shield.flag_abandoned at [True, False] through the owning surface.
+  - 'Run the case''s oracle: UI plus the real WordPress effect.'
+  assertions:
+  - The behavior matches inc/settings/options.php:36.
+  - The invariants that apply to this dimension hold.
+  oracle:
+  - ui
+  - integration
+  automation: planned
+- id: TB-SHIELD-101
+  title: 'Dimension: Recently blocked window (pro.shield.blocked_history)'
+  owner: pro
+  risk: low
+  tags:
+  - '@pro'
+  - '@shield'
+  - '@ui'
+  - '@dimension'
+  dimensions:
+  - pro.shield.blocked_history
+  values:
+  - 30_days
+  - empty
+  - many
+  steps:
+  - Apply pro.shield.blocked_history at ['30_days', 'empty', 'many'] through the owning
+    surface.
+  - 'Run the case''s oracle: UI plus the real WordPress effect.'
+  assertions:
+  - The behavior matches inc/update-shield/class-updatronix-update-shield.php.
+  - The invariants that apply to this dimension hold.
+  oracle:
+  - ui
+  - integration
+  automation: planned
+- id: TB-VLOCK-102
+  title: 'Dimension: Version Lock master switch (pro.version_lock.enabled)'
+  owner: pro
+  risk: critical
+  tags:
+  - '@pro'
+  - '@version-lock'
+  - '@invariant'
+  - '@dimension'
+  dimensions:
+  - pro.version_lock.enabled
+  values:
+  - true
+  - false
+  steps:
+  - Apply pro.version_lock.enabled at [True, False] through the owning surface.
+  - 'Run the case''s oracle: UI plus the real WordPress effect.'
+  assertions:
+  - The behavior matches inc/settings/options.php:37.
+  - The invariants that apply to this dimension hold.
+  oracle:
+  - ui
+  - integration
+  automation: planned
+- id: TB-VLOCK-104
+  title: 'Dimension: Block manual updates (pro.version_lock.manual_updates)'
+  owner: pro
+  risk: critical
+  tags:
+  - '@pro'
+  - '@version-lock'
+  - '@invariant'
+  - '@dimension'
+  dimensions:
+  - pro.version_lock.manual_updates
+  values:
+  - true
+  - false
+  steps:
+  - Apply pro.version_lock.manual_updates at [True, False] through the owning surface.
+  - 'Run the case''s oracle: UI plus the real WordPress effect.'
+  assertions:
+  - The behavior matches inc/settings/options.php:38.
+  - The invariants that apply to this dimension hold.
+  oracle:
+  - ui
+  - integration
+  automation: planned
+- id: TB-VLOCK-101
+  title: 'Dimension: Version-control detection (pro.version_lock.detection)'
+  owner: pro
+  risk: critical
+  tags:
+  - '@pro'
+  - '@version-lock'
+  - '@invariant'
+  - '@dimension'
+  dimensions:
+  - pro.version_lock.detection
+  values:
+  - none
+  - git_item_root
+  - git_ancestor
+  - svn
+  - hg
+  - bzr
+  steps:
+  - Apply pro.version_lock.detection at ['none', 'git_item_root', 'git_ancestor',
+    'svn', 'hg', 'bzr'] through the owning surface.
+  - 'Run the case''s oracle: UI plus the real WordPress effect.'
+  assertions:
+  - The behavior matches inc/update-engine/class-updatronix-version-control-detector.php.
+  - The invariants that apply to this dimension hold.
+  oracle:
+  - ui
+  - integration
+  automation: planned
+- id: TB-VLOCK-103
+  title: 'Dimension: Manager label (pro.version_lock.manager)'
+  owner: pro
+  risk: medium
+  tags:
+  - '@pro'
+  - '@version-lock'
+  - '@ui'
+  - '@dimension'
+  dimensions:
+  - pro.version_lock.manager
+  values:
+  - Git
+  - SVN
+  - Mercurial
+  - Bazaar
+  - Composer
+  - another manager
+  steps:
+  - Apply pro.version_lock.manager at ['Git', 'SVN', 'Mercurial', 'Bazaar', 'Composer',
+    'another manager'] through the owning surface.
+  - 'Run the case''s oracle: UI plus the real WordPress effect.'
+  assertions:
+  - The behavior matches inc/update-engine/class-updatronix-version-control-detector.php.
+  - The invariants that apply to this dimension hold.
+  oracle:
+  - ui
+  - integration
+  automation: planned
+- id: TB-PASS-101
+  title: 'Dimension: Automatic update pass enabled (pro.pass.enabled)'
+  owner: pro
+  risk: critical
+  tags:
+  - '@pro'
+  - '@pass'
+  - '@kill-switch'
+  - '@invariant'
+  - '@dimension'
+  dimensions:
+  - pro.pass.enabled
+  values:
+  - true
+  - false
+  steps:
+  - Apply pro.pass.enabled at [True, False] through the owning surface.
+  - 'Run the case''s oracle: UI plus the real WordPress effect.'
+  assertions:
+  - The behavior matches inc/update-engine/class-updatronix-update-pass.php:1161.
+  - The invariants that apply to this dimension hold.
+  oracle:
+  - ui
+  - integration
+  automation: planned
+- id: TB-PASS-105
+  title: 'Dimension: Pass nodes (pro.pass.node_count)'
+  owner: pro
+  risk: high
+  tags:
+  - '@pro'
+  - '@pass'
+  - '@dimension'
+  dimensions:
+  - pro.pass.node_count
+  values:
+  - 0
+  - 1
+  - 2
+  - 10
+  - 49
+  - 50
+  steps:
+  - Apply pro.pass.node_count at [0, 1, 2, 10, 49, 50] through the owning surface.
+  - 'Run the case''s oracle: UI plus the real WordPress effect.'
+  assertions:
+  - The behavior matches inc/update-engine/class-updatronix-update-pass.php.
+  - The invariants that apply to this dimension hold.
+  oracle:
+  - ui
+  - integration
+  automation: planned
+- id: TB-PASS-106
+  title: 'Dimension: Pass state (pro.pass.state)'
+  owner: pro
+  risk: critical
+  tags:
+  - '@pro'
+  - '@pass'
+  - '@invariant'
+  - '@dimension'
+  dimensions:
+  - pro.pass.state
+  values:
+  - none
+  - planned
+  - active
+  - draining
+  - completed
+  - partial
+  steps:
+  - Apply pro.pass.state at ['none', 'planned', 'active', 'draining', 'completed',
+    'partial'] through the owning surface.
+  - 'Run the case''s oracle: UI plus the real WordPress effect.'
+  assertions:
+  - The behavior matches inc/update-engine/class-updatronix-update-pass.php.
+  - The invariants that apply to this dimension hold.
+  oracle:
+  - ui
+  - integration
+  automation: planned
+- id: TB-PASS-103
+  title: 'Dimension: Native lock contention (pro.pass.lock_wait)'
+  owner: pro
+  risk: high
+  tags:
+  - '@pro'
+  - '@pass'
+  - '@invariant'
+  - '@dimension'
+  dimensions:
+  - pro.pass.lock_wait
+  values:
+  - clear
+  - busy_first
+  - busy_retry
+  - busy_give_up
+  steps:
+  - Apply pro.pass.lock_wait at ['clear', 'busy_first', 'busy_retry', 'busy_give_up']
+    through the owning surface.
+  - 'Run the case''s oracle: UI plus the real WordPress effect.'
+  assertions:
+  - The behavior matches inc/update-engine/class-updatronix-update-pass-gate.php.
+  - The invariants that apply to this dimension hold.
+  oracle:
+  - ui
+  - integration
+  automation: planned
+- id: TB-PASS-104
+  title: 'Dimension: Pass max attempts (pro.pass.max_attempts)'
+  owner: pro
+  risk: high
+  tags:
+  - '@pro'
+  - '@pass'
+  - '@dimension'
+  dimensions:
+  - pro.pass.max_attempts
+  values:
+  - 1
+  - 2
+  - 3
+  - 5
+  - 10
+  steps:
+  - Apply pro.pass.max_attempts at [1, 2, 3, 5, 10] through the owning surface.
+  - 'Run the case''s oracle: UI plus the real WordPress effect.'
+  assertions:
+  - The behavior matches filter `updatronix_pro_update_pass_max_attempts`.
+  - The invariants that apply to this dimension hold.
+  oracle:
+  - ui
+  - integration
+  automation: planned
+- id: TB-PASS-102
+  title: 'Dimension: Last-pass cache (pro.pass.last_pass)'
+  owner: pro
+  risk: medium
+  tags:
+  - '@pro'
+  - '@pass'
+  - '@flow'
+  - '@dimension'
+  dimensions:
+  - pro.pass.last_pass
+  values:
+  - absent
+  - present
+  - expired
+  - logging_disabled
+  steps:
+  - Apply pro.pass.last_pass at ['absent', 'present', 'expired', 'logging_disabled']
+    through the owning surface.
+  - 'Run the case''s oracle: UI plus the real WordPress effect.'
+  assertions:
+  - The behavior matches inc/update-engine/class-updatronix-update-pass.php.
+  - The invariants that apply to this dimension hold.
+  oracle:
+  - ui
+  - integration
+  automation: planned
+- id: TB-PLAN-102
+  title: 'Dimension: Offer state at plan time (pro.planning.offer_state)'
+  owner: pro
+  risk: critical
+  tags:
+  - '@pro'
+  - '@pass'
+  - '@invariant'
+  - '@dimension'
+  dimensions:
+  - pro.planning.offer_state
+  values:
+  - no_offer
+  - pending
+  - stale
+  - target_mismatch
+  - non_opted
+  - locked
+  steps:
+  - Apply pro.planning.offer_state at ['no_offer', 'pending', 'stale', 'target_mismatch',
+    'non_opted', 'locked'] through the owning surface.
+  - 'Run the case''s oracle: UI plus the real WordPress effect.'
+  assertions:
+  - The behavior matches inc/update-engine/class-updatronix-update-planner.php.
+  - The invariants that apply to this dimension hold.
+  oracle:
+  - ui
+  - integration
+  automation: planned
+- id: TB-PLAN-101
+  title: 'Dimension: One-item gate result (pro.planning.gate_result)'
+  owner: pro
+  risk: critical
+  tags:
+  - '@pro'
+  - '@pass'
+  - '@invariant'
+  - '@dimension'
+  dimensions:
+  - pro.planning.gate_result
+  values:
+  - selected
+  - not_selected
+  - pass_disabled
+  - lock_busy
+  - no_offer
+  steps:
+  - Apply pro.planning.gate_result at ['selected', 'not_selected', 'pass_disabled',
+    'lock_busy', 'no_offer'] through the owning surface.
+  - 'Run the case''s oracle: UI plus the real WordPress effect.'
+  assertions:
+  - The behavior matches inc/update-engine/class-updatronix-update-pass-gate.php.
+  - The invariants that apply to this dimension hold.
+  oracle:
+  - ui
+  - integration
+  automation: planned
+- id: TB-FLOW-101
+  title: 'Dimension: Chain count (pro.flow.chain_count)'
+  owner: pro
+  risk: high
+  tags:
+  - '@pro'
+  - '@flow'
+  - '@dimension'
+  dimensions:
+  - pro.flow.chain_count
+  values:
+  - 0
+  - 1
+  - 2
+  - 10
+  steps:
+  - Apply pro.flow.chain_count at [0, 1, 2, 10] through the owning surface.
+  - 'Run the case''s oracle: UI plus the real WordPress effect.'
+  assertions:
+  - The behavior matches inc/update-flow/class-updatronix-update-flow.php.
+  - The invariants that apply to this dimension hold.
+  oracle:
+  - ui
+  - integration
+  automation: planned
+- id: TB-FLOW-102
+  title: 'Dimension: Chain enabled (pro.flow.chain_enabled)'
+  owner: pro
+  risk: high
+  tags:
+  - '@pro'
+  - '@flow'
+  - '@dimension'
+  dimensions:
+  - pro.flow.chain_enabled
+  values:
+  - true
+  - false
+  steps:
+  - Apply pro.flow.chain_enabled at [True, False] through the owning surface.
+  - 'Run the case''s oracle: UI plus the real WordPress effect.'
+  assertions:
+  - The behavior matches inc/update-flow/class-updatronix-update-flow.php.
+  - The invariants that apply to this dimension hold.
+  oracle:
+  - ui
+  - integration
+  automation: planned
+- id: TB-FLOW-106
+  title: 'Dimension: Steps per chain (pro.flow.step_count)'
+  owner: pro
+  risk: high
+  tags:
+  - '@pro'
+  - '@flow'
+  - '@dimension'
+  dimensions:
+  - pro.flow.step_count
+  values:
+  - 2
+  - 3
+  - 10
+  - 49
+  - 50
+  steps:
+  - Apply pro.flow.step_count at [2, 3, 10, 49, 50] through the owning surface.
+  - 'Run the case''s oracle: UI plus the real WordPress effect.'
+  assertions:
+  - The behavior matches inc/update-flow/class-updatronix-flow-planner.php.
+  - The invariants that apply to this dimension hold.
+  oracle:
+  - ui
+  - integration
+  automation: planned
+- id: TB-FLOW-103
+  title: 'Dimension: Chain shape (pro.flow.chain_shape)'
+  owner: pro
+  risk: critical
+  tags:
+  - '@pro'
+  - '@flow'
+  - '@invariant'
+  - '@dimension'
+  dimensions:
+  - pro.flow.chain_shape
+  values:
+  - valid_linear
+  - valid_branching
+  - cycle
+  - duplicate_step
+  - missing_item
+  - deleted_item
+  steps:
+  - Apply pro.flow.chain_shape at ['valid_linear', 'valid_branching', 'cycle', 'duplicate_step',
+    'missing_item', 'deleted_item'] through the owning surface.
+  - 'Run the case''s oracle: UI plus the real WordPress effect.'
+  assertions:
+  - The behavior matches inc/update-flow/class-updatronix-flow-planner.php.
+  - The invariants that apply to this dimension hold.
+  oracle:
+  - ui
+  - integration
+  automation: planned
+- id: TB-FLOW-105
+  title: 'Dimension: Predecessor state (pro.flow.predecessor_state)'
+  owner: pro
+  risk: critical
+  tags:
+  - '@pro'
+  - '@flow'
+  - '@pass'
+  - '@invariant'
+  - '@dimension'
+  dimensions:
+  - pro.flow.predecessor_state
+  values:
+  - not_started
+  - running
+  - done
+  - held
+  - locked
+  - blocked
+  steps:
+  - Apply pro.flow.predecessor_state at ['not_started', 'running', 'done', 'held',
+    'locked', 'blocked'] through the owning surface.
+  - 'Run the case''s oracle: UI plus the real WordPress effect.'
+  assertions:
+  - The behavior matches inc/update-engine/class-updatronix-update-pass-order.php.
+  - The invariants that apply to this dimension hold.
+  oracle:
+  - ui
+  - integration
+  automation: planned
+- id: TB-FLOW-104
+  title: 'Dimension: Non-opted item (pro.flow.non_opted)'
+  owner: pro
+  risk: critical
+  tags:
+  - '@pro'
+  - '@flow'
+  - '@invariant'
+  - '@dimension'
+  dimensions:
+  - pro.flow.non_opted
+  values:
+  - not_managed
+  - forced_opt_in
+  steps:
+  - Apply pro.flow.non_opted at ['not_managed', 'forced_opt_in'] through the owning
+    surface.
+  - 'Run the case''s oracle: UI plus the real WordPress effect.'
+  assertions:
+  - The behavior matches inc/update-flow/class-updatronix-flow-readiness.php.
+  - The invariants that apply to this dimension hold.
+  oracle:
+  - ui
+  - integration
+  automation: planned
+- id: TB-LIC-103
+  title: 'Dimension: License status (pro.license.status)'
+  owner: pro
+  risk: critical
+  tags:
+  - '@pro'
+  - '@license'
+  - '@gating'
+  - '@invariant'
+  - '@dimension'
+  dimensions:
+  - pro.license.status
+  values:
+  - active
+  - inactive
+  - invalid
+  - decrypt_failed
+  - dev_mode
+  - throttled
+  steps:
+  - Apply pro.license.status at ['active', 'inactive', 'invalid', 'decrypt_failed',
+    'dev_mode', 'throttled'] through the owning surface.
+  - 'Run the case''s oracle: UI plus the real WordPress effect.'
+  assertions:
+  - The behavior matches inc/license/class-updatronix-pro-license-storage.php.
+  - The invariants that apply to this dimension hold.
+  oracle:
+  - ui
+  - integration
+  automation: planned
+- id: TB-LIC-102
+  title: 'Dimension: Product presence (pro.license.mode)'
+  owner: pro
+  risk: critical
+  tags:
+  - '@pro'
+  - '@license'
+  - '@gating'
+  - '@dimension'
+  dimensions:
+  - pro.license.mode
+  values:
+  - free_only
+  - pro_missing_free
+  - pro_inactive_license
+  - pro_active_license
+  - pro_dev_mode
+  steps:
+  - Apply pro.license.mode at ['free_only', 'pro_missing_free', 'pro_inactive_license',
+    'pro_active_license', 'pro_dev_mode'] through the owning surface.
+  - 'Run the case''s oracle: UI plus the real WordPress effect.'
+  assertions:
+  - The behavior matches updatronix-pro.php, inc/classes/class-updatronix-pro-bootstrap.php.
+  - The invariants that apply to this dimension hold.
+  oracle:
+  - ui
+  - integration
+  automation: planned
+- id: TB-LIC-101
+  title: 'Dimension: License lifecycle action (pro.license.activation)'
+  owner: pro
+  risk: high
+  tags:
+  - '@pro'
+  - '@license'
+  - '@dimension'
+  dimensions:
+  - pro.license.activation
+  values:
+  - activate
+  - deactivate
+  - clear
+  - revalidate
+  - salt_rotation
+  steps:
+  - Apply pro.license.activation at ['activate', 'deactivate', 'clear', 'revalidate',
+    'salt_rotation'] through the owning surface.
+  - 'Run the case''s oracle: UI plus the real WordPress effect.'
+  assertions:
+  - The behavior matches inc/license/class-updatronix-pro-license-handler.php.
+  - The invariants that apply to this dimension hold.
+  oracle:
+  - ui
+  - integration
+  automation: planned
+- id: TB-WL-104
+  title: 'Dimension: White Label enabled (pro.white_label.enabled)'
+  owner: pro
+  risk: medium
+  tags:
+  - '@pro'
+  - '@white-label'
+  - '@dimension'
+  dimensions:
+  - pro.white_label.enabled
+  values:
+  - true
+  - false
+  steps:
+  - Apply pro.white_label.enabled at [True, False] through the owning surface.
+  - 'Run the case''s oracle: UI plus the real WordPress effect.'
+  assertions:
+  - The behavior matches inc/white-label/class-updatronix-white-label.php.
+  - The invariants that apply to this dimension hold.
+  oracle:
+  - ui
+  - integration
+  automation: planned
+- id: TB-WL-101
+  title: 'Dimension: Brand name (pro.white_label.brand)'
+  owner: pro
+  risk: medium
+  tags:
+  - '@pro'
+  - '@white-label'
+  - '@security'
+  - '@dimension'
+  dimensions:
+  - pro.white_label.brand
+  values:
+  - empty
+  - normal
+  - markup
+  - overlong
+  - unicode
+  steps:
+  - Apply pro.white_label.brand at ['empty', 'normal', 'markup', 'overlong', 'unicode']
+    through the owning surface.
+  - 'Run the case''s oracle: UI plus the real WordPress effect.'
+  assertions:
+  - The behavior matches inc/white-label/class-updatronix-white-label.php.
+  - The invariants that apply to this dimension hold.
+  oracle:
+  - ui
+  - integration
+  automation: planned
+- id: TB-WL-106
+  title: 'Dimension: Menu label (pro.white_label.menu_label)'
+  owner: pro
+  risk: low
+  tags:
+  - '@pro'
+  - '@white-label'
+  - '@dimension'
+  dimensions:
+  - pro.white_label.menu_label
+  values:
+  - empty
+  - normal
+  - markup
+  - overlong
+  steps:
+  - Apply pro.white_label.menu_label at ['empty', 'normal', 'markup', 'overlong']
+    through the owning surface.
+  - 'Run the case''s oracle: UI plus the real WordPress effect.'
+  assertions:
+  - The behavior matches inc/white-label/class-updatronix-white-label.php.
+  - The invariants that apply to this dimension hold.
+  oracle:
+  - ui
+  - integration
+  automation: planned
+- id: TB-WL-102
+  title: 'Dimension: Brand and menu colors (pro.white_label.colors)'
+  owner: pro
+  risk: low
+  tags:
+  - '@pro'
+  - '@white-label'
+  - '@a11y'
+  - '@dimension'
+  dimensions:
+  - pro.white_label.colors
+  values:
+  - default
+  - valid_hex
+  - invalid_hex
+  - low_contrast
+  steps:
+  - Apply pro.white_label.colors at ['default', 'valid_hex', 'invalid_hex', 'low_contrast']
+    through the owning surface.
+  - 'Run the case''s oracle: UI plus the real WordPress effect.'
+  assertions:
+  - The behavior matches inc/white-label/class-updatronix-white-label.php.
+  - The invariants that apply to this dimension hold.
+  oracle:
+  - ui
+  - integration
+  automation: planned
+- id: TB-WL-105
+  title: 'Dimension: Logo upload (pro.white_label.logo)'
+  owner: pro
+  risk: medium
+  tags:
+  - '@pro'
+  - '@white-label'
+  - '@security'
+  - '@dimension'
+  dimensions:
+  - pro.white_label.logo
+  values:
+  - none
+  - png_64
+  - jpeg_64
+  - webp_64
+  - svg
+  - oversized
+  steps:
+  - Apply pro.white_label.logo at ['none', 'png_64', 'jpeg_64', 'webp_64', 'svg',
+    'oversized'] through the owning surface.
+  - 'Run the case''s oracle: UI plus the real WordPress effect.'
+  assertions:
+  - The behavior matches inc/white-label/class-updatronix-white-label.php.
+  - The invariants that apply to this dimension hold.
+  oracle:
+  - ui
+  - integration
+  automation: planned
+- id: TB-WL-103
+  title: 'Dimension: Apply brand to emails (pro.white_label.email)'
+  owner: pro
+  risk: low
+  tags:
+  - '@pro'
+  - '@white-label'
+  - '@mail'
+  - '@dimension'
+  dimensions:
+  - pro.white_label.email
+  values:
+  - true
+  - false
+  steps:
+  - Apply pro.white_label.email at [True, False] through the owning surface.
+  - 'Run the case''s oracle: UI plus the real WordPress effect.'
+  assertions:
+  - The behavior matches inc/white-label/class-updatronix-white-label.php.
+  - The invariants that apply to this dimension hold.
+  oracle:
+  - ui
+  - integration
+  automation: planned
+- id: TB-UPDATE-105
+  title: 'Dimension: Update type (update.type)'
+  owner: shared
+  risk: critical
+  tags:
+  - '@free'
+  - '@pro'
+  - '@update'
+  - '@dimension'
+  dimensions:
+  - update.type
+  values:
+  - plugin
+  - theme
+  - core
+  - translation
+  steps:
+  - Apply update.type at ['plugin', 'theme', 'core', 'translation'] through the owning
+    surface.
+  - 'Run the case''s oracle: UI plus the real WordPress effect.'
+  assertions:
+  - The behavior matches inc/classes/class-updatronix-log-taxonomy.php.
+  - The invariants that apply to this dimension hold.
+  oracle:
+  - ui
+  - integration
+  automation: planned
+- id: TB-UPDATE-103
+  title: 'Dimension: Update origin (update.origin)'
+  owner: shared
+  risk: critical
+  tags:
+  - '@free'
+  - '@pro'
+  - '@update'
+  - '@dimension'
+  dimensions:
+  - update.origin
+  values:
+  - manual
+  - automatic
+  - wp_cli
+  - flow
+  - pass
+  steps:
+  - Apply update.origin at ['manual', 'automatic', 'wp_cli', 'flow', 'pass'] through
+    the owning surface.
+  - 'Run the case''s oracle: UI plus the real WordPress effect.'
+  assertions:
+  - The behavior matches inc/classes/class-updatronix-log-taxonomy.php.
+  - The invariants that apply to this dimension hold.
+  oracle:
+  - ui
+  - integration
+  automation: planned
+- id: TB-UPDATE-102
+  title: 'Dimension: Item decision state (update.item_state)'
+  owner: shared
+  risk: critical
+  tags:
+  - '@free'
+  - '@pro'
+  - '@update'
+  - '@invariant'
+  - '@dimension'
+  dimensions:
+  - update.item_state
+  values:
+  - no_offer
+  - pending
+  - locked_native
+  - locked_composer
+  - unknown
+  - unverified
+  steps:
+  - Apply update.item_state at ['no_offer', 'pending', 'locked_native', 'locked_composer',
+    'unknown', 'unverified'] through the owning surface.
+  - 'Run the case''s oracle: UI plus the real WordPress effect.'
+  assertions:
+  - The behavior matches inc/classes/class-updatronix-log-taxonomy.php.
+  - The invariants that apply to this dimension hold.
+  oracle:
+  - ui
+  - integration
+  automation: planned
+- id: TB-UPDATE-104
+  title: 'Dimension: Update package outcome (update.package)'
+  owner: shared
+  risk: critical
+  tags:
+  - '@free'
+  - '@pro'
+  - '@update'
+  - '@invariant'
+  - '@dimension'
+  dimensions:
+  - update.package
+  values:
+  - valid
+  - failing_download
+  - invalid_zip
+  - partial_write
+  - rollback
+  - timeout
+  steps:
+  - Apply update.package at ['valid', 'failing_download', 'invalid_zip', 'partial_write',
+    'rollback', 'timeout'] through the owning surface.
+  - 'Run the case''s oracle: UI plus the real WordPress effect.'
+  assertions:
+  - The behavior matches WordPress upgrader / pass fixtures.
+  - The invariants that apply to this dimension hold.
+  oracle:
+  - ui
+  - integration
+  automation: planned
+- id: TB-UPDATE-101
+  title: 'Dimension: Native per-item email (update.email)'
+  owner: shared
+  risk: critical
+  tags:
+  - '@free'
+  - '@pro'
+  - '@mail'
+  - '@invariant'
+  - '@dimension'
+  dimensions:
+  - update.email
+  values:
+  - none
+  - one
+  - two
+  - grouped
+  - failure
+  steps:
+  - Apply update.email at ['none', 'one', 'two', 'grouped', 'failure'] through the
+    owning surface.
+  - 'Run the case''s oracle: UI plus the real WordPress effect.'
+  assertions:
+  - The behavior matches WordPress `wp_mail` / `pre_wp_mail`.
+  - The invariants that apply to this dimension hold.
+  oracle:
+  - ui
+  - integration
+  automation: planned
+- id: TB-ENV-109
+  title: 'Dimension: WordPress version (env.wp_version)'
+  owner: shared
+  risk: high
+  tags:
+  - '@free'
+  - '@pro'
+  - '@environment'
+  - '@dimension'
+  dimensions:
+  - env.wp_version
+  values:
+  - '6.2'
+  - '6.4'
+  - '6.6'
+  - '7.1'
+  - compatible
+  - incompatible
+  steps:
+  - Apply env.wp_version at ['6.2', '6.4', '6.6', '7.1', 'compatible', 'incompatible']
+    through the owning surface.
+  - 'Run the case''s oracle: UI plus the real WordPress effect.'
+  assertions:
+  - The behavior matches readme.txt / site.
+  - The invariants that apply to this dimension hold.
+  oracle:
+  - ui
+  - integration
+  automation: planned
+- id: TB-ENV-106
+  title: 'Dimension: PHP version (env.php_version)'
+  owner: shared
+  risk: high
+  tags:
+  - '@free'
+  - '@pro'
+  - '@environment'
+  - '@dimension'
+  dimensions:
+  - env.php_version
+  values:
+  - '8.1'
+  - '8.2'
+  - '8.3'
+  - '8.4'
+  - incompatible
+  steps:
+  - Apply env.php_version at ['8.1', '8.2', '8.3', '8.4', 'incompatible'] through
+    the owning surface.
+  - 'Run the case''s oracle: UI plus the real WordPress effect.'
+  assertions:
+  - The behavior matches readme.txt / DDEV.
+  - The invariants that apply to this dimension hold.
+  oracle:
+  - ui
+  - integration
+  automation: planned
+- id: TB-ENV-102
+  title: 'Dimension: Database (env.database)'
+  owner: shared
+  risk: high
+  tags:
+  - '@free'
+  - '@pro'
+  - '@environment'
+  - '@dimension'
+  dimensions:
+  - env.database
+  values:
+  - mariadb
+  - mysql
+  - fresh_install
+  - legacy_schema
+  - restored_backup
+  steps:
+  - Apply env.database at ['mariadb', 'mysql', 'fresh_install', 'legacy_schema', 'restored_backup']
+    through the owning surface.
+  - 'Run the case''s oracle: UI plus the real WordPress effect.'
+  assertions:
+  - The behavior matches .ddev/config.yaml.
+  - The invariants that apply to this dimension hold.
+  oracle:
+  - ui
+  - integration
+  automation: planned
+- id: TB-ENV-103
+  title: 'Dimension: Filesystem method (env.filesystem)'
+  owner: shared
+  risk: critical
+  tags:
+  - '@free'
+  - '@pro'
+  - '@environment'
+  - '@invariant'
+  - '@dimension'
+  dimensions:
+  - env.filesystem
+  values:
+  - direct
+  - ssh
+  - unavailable
+  - read_only
+  - disk_full
+  steps:
+  - Apply env.filesystem at ['direct', 'ssh', 'unavailable', 'read_only', 'disk_full']
+    through the owning surface.
+  - 'Run the case''s oracle: UI plus the real WordPress effect.'
+  assertions:
+  - The behavior matches WordPress filesystem.
+  - The invariants that apply to this dimension hold.
+  oracle:
+  - ui
+  - integration
+  automation: planned
+- id: TB-ENV-108
+  title: 'Dimension: Item VCS provenance (env.vcs)'
+  owner: shared
+  risk: critical
+  tags:
+  - '@pro'
+  - '@environment'
+  - '@version-lock'
+  - '@dimension'
+  dimensions:
+  - env.vcs
+  values:
+  - none
+  - git_item_root
+  - git_ancestor
+  - svn
+  - hg
+  - bzr
+  steps:
+  - Apply env.vcs at ['none', 'git_item_root', 'git_ancestor', 'svn', 'hg', 'bzr']
+    through the owning surface.
+  - 'Run the case''s oracle: UI plus the real WordPress effect.'
+  assertions:
+  - The behavior matches version-control detector fixtures.
+  - The invariants that apply to this dimension hold.
+  oracle:
+  - ui
+  - integration
+  automation: planned
+- id: TB-ENV-107
+  title: 'Dimension: Site timezone (env.timezone)'
+  owner: shared
+  risk: high
+  tags:
+  - '@free'
+  - '@schedule'
+  - '@environment'
+  - '@dimension'
+  dimensions:
+  - env.timezone
+  values:
+  - UTC
+  - Europe/Paris
+  - America/New_York
+  - DST_boundary
+  - invalid
+  steps:
+  - Apply env.timezone at ['UTC', 'Europe/Paris', 'America/New_York', 'DST_boundary',
+    'invalid'] through the owning surface.
+  - 'Run the case''s oracle: UI plus the real WordPress effect.'
+  assertions:
+  - The behavior matches WordPress options.
+  - The invariants that apply to this dimension hold.
+  oracle:
+  - ui
+  - integration
+  automation: planned
+- id: TB-ENV-101
+  title: 'Dimension: WP-Cron (env.cron)'
+  owner: shared
+  risk: critical
+  tags:
+  - '@free'
+  - '@pro'
+  - '@schedule'
+  - '@pass'
+  - '@environment'
+  - '@dimension'
+  dimensions:
+  - env.cron
+  values:
+  - enabled
+  - disabled
+  - delayed
+  - manual_run
+  - overlap
+  steps:
+  - Apply env.cron at ['enabled', 'disabled', 'delayed', 'manual_run', 'overlap']
+    through the owning surface.
+  - 'Run the case''s oracle: UI plus the real WordPress effect.'
+  assertions:
+  - The behavior matches WP-Cron / `DISABLE_WP_CRON`.
+  - The invariants that apply to this dimension hold.
+  oracle:
+  - ui
+  - integration
+  automation: planned
+- id: TB-ENV-104
+  title: 'Dimension: Mail transport (env.mail)'
+  owner: shared
+  risk: high
+  tags:
+  - '@free'
+  - '@pro'
+  - '@mail'
+  - '@environment'
+  - '@dimension'
+  dimensions:
+  - env.mail
+  values:
+  - native
+  - captured
+  - failing
+  - disabled
+  - recovery_mode
+  steps:
+  - Apply env.mail at ['native', 'captured', 'failing', 'disabled', 'recovery_mode']
+    through the owning surface.
+  - 'Run the case''s oracle: UI plus the real WordPress effect.'
+  assertions:
+  - The behavior matches WordPress `wp_mail`.
+  - The invariants that apply to this dimension hold.
+  oracle:
+  - ui
+  - integration
+  automation: planned
+- id: TB-ENV-105
+  title: 'Dimension: Maintenance / recovery mode (env.maintenance)'
+  owner: shared
+  risk: high
+  tags:
+  - '@free'
+  - '@pro'
+  - '@environment'
+  - '@dimension'
+  dimensions:
+  - env.maintenance
+  values:
+  - normal
+  - maintenance
+  - recovery_mode
+  steps:
+  - Apply env.maintenance at ['normal', 'maintenance', 'recovery_mode'] through the
+    owning surface.
+  - 'Run the case''s oracle: UI plus the real WordPress effect.'
+  assertions:
+  - The behavior matches WordPress.
+  - The invariants that apply to this dimension hold.
+  oracle:
+  - ui
+  - integration
+  automation: planned
+- id: TB-ROLE-102
+  title: 'Dimension: User role (role.kind)'
+  owner: shared
+  risk: critical
+  tags:
+  - '@free'
+  - '@pro'
+  - '@roles'
+  - '@security'
+  - '@dimension'
+  dimensions:
+  - role.kind
+  values:
+  - administrator
+  - editor
+  - subscriber
+  - super_admin
+  - subsite_admin
+  - wp_cli
+  steps:
+  - Apply role.kind at ['administrator', 'editor', 'subscriber', 'super_admin', 'subsite_admin',
+    'wp_cli'] through the owning surface.
+  - 'Run the case''s oracle: UI plus the real WordPress effect.'
+  assertions:
+  - The behavior matches WordPress roles / capability checks.
+  - The invariants that apply to this dimension hold.
+  oracle:
+  - ui
+  - integration
+  automation: planned
+- id: TB-ROLE-101
+  title: 'Dimension: Capability (role.capability)'
+  owner: shared
+  risk: critical
+  tags:
+  - '@free'
+  - '@pro'
+  - '@roles'
+  - '@security'
+  - '@dimension'
+  dimensions:
+  - role.capability
+  values:
+  - manage_options
+  - manage_updatronix
+  - manage_updatronix_pro
+  - none
+  steps:
+  - Apply role.capability at ['manage_options', 'manage_updatronix', 'manage_updatronix_pro',
+    'none'] through the owning surface.
+  - 'Run the case''s oracle: UI plus the real WordPress effect.'
+  assertions:
+  - The behavior matches inc/core/constants.php, updatronix-pro.php.
+  - The invariants that apply to this dimension hold.
+  oracle:
+  - ui
+  - integration
+  automation: planned
+- id: TB-MS-102
+  title: 'Dimension: Multisite scope (multisite.scope)'
+  owner: shared
+  risk: critical
+  tags:
+  - '@free'
+  - '@pro'
+  - '@multisite'
+  - '@invariant'
+  - '@dimension'
+  dimensions:
+  - multisite.scope
+  values:
+  - single_site
+  - network_activated
+  - main_site
+  - subsite
+  - network_admin
+  - deleted_site
+  steps:
+  - Apply multisite.scope at ['single_site', 'network_activated', 'main_site', 'subsite',
+    'network_admin', 'deleted_site'] through the owning surface.
+  - 'Run the case''s oracle: UI plus the real WordPress effect.'
+  assertions:
+  - The behavior matches readme.txt, inc/classes/class-updatronix-database.php.
+  - The invariants that apply to this dimension hold.
+  oracle:
+  - ui
+  - integration
+  automation: planned
+- id: TB-MS-101
+  title: 'Dimension: Pass registration scope (multisite.pass_scope)'
+  owner: pro
+  risk: critical
+  tags:
+  - '@pro'
+  - '@multisite'
+  - '@pass'
+  - '@dimension'
+  dimensions:
+  - multisite.pass_scope
+  values:
+  - main_site_only
+  - subsite
+  - network_wide_future
+  steps:
+  - Apply multisite.pass_scope at ['main_site_only', 'subsite', 'network_wide_future']
+    through the owning surface.
+  - 'Run the case''s oracle: UI plus the real WordPress effect.'
+  assertions:
+  - The behavior matches inc/classes/class-updatronix-pro-bootstrap.php.
+  - The invariants that apply to this dimension hold.
+  oracle:
+  - ui
+  - integration
+  automation: planned

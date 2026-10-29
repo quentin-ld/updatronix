@@ -1,0 +1,92 @@
+schema: updatronix-testbook/manifest/v1
+version: 1
+updated: 2026-10-29
+generated_by: tests/testbook/testbook.py
+book: docs/testing/test-book.md
+owners: [free, pro, shared]
+automation_states: [planned, implemented, quarantined, retired]
+required_fields:
+  - id
+  - title
+  - owner
+  - risk
+  - tags
+  - automation
+case_id:
+  pattern: "^TB-[A-Z]+-[0-9]{3}$"
+  stable: true
+  groups:
+    SET: free.settings
+    SCHED: free.schedule
+    AUTO: free.auto_updates
+    LOG: free.logging
+    EXPORT: free.exports
+    HEALTH: free.health
+    UI: free.ui
+    SHIELD: pro.shield
+    VLOCK: pro.version_lock
+    PASS: pro.pass
+    PLAN: pro.planning
+    FLOW: pro.flow
+    LIC: pro.license
+    WL: pro.white_label
+    UPDATE: update
+    ENV: environment
+    ROLE: roles
+    MS: multisite
+  ranges:
+    hand_written: "001-099"
+    generated_dimension: "101-999"
+  retirement: "Keep the id with status: retired and replaced_by; never reuse."
+combination_ids:
+  pairwise: "^PAIR-[0-9]{3}$"
+  triple: "^COMBO-[0-9]{3}$"
+invariant_id: "^INV-[0-9]{2}$"
+tags:
+  core:
+    - "@free"
+    - "@pro"
+    - "@multisite"
+    - "@license"
+    - "@pass"
+    - "@flow"
+    - "@version-lock"
+    - "@schedule"
+    - "@logger"
+    - "@export"
+    - "@a11y"
+    - "@combo"
+    - "@invariant"
+    - "@smoke"
+    - "@release-only"
+  feature:
+    - "@shield"
+    - "@auto-updates"
+    - "@settings"
+    - "@update"
+    - "@mail"
+    - "@data"
+    - "@roles"
+    - "@security"
+    - "@environment"
+    - "@constants"
+    - "@timezone"
+    - "@health"
+    - "@ui"
+    - "@docs"
+    - "@support"
+    - "@white-label"
+    - "@uninstall"
+    - "@hold"
+    - "@kill-switch"
+    - "@dimension"
+    - "@all"
+    - "@critical"
+sources:
+  dimensions: tests/testbook/dimensions.yaml
+  cases: tests/testbook/cases.yaml
+  generated_cases: tests/testbook/cases.generated.yaml
+  invariants: tests/testbook/invariants.yaml
+  fixtures: tests/testbook/fixtures.yaml
+  freshness: tests/testbook/freshness.yaml
+  combinations: tests/testbook/combinations.yaml

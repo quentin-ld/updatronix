@@ -1,0 +1,94 @@
+schema: updatronix-testbook/freshness/v1
+updated: 2026-10-29
+notes: >-
+  Every watched code key, route, screen, flag, option, or constant must map to a
+  case. The validator discovers the Free settings keys, Pro Shield keys, REST
+  routes, and enabled filters from code; a new one without a mapping fails the
+  book check. Values are a dimension id (resolved to its generated case) or a
+  case id.
+
+settings_keys:
+  logging_enabled: free.logging_enabled
+  retention_days: free.retention_days
+  notifications_mode: free.notifications_mode
+  notify_enabled: free.notify_enabled
+  notify_emails: free.notify_emails
+  notify_on: free.notify_on
+  auto_update_translations: free.auto_update_translations
+  dismissed_constants: free.dismissed_constants
+  delete_data_on_uninstall: free.delete_data_on_uninstall
+
+shield_keys:
+  safe_mode: pro.shield.safe_mode
+  notify_on_block: pro.shield.notify_on_block
+  control_php_version: pro.shield.control_php_version
+  control_wp_version: pro.shield.control_wp_version
+  incompatible_behavior: pro.shield.incompatible_behavior
+  re_enable: pro.shield.re_enable
+  notify_email: pro.shield.notify_email
+  flag_abandoned: pro.shield.flag_abandoned
+  version_control_lock: pro.version_lock.enabled
+  version_lock_manual_updates: pro.version_lock.manual_updates
+
+routes:
+  "/auto-updates": TB-UI-002
+  "/auto-updates/core": TB-UI-002
+  "/auto-updates/dismiss-constant": TB-UI-002
+  "/auto-updates/plugin": TB-UI-002
+  "/auto-updates/theme": TB-UI-002
+  "/auto-updates/translation": TB-UI-002
+  "/health": TB-UI-004
+  "/health/check": TB-UI-004
+  "/health/diagnostics": TB-UI-004
+  "/health/retry": TB-UI-004
+  "/logs": TB-UI-001
+  "/logs/(?P<id>\\d+)": TB-UI-001
+  "/logs/all": TB-UI-001
+  "/logs/cleanup": TB-UI-001
+  "/logs/export": TB-UI-001
+  "/run-check": TB-UI-003
+  "/settings": TB-UI-005
+  "/flow/chains": TB-UI-009
+  "/flow/items": TB-UI-009
+  "/license/activate": TB-UI-011
+  "/license/deactivate": TB-UI-011
+  "/license/status": TB-UI-011
+  "/shield/blocked": TB-UI-008
+  "/shield/recheck": TB-UI-008
+  "/shield/settings": TB-UI-008
+  "/white-label": TB-UI-010
+
+screens:
+  logs: TB-UI-001
+  auto-updates: TB-UI-002
+  schedule: TB-UI-003
+  health: TB-UI-004
+  settings: TB-UI-005
+  documentation: TB-UI-006
+  support: TB-UI-007
+  update-shield: TB-UI-008
+  update-flow: TB-UI-009
+  white-label: TB-UI-010
+  license: TB-UI-011
+  plugins: TB-UI-012
+  themes: TB-UI-013
+  update-core: TB-UI-014
+  network-admin: TB-UI-015
+
+feature_flags:
+  updatronix_log_decision_layer_enabled: free.kill_switch.log_decision_layer
+  updatronix_native_update_time_enabled: free.kill_switch.native_update_time
+  updatronix_pro_update_engine_enabled: pro.pass.enabled
+  updatronix_pro_update_pass_enabled: pro.pass.enabled
+
+native_options:
+  auto_update_core: wp.auto_update_core
+  auto_update_plugins: wp.auto_update_plugins
+  auto_update_themes: wp.auto_update_themes
+  auto_update_translations: wp.auto_update_translations
+
+constants:
+  AUTOMATIC_UPDATER_DISABLED: wp.constants.automatic_updater_disabled
+  DISALLOW_FILE_MODS: wp.constants.disallow_file_mods
+  WP_AUTO_UPDATE_CORE: wp.constants.wp_auto_update_core
+  DISABLE_WP_CRON: wp.constants.disable_wp_cron

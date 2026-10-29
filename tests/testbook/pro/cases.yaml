@@ -1,0 +1,96 @@
+schema: updatronix-testbook/pro-cases/v1
+updated: 2026-10-29
+extends: ../cases.yaml
+notes: >-
+  Pro-only cases that extend the shared book. The shared dimensions, invariants,
+  fixtures, and the generated dimension cases already cover the settings; these
+  cases add the Pro lifecycle and network flows that the Free book cannot run.
+
+cases:
+  - id: TB-PRO-001
+    title: Pro gating and license states
+    owner: pro
+    risk: critical
+    tags: ["@pro", "@license", "@gating", "@smoke"]
+    dimensions: [pro.license.status, pro.license.mode]
+    steps: [Run free-only, inactive, invalid, active, dev-mode, and salt-rotation states.]
+    assertions: [Only Free screens without an active license; Pro routes register only when active; the license page recovers.]
+    oracle: [ui, http, pass]
+    automation: planned
+
+  - id: TB-PRO-002
+    title: Version Lock manager labels
+    owner: pro
+    risk: critical
+    tags: ["@pro", "@version-lock", "@ui"]
+    dimensions: [pro.version_lock.detection, pro.version_lock.manager]
+    steps: [Open Shield, plugins, themes, update-core, and Auto updates with locked fixtures.]
+    assertions: [Each row names the real manager and evidence; no lock label when Shield is off.]
+    oracle: [ui, log]
+    automation: planned
+
+  - id: TB-PRO-003
+    title: Shield incompatible behavior and re-enable
+    owner: pro
+    risk: critical
+    tags: ["@pro", "@shield"]
+    dimensions: [pro.shield.incompatible_behavior, pro.shield.re_enable]
+    steps: [Block an incompatible release with disable and cancel; publish a passing release.]
+    assertions: [Disable turns the toggle off; cancel keeps it on; re-enable only after a pass.]
+    oracle: [options, log, mail]
+    automation: planned
+
+  - id: TB-PRO-004
+    title: Pass two-item execution
+    owner: pro
+    risk: critical
+    tags: ["@pro", "@pass", "@smoke"]
+    dimensions: [pro.pass.node_count, pro.planning.gate_result]
+    steps: [Run a pass with two eligible items and one failure.]
+    assertions: [Two invocations; two emails; one item row each; one pass row; no duplicate.]
+    oracle: [disk, pass, log, mail]
+    automation: planned
+
+  - id: TB-PRO-005
+    title: Flow ordering
+    owner: pro
+    risk: critical
+    tags: ["@pro", "@flow", "@smoke"]
+    dimensions: [pro.flow.predecessor_state, pro.flow.chain_shape]
+    steps: [Run a chain with a held predecessor, a failed predecessor, and an independent branch.]
+    assertions: [No bypass; descendants wait; the independent branch continues.]
+    oracle: [pass, log, ui]
+    automation: planned
+
+  - id: TB-PRO-006
+    title: White Label lifecycle
+    owner: pro
+    risk: medium
+    tags: ["@pro", "@white-label", "@a11y"]
+    dimensions: [pro.white_label.enabled, pro.white_label.brand, pro.white_label.logo, pro.white_label.email]
+    steps: [Save, reset, upload invalid logos, sanitize markup, preview the email.]
+    assertions: [The draft saves/resets; file bounds hold; the preview is real; permissions are enforced.]
+    oracle: [ui, options, upload]
+    automation: planned
+
+  - id: TB-PRO-007
+    title: Network super admin
+    owner: pro
+    risk: critical
+    tags: ["@pro", "@multisite", "@roles"]
+    dimensions: [multisite.scope, role.kind, multisite.pass_scope]
+    steps: [Open the network admin as Super Admin; open a subsite as its admin; run the pass.]
+    assertions: [Network settings/logs are Super Admin only; the pass is main-site only; site deletion is clean.]
+    oracle: [ui, db, pass]
+    automation: planned
+
+  - id: TB-PRO-008
+    title: Pro export formats
+    owner: pro
+    risk: high
+    tags: ["@pro", "@export"]
+    dimensions: [free.export.format, free.export.columns]
+    steps: [Download CSV, JSON, and XML from the log export with decision context on and off.]
+    assertions: [The files are real and parse; columns match; the feed total agrees.]
+    oracle: [export, log]
+    automation: planned

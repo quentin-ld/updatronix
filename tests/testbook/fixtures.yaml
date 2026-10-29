@@ -1,0 +1,118 @@
+schema: updatronix-testbook/fixtures/v1
+updated: 2026-10-29
+notes: >-
+  The fixture contract. Provisioning is phase 3; this file names what must exist
+  and how it is reset. Secrets and the live license key are never stored here.
+
+environments:
+  single:
+    status: planned
+    url: https://updatronix-test.ddev.site
+    type: single_site
+    wp: "7.1"
+    php: "8.4"
+    db: mariadb
+    reset: db_snapshot_and_state_restore
+  multisite:
+    status: planned
+    url: https://updatronix-ms.ddev.site
+    type: multisite
+    sites: [main, subsite-a, subsite-b]
+    roles: [super_admin, subsite_admin]
+    reset: db_snapshot_and_state_restore
+
+tiers:
+  deterministic:
+    plugins:
+      - id: fixture-alpha/alpha.php
+        version: "1.0.0"
+        offer: "2.0.0"
+      - id: fixture-bravo/bravo.php
+        version: "1.0.0"
+        offer: "2.0.0"
+      - id: fixture-locked/locked.php
+        version: "1.0.0"
+        offer: "2.0.0"
+        marker: git_item_root
+      - id: fixture-broken/broken.php
+        version: "1.0.0"
+        offer: "2.0.0"
+        package: invalid_zip
+    themes:
+      - id: fixture-theme
+        version: "1.0.0"
+        offer: "2.0.0"
+    vcs:
+      - git_item_root
+      - git_ancestor
+      - svn
+      - hg
+      - bzr
+      - composer_project
+      - composer_package
+      - symlink_inside_root
+      - symlink_outside_root
+      - unreadable
+    offers:
+      - compatible
+      - incompatible_wp
+      - incompatible_php
+      - abandoned
+      - no_offer
+      - stale
+      - target_mismatch
+  community:
+    pinned: true
+    plugins:
+      - woocommerce
+      - contact-form-7
+      - wordpress-seo
+      - akismet
+    themes:
+      - twentytwentyfour
+      - twentytwentyone
+    note: Pin exact versions at provisioning time; no "latest" in a test run.
+  update_packages:
+    plugin: local zip, known older to known newer
+    theme: local zip, known older to known newer
+    core: local core package or a controlled core update fixture
+    translation: local translation package
+    failure_modes:
+      - download_404
+      - invalid_zip
+      - partial_write
+      - rollback
+      - timeout
+      - disk_full
+      - uncertain
+
+mail:
+  capture: mu-plugin on pre_wp_mail, one JSON line per message
+  cases:
+    - native_per_item
+    - shield_block
+    - notification_redirect
+    - disable_all
+    - recovery_mode
+    - header_injection
+    - recipient_cap
+
+cron:
+  control: mu-plugin + wp cron event run
+  cases: [enabled, disabled, delayed, overlap, manual_run]
+
+clock:
+  control: mu-plugin time freeze or a WP-CLI option
+  cases: [hold_start, next_eligible, retry, stale_pass, expired_pass]
+
+reset:
+  steps:
+    - restore_db_snapshot
+    - delete_updatronix_options
+    - delete_transients
+    - clear_cron
+    - truncate_logs
+    - purge_mail
+    - reset_license
+    - restore_uploads_and_fixtures
+  target_seconds: 60

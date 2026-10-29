@@ -1,0 +1,142 @@
+schema: updatronix-testbook/invariants/v1
+updated: 2026-10-29
+notes: >-
+  These rules run after every case and every combination. A failure names the
+  invariant and the dimension values that produced it. The runners live in
+  runners.py; every runner is self-tested with a known-good and a known-bad
+  observation.
+
+invariants:
+  - id: INV-01
+    title: One eligible update, one install
+    statement: >-
+      For every eligible native automatic update, the selected item is
+      installed exactly once, and no other item is installed by that pass.
+    runner: inv_01_exactly_once
+    oracle: [disk, pass, log]
+    applies_to: [update, pro.pass, pro.planning]
+    tags: ["@invariant", "@critical", "@pass"]
+    failure: An eligible item was installed zero times or more than once, or an unselected item was installed.
+
+  - id: INV-02
+    title: Ineligible items never install
+    statement: >-
+      A locked, held, blocked, incompatible, abandoned, non-opted, or
+      not-yet-eligible item is never installed, and its reason is recorded once.
+    runner: inv_02_ineligible
+    oracle: [disk, log, pass]
+    applies_to: [update.item_state, pro.version_lock, pro.shield, free.schedule]
+    tags: ["@invariant", "@critical", "@shield", "@version-lock", "@schedule"]
+    failure: An ineligible item was installed, or its reason was missing or duplicated.
+
+  - id: INV-03
+    title: One email, one item row, one pass row
+    statement: >-
+      Each installed item produces exactly one native per-item email, one
+      actual-update log row, and the pass produces exactly one summary row.
+      No digest email and no second success row.
+    runner: inv_03_email_and_rows
+    oracle: [mail, log, pass]
+    applies_to: [update.email, free.log.row_kind, pro.pass.last_pass]
+    tags: ["@invariant", "@critical", "@mail", "@logger", "@pass"]
+    failure: Email, item-row, or pass-row counts did not match the installs.
+
+  - id: INV-04
+    title: No false success
+    statement: >-
+      A failed, partial, rolled-back, or uncertain update is never reported as
+      success in the log, the UI, the pass summary, or an email.
+    runner: inv_04_truthful_outcome
+    oracle: [disk, log, ui, mail]
+    applies_to: [update.package, update.item_state, free.log.row_kind]
+    tags: ["@invariant", "@critical", "@logger", "@ui"]
+    failure: A non-success outcome was rendered or logged as success.
+
+  - id: INV-05
+    title: Manual guard is opt-in only
+    statement: >-
+      A native admin manual update is blocked only when the manual switch is
+      on; WP-CLI remains available, and the automatic pass's own write is never
+      blocked by the manual guard.
+    runner: inv_05_manual_guard
+    oracle: [ui, disk, log]
+    applies_to: [pro.version_lock.manual_updates, pro.version_lock.enabled]
+    tags: ["@invariant", "@critical", "@version-lock"]
+    failure: A manual update was blocked with the switch off, or WP-CLI/the pass was blocked.
+
+  - id: INV-06
+    title: Native option is never rewritten
+    statement: >-
+      Version Lock never changes the stored `auto_update_*` option, and the
+      pass's own write is allowed through the lock.
+    runner: inv_06_native_option
+    oracle: [options, disk]
+    applies_to: [pro.version_lock.enabled, pro.shield.safe_mode]
+    tags: ["@invariant", "@critical", "@version-lock"]
+    failure: The stored auto-update option changed, or the pass's own write was blocked.
+
+  - id: INV-07
+    title: Shield off means Shield off
+    statement: >-
+      Turning Update Shield off disables Shield and Version Lock; no native
+      update is silently blocked by their policies.
+    runner: inv_07_shield_off
+    oracle: [disk, log, ui]
+    applies_to: [pro.shield.safe_mode, pro.version_lock.enabled]
+    tags: ["@invariant", "@critical", "@shield"]
+    failure: Shield-off state still blocked a native update or still claimed a lock.
+
+  - id: INV-08
+    title: No fatal or 500
+    statement: >-
+      No admin, native, cron, REST, or network path returns HTTP 500 or raises
+      a fatal for any dimension combination.
+    runner: inv_08_no_fatal
+    oracle: [http, debug.log]
+    applies_to: [all]
+    tags: ["@invariant", "@critical", "@all"]
+    failure: A fatal or HTTP 500 was observed.
+
+  - id: INV-09
+    title: Multisite main-site contract
+    statement: >-
+      The pass is main-site only; the network schedule/logs/site deletion are
+      correct; a subsite administrator cannot reach Pro routes.
+    runner: inv_09_multisite
+    oracle: [ui, db, log]
+    applies_to: [multisite.scope, multisite.pass_scope]
+    tags: ["@invariant", "@critical", "@multisite"]
+    failure: The pass ran network-wide, a network surface was wrong, or a subsite admin reached Pro.
+
+  - id: INV-10
+    title: License fails closed
+    statement: >-
+      Without an active license, no Pro route registers and no pass executes;
+      the recovery paths (dev mode, salt rotation, revalidation) work.
+    runner: inv_10_license
+    oracle: [http, pass, options]
+    applies_to: [pro.license.status, pro.license.mode]
+    tags: ["@invariant", "@critical", "@license"]
+    failure: A Pro route or pass ran without an active license.
+
+  - id: INV-11
+    title: No unconsented data loss
+    statement: >-
+      Data is deleted only when the explicit setting allows it; the queue-table
+      drop is backup-gated and documented; retention never deletes newer rows.
+    runner: inv_11_data_deletion
+    oracle: [db, options, docs]
+    applies_to: [free.delete_data_on_uninstall, free.retention_days]
+    tags: ["@invariant", "@critical", "@data"]
+    failure: Data was deleted without consent, or a backup gate was missing.
+
+  - id: INV-12
+    title: Accessible controls
+    statement: >-
+      Every control is keyboard reachable, focus-visible, labelled, and free of
+      horizontal overflow at 390 and 760 pixels.
+    runner: inv_12_a11y
+    oracle: [ui, dom, axe]
+    applies_to: [free.ui.viewport, free.ui.surface]
+    tags: ["@invariant", "@a11y", "@all"]
+    failure: A control was unreachable, unlabeled, focusless, or the layout overflowed.

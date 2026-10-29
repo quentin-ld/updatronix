@@ -1,0 +1,1407 @@
+schema: updatronix-testbook/dimensions/v1
+updated: 2026-10-29
+scope:
+  - free
+  - pro
+sources:
+  free:
+    - updatronix.php
+    - inc/settings/options.php
+    - inc/classes/class-updatronix-settings.php
+    - inc/classes/class-updatronix-autoupdatedelay.php
+    - inc/classes/class-updatronix-log-taxonomy.php
+    - inc/classes/class-updatronix-schedule-context.php
+    - inc/classes/class-updatronix-schedule-state.php
+    - inc/admin/native-update-time.php
+  pro:
+    - updatronix-pro.php
+    - inc/settings/options.php
+    - inc/update-shield/class-updatronix-update-shield.php
+    - inc/update-engine/class-updatronix-update-pass.php
+    - inc/update-engine/class-updatronix-update-pass-gate.php
+    - inc/update-flow/class-updatronix-update-flow.php
+    - inc/update-flow/class-updatronix-flow-planner.php
+    - inc/license/class-updatronix-pro-license-storage.php
+    - inc/update-shield/class-updatronix-version-control-detector.php
+values_policy: >-
+  Every dimension declares its full domain. Enumerations list every value.
+  Integer ranges name the full range and a boundary/equivalence point set; the
+  pairwise generator uses the points, because a clamp tested at 0, 1, max-1 and
+  max is the same decision as testing every integer. A dimension marked
+  `open: true` is an external value space (WordPress versions, package
+  failures) and is exercised through named fixtures rather than enumeration.
+
+groups:
+  - id: free.settings
+    label: Free settings and notifications
+  - id: free.schedule
+    label: Free Schedule and hold
+  - id: free.auto_updates
+    label: Native auto-update options and constants
+  - id: free.logging
+    label: Logger, decision layer, filters, and retention
+  - id: free.exports
+    label: Log exports
+  - id: free.health
+    label: Health checks
+  - id: free.ui
+    label: Free admin surfaces and accessibility
+  - id: pro.shield
+    label: Update Shield
+  - id: pro.version_lock
+    label: Version Lock
+  - id: pro.pass
+    label: Automatic update pass
+  - id: pro.flow
+    label: Update Flow
+  - id: pro.license
+    label: License and gating
+  - id: pro.white_label
+    label: White Label
+  - id: pro.planning
+    label: Pass planning and execution
+  - id: update
+    label: Update identity and outcome
+  - id: environment
+    label: WordPress, PHP, filesystem, and network environment
+  - id: roles
+    label: Roles and capabilities
+  - id: multisite
+    label: Multisite scopes
+
+dimensions:
+  # ---------------------------------------------------------------------
+  # Free settings
+  # ---------------------------------------------------------------------
+  - id: free.logging_enabled
+    owner: free
+    group: free.settings
+    kind: setting
+    label: Logging enabled
+    domain: boolean
+    values: [true, false]
+    default: true
+    source: inc/settings/options.php:26
+    risk: high
+    tags: ["@free", "@logger"]
+    notes: >-
+      Off means no log rows, no export, no external log writes. The pass and
+      the native update must still run.
+
+  - id: free.retention_days
+    owner: free
+    group: free.logging
+    kind: setting
+    label: Log retention days
+    domain: integer
+    range: [1, 365]
+    points: [1, 2, 7, 30, 90, 180, 365]
+    default: 90
+    source: inc/settings/options.php:360
+    risk: medium
+    tags: ["@free", "@logger"]
+    notes: The sanitizer clamps to 1..365 on read and write.
+
+  - id: free.notifications_mode
+    owner: free
+    group: free.settings
+    kind: setting
+    label: Notification mode
+    domain: enum
+    values: ["default", "disabled"]
+    default: "default"
+    source: inc/settings/options.php:592
+    risk: high
+    tags: ["@free", "@mail"]
+    notes: >-
+      `disabled` suppresses core/plugin/theme/debug notifications. Recovery
+      mode email must remain. Legacy `redirect` normalizes to `default`.
+
+  - id: free.notify_enabled
+    owner: free
+    group: free.settings
+    kind: setting
+    label: Redirect update notification emails
+    domain: boolean
+    values: [true, false]
+    default: false
+    source: inc/settings/options.php:32
+    risk: high
+    tags: ["@free", "@mail"]
+    notes: The redirect is separate from notifications_mode.
+
+  - id: free.notify_emails
+    owner: free
+    group: free.settings
+    kind: setting
+    label: Notification recipients
+    domain: list<email>
+    points:
+      - none
+      - one_valid
+      - two_valid
+      - duplicate
+      - invalid
+      - header_injection
+      - over_4096_bytes
+      - thirty_three_addresses
+    default: ""
+    source: inc/settings/options.php:546
+    risk: high
+    tags: ["@free", "@mail"]
+    notes: Cap 32 valid addresses and 4096 raw bytes; injection candidates are rejected.
+
+  - id: free.notify_on
+    owner: free
+    group: free.settings
+    kind: setting
+    label: Notification event allowlist
+    domain: set
+    values: ["core", "plugin_theme", "debug", "technical"]
+    empty: true
+    default: []
+    source: inc/settings/options.php:613
+    risk: medium
+    tags: ["@free", "@mail"]
+    notes: Any subset; empty means no per-event notification.
+
+  - id: free.auto_update_translations
+    owner: free
+    group: free.auto_updates
+    kind: setting
+    label: Auto-update translations
+    domain: boolean
+    values: [true, false]
+    default: true
+    source: inc/settings/options.php:35
+    risk: medium
+    tags: ["@free", "@auto-updates"]
+    notes: Stored in the settings blob and reflected in the native option.
+
+  - id: free.dismissed_constants
+    owner: free
+    group: free.settings
+    kind: setting
+    label: Dismissed constant notices
+    domain: set
+    values:
+      - WP_AUTO_UPDATE_CORE
+      - AUTOMATIC_UPDATER_DISABLED
+      - DISALLOW_FILE_MODS
+      - DISABLE_WP_CRON
+    empty: true
+    default: []
+    source: inc/settings/options.php:628
+    risk: low
+    tags: ["@free", "@settings"]
+    notes: Unknown names are dropped; cap 32.
+
+  - id: free.delete_data_on_uninstall
+    owner: free
+    group: free.settings
+    kind: setting
+    label: Delete data on uninstall
+    domain: boolean
+    values: [true, false]
+    default: false
+    source: inc/settings/options.php:37
+    risk: critical
+    tags: ["@free", "@uninstall", "@data"]
+    notes: Enabling it must be an explicit, capability-gated choice; disabling must remain possible.
+
+  # ---------------------------------------------------------------------
+  # Schedule
+  # ---------------------------------------------------------------------
+  - id: free.schedule.recurrence
+    owner: free
+    group: free.schedule
+    kind: setting
+    label: Update-check recurrence
+    domain: enum
+    values: ["", "hourly", "twicedaily", "daily", "weekly"]
+    default: ""
+    source: inc/settings/options.php:67
+    risk: high
+    tags: ["@free", "@schedule"]
+    notes: Empty means WordPress's own schedule.
+
+  - id: free.schedule.time
+    owner: free
+    group: free.schedule
+    kind: setting
+    label: Preferred wall-clock time
+    domain: hh_mm
+    points: ["00:00", "00:59", "02:00", "03:00", "12:00", "23:59"]
+    invalid_points: ["24:00", "12:60", "noon", ""]
+    default: ""
+    source: inc/settings/options.php:218
+    risk: high
+    tags: ["@free", "@schedule", "@timezone"]
+    notes: Stored for every recurrence; display falls back to 03:00. DST shifts are possible.
+
+  - id: free.schedule.delay_enabled
+    owner: free
+    group: free.schedule
+    kind: setting
+    label: Hold new releases
+    domain: boolean
+    values: [true, false]
+    default: false
+    source: inc/settings/options.php:52
+    risk: high
+    tags: ["@free", "@schedule", "@hold"]
+    notes: The hold applies to automatic updates only.
+
+  - id: free.schedule.delay_value
+    owner: free
+    group: free.schedule
+    kind: setting
+    label: Hold days
+    domain: integer
+    range: [0, 365]
+    points: [0, 1, 2, 7, 30, 90, 180, 365]
+    default: 0
+    source: inc/settings/options.php:191
+    risk: high
+    tags: ["@free", "@schedule", "@hold"]
+    notes: 0 means off even when delay_enabled is true. The clock starts at plan/discovery.
+
+  - id: free.schedule.cron_disabled
+    owner: free
+    group: free.schedule
+    kind: environment
+    label: WP-Cron disabled
+    domain: boolean
+    values: [true, false]
+    default: false
+    source: inc/classes/class-updatronix-schedule-context.php
+    risk: high
+    tags: ["@free", "@schedule", "@environment"]
+    notes: The UI shows one line, not the old large notice.
+
+  # ---------------------------------------------------------------------
+  # Native auto-update options and constants
+  # ---------------------------------------------------------------------
+  - id: wp.auto_update_core
+    owner: shared
+    group: free.auto_updates
+    kind: environment
+    label: Core auto-update mode
+    domain: enum
+    values: ["true", "false", "minor"]
+    default: "true"
+    source: WordPress `auto_update_core` / `WP_AUTO_UPDATE_CORE`
+    risk: critical
+    tags: ["@free", "@auto-updates", "@invariant"]
+    notes: The plugin must respect the native mode and never force a core update.
+
+  - id: wp.auto_update_plugins
+    owner: shared
+    group: free.auto_updates
+    kind: environment
+    label: Plugin auto-update opt-ins
+    domain: set<plugin_file>
+    points: [empty, one, all, deleted_item, locked_item, composer_item]
+    default: []
+    source: WordPress `auto_update_plugins`
+    risk: critical
+    tags: ["@free", "@pro", "@auto-updates", "@invariant"]
+    notes: The pass must never force an opted-out item and must not rewrite the option.
+
+  - id: wp.auto_update_themes
+    owner: shared
+    group: free.auto_updates
+    kind: environment
+    label: Theme auto-update opt-ins
+    domain: set<stylesheet>
+    points: [empty, one, all, deleted_item, locked_item]
+    default: []
+    source: WordPress `auto_update_themes`
+    risk: critical
+    tags: ["@free", "@pro", "@auto-updates", "@invariant"]
+    notes: Same contract as plugins; theme cards have their own surfaces.
+
+  - id: wp.auto_update_translations
+    owner: shared
+    group: free.auto_updates
+    kind: environment
+    label: Native translation auto-updates
+    domain: boolean
+    values: [true, false]
+    default: true
+    source: WordPress `auto_update_translations`
+    risk: medium
+    tags: ["@free", "@auto-updates"]
+
+  - id: wp.constants.automatic_updater_disabled
+    owner: shared
+    group: free.auto_updates
+    kind: environment
+    label: AUTOMATIC_UPDATER_DISABLED
+    domain: boolean
+    values: [true, false]
+    default: false
+    source: wp-config.php
+    risk: critical
+    tags: ["@free", "@pro", "@constants", "@invariant"]
+    notes: When true, every native toggle is locked and explained.
+
+  - id: wp.constants.disallow_file_mods
+    owner: shared
+    group: free.auto_updates
+    kind: environment
+    label: DISALLOW_FILE_MODS
+    domain: boolean
+    values: [true, false]
+    default: false
+    source: wp-config.php
+    risk: critical
+    tags: ["@free", "@pro", "@constants", "@invariant"]
+    notes: When true, no update can run; the UI must say why.
+
+  - id: wp.constants.wp_auto_update_core
+    owner: shared
+    group: free.auto_updates
+    kind: environment
+    label: WP_AUTO_UPDATE_CORE
+    domain: enum
+    values: ["true", "false", "minor"]
+    default: "true"
+    source: wp-config.php
+    risk: critical
+    tags: ["@free", "@constants", "@invariant"]
+    notes: The core mode switch is locked to the constant.
+
+  - id: wp.constants.disable_wp_cron
+    owner: shared
+    group: free.auto_updates
+    kind: environment
+    label: DISABLE_WP_CRON
+    domain: boolean
+    values: [true, false]
+    default: false
+    source: wp-config.php
+    risk: high
+    tags: ["@free", "@schedule", "@constants"]
+
+  - id: free.kill_switch.log_decision_layer
+    owner: free
+    group: free.logging
+    kind: feature_flag
+    label: Decision layer enabled
+    domain: boolean
+    values: [true, false]
+    default: true
+    source: inc/classes/class-updatronix-logger.php:219
+    risk: high
+    tags: ["@free", "@logger", "@kill-switch"]
+    notes: Filter `updatronix_log_decision_layer_enabled`.
+
+  - id: free.kill_switch.native_update_time
+    owner: free
+    group: free.ui
+    kind: feature_flag
+    label: Native update time display enabled
+    domain: boolean
+    values: [true, false]
+    default: true
+    source: inc/admin/native-update-time.php:36
+    risk: medium
+    tags: ["@free", "@schedule", "@kill-switch"]
+    notes: Filter `updatronix_native_update_time_enabled`.
+
+  # ---------------------------------------------------------------------
+  # Logger and exports
+  # ---------------------------------------------------------------------
+  - id: free.log.row_kind
+    owner: free
+    group: free.logging
+    kind: state
+    label: Log row kind
+    domain: enum
+    values: ["legacy", "decision", "native_actual_update", "pass_summary", "external"]
+    default: legacy
+    source: inc/classes/class-updatronix-log-taxonomy.php
+    risk: high
+    tags: ["@free", "@logger"]
+    notes: Legacy rows show “Legacy — reason not recorded”.
+
+  - id: free.log.filters
+    owner: free
+    group: free.logging
+    kind: feature
+    label: Activity-log filters
+    domain: set
+    values:
+      - type
+      - action
+      - status
+      - triggered_by
+      - day
+      - reason
+      - state
+      - origin
+      - pass_deep_link
+      - chain_deep_link
+      - next_eligible
+    empty: true
+    default: []
+    source: assets/src/js/components/activityLog/logFilters.js
+    risk: medium
+    tags: ["@free", "@logger", "@ui"]
+    notes: Pass and Chain are deep-link filters, not Add filter menu entries.
+
+  - id: free.export.format
+    owner: shared
+    group: free.exports
+    kind: feature
+    label: Export format
+    domain: enum
+    values: ["txt", "csv", "json", "xml"]
+    default: "txt"
+    source: inc/settings/options.php:673
+    risk: high
+    tags: ["@free", "@pro", "@export"]
+    notes: Free offers txt; Pro adds csv/json/xml when the license is active.
+
+  - id: free.export.scope
+    owner: free
+    group: free.exports
+    kind: feature
+    label: Export scope
+    domain: enum
+    values: ["current", "all", "last_30_days"]
+    default: current
+    source: assets/src/js/components/activityLog/ExportLogsModal.js
+    risk: high
+    tags: ["@free", "@export"]
+    notes: The export must use the same filters/total as the feed.
+
+  - id: free.export.merge
+    owner: free
+    group: free.exports
+    kind: feature
+    label: Merge same-item rows
+    domain: boolean
+    values: [true, false]
+    default: true
+    source: assets/src/js/components/activityLog/exportReports.js
+    risk: medium
+    tags: ["@free", "@export"]
+
+  - id: free.export.columns
+    owner: free
+    group: free.exports
+    kind: feature
+    label: Export columns
+    domain: set
+    values:
+      - action
+      - run_context
+      - user
+      - status
+      - category
+      - reason
+      - state
+      - origin
+      - pass
+      - chain
+      - next_eligible
+      - decision_context
+      - retained
+    empty: false
+    default: [action, run_context, user, status, category, reason, state, origin, pass, chain, next_eligible, retained]
+    source: assets/src/js/components/activityLog/constants.js
+    risk: medium
+    tags: ["@free", "@pro", "@export"]
+    notes: Decision context is opt-in; element/version/date are always shown.
+
+  - id: free.export.empty
+    owner: free
+    group: free.exports
+    kind: state
+    label: Empty export
+    domain: enum
+    values: ["no_matches", "expired", "rate_limited", "chunked_continuation"]
+    default: no_matches
+    source: inc/classes/class-updatronix-export.php
+    risk: medium
+    tags: ["@free", "@export"]
+
+  # ---------------------------------------------------------------------
+  # Health and UI
+  # ---------------------------------------------------------------------
+  - id: free.health.checks
+    owner: free
+    group: free.health
+    kind: feature
+    label: Health checks
+    domain: set
+    values:
+      - wordpress_version
+      - php_version
+      - disk_space
+      - wp_cron
+      - update_lock
+      - automatic_retries
+      - automatic_update_pass
+      - automatic_update_last_pass
+      - automatic_update_drain
+    empty: false
+    default: all
+    source: inc/classes/class-updatronix-health.php, Pro pass health
+    risk: medium
+    tags: ["@free", "@pro", "@health"]
+    notes: The five queue checks are gone; three pass checks replace them.
+
+  - id: free.ui.surface
+    owner: shared
+    group: free.ui
+    kind: feature
+    label: Admin surface
+    domain: enum
+    values:
+      - logs
+      - auto_updates
+      - schedule
+      - health
+      - settings
+      - documentation
+      - support
+      - update_shield
+      - update_flow
+      - white_label
+      - license
+      - plugins
+      - themes
+      - update_core
+      - network_admin
+    default: logs
+    source: assets/src/js/shell/routes.js, inc/admin/menu.php
+    risk: high
+    tags: ["@free", "@pro", "@ui"]
+    notes: Every surface needs a role/permission and a responsive/a11y check.
+
+  - id: free.ui.viewport
+    owner: shared
+    group: free.ui
+    kind: environment
+    label: Viewport
+    domain: enum
+    values: ["390", "760", "desktop"]
+    default: desktop
+    source: tests/e2e/helpers/a11y.js
+    risk: low
+    tags: ["@free", "@pro", "@a11y"]
+
+  # ---------------------------------------------------------------------
+  # Shield
+  # ---------------------------------------------------------------------
+  - id: pro.shield.safe_mode
+    owner: pro
+    group: pro.shield
+    kind: setting
+    label: Protect this site
+    domain: boolean
+    values: [true, false]
+    default: false
+    source: inc/settings/options.php:29
+    risk: critical
+    tags: ["@pro", "@shield", "@invariant"]
+    notes: Off disables the Shield policies and Version Lock.
+
+  - id: pro.shield.control_php_version
+    owner: pro
+    group: pro.shield
+    kind: setting
+    label: Check PHP compatibility
+    domain: boolean
+    values: [true, false]
+    default: true
+    source: inc/settings/options.php:31
+    risk: critical
+    tags: ["@pro", "@shield"]
+
+  - id: pro.shield.control_wp_version
+    owner: pro
+    group: pro.shield
+    kind: setting
+    label: Check WordPress compatibility
+    domain: boolean
+    values: [true, false]
+    default: true
+    source: inc/settings/options.php:32
+    risk: critical
+    tags: ["@pro", "@shield"]
+
+  - id: pro.shield.incompatible_behavior
+    owner: pro
+    group: pro.shield
+    kind: setting
+    label: Incompatible update behavior
+    domain: enum
+    values: ["disable", "cancel"]
+    default: disable
+    source: inc/settings/options.php:33
+    risk: critical
+    tags: ["@pro", "@shield"]
+    notes: Disable turns the item's auto-update off; cancel only skips this release.
+
+  - id: pro.shield.re_enable
+    owner: pro
+    group: pro.shield
+    kind: setting
+    label: Re-enable auto-updates automatically
+    domain: boolean
+    values: [true, false]
+    default: true
+    source: inc/settings/options.php:34
+    risk: high
+    tags: ["@pro", "@shield"]
+
+  - id: pro.shield.notify_on_block
+    owner: pro
+    group: pro.shield
+    kind: setting
+    label: Notify the technical manager on block
+    domain: boolean
+    values: [true, false]
+    default: true
+    source: inc/settings/options.php:30
+    risk: high
+    tags: ["@pro", "@shield", "@mail"]
+
+  - id: pro.shield.notify_email
+    owner: pro
+    group: pro.shield
+    kind: setting
+    label: Email the technical manager
+    domain: boolean
+    values: [true, false]
+    default: true
+    source: inc/settings/options.php:35
+    risk: high
+    tags: ["@pro", "@shield", "@mail"]
+    notes: Kept in sync with notify_on_block.
+
+  - id: pro.shield.flag_abandoned
+    owner: pro
+    group: pro.shield
+    kind: setting
+    label: Flag abandoned plugins
+    domain: boolean
+    values: [true, false]
+    default: true
+    source: inc/settings/options.php:36
+    risk: medium
+    tags: ["@pro", "@shield"]
+
+  - id: pro.shield.blocked_history
+    owner: pro
+    group: pro.shield
+    kind: feature
+    label: Recently blocked window
+    domain: enum
+    values: ["30_days", "empty", "many"]
+    default: 30_days
+    source: inc/update-shield/class-updatronix-update-shield.php
+    risk: low
+    tags: ["@pro", "@shield", "@ui"]
+
+  # ---------------------------------------------------------------------
+  # Version Lock
+  # ---------------------------------------------------------------------
+  - id: pro.version_lock.enabled
+    owner: pro
+    group: pro.version_lock
+    kind: setting
+    label: Version Lock master switch
+    domain: boolean
+    values: [true, false]
+    default: true
+    source: inc/settings/options.php:37
+    risk: critical
+    tags: ["@pro", "@version-lock", "@invariant"]
+    notes: Lives inside Update Shield; false disables the whole Updatronix lock.
+
+  - id: pro.version_lock.manual_updates
+    owner: pro
+    group: pro.version_lock
+    kind: setting
+    label: Block manual updates
+    domain: boolean
+    values: [true, false]
+    default: false
+    source: inc/settings/options.php:38
+    risk: critical
+    tags: ["@pro", "@version-lock", "@invariant"]
+    notes: Off by default; WP-CLI must remain an escape hatch.
+
+  - id: pro.version_lock.detection
+    owner: pro
+    group: pro.version_lock
+    kind: state
+    label: Version-control detection
+    domain: enum
+    values:
+      - none
+      - git_item_root
+      - git_ancestor
+      - svn
+      - hg
+      - bzr
+      - composer_project
+      - composer_package
+      - composer_bundled
+      - symlink_inside_root
+      - symlink_outside_root
+      - unreadable
+      - unknown
+      - unverified
+    default: none
+    source: inc/update-engine/class-updatronix-version-control-detector.php
+    risk: critical
+    tags: ["@pro", "@version-lock", "@invariant"]
+    notes: Fail closed for unknown, one advisory for unverified.
+
+  - id: pro.version_lock.manager
+    owner: pro
+    group: pro.version_lock
+    kind: state
+    label: Manager label
+    domain: enum
+    values: ["Git", "SVN", "Mercurial", "Bazaar", "Composer", "another manager", "unknown"]
+    default: none
+    source: inc/update-engine/class-updatronix-version-control-detector.php
+    risk: medium
+    tags: ["@pro", "@version-lock", "@ui"]
+
+  # ---------------------------------------------------------------------
+  # Automatic pass
+  # ---------------------------------------------------------------------
+  - id: pro.pass.enabled
+    owner: pro
+    group: pro.pass
+    kind: feature_flag
+    label: Automatic update pass enabled
+    domain: boolean
+    values: [true, false]
+    default: true
+    source: inc/update-engine/class-updatronix-update-pass.php:1161
+    risk: critical
+    tags: ["@pro", "@pass", "@kill-switch", "@invariant"]
+    notes: Filter `updatronix_pro_update_pass_enabled`.
+
+  - id: pro.pass.node_count
+    owner: pro
+    group: pro.pass
+    kind: feature
+    label: Pass nodes
+    domain: integer
+    range: [0, 50]
+    points: [0, 1, 2, 10, 49, 50]
+    default: 0
+    source: inc/update-engine/class-updatronix-update-pass.php
+    risk: high
+    tags: ["@pro", "@pass"]
+    notes: MAX_NODES is 50; overflow must be reported, not silently truncated.
+
+  - id: pro.pass.state
+    owner: pro
+    group: pro.pass
+    kind: state
+    label: Pass state
+    domain: enum
+    values:
+      - none
+      - planned
+      - active
+      - draining
+      - completed
+      - partial
+      - failed
+      - stale
+      - expired
+      - uncertain
+    default: none
+    source: inc/update-engine/class-updatronix-update-pass.php
+    risk: critical
+    tags: ["@pro", "@pass", "@invariant"]
+    notes: A stale or expired pass must not render as active.
+
+  - id: pro.pass.lock_wait
+    owner: pro
+    group: pro.pass
+    kind: state
+    label: Native lock contention
+    domain: enum
+    values: ["clear", "busy_first", "busy_retry", "busy_give_up"]
+    default: clear
+    source: inc/update-engine/class-updatronix-update-pass-gate.php
+    risk: high
+    tags: ["@pro", "@pass", "@invariant"]
+    notes: Lock busy is waiting/skipped, not failed; bounded wait and retries.
+
+  - id: pro.pass.max_attempts
+    owner: pro
+    group: pro.pass
+    kind: feature
+    label: Pass max attempts
+    domain: integer
+    range: [1, 10]
+    points: [1, 2, 3, 5, 10]
+    default: 3
+    source: filter `updatronix_pro_update_pass_max_attempts`
+    risk: high
+    tags: ["@pro", "@pass"]
+
+  - id: pro.pass.last_pass
+    owner: pro
+    group: pro.pass
+    kind: state
+    label: Last-pass cache
+    domain: enum
+    values: ["absent", "present", "expired", "logging_disabled"]
+    default: absent
+    source: inc/update-engine/class-updatronix-update-pass.php
+    risk: medium
+    tags: ["@pro", "@pass", "@flow"]
+
+  # ---------------------------------------------------------------------
+  # Pass planning
+  # ---------------------------------------------------------------------
+  - id: pro.planning.offer_state
+    owner: pro
+    group: pro.planning
+    kind: state
+    label: Offer state at plan time
+    domain: enum
+    values:
+      - no_offer
+      - pending
+      - stale
+      - target_mismatch
+      - non_opted
+      - locked
+      - incompatible
+      - abandoned
+      - translation
+    default: no_offer
+    source: inc/update-engine/class-updatronix-update-planner.php
+    risk: critical
+    tags: ["@pro", "@pass", "@invariant"]
+    notes: observe_offer() runs at plan time; a stale offer is not selected.
+
+  - id: pro.planning.gate_result
+    owner: pro
+    group: pro.planning
+    kind: state
+    label: One-item gate result
+    domain: enum
+    values: ["selected", "not_selected", "pass_disabled", "lock_busy", "no_offer"]
+    default: not_selected
+    source: inc/update-engine/class-updatronix-update-pass-gate.php
+    risk: critical
+    tags: ["@pro", "@pass", "@invariant"]
+    notes: The gate selects at most one item per request; it never returns true for everything.
+
+  # ---------------------------------------------------------------------
+  # Flow
+  # ---------------------------------------------------------------------
+  - id: pro.flow.chain_count
+    owner: pro
+    group: pro.flow
+    kind: feature
+    label: Chain count
+    domain: integer
+    range: [0, 50]
+    points: [0, 1, 2, 10]
+    default: 0
+    source: inc/update-flow/class-updatronix-update-flow.php
+    risk: high
+    tags: ["@pro", "@flow"]
+
+  - id: pro.flow.chain_enabled
+    owner: pro
+    group: pro.flow
+    kind: setting
+    label: Chain enabled
+    domain: boolean
+    values: [true, false]
+    default: true
+    source: inc/update-flow/class-updatronix-update-flow.php
+    risk: high
+    tags: ["@pro", "@flow"]
+
+  - id: pro.flow.step_count
+    owner: pro
+    group: pro.flow
+    kind: feature
+    label: Steps per chain
+    domain: integer
+    range: [2, 50]
+    points: [2, 3, 10, 49, 50]
+    default: 2
+    source: inc/update-flow/class-updatronix-flow-planner.php
+    risk: high
+    tags: ["@pro", "@flow"]
+
+  - id: pro.flow.chain_shape
+    owner: pro
+    group: pro.flow
+    kind: state
+    label: Chain shape
+    domain: enum
+    values:
+      - valid_linear
+      - valid_branching
+      - cycle
+      - duplicate_step
+      - missing_item
+      - deleted_item
+      - uninstalled_item
+      - too_many_steps
+      - empty
+      - disabled
+    default: valid_linear
+    source: inc/update-flow/class-updatronix-flow-planner.php
+    risk: critical
+    tags: ["@pro", "@flow", "@invariant"]
+    notes: A cycle blocks the save; a missing item blocks only its descendants.
+
+  - id: pro.flow.predecessor_state
+    owner: pro
+    group: pro.flow
+    kind: state
+    label: Predecessor state
+    domain: enum
+    values:
+      - not_started
+      - running
+      - done
+      - held
+      - locked
+      - blocked
+      - failed
+      - canceled
+      - uncertain
+      - not_managed
+    default: not_started
+    source: inc/update-engine/class-updatronix-update-pass-order.php
+    risk: critical
+    tags: ["@pro", "@flow", "@pass", "@invariant"]
+    notes: A held/locked predecessor is never bypassed; a failed one affects only descendants.
+
+  - id: pro.flow.non_opted
+    owner: pro
+    group: pro.flow
+    kind: state
+    label: Non-opted item
+    domain: enum
+    values: ["not_managed", "forced_opt_in"]
+    default: not_managed
+    source: inc/update-flow/class-updatronix-flow-readiness.php
+    risk: critical
+    tags: ["@pro", "@flow", "@invariant"]
+    notes: Flow must never force the native opt-in.
+
+  # ---------------------------------------------------------------------
+  # License and gating
+  # ---------------------------------------------------------------------
+  - id: pro.license.status
+    owner: pro
+    group: pro.license
+    kind: state
+    label: License status
+    domain: enum
+    values:
+      - active
+      - inactive
+      - invalid
+      - decrypt_failed
+      - dev_mode
+      - throttled
+      - domain_mismatch
+      - api_unreachable
+    default: inactive
+    source: inc/license/class-updatronix-pro-license-storage.php
+    risk: critical
+    tags: ["@pro", "@license", "@gating", "@invariant"]
+    notes: The capability and routes fail closed when the license is not active.
+
+  - id: pro.license.mode
+    owner: pro
+    group: pro.license
+    kind: environment
+    label: Product presence
+    domain: enum
+    values:
+      - free_only
+      - pro_missing_free
+      - pro_inactive_license
+      - pro_active_license
+      - pro_dev_mode
+    default: free_only
+    source: updatronix-pro.php, inc/classes/class-updatronix-pro-bootstrap.php
+    risk: critical
+    tags: ["@pro", "@license", "@gating"]
+    notes: Pro screens and routes appear only for Free + active license.
+
+  - id: pro.license.activation
+    owner: pro
+    group: pro.license
+    kind: feature
+    label: License lifecycle action
+    domain: enum
+    values: ["activate", "deactivate", "clear", "revalidate", "salt_rotation"]
+    default: activate
+    source: inc/license/class-updatronix-pro-license-handler.php
+    risk: high
+    tags: ["@pro", "@license"]
+
+  # ---------------------------------------------------------------------
+  # White Label
+  # ---------------------------------------------------------------------
+  - id: pro.white_label.enabled
+    owner: pro
+    group: pro.white_label
+    kind: setting
+    label: White Label enabled
+    domain: boolean
+    values: [true, false]
+    default: false
+    source: inc/white-label/class-updatronix-white-label.php
+    risk: medium
+    tags: ["@pro", "@white-label"]
+
+  - id: pro.white_label.brand
+    owner: pro
+    group: pro.white_label
+    kind: setting
+    label: Brand name
+    domain: string
+    points: [empty, normal, markup, overlong, unicode]
+    default: ""
+    source: inc/white-label/class-updatronix-white-label.php
+    risk: medium
+    tags: ["@pro", "@white-label", "@security"]
+    notes: Sanitized and capped; no HTML from user data.
+
+  - id: pro.white_label.menu_label
+    owner: pro
+    group: pro.white_label
+    kind: setting
+    label: Menu label
+    domain: string
+    points: [empty, normal, markup, overlong]
+    default: ""
+    source: inc/white-label/class-updatronix-white-label.php
+    risk: low
+    tags: ["@pro", "@white-label"]
+
+  - id: pro.white_label.colors
+    owner: pro
+    group: pro.white_label
+    kind: setting
+    label: Brand and menu colors
+    domain: color
+    points: [default, valid_hex, invalid_hex, low_contrast]
+    default: default
+    source: inc/white-label/class-updatronix-white-label.php
+    risk: low
+    tags: ["@pro", "@white-label", "@a11y"]
+
+  - id: pro.white_label.logo
+    owner: pro
+    group: pro.white_label
+    kind: setting
+    label: Logo upload
+    domain: file
+    points:
+      - none
+      - png_64
+      - jpeg_64
+      - webp_64
+      - svg
+      - oversized
+      - undersized
+      - unreadable
+      - unsupported
+    default: none
+    source: inc/white-label/class-updatronix-white-label.php
+    risk: medium
+    tags: ["@pro", "@white-label", "@security"]
+    notes: PNG/JPEG/WebP, up to 1 MB, at least 64×64.
+
+  - id: pro.white_label.email
+    owner: pro
+    group: pro.white_label
+    kind: setting
+    label: Apply brand to emails
+    domain: boolean
+    values: [true, false]
+    default: false
+    source: inc/white-label/class-updatronix-white-label.php
+    risk: low
+    tags: ["@pro", "@white-label", "@mail"]
+
+  # ---------------------------------------------------------------------
+  # Update identity and outcome
+  # ---------------------------------------------------------------------
+  - id: update.type
+    owner: shared
+    group: update
+    kind: state
+    label: Update type
+    domain: enum
+    values: ["plugin", "theme", "core", "translation"]
+    default: plugin
+    source: inc/classes/class-updatronix-log-taxonomy.php
+    risk: critical
+    tags: ["@free", "@pro", "@update"]
+
+  - id: update.origin
+    owner: shared
+    group: update
+    kind: state
+    label: Update origin
+    domain: enum
+    values: ["manual", "automatic", "wp_cli", "flow", "pass"]
+    default: manual
+    source: inc/classes/class-updatronix-log-taxonomy.php
+    risk: critical
+    tags: ["@free", "@pro", "@update"]
+
+  - id: update.item_state
+    owner: shared
+    group: update
+    kind: state
+    label: Item decision state
+    domain: enum
+    values:
+      - no_offer
+      - pending
+      - locked_native
+      - locked_composer
+      - unknown
+      - unverified
+      - incompatible_wp
+      - incompatible_php
+      - abandoned
+      - held
+      - waiting_predecessor
+      - failed_predecessor
+      - blocked
+      - running
+      - done
+      - uncertain
+      - canceled
+      - not_managed
+    default: no_offer
+    source: inc/classes/class-updatronix-log-taxonomy.php
+    risk: critical
+    tags: ["@free", "@pro", "@update", "@invariant"]
+
+  - id: update.package
+    owner: shared
+    group: update
+    kind: state
+    label: Update package outcome
+    domain: enum
+    values: ["valid", "failing_download", "invalid_zip", "partial_write", "rollback", "timeout", "disk_full", "uncertain"]
+    default: valid
+    source: WordPress upgrader / pass fixtures
+    risk: critical
+    tags: ["@free", "@pro", "@update", "@invariant"]
+    notes: Every failure must leave a truthful log row and not claim success.
+
+  - id: update.email
+    owner: shared
+    group: update
+    kind: environment
+    label: Native per-item email
+    domain: enum
+    values: ["none", "one", "two", "grouped", "failure"]
+    default: none
+    source: WordPress `wp_mail` / `pre_wp_mail`
+    risk: critical
+    tags: ["@free", "@pro", "@mail", "@invariant"]
+    notes: One item per invocation should produce one native email; capture with `pre_wp_mail`.
+
+  # ---------------------------------------------------------------------
+  # Environment
+  # ---------------------------------------------------------------------
+  - id: env.wp_version
+    owner: shared
+    group: environment
+    kind: environment
+    label: WordPress version
+    domain: string
+    open: true
+    points: ["6.2", "6.4", "6.6", "7.1", "compatible", "incompatible"]
+    default: "7.1"
+    source: readme.txt / site
+    risk: high
+    tags: ["@free", "@pro", "@environment"]
+    notes: The declared floor is 6.2; the live site is 7.1.4.
+
+  - id: env.php_version
+    owner: shared
+    group: environment
+    kind: environment
+    label: PHP version
+    domain: string
+    open: true
+    points: ["8.1", "8.2", "8.3", "8.4", "incompatible"]
+    default: "8.4"
+    source: readme.txt / DDEV
+    risk: high
+    tags: ["@free", "@pro", "@environment"]
+
+  - id: env.database
+    owner: shared
+    group: environment
+    kind: environment
+    label: Database
+    domain: string
+    open: true
+    points: ["mariadb", "mysql", "fresh_install", "legacy_schema", "restored_backup"]
+    default: mariadb
+    source: .ddev/config.yaml
+    risk: high
+    tags: ["@free", "@pro", "@environment"]
+
+  - id: env.filesystem
+    owner: shared
+    group: environment
+    kind: environment
+    label: Filesystem method
+    domain: enum
+    values: ["direct", "ssh", "unavailable", "read_only", "disk_full"]
+    default: direct
+    source: WordPress filesystem
+    risk: critical
+    tags: ["@free", "@pro", "@environment", "@invariant"]
+
+  - id: env.vcs
+    owner: shared
+    group: environment
+    kind: environment
+    label: Item VCS provenance
+    domain: enum
+    values:
+      - none
+      - git_item_root
+      - git_ancestor
+      - svn
+      - hg
+      - bzr
+      - composer_project
+      - composer_package
+      - symlink_inside_root
+      - symlink_outside_root
+      - unreadable
+    default: none
+    source: version-control detector fixtures
+    risk: critical
+    tags: ["@pro", "@environment", "@version-lock"]
+
+  - id: env.timezone
+    owner: shared
+    group: environment
+    kind: environment
+    label: Site timezone
+    domain: enum
+    values: ["UTC", "Europe/Paris", "America/New_York", "DST_boundary", "invalid"]
+    default: "UTC"
+    source: WordPress options
+    risk: high
+    tags: ["@free", "@schedule", "@environment"]
+
+  - id: env.cron
+    owner: shared
+    group: environment
+    kind: environment
+    label: WP-Cron
+    domain: enum
+    values: ["enabled", "disabled", "delayed", "manual_run", "overlap"]
+    default: enabled
+    source: WP-Cron / `DISABLE_WP_CRON`
+    risk: critical
+    tags: ["@free", "@pro", "@schedule", "@pass", "@environment"]
+
+  - id: env.mail
+    owner: shared
+    group: environment
+    kind: environment
+    label: Mail transport
+    domain: enum
+    values: ["native", "captured", "failing", "disabled", "recovery_mode"]
+    default: native
+    source: WordPress `wp_mail`
+    risk: high
+    tags: ["@free", "@pro", "@mail", "@environment"]
+
+  - id: env.maintenance
+    owner: shared
+    group: environment
+    kind: environment
+    label: Maintenance / recovery mode
+    domain: enum
+    values: ["normal", "maintenance", "recovery_mode"]
+    default: normal
+    source: WordPress
+    risk: high
+    tags: ["@free", "@pro", "@environment"]
+
+  # ---------------------------------------------------------------------
+  # Roles and multisite
+  # ---------------------------------------------------------------------
+  - id: role.kind
+    owner: shared
+    group: roles
+    kind: environment
+    label: User role
+    domain: enum
+    values: ["administrator", "editor", "subscriber", "super_admin", "subsite_admin", "wp_cli"]
+    default: administrator
+    source: WordPress roles / capability checks
+    risk: critical
+    tags: ["@free", "@pro", "@roles", "@security"]
+
+  - id: role.capability
+    owner: shared
+    group: roles
+    kind: environment
+    label: Capability
+    domain: enum
+    values: ["manage_options", "manage_updatronix", "manage_updatronix_pro", "none"]
+    default: manage_updatronix
+    source: inc/core/constants.php, updatronix-pro.php
+    risk: critical
+    tags: ["@free", "@pro", "@roles", "@security"]
+
+  - id: multisite.scope
+    owner: shared
+    group: multisite
+    kind: environment
+    label: Multisite scope
+    domain: enum
+    values: ["single_site", "network_activated", "main_site", "subsite", "network_admin", "deleted_site"]
+    default: single_site
+    source: readme.txt, inc/classes/class-updatronix-database.php
+    risk: critical
+    tags: ["@free", "@pro", "@multisite", "@invariant"]
+
+  - id: multisite.pass_scope
+    owner: pro
+    group: multisite
+    kind: state
+    label: Pass registration scope
+    domain: enum
+    values: ["main_site_only", "subsite", "network_wide_future"]
+    default: main_site_only
+    source: inc/classes/class-updatronix-pro-bootstrap.php
+    risk: critical
+    tags: ["@pro", "@multisite", "@pass"]
+    notes: The pass is main-site only; subsites keep native all-at-once behavior.

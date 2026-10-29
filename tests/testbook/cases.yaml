@@ -1,0 +1,706 @@
+schema: updatronix-testbook/cases/v1
+updated: 2026-10-29
+notes: >-
+  Hand-written high-value cases. The generator adds one case per dimension from
+  dimensions.yaml; those generated cases are listed in the book but not edited
+  here. IDs are stable and never reused.
+
+surface_cases:
+  - id: TB-UI-001
+    title: Update logs surface
+    owner: free
+    risk: high
+    tags: ["@free", "@logger", "@ui", "@smoke"]
+    surfaces: [logs]
+    dimensions: [free.log.filters, free.export.format]
+    steps:
+      - Seed a decision row and a legacy row.
+      - Filter by reason, state, origin, and the pass/chain deep links.
+      - Open details and the export modal.
+    assertions:
+      - The feed shows reason and state for the new row and “Legacy — reason not recorded” for the old one.
+      - The pass deep link returns the matching rows; the chain deep link returns its row.
+      - The details section shows state, reason, origin, stage, pass, chain, predecessor, target, next eligible.
+      - The export offers reason, state, origin, pass, chain, next eligible, decision context, and retained.
+    oracle: [ui, log, export]
+    automation: planned
+
+  - id: TB-UI-002
+    title: Auto updates surface
+    owner: free
+    risk: high
+    tags: ["@free", "@auto-updates", "@ui", "@smoke"]
+    surfaces: [auto_updates]
+    dimensions: [wp.auto_update_core, wp.auto_update_plugins, wp.auto_update_themes, wp.auto_update_translations]
+    steps: [Toggle core, plugin, theme, and translation controls; save once; reload.]
+    assertions:
+      - Each control reflects the stored native option.
+      - The save order is one mutation per staged change.
+      - A partial failure is surfaced, not hidden.
+    oracle: [ui, options]
+    automation: planned
+
+  - id: TB-UI-003
+    title: Schedule surface
+    owner: free
+    risk: high
+    tags: ["@free", "@schedule", "@ui", "@smoke"]
+    surfaces: [schedule]
+    dimensions: [free.schedule.recurrence, free.schedule.time, free.schedule.delay_value]
+    steps: [Set the hour and minute, the recurrence, and a hold; save; reload.]
+    assertions:
+      - Every hour and minute is selectable; the saved time survives a frequency that ignores it.
+      - The hold accepts 0–365 and 0 turns it off.
+      - The next-run copy says it is a check, not an install time.
+    oracle: [ui, options, cron]
+    automation: planned
+
+  - id: TB-UI-004
+    title: Health surface
+    owner: free
+    risk: medium
+    tags: ["@free", "@pro", "@health", "@ui"]
+    surfaces: [health]
+    dimensions: [free.health.checks]
+    steps: [Run the checks; open diagnostics.]
+    assertions:
+      - The pass checks replace the queue checks.
+      - A stale pass, disabled WP-Cron, or busy lock is surfaced.
+      - The copy does not promise a queue.
+    oracle: [ui, options, cron]
+    automation: planned
+
+  - id: TB-UI-005
+    title: Settings surface
+    owner: free
+    risk: high
+    tags: ["@free", "@settings", "@ui", "@smoke"]
+    surfaces: [settings]
+    dimensions: [free.logging_enabled, free.retention_days, free.notifications_mode, free.delete_data_on_uninstall]
+    steps: [Edit the settings; try to leave with a dirty draft; save and reload.]
+    assertions:
+      - One save commits the surface; the dirty guard warns.
+      - Retention stays 1–365; uninstall opt-in is explicit.
+      - The recipient list is sanitized and capped.
+    oracle: [ui, options]
+    automation: planned
+
+  - id: TB-UI-006
+    title: Documentation surface
+    owner: free
+    risk: low
+    tags: ["@free", "@docs", "@ui"]
+    surfaces: [documentation]
+    steps: [Open the documentation destination.]
+    assertions: [Every link resolves; the Pro badge is correct; no unsupported promise.]
+    oracle: [ui, http]
+    automation: planned
+
+  - id: TB-UI-007
+    title: Support surface
+    owner: free
+    risk: low
+    tags: ["@free", "@support", "@ui"]
+    surfaces: [support]
+    steps: [Open the support destination.]
+    assertions: [The WordPress.org forum link resolves; no private channel is claimed.]
+    oracle: [ui, http]
+    automation: planned
+
+  - id: TB-UI-008
+    title: Update Shield surface
+    owner: pro
+    risk: critical
+    tags: ["@pro", "@shield", "@ui", "@smoke"]
+    surfaces: [update_shield]
+    dimensions: [pro.shield.safe_mode, pro.shield.incompatible_behavior, pro.shield.re_enable]
+    steps: [Open Shield with the license active; toggle Safe Mode; save; reopen.]
+    assertions:
+      - Protection, Version Lock, and Recently blocked render; no queue card.
+      - Safe Mode off disables the Shield/Version Lock controls and says why.
+      - The incompatible behavior and re-enable choices persist.
+    oracle: [ui, options, log]
+    automation: planned
+
+  - id: TB-UI-009
+    title: Update Flow surface
+    owner: pro
+    risk: critical
+    tags: ["@pro", "@flow", "@ui", "@smoke"]
+    surfaces: [update_flow]
+    dimensions: [pro.flow.chain_count, pro.flow.chain_shape, pro.flow.predecessor_state]
+    steps: [Open Flow with a seeded chain and a seeded last pass.]
+    assertions:
+      - The chain editor is available; there is no Run now, run route, cooldown, or polling.
+      - Waiting/Blocked steps show the predecessor, reason, eligible time, and manager.
+      - The Last pass card is read-only and shows the pass id, times, counters, and first waiting reason.
+    oracle: [ui, pass, log]
+    automation: planned
+
+  - id: TB-UI-010
+    title: White Label surface
+    owner: pro
+    risk: medium
+    tags: ["@pro", "@white-label", "@ui", "@a11y"]
+    surfaces: [white_label]
+    dimensions: [pro.white_label.enabled, pro.white_label.brand, pro.white_label.logo]
+    steps: [Save a brand; reset; upload a bad logo; sanitize markup.]
+    assertions:
+      - The draft saves and resets; the preview shows the real rail and email.
+      - PNG/JPEG/WebP within 1 MB and 64×64 are accepted; SVG and invalid files are rejected.
+      - Brand and menu labels are sanitized and capped.
+    oracle: [ui, options, upload]
+    automation: planned
+
+  - id: TB-UI-011
+    title: License surface
+    owner: pro
+    risk: critical
+    tags: ["@pro", "@license", "@ui", "@smoke"]
+    surfaces: [license]
+    dimensions: [pro.license.status, pro.license.mode, pro.license.activation]
+    steps: [Reject an invalid key; activate the real key; reload; deactivate.]
+    assertions:
+      - The error is inline, focused, and distinct per state.
+      - Activation reloads the Pro destinations and routes.
+      - Deactivation removes them and leaves the license page usable.
+    oracle: [ui, options, http]
+    automation: planned
+
+  - id: TB-UI-012
+    title: Plugins screen
+    owner: shared
+    risk: critical
+    tags: ["@free", "@pro", "@version-lock", "@ui"]
+    surfaces: [plugins]
+    dimensions: [pro.version_lock.enabled, pro.version_lock.detection]
+    steps: [Open plugins.php with locked and unlocked fixtures.]
+    assertions:
+      - A locked row shows the manager notice and the lock label; its update link is gone.
+      - An unlocked row keeps its normal controls.
+      - No fatal/500.
+    oracle: [ui, log, http]
+    automation: planned
+
+  - id: TB-UI-013
+    title: Themes screen
+    owner: shared
+    risk: critical
+    tags: ["@free", "@pro", "@version-lock", "@ui"]
+    surfaces: [themes]
+    dimensions: [pro.version_lock.detection]
+    steps: [Open themes.php with a locked theme fixture and a single-site theme card.]
+    assertions:
+      - The locked card names the manager and disables Update.
+      - The unlocked theme keeps its controls.
+    oracle: [ui, log]
+    automation: planned
+
+  - id: TB-UI-014
+    title: Update-core screen
+    owner: shared
+    risk: critical
+    tags: ["@free", "@pro", "@version-lock", "@ui"]
+    surfaces: [update_core]
+    dimensions: [free.schedule.time, pro.version_lock.detection]
+    steps: [Open update-core.php with a pending plugin/theme/core offer.]
+    assertions:
+      - The row shows the truthful next-pass/held/locked state, not the next check as the install time.
+      - Locked rows lose the checkbox/update link.
+      - The WP-Cron hint is one line when disabled.
+    oracle: [ui, log]
+    automation: planned
+
+  - id: TB-UI-015
+    title: Network Admin
+    owner: shared
+    risk: critical
+    tags: ["@free", "@pro", "@multisite", "@ui"]
+    surfaces: [network_admin]
+    dimensions: [multisite.scope, multisite.pass_scope, role.kind]
+    steps: [Open the network admin as Super Admin; open a subsite as its admin.]
+    assertions:
+      - Super Admin sees the network settings/logs; a subsite admin sees nothing.
+      - The pass is main-site only; the network schedule is shared.
+      - Site deletion removes that site's rows.
+    oracle: [ui, db, log]
+    automation: planned
+
+flow_cases:
+  - id: TB-UPDATE-001
+    title: Plugin update happy path
+    owner: shared
+    risk: critical
+    tags: ["@free", "@pro", "@update", "@smoke"]
+    dimensions: [update.type, update.package, update.email]
+    steps: [Offer a local plugin 1.0.0 to 2.0.0; run one automatic pass.]
+    assertions: [The plugin is installed once; one item row and one pass row; one native email.]
+    oracle: [disk, log, pass, mail]
+    automation: planned
+
+  - id: TB-UPDATE-002
+    title: Theme update happy path
+    owner: shared
+    risk: critical
+    tags: ["@free", "@pro", "@update"]
+    dimensions: [update.type, update.package, update.email]
+    steps: [Offer a local theme update; run one pass.]
+    assertions: [The theme is installed once; one row; one email.]
+    oracle: [disk, log, pass, mail]
+    automation: planned
+
+  - id: TB-UPDATE-003
+    title: Core update
+    owner: shared
+    risk: critical
+    tags: ["@free", "@pro", "@update"]
+    dimensions: [update.type, wp.auto_update_core]
+    steps: [Offer a controlled core update; run one pass.]
+    assertions: [The core update is selected only when the native mode allows it; one row; one email.]
+    oracle: [disk, log, mail]
+    automation: planned
+
+  - id: TB-UPDATE-004
+    title: Translation update
+    owner: shared
+    risk: medium
+    tags: ["@free", "@pro", "@update"]
+    dimensions: [update.type, wp.auto_update_translations]
+    steps: [Offer a translation update; run one pass.]
+    assertions: [The translation is installed once; the row is categorized as a translation.]
+    oracle: [disk, log]
+    automation: planned
+
+  - id: TB-UPDATE-005
+    title: Failed and rolled-back update
+    owner: shared
+    risk: critical
+    tags: ["@free", "@pro", "@update"]
+    dimensions: [update.package, update.item_state]
+    steps: [Offer an invalid zip, a partial write, and a rollback; run the pass.]
+    assertions: [No false success; the failure/rollback is logged; the next pass retries once.]
+    oracle: [disk, log, mail]
+    automation: planned
+
+  - id: TB-PASS-001
+    title: Two items, two invocations
+    owner: pro
+    risk: critical
+    tags: ["@pro", "@pass", "@smoke"]
+    dimensions: [pro.pass.node_count, pro.planning.gate_result, update.email]
+    steps: [Seed two eligible items; run one pass to completion.]
+    assertions: [Two native invocations; two installs; two emails; one item row each; one pass row.]
+    oracle: [disk, log, pass, mail]
+    automation: planned
+
+  - id: TB-PASS-002
+    title: Lock busy and retry
+    owner: pro
+    risk: high
+    tags: ["@pro", "@pass"]
+    dimensions: [pro.pass.lock_wait]
+    steps: [Hold the native lock; run the pass; release and rerun.]
+    assertions: [Lock busy is waiting/skipped, not failed; the retry is bounded; no duplicate install.]
+    oracle: [pass, log]
+    automation: planned
+
+  - id: TB-PASS-003
+    title: Failed item retried next pass
+    owner: pro
+    risk: high
+    tags: ["@pro", "@pass"]
+    dimensions: [pro.pass.state, update.item_state]
+    steps: [Seed a failing item and a healthy item; run two passes.]
+    assertions: [The failed item is skipped for the pass and retried next; the healthy item completes.]
+    oracle: [pass, log]
+    automation: planned
+
+  - id: TB-PASS-004
+    title: Last pass, stale, expired
+    owner: pro
+    risk: high
+    tags: ["@pro", "@pass", "@flow"]
+    dimensions: [pro.pass.last_pass, pro.pass.state]
+    steps: [Seed a completed pass, a stale pass, and an expired pass.]
+    assertions: [The card is read-only; a stale/expired pass is not shown as active; “No pass summary” when absent.]
+    oracle: [pass, ui]
+    automation: planned
+
+  - id: TB-FLOW-001
+    title: Day-1 and day-2 ordering
+    owner: pro
+    risk: critical
+    tags: ["@pro", "@flow", "@pass"]
+    dimensions: [pro.flow.predecessor_state]
+    steps: [Run a two-step chain; run it again on the next day.]
+    assertions: [The predecessor installs first; the successor waits; the next pass advances it.]
+    oracle: [disk, pass, log]
+    automation: planned
+
+  - id: TB-FLOW-002
+    title: Locked or held predecessor
+    owner: pro
+    risk: critical
+    tags: ["@pro", "@flow", "@version-lock", "@schedule"]
+    dimensions: [pro.flow.predecessor_state, pro.version_lock.enabled, free.schedule.delay_value]
+    steps: [Make the predecessor locked, then held; run the pass.]
+    assertions: [The successor waits; no bypass; the reason names the predecessor; the next pass re-evaluates.]
+    oracle: [pass, log, ui]
+    automation: planned
+
+  - id: TB-FLOW-003
+    title: Failed predecessor and independent branches
+    owner: pro
+    risk: critical
+    tags: ["@pro", "@flow"]
+    dimensions: [pro.flow.predecessor_state, pro.flow.chain_shape]
+    steps: [Fail one branch; keep an independent branch.]
+    assertions: [Only descendants wait; the independent branch continues; no spin.]
+    oracle: [pass, log]
+    automation: planned
+
+  - id: TB-FLOW-004
+    title: Chain shapes
+    owner: pro
+    risk: high
+    tags: ["@pro", "@flow"]
+    dimensions: [pro.flow.chain_shape]
+    steps: [Create a valid chain, a cycle, a duplicate, a missing item, and an overflow.]
+    assertions: [Cycles block the save; missing items block descendants; overflow is reported, not truncated.]
+    oracle: [ui, pass]
+    automation: planned
+
+  - id: TB-SCHED-001
+    title: 24h+60m picker and hold boundaries
+    owner: free
+    risk: high
+    tags: ["@free", "@schedule"]
+    dimensions: [free.schedule.recurrence, free.schedule.time, free.schedule.delay_value]
+    steps: [Set 00:00, 23:59, and every recurrence; set hold 0, 1, 365.]
+    assertions: [The picker offers all hours/minutes; the time survives; 0 is off; 365 is accepted; 366 is rejected.]
+    oracle: [ui, options, cron]
+    automation: planned
+
+  - id: TB-SCHED-002
+    title: Native time and truthful copy
+    owner: free
+    risk: high
+    tags: ["@free", "@schedule", "@ui"]
+    dimensions: [free.schedule.time, free.schedule.cron_disabled]
+    steps: [Open plugins, themes, and update-core with a held and a waiting offer.]
+    assertions: [The row shows the truthful state; the next check is not the install time; the big notice is gone.]
+    oracle: [ui, log]
+    automation: planned
+
+  - id: TB-LOG-001
+    title: Decision filters and details
+    owner: free
+    risk: high
+    tags: ["@free", "@logger"]
+    dimensions: [free.log.filters, free.log.row_kind]
+    steps: [Seed blocked, waiting, held, and legacy rows; filter and open details.]
+    assertions: [Reason, state, origin, pass, chain, predecessor, target, next eligible are correct; legacy is labeled.]
+    oracle: [ui, log]
+    automation: planned
+
+  - id: TB-EXPORT-001
+    title: Export formats and columns
+    owner: shared
+    risk: high
+    tags: ["@free", "@pro", "@export"]
+    dimensions: [free.export.format, free.export.columns, free.export.merge]
+    steps: [Export txt, csv, json, and xml with merge on/off and decision context on/off.]
+    assertions: [The format is real; columns match; the feed total and export total agree; decision context is opt-in.]
+    oracle: [export, log]
+    automation: planned
+
+  - id: TB-EXPORT-002
+    title: Empty, expired, rate-limited, chunked
+    owner: free
+    risk: medium
+    tags: ["@free", "@pro", "@export"]
+    dimensions: [free.export.empty]
+    steps: [Export an empty filter, wait past expiry, exceed the rate limit, continue a chunked export.]
+    assertions: [Each state has a truthful message; no partial row is lost; no data leak.]
+    oracle: [export, http]
+    automation: planned
+
+  - id: TB-SHIELD-001
+    title: Safe Mode off and on
+    owner: pro
+    risk: critical
+    tags: ["@pro", "@shield"]
+    dimensions: [pro.shield.safe_mode, pro.version_lock.enabled]
+    steps: [Toggle Safe Mode off and on; run a native update.]
+    assertions: [Off disables Shield/Version Lock and does not block; on evaluates the policies.]
+    oracle: [ui, disk, log]
+    automation: planned
+
+  - id: TB-SHIELD-002
+    title: Incompatible behavior
+    owner: pro
+    risk: critical
+    tags: ["@pro", "@shield"]
+    dimensions: [pro.shield.incompatible_behavior, pro.shield.re_enable]
+    steps: [Offer an incompatible PHP/WP update; try disable and cancel; re-enable after a passing release.]
+    assertions: [Disable turns the toggle off; cancel skips one release; re-enable only after a pass.]
+    oracle: [options, log, ui]
+    automation: planned
+
+  - id: TB-SHIELD-003
+    title: Shield block email
+    owner: pro
+    risk: high
+    tags: ["@pro", "@shield", "@mail"]
+    dimensions: [pro.shield.notify_on_block, pro.shield.notify_email]
+    steps: [Block an update with each notification combination.]
+    assertions: [The email is sent only when enabled; the recipient is the configured one; the body is truthful.]
+    oracle: [mail, log]
+    automation: planned
+
+  - id: TB-VLOCK-001
+    title: Detection matrix
+    owner: pro
+    risk: critical
+    tags: ["@pro", "@version-lock"]
+    dimensions: [pro.version_lock.detection, pro.version_lock.manager]
+    steps: [Create Git item-root, Git ancestor, SVN, Composer project, Composer package, symlink, and unreadable fixtures.]
+    assertions: [Each detection maps to the canonical reason/manager; unknown fails closed; unverified writes one advisory.]
+    oracle: [ui, log, options]
+    automation: planned
+
+  - id: TB-VLOCK-002
+    title: Manual guard and pass own write
+    owner: pro
+    risk: critical
+    tags: ["@pro", "@version-lock"]
+    dimensions: [pro.version_lock.manual_updates, pro.version_lock.enabled]
+    steps: [Block manual updates; try direct URL, bulk, and WP-CLI; let the pass write.]
+    assertions: [Admin manual is blocked only with the switch on; WP-CLI works; the pass is exempt; the option is unchanged.]
+    oracle: [disk, log, options]
+    automation: planned
+
+  - id: TB-LIC-001
+    title: License gating
+    owner: pro
+    risk: critical
+    tags: ["@pro", "@license"]
+    dimensions: [pro.license.status, pro.license.mode]
+    steps: [Run with free-only, inactive, invalid, active, and dev-mode licenses.]
+    assertions: [Pro routes/screens appear only when active; inactive fails closed; the recovery path works.]
+    oracle: [ui, http, pass]
+    automation: planned
+
+  - id: TB-LIC-002
+    title: Salt rotation and throttle
+    owner: pro
+    risk: high
+    tags: ["@pro", "@license"]
+    dimensions: [pro.license.activation]
+    steps: [Rotate salts, clear the key, throttle activation, revalidate.]
+    assertions: [The notice is truthful; the key can be cleared; the throttle is respected; no fatal.]
+    oracle: [ui, options, http]
+    automation: planned
+
+  - id: TB-WL-001
+    title: White Label save, reset, logo, sanitize
+    owner: pro
+    risk: medium
+    tags: ["@pro", "@white-label", "@a11y"]
+    dimensions: [pro.white_label.brand, pro.white_label.logo, pro.white_label.colors]
+    steps: [Save a brand, reset, upload a bad logo, sanitize markup, open the preview.]
+    assertions: [The draft saves/resets; invalid files are rejected; labels are capped; the preview is the real rail/email.]
+    oracle: [ui, options, upload]
+    automation: planned
+
+  - id: TB-MS-001
+    title: Network schedule and logs
+    owner: shared
+    risk: critical
+    tags: ["@free", "@pro", "@multisite"]
+    dimensions: [multisite.scope, free.schedule.recurrence]
+    steps: [Save the network schedule as Super Admin; view from a subsite; generate a subsite log row.]
+    assertions: [The network option is shared; a subsite admin cannot save; network logs include subsite rows.]
+    oracle: [ui, db, options]
+    automation: planned
+
+  - id: TB-MS-002
+    title: Site deletion and uninstall
+    owner: shared
+    risk: critical
+    tags: ["@free", "@pro", "@multisite"]
+    dimensions: [multisite.scope]
+    steps: [Delete a subsite with rows; uninstall the plugin on the network.]
+    assertions: [The deleted site's rows are purged; uninstall removes network data once; no fatal.]
+    oracle: [db, ui]
+    automation: planned
+
+  - id: TB-MS-003
+    title: Main-site pass
+    owner: pro
+    risk: critical
+    tags: ["@pro", "@multisite", "@pass"]
+    dimensions: [multisite.pass_scope]
+    steps: [Run a pass on the main site; trigger a subsite tick.]
+    assertions: [The pass runs on the main site only; a subsite keeps native all-at-once behavior; no network-wide claim.]
+    oracle: [pass, log, ui]
+    automation: planned
+
+  - id: TB-ROLE-001
+    title: Role and capability matrix
+    owner: shared
+    risk: critical
+    tags: ["@free", "@pro", "@roles", "@security"]
+    dimensions: [role.kind, role.capability]
+    steps: [Open every destination as admin, editor, subscriber, Super Admin, and subsite admin.]
+    assertions: [Only the allowed roles see the destination; direct URLs are denied; REST is denied; no fatal.]
+    oracle: [ui, http]
+    automation: planned
+
+  - id: TB-ENV-001
+    title: Constants and locked controls
+    owner: shared
+    risk: critical
+    tags: ["@free", "@pro", "@constants"]
+    dimensions: [wp.constants.automatic_updater_disabled, wp.constants.disallow_file_mods, wp.constants.wp_auto_update_core]
+    steps: [Set each constant; open the auto-update surfaces.]
+    assertions: [The controls are locked and explain the constant; no update is silently attempted.]
+    oracle: [ui, options]
+    automation: planned
+
+  - id: TB-ENV-002
+    title: Cron and timezone
+    owner: free
+    risk: high
+    tags: ["@free", "@schedule", "@timezone"]
+    dimensions: [env.cron, env.timezone, free.schedule.time]
+    steps: [Disable WP-Cron; set UTC and a DST boundary; run the check.]
+    assertions: [The hint is one line; the next check uses the site timezone; DST is documented; no false install time.]
+    oracle: [ui, cron, options]
+    automation: planned
+
+  - id: TB-ENV-003
+    title: Filesystem and disk failures
+    owner: shared
+    risk: critical
+    tags: ["@free", "@pro", "@environment"]
+    dimensions: [env.filesystem, update.package]
+    steps: [Make the filesystem read-only, return an invalid zip, fill the disk, and run an update.]
+    assertions: [The failure is logged truthfully; no fatal; no false success; the next pass recovers.]
+    oracle: [disk, log, http]
+    automation: planned
+
+triples:
+  - id: COMBO-001
+    title: Shield off + Version Lock on + locked item
+    owner: pro
+    risk: critical
+    tags: ["@pro", "@combo", "@shield", "@version-lock"]
+    dimensions:
+      pro.shield.safe_mode: false
+      pro.version_lock.enabled: true
+      update.item_state: locked_native
+    why: The master switch is inside Shield; with Shield off, the lock must be inactive and the native update must still run.
+    assertions: [No lock policy blocks the update; the native option is unchanged; no false “Locked” label.]
+    oracle: [disk, ui, options]
+    automation: planned
+
+  - id: COMBO-002
+    title: Hold 365 + locked item
+    owner: pro
+    risk: critical
+    tags: ["@pro", "@combo", "@schedule", "@version-lock"]
+    dimensions:
+      free.schedule.delay_value: 365
+      pro.version_lock.enabled: true
+      update.item_state: held
+    why: A long hold and a lock must both wait; neither may bypass the other.
+    assertions: [The item is held/locked, not installed; the reason names both; the next pass re-evaluates.]
+    oracle: [disk, ui, pass]
+    automation: planned
+
+  - id: COMBO-003
+    title: License inactive + pass enabled
+    owner: pro
+    risk: critical
+    tags: ["@pro", "@combo", "@license", "@pass"]
+    dimensions:
+      pro.license.status: inactive
+      pro.pass.enabled: true
+      pro.planning.gate_result: pass_disabled
+    why: The kill switch is on, but the license gate must fail closed before execution.
+    assertions: [No pass, no Pro route, no native gate; the license page remains usable.]
+    oracle: [http, pass, options]
+    automation: planned
+
+  - id: COMBO-004
+    title: Multisite + network activation + main-site pass
+    owner: pro
+    risk: critical
+    tags: ["@pro", "@combo", "@multisite", "@pass"]
+    dimensions:
+      multisite.scope: network_activated
+      multisite.pass_scope: main_site_only
+      role.kind: super_admin
+    why: Network activation must not turn the pass into a network-wide runner.
+    assertions: [The pass runs on the main site only; subsite admins are blocked; network logs remain correct.]
+    oracle: [pass, ui, db]
+    automation: planned
+
+  - id: COMBO-005
+    title: Manual lock on + direct URL + WP-CLI
+    owner: pro
+    risk: critical
+    tags: ["@pro", "@combo", "@version-lock"]
+    dimensions:
+      pro.version_lock.enabled: true
+      pro.version_lock.manual_updates: true
+      update.origin: manual
+    why: The manual hard block must cover the admin routes and leave WP-CLI as the escape hatch.
+    assertions: [The admin direct URL is blocked; bulk and update-core are blocked; WP-CLI succeeds; the option is unchanged.]
+    oracle: [disk, http, options]
+    automation: planned
+
+  - id: COMBO-006
+    title: Composer/VCS + pending update + manual switch off
+    owner: pro
+    risk: critical
+    tags: ["@pro", "@combo", "@version-lock"]
+    dimensions:
+      pro.version_lock.detection: composer_project
+      pro.version_lock.manual_updates: false
+      update.item_state: pending
+    why: Automatic updates are locked; manual admin updates remain available unless the manual switch says otherwise.
+    assertions: [The automatic update is blocked with the manager label; the manual admin update is allowed; no option rewrite.]
+    oracle: [disk, ui, options]
+    automation: planned
+
+  - id: COMBO-007
+    title: Shield on + incompatible PHP + re-enable on + hold 0
+    owner: pro
+    risk: critical
+    tags: ["@pro", "@combo", "@shield", "@schedule"]
+    dimensions:
+      pro.shield.safe_mode: true
+      pro.shield.incompatible_behavior: disable
+      pro.shield.re_enable: true
+      free.schedule.delay_value: 0
+    why: An incompatible update must be blocked, its auto-update turned off, and re-enabled only after a passing release.
+    assertions: [The update is blocked; the toggle is off; a later passing release re-enables it; one row per outcome.]
+    oracle: [options, log, mail]
+    automation: planned
+
+  - id: COMBO-008
+    title: Pass enabled + two items + one failure
+    owner: pro
+    risk: critical
+    tags: ["@pro", "@combo", "@pass", "@update"]
+    dimensions:
+      pro.pass.enabled: true
+      pro.pass.node_count: 2
+      update.package: invalid_zip
+      update.email: one
+    why: One item failing must not duplicate execution, lose the pass summary, or suppress the healthy item's email.
+    assertions: [Two invocations; one failure row; one healthy install; one email each; one pass row.]
+    oracle: [disk, log, pass, mail]
+    automation: planned
