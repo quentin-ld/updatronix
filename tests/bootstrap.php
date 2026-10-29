@@ -634,6 +634,16 @@ if (!class_exists('Updatronix_Logger', false)) {
         }
 
         /**
+         * No event has been recorded in the unit harness.
+         *
+         * @param string $key Event key.
+         * @return bool
+         */
+        public static function has_event( string $key ): bool {
+            return false;
+        }
+
+        /**
          * Stub log_event method.
          *
          * Records the event in the same shape as log(), plus the decision

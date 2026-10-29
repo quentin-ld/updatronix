@@ -1,5 +1,5 @@
 {
-  "commit": "0da485b",
+  "commit": "d200f63",
   "files": {
     ".agents/docs/DISTILLATION.md": {
       "class": "owned",
@@ -239,7 +239,7 @@
     },
     ".githooks/pre-push": {
       "class": "owned",
-      "sha256": "e3124badafbe98012d6b6bbf3d62eb26be5c655178d56cee63e416454e8145a3"
+      "sha256": "e865be2c9ed4f906b90ab76b55a64c8915558c6e4dff81d5872896ed670e6d08"
     },
     ".githooks/pre-release": {
       "class": "owned",
@@ -514,7 +514,7 @@
     },
     "README.md": {
       "class": "block",
-      "sha256": "b3b165428dd96d5ffd8a89c4200da3c5a60b6a4ab6bf0a883f86e0800319afb8"
+      "sha256": "acc00b52f1af61d5849d305571e208907d43bddb256913879e74443044c99138"
     },
     "bin/check-prose-drift.php": {
       "class": "owned",
@@ -526,7 +526,7 @@
     },
     "bin/harness": {
       "class": "owned",
-      "sha256": "90d54d4f7e52056f8957ad5744ce6734bcd604c0f34f6ce8f944a1a0a4b8a9f5"
+      "sha256": "85b0c3f6ee4582fc49a68cefb4916826fa2a874a80ef9d9351e52217413e7d73"
     },
     "bin/install-wp-tests.sh": {
       "class": "owned",
@@ -542,7 +542,7 @@
     },
     "package.json": {
       "class": "merge",
-      "sha256": "1133f67314edfafd6f8cb2d0f9f6cd67ed78363094e445ec5bdfbf3093c16e6b"
+      "sha256": "646ebf9c786128d97e6a433e061ef11b65f00e98efe3430d91b631539f5c067a"
     },
     "readme.txt": {
       "class": "seed",

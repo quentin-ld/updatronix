@@ -613,6 +613,7 @@ final class Updatronix_Update_Logger {
 				if ( self::should_skip_event( $event_key ) ) {
 					continue;
 				}
+				$target_version = $version_after;
 				if ( isset( $result->result ) && is_wp_error( $result->result ) ) {
 					$status = 'error';
 				}
@@ -621,6 +622,28 @@ final class Updatronix_Update_Logger {
 					$messages,
 					$result->result ?? null
 				);
+
+				if ( 'plugin' === $type && is_object( $item ) && isset( $item->plugin ) ) {
+					$file   = (string) $item->plugin;
+					$path   = WP_PLUGIN_DIR . '/' . $file;
+					$actual = ( file_exists( $path ) && function_exists( 'get_plugin_data' ) )
+						? (string) ( get_plugin_data( $path, false, false )['Version'] ?? '' ) // counterfactual: equivalent false -> true — markup/translate flags do not affect Version.
+						: '';
+					if ( '' === $actual || ( '' !== $target_version && $actual !== $target_version ) ) {
+						$status        = 'error';
+						$version_after = $actual;
+					}
+				}
+
+				if ( 'theme' === $type && '' !== $slug ) {
+					$theme  = wp_get_theme( $slug );
+					$actual = $theme->exists() ? (string) $theme->get( 'Version' ) : '';
+					if ( '' === $actual || ( '' !== $target_version && $actual !== $target_version ) ) {
+						$status        = 'error';
+						$version_after = $actual;
+					}
+				}
+
 				Updatronix_Logger::log_event(
 					array(
 						'log_type'       => 'translation' === $type ? 'translation' : $type,
@@ -629,7 +652,7 @@ final class Updatronix_Update_Logger {
 						'item_slug'      => 'core' === $type ? 'core:wordpress' : $slug,
 						'version_before' => $version_before,
 						'version_after'  => $version_after,
-						'target_version' => $version_after,
+						'target_version' => $target_version,
 						'status'         => $status,
 						'message'        => $notes,
 						'trace'          => $trace,
@@ -1743,6 +1766,16 @@ final class Updatronix_Update_Logger {
 		if ( '' === $version_before && isset( $by_mainfile[ basename( $plugin_file ) ] ) ) {
 			$version_before = (string) $by_mainfile[ basename( $plugin_file ) ];
 		}
+		$path = WP_PLUGIN_DIR . '/' . $plugin_file;
+
+		if ( ! file_exists( $path ) ) {
+			// The upgrader can report completion after removing the old plugin.
+			// The pass finalizer records the failure; never write a false success row.
+			unset( $stored[ $plugin_file ] );
+			unset( $by_mainfile[ basename( $plugin_file ) ] );
+			return;
+		}
+
 		$version_after = '';
 		$name          = $plugin_file;
 

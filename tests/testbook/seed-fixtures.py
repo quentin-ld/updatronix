@@ -59,7 +59,7 @@ $p->response['fixture-locked/fixture-locked.php'] = (object) array(
 $p->response['fixture-broken/fixture-broken.php'] = (object) array(
     'id' => 'wordpress.org/plugins/fixture-broken/', 'slug' => 'fixture-broken',
     'plugin' => 'fixture-broken/fixture-broken.php', 'new_version' => '2.0.0',
-    'url' => 'https://example.test/fixture-broken', 'package' => $base . 'fixture-broken-2.0.0.zip',
+    'url' => 'https://example.test/fixture-broken', 'package' => $base . 'fixture-broken-2.0.0-missing.zip',
     'icons' => array(), 'banners' => array(), 'banners_rtl' => array(),
     'tested' => '7.1', 'requires_php' => '8.0', 'requires' => '6.2', 'compatibility' => new stdClass(),
 );
@@ -142,7 +142,7 @@ add_filter( 'site_transient_update_plugins', static function ( $value ) {
     $value->response['fixture-broken/fixture-broken.php'] = (object) array(
         'id' => 'wordpress.org/plugins/fixture-broken/', 'slug' => 'fixture-broken',
         'plugin' => 'fixture-broken/fixture-broken.php', 'new_version' => '2.0.0',
-        'url' => 'https://example.test/fixture-broken', 'package' => $base . 'fixture-broken-2.0.0.zip',
+        'url' => 'https://example.test/fixture-broken', 'package' => $base . 'fixture-broken-2.0.0-missing.zip',
         'icons' => array(), 'banners' => array(), 'banners_rtl' => array(),
         'tested' => '7.1', 'requires_php' => '8.0', 'requires' => '6.2', 'compatibility' => new stdClass(),
     );

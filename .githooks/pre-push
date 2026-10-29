@@ -87,7 +87,9 @@ SECONDS=0
 
 status=0
 
-"$ROOT/bin/harness" lint || status=1
+# Diff-scoped: only the PHP this push changes. The full-tree `lint` remains the
+# release/merge gate; unrelated legacy debt must not block a push.
+"$ROOT/bin/harness" lint:changed || status=1
 
 # The README's announced facts, read back from the project header: the WordPress
 # and PHP floors, the version tested against, the version shipped as. The

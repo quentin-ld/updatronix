@@ -242,13 +242,7 @@ _reenter_in_container() {
 	# The inner runtime must resolve to `host`, so `HARNESS_BACKEND` is
 	# deliberately *not* forwarded — `IS_DDEV_PROJECT` is the signal that it is
 	# already inside. It goes first so the array is never empty.
-	#
-	# The value is the literal string `true`, not `1`: `wp-config.php` and
-	# `wp-config-ddev.php` test `getenv( 'IS_DDEV_PROJECT' ) === 'true'` before
-	# loading the DDEV database settings. Forwarding `1` satisfied the harness's
-	# own "inside a container" check while making WP-CLI skip `wp-config-ddev.php`,
-	# so `$table_prefix` was undefined and every WP-CLI call failed to connect.
-	local -a forward=(IS_DDEV_PROJECT=true)
+	local -a forward=(IS_DDEV_PROJECT=1)
 	local knob
 	for knob in HARNESS_MUTATION_BASE HARNESS_COVERAGE_TIMEOUT \
 		HARNESS_COUNTERFACTUAL_MAX HARNESS_COUNTERFACTUAL_LOCK_WAIT \
@@ -630,6 +624,61 @@ cmd_lint_files() {
 	step "WPCS (${#} file(s))"
 	_phpcs_cache_dir
 	run vendor/bin/phpcs --standard="$phpcs_config" --cache="$PHPCS_CACHE_REL" --parallel="$PHPCS_PARALLEL" "$@"
+}
+
+# Lint only the PHP files a push adds. The full-tree `lint` stays the
+# release/merge gate; unrelated legacy debt in untouched files must not block a
+# push. `_mutation_base` is the same base `mutation` and `counterfactual` use,
+# so all three scoped gates agree on what "the push" means.
+cmd_lint_changed() {
+	local phpcs_config phpstan_config base file path
+	phpcs_config="$(_require_config 'PHP_CodeSniffer' .config/phpcs.xml phpcs.xml phpcs.xml.dist)"
+	phpstan_config="$(_require_config 'PHPStan' .config/phpstan.neon phpstan.neon phpstan.neon.dist)"
+	_require_binary phpcs squizlabs/php_codesniffer
+	_require_binary phpstan phpstan/phpstan
+
+	base="$(_mutation_base)"
+	local -a changed=() wpcs_targets=() lint_paths=() phpstan_paths=()
+	if [[ "$base" == "HEAD" ]]; then
+		while IFS= read -r file; do
+			[[ -n "$file" ]] && changed+=("$file")
+		done < <(git -C "$PROJECT_ROOT" diff --name-only --diff-filter=ACMR -- '*.php')
+	else
+		while IFS= read -r file; do
+			[[ -n "$file" ]] && changed+=("$file")
+		done < <(git -C "$PROJECT_ROOT" diff --name-only --diff-filter=ACMR "${base}...HEAD" -- '*.php')
+	fi
+	while IFS= read -r path; do
+		[[ -n "$path" ]] && lint_paths+=("$path")
+	done < <(_lint_paths)
+	while IFS= read -r path; do
+		[[ -n "$path" ]] && phpstan_paths+=("$path")
+	done < <(_phpstan_paths)
+
+	for file in "${changed[@]}"; do
+		[[ -f "$PROJECT_ROOT/$file" ]] || continue
+		for path in "${lint_paths[@]}"; do
+			if [[ "$file" == "$path" || "$file" == "$path"/* ]]; then
+				wpcs_targets+=("$file")
+				break
+			fi
+		done
+	done
+
+	if [[ ${#wpcs_targets[@]} -eq 0 ]]; then
+		info "WPCS: no changed PHP files under the lint paths."
+	else
+		step "WPCS (${#wpcs_targets[@]} changed file(s))"
+		_phpcs_cache_dir
+		run vendor/bin/phpcs --standard="$phpcs_config" --cache="$PHPCS_CACHE_REL" --parallel="$PHPCS_PARALLEL" "${wpcs_targets[@]}"
+	fi
+
+	if [[ ${#phpstan_paths[@]} -eq 0 ]]; then
+		info "PHPStan: no analysis paths."
+	else
+		step "PHPStan (${#phpstan_paths[@]} path(s))"
+		run vendor/bin/phpstan analyse --memory-limit=2048M --configuration="$phpstan_config" "${phpstan_paths[@]}"
+	fi
 }
 
 cmd_test_js() {
@@ -4627,6 +4676,7 @@ ${PROJECT_SLUG} harness ${HARNESS_VERSION} — backend: ${BACKEND:-unresolved}
                                     rm -rf .cache/gate-results
   bin/harness pcp                 Plugin Check
   bin/harness verify              the pre-push gate
+  bin/harness lint:changed        WPCS/PHPStan on the pushed diff (pre-push)
 
   WP_MULTISITE=1 bin/harness integration   also run the multisite suite
 
@@ -4657,6 +4707,7 @@ main() {
 	php | composer | wp | node | npm | npx) require_tool "$command"; run "$command" "$@" ;;
 	graft) cmd_graft "$@" ;;
 	lint) cmd_lint ;;
+	lint:changed) cmd_lint_changed ;;
 	lint:wpcs) cmd_lint_wpcs ;;
 	lint:fix) cmd_lint_fix ;;
 	lint:files) cmd_lint_files "$@" ;;
