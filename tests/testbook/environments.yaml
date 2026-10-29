@@ -1,0 +1,20 @@
+schema: updatronix-testbook/environments/v1
+updated: 2026-10-29
+defaults:
+  user: testbook
+  password: testbook-local
+  snapshot: testbook-base2
+  base: wp-content/testbook-base
+  reset_timeout: 600
+sites:
+  single:
+    project: updatronix-test
+    path: /home/quentin/_DDEV/updatronix-test
+    url: https://updatronix-test.ddev.site
+    multisite: false
+  multisite:
+    project: updatronix-ms
+    path: /home/quentin/_DDEV/updatronix-ms
+    url: https://updatronix-ms.ddev.site
+    multisite: true
+    snapshot: testbook-ms

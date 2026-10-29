@@ -34,4 +34,12 @@
 	<rule ref="WordPress.Files.FileName">
 		<exclude-pattern>*/tests/Support/*</exclude-pattern>
 	</rule>
+	<!--
+		Test-book PHP files are WP-CLI eval fixtures, not plugin code. Their
+		docblock is a file comment, but the Squiz file-comment sniff does not
+		recognize the eval-file shape. Exclude only that rule for this folder.
+	-->
+	<rule ref="Squiz.Commenting.FileComment">
+		<exclude-pattern>*/tests/testbook/php/*</exclude-pattern>
+	</rule>
 </ruleset>
