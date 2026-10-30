@@ -450,9 +450,9 @@ echo wp_json_encode( array( 'id' => (int) $user->ID, 'roles' => $user->roles ) )
 		if not route.startswith( "/" ):
 			route = "/" + route
 		php = f"""<?php
-$route = {php_list([route])}[0];
-$method = strtoupper( {php_list([method])}[0] );
-$login = {php_list([login]) if login else "null"};
+$route = {php_json(route)};
+$method = strtoupper( {php_json(method)} );
+$login = {php_json(login) if login else "null"};
 if ( $login ) {{
 	$user = get_user_by( 'login', $login );
 	if ( $user ) {{ wp_set_current_user( $user->ID ); }}
@@ -593,8 +593,10 @@ echo wp_json_encode( array( 'ok' => true, 'chains' => $clean ) );
 		lines = []
 		if plugins is not None:
 			lines.append( f"update_option( 'auto_update_plugins', {php_list(plugins)} );" )
+			lines.append( f"if ( is_multisite() ) {{ update_site_option( 'auto_update_plugins', {php_list(plugins)} ); }}" )
 		if themes is not None:
 			lines.append( f"update_option( 'auto_update_themes', {php_list(themes)} );" )
+			lines.append( f"if ( is_multisite() ) {{ update_site_option( 'auto_update_themes', {php_list(themes)} ); }}" )
 		php = "<?php\n" + "\n".join( lines ) + """
 wp_cache_flush();
 echo wp_json_encode( array(
@@ -813,6 +815,48 @@ echo wp_json_encode( array( 'created' => null !== $pass, 'data' => null !== $pas
 
 	def remove_plugin( self, slug: str ) -> None:
 		self._remove_path( self.path / "wp-content/plugins" / slug )
+
+	def create_site( self, slug: str, title: str ) -> dict:
+		completed = self.wp(
+			[ "site", "create", f"--slug={slug}", f"--title={title}", "--porcelain" ],
+			check=False,
+		)
+		if completed.returncode != 0:
+			raise RuntimeError( f"wp site create failed: {completed.stderr.strip() or completed.stdout.strip()}" )
+		lines = [ line.strip() for line in completed.stdout.splitlines() if line.strip() ]
+		if not lines or not lines[-1].isdigit():
+			raise RuntimeError( f"wp site create returned no blog id: {completed.stdout!r}" )
+		return { "blog_id": int( lines[-1] ) }
+
+	def delete_site( self, blog_id: int ) -> subprocess.CompletedProcess[str]:
+		return self.wp( [ "site", "delete", str( blog_id ), "--yes" ], check=False )
+
+	def insert_log( self, blog_id: int, name: str ) -> dict:
+		php = f"""<?php
+$multisite = is_multisite();
+if ( $multisite ) {{ switch_to_blog( {int(blog_id)} ); }}
+$id = Updatronix_Logger::log_event( array(
+	'log_type' => 'plugin', 'action_type' => 'update',
+	'item_name' => {php_list([name])}[0], 'item_slug' => 'tb/multisite.php',
+	'version_before' => '1.0.0', 'target_version' => '1.1.0',
+	'status' => 'success', 'message' => {php_list([name])}[0],
+	'performed_as' => 'automatic', 'reason_code' => 'updated',
+	'decision_state' => 'done', 'origin' => 'automatic', 'decision_stage' => 'execute',
+) );
+if ( $multisite ) {{ restore_current_blog(); }}
+echo wp_json_encode( array( 'id' => $id ) );
+"""
+		return self.json_eval( php )
+
+	def log_rows( self, blog_id: int | None = None ) -> list[dict]:
+		table = self.table( "updatronix_logs" )
+		if blog_id is None:
+			return self.db_query( f"SELECT * FROM {table} ORDER BY id" )
+		return self.db_query( f"SELECT * FROM {table} WHERE site_id = %d ORDER BY id", [ int( blog_id ) ] )
+
+	def log_table_exists( self ) -> bool:
+		table = self.table( "updatronix_logs" )
+		return bool( self.db_query( "SHOW TABLES LIKE %s", [ table ] ) )
 
 	def get_flow_chains( self ) -> list[dict]:
 		return self.json_eval(

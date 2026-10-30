@@ -82,7 +82,7 @@ cases:
     steps: [Open the network admin as Super Admin; open a subsite as its admin; run the pass.]
     assertions: [Network settings/logs are Super Admin only; the pass is main-site only; site deletion is clean.]
     oracle: [ui, db, pass]
-    automation: planned
+    automation: implemented
 
   - id: TB-PRO-008
     title: Pro export formats

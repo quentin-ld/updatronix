@@ -227,7 +227,7 @@ cases:
   oracle:
   - ui
   - integration
-  automation: planned
+  automation: implemented
 - id: TB-SCHED-104
   title: 'Dimension: Update-check recurrence (free.schedule.recurrence)'
   owner: free
@@ -443,7 +443,7 @@ cases:
   oracle:
   - ui
   - integration
-  automation: planned
+  automation: implemented
 - id: TB-AUTO-105
   title: 'Dimension: Native translation auto-updates (wp.auto_update_translations)'
   owner: shared
@@ -492,7 +492,7 @@ cases:
   oracle:
   - ui
   - integration
-  automation: planned
+  automation: implemented
 - id: TB-AUTO-108
   title: 'Dimension: DISALLOW_FILE_MODS (wp.constants.disallow_file_mods)'
   owner: shared
@@ -517,7 +517,7 @@ cases:
   oracle:
   - ui
   - integration
-  automation: planned
+  automation: implemented
 - id: TB-AUTO-109
   title: 'Dimension: WP_AUTO_UPDATE_CORE (wp.constants.wp_auto_update_core)'
   owner: shared
@@ -543,7 +543,7 @@ cases:
   oracle:
   - ui
   - integration
-  automation: planned
+  automation: implemented
 - id: TB-AUTO-107
   title: 'Dimension: DISABLE_WP_CRON (wp.constants.disable_wp_cron)'
   owner: shared
@@ -2105,7 +2105,7 @@ cases:
   oracle:
   - ui
   - integration
-  automation: planned
+  automation: implemented
 - id: TB-ENV-108
   title: 'Dimension: Item VCS provenance (env.vcs)'
   owner: shared
@@ -2134,7 +2134,7 @@ cases:
   oracle:
   - ui
   - integration
-  automation: planned
+  automation: implemented
 - id: TB-ENV-107
   title: 'Dimension: Site timezone (env.timezone)'
   owner: shared
@@ -2192,7 +2192,7 @@ cases:
   oracle:
   - ui
   - integration
-  automation: planned
+  automation: implemented
 - id: TB-ENV-104
   title: 'Dimension: Mail transport (env.mail)'
   owner: shared
@@ -2277,7 +2277,7 @@ cases:
   oracle:
   - ui
   - integration
-  automation: planned
+  automation: implemented
 - id: TB-ROLE-101
   title: 'Dimension: Capability (role.capability)'
   owner: shared
@@ -2305,7 +2305,7 @@ cases:
   oracle:
   - ui
   - integration
-  automation: planned
+  automation: implemented
 - id: TB-MS-102
   title: 'Dimension: Multisite scope (multisite.scope)'
   owner: shared
@@ -2335,7 +2335,7 @@ cases:
   oracle:
   - ui
   - integration
-  automation: planned
+  automation: implemented
 - id: TB-MS-101
   title: 'Dimension: Pass registration scope (multisite.pass_scope)'
   owner: pro
@@ -2361,4 +2361,4 @@ cases:
   oracle:
   - ui
   - integration
-  automation: planned
+  automation: implemented

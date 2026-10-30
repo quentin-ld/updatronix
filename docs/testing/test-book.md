@@ -147,7 +147,7 @@ the run. The release gate stays open until every catalog case has one.
 | TB-SET-107 | Dimension: Notification event allowlist (free.notify_on) | free | medium | @free @mail @dimension | planned |
 | TB-AUTO-101 | Dimension: Auto-update translations (free.auto_update_translations) | free | medium | @free @auto-updates @dimension | planned |
 | TB-SET-102 | Dimension: Dismissed constant notices (free.dismissed_constants) | free | low | @free @settings @dimension | planned |
-| TB-SET-101 | Dimension: Delete data on uninstall (free.delete_data_on_uninstall) | free | critical | @free @uninstall @data @dimension | planned |
+| TB-SET-101 | Dimension: Delete data on uninstall (free.delete_data_on_uninstall) | free | critical | @free @uninstall @data @dimension | implemented |
 | TB-SCHED-104 | Dimension: Update-check recurrence (free.schedule.recurrence) | free | high | @free @schedule @dimension | planned |
 | TB-SCHED-105 | Dimension: Preferred wall-clock time (free.schedule.time) | free | high | @free @schedule @timezone @dimension | planned |
 | TB-SCHED-102 | Dimension: Hold new releases (free.schedule.delay_enabled) | free | high | @free @schedule @hold @dimension | planned |
@@ -155,11 +155,11 @@ the run. The release gate stays open until every catalog case has one.
 | TB-SCHED-101 | Dimension: WP-Cron disabled (free.schedule.cron_disabled) | free | high | @free @schedule @environment @dimension | planned |
 | TB-AUTO-102 | Dimension: Core auto-update mode (wp.auto_update_core) | shared | critical | @free @auto-updates @invariant @dimension | partial |
 | TB-AUTO-103 | Dimension: Plugin auto-update opt-ins (wp.auto_update_plugins) | shared | critical | @free @pro @auto-updates @invariant @dimension | partial |
-| TB-AUTO-104 | Dimension: Theme auto-update opt-ins (wp.auto_update_themes) | shared | critical | @free @pro @auto-updates @invariant @dimension | planned |
+| TB-AUTO-104 | Dimension: Theme auto-update opt-ins (wp.auto_update_themes) | shared | critical | @free @pro @auto-updates @invariant @dimension | implemented |
 | TB-AUTO-105 | Dimension: Native translation auto-updates (wp.auto_update_translations) | shared | medium | @free @auto-updates @dimension | planned |
-| TB-AUTO-106 | Dimension: AUTOMATIC_UPDATER_DISABLED (wp.constants.automatic_updater_disabled) | shared | critical | @free @pro @constants @invariant @dimension | planned |
-| TB-AUTO-108 | Dimension: DISALLOW_FILE_MODS (wp.constants.disallow_file_mods) | shared | critical | @free @pro @constants @invariant @dimension | planned |
-| TB-AUTO-109 | Dimension: WP_AUTO_UPDATE_CORE (wp.constants.wp_auto_update_core) | shared | critical | @free @constants @invariant @dimension | planned |
+| TB-AUTO-106 | Dimension: AUTOMATIC_UPDATER_DISABLED (wp.constants.automatic_updater_disabled) | shared | critical | @free @pro @constants @invariant @dimension | implemented |
+| TB-AUTO-108 | Dimension: DISALLOW_FILE_MODS (wp.constants.disallow_file_mods) | shared | critical | @free @pro @constants @invariant @dimension | implemented |
+| TB-AUTO-109 | Dimension: WP_AUTO_UPDATE_CORE (wp.constants.wp_auto_update_core) | shared | critical | @free @constants @invariant @dimension | implemented |
 | TB-AUTO-107 | Dimension: DISABLE_WP_CRON (wp.constants.disable_wp_cron) | shared | high | @free @schedule @constants @dimension | planned |
 | TB-LOG-101 | Dimension: Decision layer enabled (free.kill_switch.log_decision_layer) | free | high | @free @logger @kill-switch @dimension | planned |
 | TB-UI-101 | Dimension: Native update time display enabled (free.kill_switch.native_update_time) | free | medium | @free @schedule @kill-switch @dimension | planned |
@@ -217,16 +217,16 @@ the run. The release gate stays open until every catalog case has one.
 | TB-ENV-109 | Dimension: WordPress version (env.wp_version) | shared | high | @free @pro @environment @dimension | planned |
 | TB-ENV-106 | Dimension: PHP version (env.php_version) | shared | high | @free @pro @environment @dimension | planned |
 | TB-ENV-102 | Dimension: Database (env.database) | shared | high | @free @pro @environment @dimension | planned |
-| TB-ENV-103 | Dimension: Filesystem method (env.filesystem) | shared | critical | @free @pro @environment @invariant @dimension | planned |
-| TB-ENV-108 | Dimension: Item VCS provenance (env.vcs) | shared | critical | @pro @environment @version-lock @dimension | planned |
+| TB-ENV-103 | Dimension: Filesystem method (env.filesystem) | shared | critical | @free @pro @environment @invariant @dimension | implemented |
+| TB-ENV-108 | Dimension: Item VCS provenance (env.vcs) | shared | critical | @pro @environment @version-lock @dimension | implemented |
 | TB-ENV-107 | Dimension: Site timezone (env.timezone) | shared | high | @free @schedule @environment @dimension | planned |
-| TB-ENV-101 | Dimension: WP-Cron (env.cron) | shared | critical | @free @pro @schedule @pass @environment @dimension | planned |
+| TB-ENV-101 | Dimension: WP-Cron (env.cron) | shared | critical | @free @pro @schedule @pass @environment @dimension | implemented |
 | TB-ENV-104 | Dimension: Mail transport (env.mail) | shared | high | @free @pro @mail @environment @dimension | planned |
 | TB-ENV-105 | Dimension: Maintenance / recovery mode (env.maintenance) | shared | high | @free @pro @environment @dimension | planned |
-| TB-ROLE-102 | Dimension: User role (role.kind) | shared | critical | @free @pro @roles @security @dimension | planned |
-| TB-ROLE-101 | Dimension: Capability (role.capability) | shared | critical | @free @pro @roles @security @dimension | planned |
-| TB-MS-102 | Dimension: Multisite scope (multisite.scope) | shared | critical | @free @pro @multisite @invariant @dimension | planned |
-| TB-MS-101 | Dimension: Pass registration scope (multisite.pass_scope) | pro | critical | @pro @multisite @pass @dimension | planned |
+| TB-ROLE-102 | Dimension: User role (role.kind) | shared | critical | @free @pro @roles @security @dimension | implemented |
+| TB-ROLE-101 | Dimension: Capability (role.capability) | shared | critical | @free @pro @roles @security @dimension | implemented |
+| TB-MS-102 | Dimension: Multisite scope (multisite.scope) | shared | critical | @free @pro @multisite @invariant @dimension | implemented |
+| TB-MS-101 | Dimension: Pass registration scope (multisite.pass_scope) | pro | critical | @pro @multisite @pass @dimension | implemented |
 | TB-UI-001 | Update logs surface | free | high | @free @logger @ui @smoke | implemented |
 | TB-UI-002 | Auto updates surface | free | high | @free @auto-updates @ui @smoke | implemented |
 | TB-UI-003 | Schedule surface | free | high | @free @schedule @ui @smoke | implemented |
@@ -269,16 +269,16 @@ the run. The release gate stays open until every catalog case has one.
 | TB-LIC-002 | Salt rotation and throttle | pro | high | @pro @license | planned |
 | TB-WL-001 | White Label save, reset, logo, sanitize | pro | medium | @pro @white-label @a11y | planned |
 | TB-MS-001 | Network schedule and logs | shared | critical | @free @pro @multisite | implemented |
-| TB-MS-002 | Site deletion and uninstall | shared | critical | @free @pro @multisite | planned |
-| TB-MS-003 | Main-site pass | pro | critical | @pro @multisite @pass | planned |
+| TB-MS-002 | Site deletion and uninstall | shared | critical | @free @pro @multisite | implemented |
+| TB-MS-003 | Main-site pass | pro | critical | @pro @multisite @pass | implemented |
 | TB-ROLE-001 | Role and capability matrix | shared | critical | @free @pro @roles @security | implemented |
-| TB-ENV-001 | Constants and locked controls | shared | critical | @free @pro @constants | planned |
+| TB-ENV-001 | Constants and locked controls | shared | critical | @free @pro @constants | implemented |
 | TB-ENV-002 | Cron and timezone | free | high | @free @schedule @timezone | implemented |
-| TB-ENV-003 | Filesystem and disk failures | shared | critical | @free @pro @environment | planned |
+| TB-ENV-003 | Filesystem and disk failures | shared | critical | @free @pro @environment | implemented |
 | COMBO-001 | Shield off + Version Lock on + locked item | pro | critical | @pro @combo @shield @version-lock | implemented |
 | COMBO-002 | Hold 365 + locked item | pro | critical | @pro @combo @schedule @version-lock | implemented |
 | COMBO-003 | License inactive + pass enabled | pro | critical | @pro @combo @license @pass | implemented |
-| COMBO-004 | Multisite + network activation + main-site pass | pro | critical | @pro @combo @multisite @pass | planned |
+| COMBO-004 | Multisite + network activation + main-site pass | pro | critical | @pro @combo @multisite @pass | implemented |
 | COMBO-005 | Manual lock on + direct URL + WP-CLI | pro | critical | @pro @combo @version-lock | implemented |
 | COMBO-006 | Composer/VCS + pending update + manual switch off | pro | critical | @pro @combo @version-lock | implemented |
 | COMBO-007 | Shield on + incompatible PHP + re-enable on + hold 0 | pro | critical | @pro @combo @shield @schedule | implemented |
@@ -289,7 +289,7 @@ the run. The release gate stays open until every catalog case has one.
 | TB-PRO-004 | Pass two-item execution | pro | critical | @pro @pass @smoke | implemented |
 | TB-PRO-005 | Flow ordering | pro | critical | @pro @flow @smoke | implemented |
 | TB-PRO-006 | White Label lifecycle | pro | medium | @pro @white-label @a11y | planned |
-| TB-PRO-007 | Network super admin | pro | critical | @pro @multisite @roles | planned |
+| TB-PRO-007 | Network super admin | pro | critical | @pro @multisite @roles | implemented |
 | TB-PRO-008 | Pro export formats | pro | high | @pro @export | planned |
 
 ## Combination model

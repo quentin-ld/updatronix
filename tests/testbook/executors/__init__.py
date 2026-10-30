@@ -45,6 +45,7 @@ MODULES = (
 	"multisite",
 	"environment",
 	"roles",
+	"uninstall",
 	"dimensions",
 )
 

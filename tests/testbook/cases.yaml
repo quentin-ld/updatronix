@@ -533,7 +533,7 @@ flow_cases:
     steps: [Delete a subsite with rows; uninstall the plugin on the network.]
     assertions: [The deleted site's rows are purged; uninstall removes network data once; no fatal.]
     oracle: [db, ui]
-    automation: planned
+    automation: implemented
 
   - id: TB-MS-003
     title: Main-site pass
@@ -544,7 +544,7 @@ flow_cases:
     steps: [Run a pass on the main site; trigger a subsite tick.]
     assertions: [The pass runs on the main site only; a subsite keeps native all-at-once behavior; no network-wide claim.]
     oracle: [pass, log, ui]
-    automation: planned
+    automation: implemented
 
   - id: TB-ROLE-001
     title: Role and capability matrix
@@ -566,7 +566,7 @@ flow_cases:
     steps: [Set each constant; open the auto-update surfaces.]
     assertions: [The controls are locked and explain the constant; no update is silently attempted.]
     oracle: [ui, options]
-    automation: planned
+    automation: implemented
 
   - id: TB-ENV-002
     title: Cron and timezone
@@ -588,7 +588,7 @@ flow_cases:
     steps: [Make the filesystem read-only, return an invalid zip, fill the disk, and run an update.]
     assertions: [The failure is logged truthfully; no fatal; no false success; the next pass recovers.]
     oracle: [disk, log, http]
-    automation: planned
+    automation: implemented
 
 triples:
   - id: COMBO-001
@@ -645,7 +645,7 @@ triples:
     why: Network activation must not turn the pass into a network-wide runner.
     assertions: [The pass runs on the main site only; subsite admins are blocked; network logs remain correct.]
     oracle: [pass, ui, db]
-    automation: planned
+    automation: implemented
 
   - id: COMBO-005
     title: Manual lock on + direct URL + WP-CLI
