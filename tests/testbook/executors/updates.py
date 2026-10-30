@@ -32,6 +32,7 @@ from .live import (
 
 def pass_plugin_update( site: Site ) -> tuple[dict, dict]:
 	before = site.observe()
+	reset_item( site )
 	site.run_pass( [ "fixture-alpha/fixture-alpha.php" ] )
 	after = site.observe()
 	installed = after.get( "plugin_versions", {} ).get( "fixture-alpha" ) == "2.0.0"

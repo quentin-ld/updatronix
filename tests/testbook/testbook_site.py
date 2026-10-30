@@ -527,6 +527,11 @@ add_filter( 'site_transient_update_plugins', static function ( $value ) use ( $k
 	$value->translations = array();
 	return $value;
 }}, 20 );
+$auto = (array) get_option( 'auto_update_plugins', array() );
+foreach ( $keep as $plugin ) {{ $auto[] = $plugin; }}
+update_option( 'auto_update_plugins', array_values( array_unique( $auto ) ) );
+wp_cache_flush();
+if ( class_exists( 'Updatronix_Item_State' ) ) {{ Updatronix_Item_State::reset_cache(); }}
 $exists = class_exists( 'Updatronix_Update_Pass' ) && Updatronix_Update_Pass::exists();
 if ( $exists ) {{
 	wp_clear_scheduled_hook( 'updatronix_pro_update_pass_follow_up' );
