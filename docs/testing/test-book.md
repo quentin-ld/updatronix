@@ -140,31 +140,31 @@ the run. The release gate stays open until every catalog case has one.
 | ID | Title | Owner | Risk | Tags | Automation |
 |---|---|---|---|---|---|
 | TB-SET-103 | Dimension: Logging enabled (free.logging_enabled) | free | high | @free @logger @dimension | implemented |
-| TB-LOG-104 | Dimension: Log retention days (free.retention_days) | free | medium | @free @logger @dimension | planned |
+| TB-LOG-104 | Dimension: Log retention days (free.retention_days) | free | medium | @free @logger @dimension | implemented |
 | TB-SET-104 | Dimension: Notification mode (free.notifications_mode) | free | high | @free @mail @dimension | implemented |
-| TB-SET-106 | Dimension: Redirect update notification emails (free.notify_enabled) | free | high | @free @mail @dimension | planned |
-| TB-SET-105 | Dimension: Notification recipients (free.notify_emails) | free | high | @free @mail @dimension | planned |
-| TB-SET-107 | Dimension: Notification event allowlist (free.notify_on) | free | medium | @free @mail @dimension | planned |
-| TB-AUTO-101 | Dimension: Auto-update translations (free.auto_update_translations) | free | medium | @free @auto-updates @dimension | planned |
-| TB-SET-102 | Dimension: Dismissed constant notices (free.dismissed_constants) | free | low | @free @settings @dimension | planned |
+| TB-SET-106 | Dimension: Redirect update notification emails (free.notify_enabled) | free | high | @free @mail @dimension | implemented |
+| TB-SET-105 | Dimension: Notification recipients (free.notify_emails) | free | high | @free @mail @dimension | implemented |
+| TB-SET-107 | Dimension: Notification event allowlist (free.notify_on) | free | medium | @free @mail @dimension | implemented |
+| TB-AUTO-101 | Dimension: Auto-update translations (free.auto_update_translations) | free | medium | @free @auto-updates @dimension | implemented |
+| TB-SET-102 | Dimension: Dismissed constant notices (free.dismissed_constants) | free | low | @free @settings @dimension | implemented |
 | TB-SET-101 | Dimension: Delete data on uninstall (free.delete_data_on_uninstall) | free | critical | @free @uninstall @data @dimension | implemented |
-| TB-SCHED-104 | Dimension: Update-check recurrence (free.schedule.recurrence) | free | high | @free @schedule @dimension | planned |
-| TB-SCHED-105 | Dimension: Preferred wall-clock time (free.schedule.time) | free | high | @free @schedule @timezone @dimension | planned |
-| TB-SCHED-102 | Dimension: Hold new releases (free.schedule.delay_enabled) | free | high | @free @schedule @hold @dimension | planned |
+| TB-SCHED-104 | Dimension: Update-check recurrence (free.schedule.recurrence) | free | high | @free @schedule @dimension | implemented |
+| TB-SCHED-105 | Dimension: Preferred wall-clock time (free.schedule.time) | free | high | @free @schedule @timezone @dimension | implemented |
+| TB-SCHED-102 | Dimension: Hold new releases (free.schedule.delay_enabled) | free | high | @free @schedule @hold @dimension | implemented |
 | TB-SCHED-103 | Dimension: Hold days (free.schedule.delay_value) | free | high | @free @schedule @hold @dimension | implemented |
-| TB-SCHED-101 | Dimension: WP-Cron disabled (free.schedule.cron_disabled) | free | high | @free @schedule @environment @dimension | planned |
+| TB-SCHED-101 | Dimension: WP-Cron disabled (free.schedule.cron_disabled) | free | high | @free @schedule @environment @dimension | implemented |
 | TB-AUTO-102 | Dimension: Core auto-update mode (wp.auto_update_core) | shared | critical | @free @auto-updates @invariant @dimension | partial |
 | TB-AUTO-103 | Dimension: Plugin auto-update opt-ins (wp.auto_update_plugins) | shared | critical | @free @pro @auto-updates @invariant @dimension | partial |
 | TB-AUTO-104 | Dimension: Theme auto-update opt-ins (wp.auto_update_themes) | shared | critical | @free @pro @auto-updates @invariant @dimension | implemented |
-| TB-AUTO-105 | Dimension: Native translation auto-updates (wp.auto_update_translations) | shared | medium | @free @auto-updates @dimension | planned |
+| TB-AUTO-105 | Dimension: Native translation auto-updates (wp.auto_update_translations) | shared | medium | @free @auto-updates @dimension | implemented |
 | TB-AUTO-106 | Dimension: AUTOMATIC_UPDATER_DISABLED (wp.constants.automatic_updater_disabled) | shared | critical | @free @pro @constants @invariant @dimension | implemented |
 | TB-AUTO-108 | Dimension: DISALLOW_FILE_MODS (wp.constants.disallow_file_mods) | shared | critical | @free @pro @constants @invariant @dimension | implemented |
 | TB-AUTO-109 | Dimension: WP_AUTO_UPDATE_CORE (wp.constants.wp_auto_update_core) | shared | critical | @free @constants @invariant @dimension | implemented |
-| TB-AUTO-107 | Dimension: DISABLE_WP_CRON (wp.constants.disable_wp_cron) | shared | high | @free @schedule @constants @dimension | planned |
-| TB-LOG-101 | Dimension: Decision layer enabled (free.kill_switch.log_decision_layer) | free | high | @free @logger @kill-switch @dimension | planned |
-| TB-UI-101 | Dimension: Native update time display enabled (free.kill_switch.native_update_time) | free | medium | @free @schedule @kill-switch @dimension | planned |
-| TB-LOG-103 | Dimension: Log row kind (free.log.row_kind) | free | high | @free @logger @dimension | planned |
-| TB-LOG-102 | Dimension: Activity-log filters (free.log.filters) | free | medium | @free @logger @ui @dimension | planned |
+| TB-AUTO-107 | Dimension: DISABLE_WP_CRON (wp.constants.disable_wp_cron) | shared | high | @free @schedule @constants @dimension | implemented |
+| TB-LOG-101 | Dimension: Decision layer enabled (free.kill_switch.log_decision_layer) | free | high | @free @logger @kill-switch @dimension | implemented |
+| TB-UI-101 | Dimension: Native update time display enabled (free.kill_switch.native_update_time) | free | medium | @free @schedule @kill-switch @dimension | implemented |
+| TB-LOG-103 | Dimension: Log row kind (free.log.row_kind) | free | high | @free @logger @dimension | implemented |
+| TB-LOG-102 | Dimension: Activity-log filters (free.log.filters) | free | medium | @free @logger @ui @dimension | implemented |
 | TB-EXPORT-103 | Dimension: Export format (free.export.format) | shared | high | @free @pro @export @dimension | planned |
 | TB-EXPORT-105 | Dimension: Export scope (free.export.scope) | free | high | @free @export @dimension | planned |
 | TB-EXPORT-104 | Dimension: Merge same-item rows (free.export.merge) | free | medium | @free @export @dimension | planned |

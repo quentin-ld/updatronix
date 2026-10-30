@@ -47,6 +47,7 @@ MODULES = (
 	"roles",
 	"uninstall",
 	"dimensions",
+	"free_dims",
 )
 
 Executor = Callable[[Any], tuple[dict, dict]]

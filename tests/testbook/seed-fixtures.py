@@ -223,6 +223,8 @@ add_filter( 'site_transient_update_themes', static function ( $value ) {
 add_filter( 'site_transient_update_core', static function ( $value ) {
     if ( ! is_object( $value ) ) { $value = new stdClass(); }
     if ( ! isset( $value->updates ) || ! is_array( $value->updates ) ) { $value->updates = array(); }
+    if ( ! isset( $value->version_checked ) ) { $value->version_checked = time(); }
+    if ( ! isset( $value->last_checked ) ) { $value->last_checked = time(); }
     $base = get_site_url() . '/wp-content/uploads/testbook/';
     foreach ( $value->updates as $update ) {
         if ( isset( $update->version ) && '7.1.3' === $update->version ) { return $value; }

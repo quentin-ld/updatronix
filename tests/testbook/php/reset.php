@@ -15,6 +15,7 @@ if ( class_exists( 'Updatronix_Logger' ) ) {
 
 $options = array(
 	'updatronix_settings',
+	'updatronix_network_schedule',
 	'updatronix_pro_update_pass',
 	'updatronix_pro_last_pass',
 	'updatronix_pro_shield_ledger',
@@ -24,6 +25,7 @@ $options = array(
 	'auto_update_themes',
 	'auto_update_core',
 	'auto_update_translations',
+	'updatronix_auto_update_delay_ledger',
 );
 
 foreach ( $options as $option ) {

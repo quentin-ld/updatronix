@@ -49,7 +49,7 @@ cases:
   oracle:
   - ui
   - integration
-  automation: planned
+  automation: implemented
 - id: TB-SET-104
   title: 'Dimension: Notification mode (free.notifications_mode)'
   owner: free
@@ -95,7 +95,7 @@ cases:
   oracle:
   - ui
   - integration
-  automation: planned
+  automation: implemented
 - id: TB-SET-105
   title: 'Dimension: Notification recipients (free.notify_emails)'
   owner: free
@@ -123,7 +123,7 @@ cases:
   oracle:
   - ui
   - integration
-  automation: planned
+  automation: implemented
 - id: TB-SET-107
   title: 'Dimension: Notification event allowlist (free.notify_on)'
   owner: free
@@ -151,7 +151,7 @@ cases:
   oracle:
   - ui
   - integration
-  automation: planned
+  automation: implemented
 - id: TB-AUTO-101
   title: 'Dimension: Auto-update translations (free.auto_update_translations)'
   owner: free
@@ -174,7 +174,7 @@ cases:
   oracle:
   - ui
   - integration
-  automation: planned
+  automation: implemented
 - id: TB-SET-102
   title: 'Dimension: Dismissed constant notices (free.dismissed_constants)'
   owner: free
@@ -203,7 +203,7 @@ cases:
   oracle:
   - ui
   - integration
-  automation: planned
+  automation: implemented
 - id: TB-SET-101
   title: 'Dimension: Delete data on uninstall (free.delete_data_on_uninstall)'
   owner: free
@@ -254,7 +254,7 @@ cases:
   oracle:
   - ui
   - integration
-  automation: planned
+  automation: implemented
 - id: TB-SCHED-105
   title: 'Dimension: Preferred wall-clock time (free.schedule.time)'
   owner: free
@@ -283,7 +283,7 @@ cases:
   oracle:
   - ui
   - integration
-  automation: planned
+  automation: implemented
 - id: TB-SCHED-102
   title: 'Dimension: Hold new releases (free.schedule.delay_enabled)'
   owner: free
@@ -307,7 +307,7 @@ cases:
   oracle:
   - ui
   - integration
-  automation: planned
+  automation: implemented
 - id: TB-SCHED-103
   title: 'Dimension: Hold days (free.schedule.delay_value)'
   owner: free
@@ -359,7 +359,7 @@ cases:
   oracle:
   - ui
   - integration
-  automation: planned
+  automation: implemented
 - id: TB-AUTO-102
   title: 'Dimension: Core auto-update mode (wp.auto_update_core)'
   owner: shared
@@ -466,7 +466,7 @@ cases:
   oracle:
   - ui
   - integration
-  automation: planned
+  automation: implemented
 - id: TB-AUTO-106
   title: 'Dimension: AUTOMATIC_UPDATER_DISABLED (wp.constants.automatic_updater_disabled)'
   owner: shared
@@ -567,7 +567,7 @@ cases:
   oracle:
   - ui
   - integration
-  automation: planned
+  automation: implemented
 - id: TB-LOG-101
   title: 'Dimension: Decision layer enabled (free.kill_switch.log_decision_layer)'
   owner: free
@@ -592,7 +592,7 @@ cases:
   oracle:
   - ui
   - integration
-  automation: planned
+  automation: implemented
 - id: TB-UI-101
   title: 'Dimension: Native update time display enabled (free.kill_switch.native_update_time)'
   owner: free
@@ -617,7 +617,7 @@ cases:
   oracle:
   - ui
   - integration
-  automation: planned
+  automation: implemented
 - id: TB-LOG-103
   title: 'Dimension: Log row kind (free.log.row_kind)'
   owner: free
@@ -644,7 +644,7 @@ cases:
   oracle:
   - ui
   - integration
-  automation: planned
+  automation: implemented
 - id: TB-LOG-102
   title: 'Dimension: Activity-log filters (free.log.filters)'
   owner: free
@@ -681,7 +681,7 @@ cases:
   oracle:
   - ui
   - integration
-  automation: planned
+  automation: implemented
 - id: TB-EXPORT-103
   title: 'Dimension: Export format (free.export.format)'
   owner: shared
