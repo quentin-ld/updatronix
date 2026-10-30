@@ -1281,7 +1281,7 @@ cases:
   oracle:
   - ui
   - integration
-  automation: planned
+  automation: implemented
 - id: TB-PASS-106
   title: 'Dimension: Pass state (pro.pass.state)'
   owner: pro
@@ -1337,7 +1337,7 @@ cases:
   oracle:
   - ui
   - integration
-  automation: planned
+  automation: implemented
 - id: TB-PASS-104
   title: 'Dimension: Pass max attempts (pro.pass.max_attempts)'
   owner: pro
@@ -1363,7 +1363,7 @@ cases:
   oracle:
   - ui
   - integration
-  automation: planned
+  automation: implemented
 - id: TB-PASS-102
   title: 'Dimension: Last-pass cache (pro.pass.last_pass)'
   owner: pro
@@ -1390,7 +1390,7 @@ cases:
   oracle:
   - ui
   - integration
-  automation: planned
+  automation: implemented
 - id: TB-PLAN-102
   title: 'Dimension: Offer state at plan time (pro.planning.offer_state)'
   owner: pro
@@ -1713,7 +1713,7 @@ cases:
   oracle:
   - ui
   - integration
-  automation: planned
+  automation: implemented
 - id: TB-WL-101
   title: 'Dimension: Brand name (pro.white_label.brand)'
   owner: pro
@@ -1741,7 +1741,7 @@ cases:
   oracle:
   - ui
   - integration
-  automation: planned
+  automation: implemented
 - id: TB-WL-106
   title: 'Dimension: Menu label (pro.white_label.menu_label)'
   owner: pro
@@ -1767,7 +1767,7 @@ cases:
   oracle:
   - ui
   - integration
-  automation: planned
+  automation: implemented
 - id: TB-WL-102
   title: 'Dimension: Brand and menu colors (pro.white_label.colors)'
   owner: pro
@@ -1794,7 +1794,7 @@ cases:
   oracle:
   - ui
   - integration
-  automation: planned
+  automation: implemented
 - id: TB-WL-105
   title: 'Dimension: Logo upload (pro.white_label.logo)'
   owner: pro
@@ -1823,7 +1823,7 @@ cases:
   oracle:
   - ui
   - integration
-  automation: planned
+  automation: implemented
 - id: TB-WL-103
   title: 'Dimension: Apply brand to emails (pro.white_label.email)'
   owner: pro
@@ -1847,7 +1847,7 @@ cases:
   oracle:
   - ui
   - integration
-  automation: planned
+  automation: implemented
 - id: TB-UPDATE-105
   title: 'Dimension: Update type (update.type)'
   owner: shared

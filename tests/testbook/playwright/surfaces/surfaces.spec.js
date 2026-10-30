@@ -46,6 +46,25 @@ test( `surface: ${ surface }`, async ( { page } ) => {
 				page.getByText( 'Before you ask', { exact: true } ).first()
 			).toBeVisible();
 			break;
+		case 'white-label':
+			await page.goto( `${ updatronixBase }&tab=white-label` );
+			await expect(
+				page.getByRole( 'heading', {
+					level: 1,
+					name: 'White label',
+					exact: true,
+				} )
+			).toBeVisible();
+			await expect(
+				page.getByText( 'Brand name', { exact: true } ).first()
+			).toBeVisible();
+			await expect(
+				page.getByText( 'Menu label', { exact: true } ).first()
+			).toBeVisible();
+			await expect(
+				page.getByText( 'Preview', { exact: true } ).first()
+			).toBeVisible();
+			break;
 		case 'settings':
 			await page.goto( `${ updatronixBase }&tab=settings` );
 			await expect(
@@ -122,7 +141,10 @@ test( `surface: ${ surface }`, async ( { page } ) => {
 	await writeMetrics( page );
 
 	const linksTarget = process.env.TESTBOOK_LINKS_PATH;
-	if ( linksTarget && [ 'documentation', 'support' ].includes( surface ) ) {
+	if (
+		linksTarget &&
+		[ 'documentation', 'support', 'white-label' ].includes( surface )
+	) {
 		const links = await page
 			.locator( 'a[href]' )
 			.evaluateAll( ( elements ) =>
@@ -137,10 +159,13 @@ test( `surface: ${ surface }`, async ( { page } ) => {
 		const proBadges = await page
 			.locator( '.updatronix-doc-icon--pro' )
 			.count();
+		const resetButtons = await page
+			.getByRole( 'button', { name: 'Reset', exact: true } )
+			.count();
 		fs.mkdirSync( path.dirname( linksTarget ), { recursive: true } );
 		fs.writeFileSync(
 			linksTarget,
-			JSON.stringify( { links, body, proBadges }, null, 2 )
+			JSON.stringify( { links, body, proBadges, resetButtons }, null, 2 )
 		);
 	}
 } );

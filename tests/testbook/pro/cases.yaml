@@ -71,7 +71,7 @@ cases:
     steps: [Save, reset, upload invalid logos, sanitize markup, preview the email.]
     assertions: [The draft saves/resets; file bounds hold; the preview is real; permissions are enforced.]
     oracle: [ui, options, upload]
-    automation: planned
+    automation: implemented
 
   - id: TB-PRO-007
     title: Network super admin

@@ -187,11 +187,11 @@ the run. The release gate stays open until every catalog case has one.
 | TB-VLOCK-101 | Dimension: Version-control detection (pro.version_lock.detection) | pro | critical | @pro @version-lock @invariant @dimension | implemented |
 | TB-VLOCK-103 | Dimension: Manager label (pro.version_lock.manager) | pro | medium | @pro @version-lock @ui @dimension | planned |
 | TB-PASS-101 | Dimension: Automatic update pass enabled (pro.pass.enabled) | pro | critical | @pro @pass @kill-switch @invariant @dimension | implemented |
-| TB-PASS-105 | Dimension: Pass nodes (pro.pass.node_count) | pro | high | @pro @pass @dimension | planned |
+| TB-PASS-105 | Dimension: Pass nodes (pro.pass.node_count) | pro | high | @pro @pass @dimension | implemented |
 | TB-PASS-106 | Dimension: Pass state (pro.pass.state) | pro | critical | @pro @pass @invariant @dimension | implemented |
-| TB-PASS-103 | Dimension: Native lock contention (pro.pass.lock_wait) | pro | high | @pro @pass @invariant @dimension | planned |
-| TB-PASS-104 | Dimension: Pass max attempts (pro.pass.max_attempts) | pro | high | @pro @pass @dimension | planned |
-| TB-PASS-102 | Dimension: Last-pass cache (pro.pass.last_pass) | pro | medium | @pro @pass @flow @dimension | planned |
+| TB-PASS-103 | Dimension: Native lock contention (pro.pass.lock_wait) | pro | high | @pro @pass @invariant @dimension | implemented |
+| TB-PASS-104 | Dimension: Pass max attempts (pro.pass.max_attempts) | pro | high | @pro @pass @dimension | implemented |
+| TB-PASS-102 | Dimension: Last-pass cache (pro.pass.last_pass) | pro | medium | @pro @pass @flow @dimension | implemented |
 | TB-PLAN-102 | Dimension: Offer state at plan time (pro.planning.offer_state) | pro | critical | @pro @pass @invariant @dimension | implemented |
 | TB-PLAN-101 | Dimension: One-item gate result (pro.planning.gate_result) | pro | critical | @pro @pass @invariant @dimension | implemented |
 | TB-FLOW-101 | Dimension: Chain count (pro.flow.chain_count) | pro | high | @pro @flow @dimension | planned |
@@ -203,12 +203,12 @@ the run. The release gate stays open until every catalog case has one.
 | TB-LIC-103 | Dimension: License status (pro.license.status) | pro | critical | @pro @license @gating @invariant @dimension | implemented |
 | TB-LIC-102 | Dimension: Product presence (pro.license.mode) | pro | critical | @pro @license @gating @dimension | implemented |
 | TB-LIC-101 | Dimension: License lifecycle action (pro.license.activation) | pro | high | @pro @license @dimension | planned |
-| TB-WL-104 | Dimension: White Label enabled (pro.white_label.enabled) | pro | medium | @pro @white-label @dimension | planned |
-| TB-WL-101 | Dimension: Brand name (pro.white_label.brand) | pro | medium | @pro @white-label @security @dimension | planned |
-| TB-WL-106 | Dimension: Menu label (pro.white_label.menu_label) | pro | low | @pro @white-label @dimension | planned |
-| TB-WL-102 | Dimension: Brand and menu colors (pro.white_label.colors) | pro | low | @pro @white-label @a11y @dimension | planned |
-| TB-WL-105 | Dimension: Logo upload (pro.white_label.logo) | pro | medium | @pro @white-label @security @dimension | planned |
-| TB-WL-103 | Dimension: Apply brand to emails (pro.white_label.email) | pro | low | @pro @white-label @mail @dimension | planned |
+| TB-WL-104 | Dimension: White Label enabled (pro.white_label.enabled) | pro | medium | @pro @white-label @dimension | implemented |
+| TB-WL-101 | Dimension: Brand name (pro.white_label.brand) | pro | medium | @pro @white-label @security @dimension | implemented |
+| TB-WL-106 | Dimension: Menu label (pro.white_label.menu_label) | pro | low | @pro @white-label @dimension | implemented |
+| TB-WL-102 | Dimension: Brand and menu colors (pro.white_label.colors) | pro | low | @pro @white-label @a11y @dimension | implemented |
+| TB-WL-105 | Dimension: Logo upload (pro.white_label.logo) | pro | medium | @pro @white-label @security @dimension | implemented |
+| TB-WL-103 | Dimension: Apply brand to emails (pro.white_label.email) | pro | low | @pro @white-label @mail @dimension | implemented |
 | TB-UPDATE-105 | Dimension: Update type (update.type) | shared | critical | @free @pro @update @dimension | implemented |
 | TB-UPDATE-103 | Dimension: Update origin (update.origin) | shared | critical | @free @pro @update @dimension | implemented |
 | TB-UPDATE-102 | Dimension: Item decision state (update.item_state) | shared | critical | @free @pro @update @invariant @dimension | implemented |
@@ -236,7 +236,7 @@ the run. The release gate stays open until every catalog case has one.
 | TB-UI-007 | Support surface | free | low | @free @support @ui | partial |
 | TB-UI-008 | Update Shield surface | pro | critical | @pro @shield @ui @smoke | implemented |
 | TB-UI-009 | Update Flow surface | pro | critical | @pro @flow @ui @smoke | implemented |
-| TB-UI-010 | White Label surface | pro | medium | @pro @white-label @ui @a11y | planned |
+| TB-UI-010 | White Label surface | pro | medium | @pro @white-label @ui @a11y | implemented |
 | TB-UI-011 | License surface | pro | critical | @pro @license @ui @smoke | implemented |
 | TB-UI-012 | Plugins screen | shared | critical | @free @pro @version-lock @ui | implemented |
 | TB-UI-013 | Themes screen | shared | critical | @free @pro @version-lock @ui | implemented |
@@ -248,8 +248,8 @@ the run. The release gate stays open until every catalog case has one.
 | TB-UPDATE-004 | Translation update | shared | medium | @free @pro @update | implemented |
 | TB-UPDATE-005 | Failed and rolled-back update | shared | critical | @free @pro @update | implemented |
 | TB-PASS-001 | Two items, two invocations | pro | critical | @pro @pass @smoke | implemented |
-| TB-PASS-002 | Lock busy and retry | pro | high | @pro @pass | planned |
-| TB-PASS-003 | Failed item retried next pass | pro | high | @pro @pass | planned |
+| TB-PASS-002 | Lock busy and retry | pro | high | @pro @pass | implemented |
+| TB-PASS-003 | Failed item retried next pass | pro | high | @pro @pass | implemented |
 | TB-PASS-004 | Last pass, stale, expired | pro | high | @pro @pass @flow | planned |
 | TB-FLOW-001 | Day-1 and day-2 ordering | pro | critical | @pro @flow @pass | implemented |
 | TB-FLOW-002 | Locked or held predecessor | pro | critical | @pro @flow @version-lock @schedule | implemented |
@@ -267,7 +267,7 @@ the run. The release gate stays open until every catalog case has one.
 | TB-VLOCK-002 | Manual guard and pass own write | pro | critical | @pro @version-lock | implemented |
 | TB-LIC-001 | License gating | pro | critical | @pro @license | implemented |
 | TB-LIC-002 | Salt rotation and throttle | pro | high | @pro @license | planned |
-| TB-WL-001 | White Label save, reset, logo, sanitize | pro | medium | @pro @white-label @a11y | planned |
+| TB-WL-001 | White Label save, reset, logo, sanitize | pro | medium | @pro @white-label @a11y | implemented |
 | TB-MS-001 | Network schedule and logs | shared | critical | @free @pro @multisite | implemented |
 | TB-MS-002 | Site deletion and uninstall | shared | critical | @free @pro @multisite | implemented |
 | TB-MS-003 | Main-site pass | pro | critical | @pro @multisite @pass | implemented |
@@ -288,7 +288,7 @@ the run. The release gate stays open until every catalog case has one.
 | TB-PRO-003 | Shield incompatible behavior and re-enable | pro | critical | @pro @shield | implemented |
 | TB-PRO-004 | Pass two-item execution | pro | critical | @pro @pass @smoke | implemented |
 | TB-PRO-005 | Flow ordering | pro | critical | @pro @flow @smoke | implemented |
-| TB-PRO-006 | White Label lifecycle | pro | medium | @pro @white-label @a11y | planned |
+| TB-PRO-006 | White Label lifecycle | pro | medium | @pro @white-label @a11y | implemented |
 | TB-PRO-007 | Network super admin | pro | critical | @pro @multisite @roles | implemented |
 | TB-PRO-008 | Pro export formats | pro | high | @pro @export | planned |
 

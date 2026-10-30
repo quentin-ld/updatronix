@@ -150,7 +150,7 @@ surface_cases:
       - PNG/JPEG/WebP within 1 MB and 64×64 are accepted; SVG and invalid files are rejected.
       - Brand and menu labels are sanitized and capped.
     oracle: [ui, options, upload]
-    automation: planned
+    automation: implemented
 
   - id: TB-UI-011
     title: License surface
@@ -302,7 +302,7 @@ flow_cases:
     steps: [Hold the native lock; run the pass; release and rerun.]
     assertions: [Lock busy is waiting/skipped, not failed; the retry is bounded; no duplicate install.]
     oracle: [pass, log]
-    automation: planned
+    automation: implemented
 
   - id: TB-PASS-003
     title: Failed item retried next pass
@@ -313,7 +313,7 @@ flow_cases:
     steps: [Seed a failing item and a healthy item; run two passes.]
     assertions: [The failed item is skipped for the pass and retried next; the healthy item completes.]
     oracle: [pass, log]
-    automation: planned
+    automation: implemented
 
   - id: TB-PASS-004
     title: Last pass, stale, expired
@@ -511,7 +511,7 @@ flow_cases:
     steps: [Save a brand, reset, upload a bad logo, sanitize markup, open the preview.]
     assertions: [The draft saves/resets; invalid files are rejected; labels are capped; the preview is the real rail/email.]
     oracle: [ui, options, upload]
-    automation: planned
+    automation: implemented
 
   - id: TB-MS-001
     title: Network schedule and logs

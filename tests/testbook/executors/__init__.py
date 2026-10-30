@@ -49,6 +49,7 @@ MODULES = (
 	"dimensions",
 	"free_dims",
 	"export_dims",
+	"pro_dims",
 )
 
 Executor = Callable[[Any], tuple[dict, dict]]

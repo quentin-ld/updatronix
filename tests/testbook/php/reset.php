@@ -26,6 +26,7 @@ $options = array(
 	'auto_update_core',
 	'auto_update_translations',
 	'updatronix_auto_update_delay_ledger',
+	'updatronix_update_logger_state',
 );
 
 foreach ( $options as $option ) {
