@@ -14,7 +14,7 @@ import json
 from testbook_site import ROOT, Site, base_observation, parse_json, php_json
 
 from . import CaseSpec
-from .dimensions import _run_playwright
+from .dimensions import _a11y_metrics, _run_playwright, ui_surface
 from .live import PLUGIN_ALPHA, item_rows, ok, pump, reset_item, version
 
 TRANSLATION_MO = "WP_LANG_DIR . '/plugins/fixture-alpha-fr_FR.mo'"
@@ -1298,6 +1298,288 @@ def ui_viewports( site: Site ) -> tuple[dict, dict]:
 	return data, { **detail, "viewports": viewports }
 
 
+def _surface_links( site: Site, surface: str ) -> tuple[dict, dict]:
+	a11y_path = f".cache/testbook/a11y-{site.name}-{surface}.json"
+	links_path = f".cache/testbook/links-{site.name}-{surface}.json"
+	stdout = _run_playwright(
+		site,
+		"tests/testbook/playwright-surfaces.config.js",
+		{
+			"TESTBOOK_SURFACE": surface,
+			"TESTBOOK_A11Y_PATH": a11y_path,
+			"TESTBOOK_LINKS_PATH": links_path,
+		},
+	)
+	target = ROOT / links_path
+	if not target.exists():
+		raise RuntimeError( f"link metrics were not written: {links_path}" )
+	metrics = json.loads( target.read_text( encoding="utf-8" ) )
+	observation = site.observe()
+	data = base_observation( observation )
+	data.update( { "http_status": 200, "fatal": False } )
+	_apply = _a11y_metrics( a11y_path )
+	for key in ( "controls", "reachable", "labelled", "focus_visible", "overflow" ):
+		data[ key ] = _apply[ key ]
+	return data, { "playwright": stdout.splitlines()[-3:], "metrics": metrics, "a11y": _apply }
+
+
+def _probe_url( site: Site, url: str ) -> dict:
+	return site.json_eval(
+		f"""<?php
+$response = wp_remote_head(
+	'{url}',
+	array( 'timeout' => 10, 'redirection' => 3, 'sslverify' => true )
+);
+if ( is_wp_error( $response ) ) {{
+	echo wp_json_encode( array( 'status' => 0, 'error' => $response->get_error_message() ) );
+	return;
+}}
+echo wp_json_encode( array( 'status' => (int) wp_remote_retrieve_response_code( $response ) ) );
+"""
+	)
+
+
+def ui_health_surface( site: Site ) -> tuple[dict, dict]:
+	"""TB-UI-004: the Health surface renders the pass checks, not a queue."""
+	reset_item( site )
+	data, detail = ui_surface( site, "health" )
+	state = site.json_eval(
+		r"""<?php
+$snapshot = Updatronix_Health::get_snapshot( true );
+$checks   = array();
+foreach ( $snapshot['checks'] as $check ) {
+	$checks[ $check['id'] ] = $check;
+}
+echo wp_json_encode( array( 'checks' => $checks, 'counts' => $snapshot['counts'] ) );
+"""
+	)
+	ids = set( state["checks"] )
+	ok( { "pass_state", "pass_last_run", "pass_follow_up" } <= ids, f"the pass checks are missing: {sorted(ids)}" )
+	ok( not any( "queue" in check_id.lower() for check_id in ids ), f"a queue check survived: {sorted(ids)}" )
+	for check in state["checks"].values():
+		ok( "queue" not in ( check.get( "detail" ) or "" ).lower(), f"the copy promises a queue: {check}" )
+	return data, { **detail, "ids": sorted( ids ), "counts": state["counts"] }
+
+
+def ui_docs_surface( site: Site ) -> tuple[dict, dict]:
+	"""TB-UI-006: the guides, their Pro badge, and their real destinations."""
+	data, detail = _surface_links( site, "documentation" )
+	metrics = detail["metrics"]
+	links = metrics["links"]
+	guides = [
+		"https://holdmywp.com/en/documents/updatronix-documentation/",
+		"https://holdmywp.com/en/documents/updatronix-3000-documentation/",
+		"https://holdmywp.com/en/documents/wordpress-update-system-developer-reference/",
+	]
+	hrefs = { link["href"].split( "#" )[0] for link in links }
+	for guide in guides:
+		ok( guide in hrefs, f"the guide {guide} is not linked: {sorted(hrefs)}" )
+	ok( metrics["proBadges"] == 1, f"the Pro badge count is {metrics['proBadges']}" )
+	body = metrics["body"].lower()
+	for promise in ( "guarantee", "instant", "always works", "100%" ):
+		ok( promise not in body, f"the documentation promises {promise}: {body[:400]}" )
+	probes = { url: _probe_url( site, url ) for url in guides }
+	unreachable = { url: probe for url, probe in probes.items() if int( probe.get( "status", 0 ) ) == 0 }
+	for url, probe in probes.items():
+		status = int( probe.get( "status", 0 ) )
+		if status:
+			ok( status < 400, f"{url} returned HTTP {status}" )
+	return data, {
+		**detail,
+		"guides": sorted( hrefs ),
+		"probes": probes,
+		"unreachable": sorted( unreachable ),
+	}
+
+
+def ui_support_surface( site: Site ) -> tuple[dict, dict]:
+	"""TB-UI-007: the forum link resolves and no private channel is claimed."""
+	data, detail = _surface_links( site, "support" )
+	metrics = detail["metrics"]
+	forum = "https://wordpress.org/support/plugin/updatronix/"
+	hrefs = { link["href"].split( "#" )[0] for link in metrics["links"] }
+	ok( forum in hrefs, f"the forum link is missing: {sorted(hrefs)}" )
+	body = metrics["body"].lower()
+	for claim in ( "private support", "priority support", "email us", "paid support" ):
+		ok( claim not in body, f"the support page claims {claim}: {body[:400]}" )
+	probe = _probe_url( site, forum )
+	if int( probe.get( "status", 0 ) ):
+		ok( int( probe["status"] ) < 400, f"the forum link returned HTTP {probe['status']}" )
+	return data, {
+		**detail,
+		"forum": forum,
+		"probe": probe,
+		"unreachable": int( probe.get( "status", 0 ) ) == 0,
+	}
+
+
+def schedule_picker( site: Site ) -> tuple[dict, dict]:
+	"""TB-SCHED-001: every hour and minute, and the hold boundaries."""
+	reset_item( site )
+	metrics_path = f".cache/testbook/schedule-{site.name}.json"
+	stdout = _run_playwright(
+		site,
+		"tests/testbook/playwright-schedule.config.js",
+		{ "TESTBOOK_SCHEDULE_PATH": metrics_path },
+	)
+	target = ROOT / metrics_path
+	if not target.exists():
+		raise RuntimeError( f"schedule metrics were not written: {metrics_path}" )
+	metrics = json.loads( target.read_text( encoding="utf-8" ) )
+	ok( metrics["hours"] == 24, f"the picker offers {metrics['hours']} hours" )
+	ok( metrics["minutes"] == 60, f"the picker offers {metrics['minutes']} minutes" )
+	ok( "00" in metrics["hourValues"] and "23" in metrics["hourValues"], "the hour range is incomplete" )
+	ok( "00" in metrics["minuteValues"] and "59" in metrics["minuteValues"], "the minute range is incomplete" )
+	ok(
+		set( metrics["frequencies"] ) == { "WordPress default", "Hourly", "Twice daily", "Daily", "Weekly" },
+		f"the frequency options are {metrics['frequencies']}",
+	)
+
+	state = site.json_eval(
+		r"""<?php
+$out = array();
+$out['recurrences'] = array();
+foreach ( array( '', 'hourly', 'twicedaily', 'daily', 'weekly' ) as $recurrence ) {
+	updatronix_save_network_schedule(
+		array(
+			'update_check'  => array( 'recurrence' => $recurrence, 'time' => '03:00' ),
+			'delay_updates' => array( 'enabled' => false, 'delay_value' => 0 ),
+		)
+	);
+	$saved = updatronix_get_network_schedule();
+	$event = wp_get_scheduled_event( 'wp_version_check' );
+	$out['recurrences'][ $recurrence ?: 'default' ] = array(
+		'saved'    => $saved['update_check'],
+		'schedule' => false !== $event ? $event->schedule : null,
+	);
+}
+$out['times'] = array();
+foreach ( array( '00:00', '00:01', '12:34', '23:59' ) as $time ) {
+	updatronix_save_network_schedule(
+		array(
+			'update_check'  => array( 'recurrence' => 'daily', 'time' => $time ),
+			'delay_updates' => array( 'enabled' => false, 'delay_value' => 0 ),
+		)
+	);
+	$out['times'][ $time ] = updatronix_get_network_schedule()['update_check']['time'];
+}
+$out['hold'] = array();
+foreach ( array( 0, 1, 365, 366, -1 ) as $days ) {
+	updatronix_save_network_schedule(
+		array(
+			'update_check'  => array( 'recurrence' => 'daily', 'time' => '03:00' ),
+			'delay_updates' => array( 'enabled' => true, 'delay_value' => $days ),
+		)
+	);
+	$out['hold'][ (string) $days ] = updatronix_get_network_schedule()['delay_updates'];
+}
+echo wp_json_encode( $out );
+"""
+	)
+	for recurrence, entry in state["recurrences"].items():
+		expected = "" if recurrence == "default" else recurrence
+		ok( entry["saved"]["recurrence"] == expected, f"{recurrence}: stored {entry['saved']}" )
+		if expected:
+			ok( entry["schedule"] == expected, f"{recurrence}: the cron event uses {entry['schedule']}" )
+	for value, stored in state["times"].items():
+		ok( stored == value, f"{value} was stored as {stored}" )
+	ok( state["hold"]["0"] == { "enabled": False, "delay_value": 0 }, f"0 is not off: {state['hold']['0']}" )
+	ok( state["hold"]["1"]["delay_value"] == 1, f"1 day is not accepted: {state['hold']['1']}" )
+	ok( state["hold"]["365"]["delay_value"] == 365, f"365 days is not accepted: {state['hold']['365']}" )
+	ok( state["hold"]["366"]["delay_value"] == 365, f"366 was not clamped: {state['hold']['366']}" )
+	ok( state["hold"]["-1"] == { "enabled": False, "delay_value": 0 }, f"-1 is not off: {state['hold']['-1']}" )
+	return base_observation( site.observe() ), { **metrics, "playwright": stdout.splitlines()[-3:], "state": state }
+
+
+def schedule_native_copy( site: Site ) -> tuple[dict, dict]:
+	"""TB-SCHED-002: truthful states, a check-not-install time, one line."""
+	reset_item( site )
+	site.set_shield( { "safe_mode": True, "version_control_lock": True } )
+	site.set_delay( 365, True )
+	site.set_auto_update( plugins=[ PLUGIN_ALPHA ] )
+	hint = site.json_eval(
+		r"""<?php
+echo wp_json_encode(
+	array(
+		'hint'  => ( static function () {
+			ob_start();
+			updatronix_render_wp_cron_hint();
+			return ( string ) ob_get_clean();
+		} )(),
+		'hooks' => has_action( 'admin_notices', 'updatronix_render_wp_cron_hint' ),
+	)
+);
+"""
+	)
+	site.config_backup()
+	try:
+		site.remove_constant( "DISABLE_WP_CRON" )
+		state = site.json_eval(
+			r"""<?php
+updatronix_save_network_schedule(
+	array(
+		'update_check'  => array( 'recurrence' => 'daily', 'time' => '03:00' ),
+		'delay_updates' => array( 'enabled' => true, 'delay_value' => 365 ),
+	)
+);
+$transient = get_site_transient( 'update_plugins' );
+$offer     = $transient->response['fixture-alpha/fixture-alpha.php'];
+$hash      = Updatronix_AutoUpdateDelay::ledger_hash( 'plugin', $offer );
+$ledger    = get_option( Updatronix_AutoUpdateDelay::OPTION_LEDGER, array() );
+if ( is_string( $ledger ) ) {
+	$ledger = json_decode( $ledger, true );
+}
+if ( ! is_array( $ledger ) ) {
+	$ledger = array();
+}
+$ledger[ $hash ] = time();
+update_option( Updatronix_AutoUpdateDelay::OPTION_LEDGER, wp_json_encode( $ledger ), false );
+Updatronix_AutoUpdateDelay::reset_cache();
+echo wp_json_encode( array( 'saved' => updatronix_get_network_schedule() ) );
+"""
+		)
+		state = site.json_eval(
+			r"""<?php
+Updatronix_Schedule_Context::reset_cache();
+Updatronix_AutoUpdateDelay::reset_cache();
+Updatronix_AutoUpdateDelay::register_filters();
+$held = Updatronix_Schedule_Context::get_item( 'plugin', 'fixture-alpha/fixture-alpha.php' );
+$locked = Updatronix_Schedule_Context::get_item( 'plugin', 'fixture-locked/fixture-locked.php' );
+$waiting = Updatronix_Schedule_State::calculate(
+	array(
+		'type'          => 'plugin',
+		'now'           => time(),
+		'next_check'    => time() + HOUR_IN_SECONDS,
+		'offer_state'   => 'pending',
+		'auto_update'   => 'on',
+		'flow'          => array( 'state' => 'waiting', 'waiting_for' => 'fixture-alpha' ),
+		'cron_disabled' => false,
+	)
+);
+echo wp_json_encode(
+	array(
+		'held'    => $held,
+		'locked'  => $locked,
+		'waiting' => $waiting,
+	)
+);
+"""
+		)
+	finally:
+		site.restore_config()
+	ok( state["held"]["state"] == "held", f"the held item is {state['held']['state']}" )
+	ok( "Earliest automatic install" in state["held"]["display"], f"the held copy is not truthful: {state['held']['display']}" )
+	ok( "Hold ends" in state["held"]["display"], f"the held copy hides the hold: {state['held']['display']}" )
+	ok( state["locked"]["state"] == "locked", f"the locked item is {state['locked']['state']}" )
+	ok( "Managed via" in state["locked"]["display"], f"the locked copy is not truthful: {state['locked']['display']}" )
+	ok( state["waiting"]["display"].startswith( "Waiting for fixture-alpha" ), f"the waiting copy is {state['waiting']['display']}" )
+	ok( "install time" in state["waiting"]["display"].lower(), "the waiting copy does not name the install time" )
+	hint_text = str( hint["hint"] or "" )
+	ok( chr( 10 ) not in hint_text.strip(), f"the WP-Cron hint is not one line: {hint_text!r}" )
+	ok( bool( hint["hooks"] ), "the one-line WP-Cron hint is not registered" )
+	return base_observation( site.observe() ), { "states": state, "hint": hint_text }
+
+
 def esc_html_text( value: str ) -> str:
 	return (
 		value.replace( "&", "&amp;" )
@@ -1459,6 +1741,48 @@ CASES = [
 		( "single", ),
 		( "INV-08", ),
 		phase="ui",
+		reset="state",
+	),
+	CaseSpec(
+		"TB-UI-004",
+		ui_health_surface,
+		( "single", ),
+		( "INV-08", ),
+		phase="ui",
+		reset="state",
+	),
+	CaseSpec(
+		"TB-UI-006",
+		ui_docs_surface,
+		( "single", ),
+		( "INV-08", ),
+		phase="ui",
+		reset="state",
+		partial=True,
+	),
+	CaseSpec(
+		"TB-UI-007",
+		ui_support_surface,
+		( "single", ),
+		( "INV-08", ),
+		phase="ui",
+		reset="state",
+		partial=True,
+	),
+	CaseSpec(
+		"TB-SCHED-001",
+		schedule_picker,
+		( "single", ),
+		( "INV-08", ),
+		phase="dimensions",
+		reset="state",
+	),
+	CaseSpec(
+		"TB-SCHED-002",
+		schedule_native_copy,
+		( "single", ),
+		( "INV-08", ),
+		phase="dimensions",
 		reset="state",
 	),
 ]

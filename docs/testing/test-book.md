@@ -230,10 +230,10 @@ the run. The release gate stays open until every catalog case has one.
 | TB-UI-001 | Update logs surface | free | high | @free @logger @ui @smoke | implemented |
 | TB-UI-002 | Auto updates surface | free | high | @free @auto-updates @ui @smoke | implemented |
 | TB-UI-003 | Schedule surface | free | high | @free @schedule @ui @smoke | implemented |
-| TB-UI-004 | Health surface | free | medium | @free @pro @health @ui | planned |
+| TB-UI-004 | Health surface | free | medium | @free @pro @health @ui | implemented |
 | TB-UI-005 | Settings surface | free | high | @free @settings @ui @smoke | implemented |
-| TB-UI-006 | Documentation surface | free | low | @free @docs @ui | planned |
-| TB-UI-007 | Support surface | free | low | @free @support @ui | planned |
+| TB-UI-006 | Documentation surface | free | low | @free @docs @ui | partial |
+| TB-UI-007 | Support surface | free | low | @free @support @ui | partial |
 | TB-UI-008 | Update Shield surface | pro | critical | @pro @shield @ui @smoke | implemented |
 | TB-UI-009 | Update Flow surface | pro | critical | @pro @flow @ui @smoke | implemented |
 | TB-UI-010 | White Label surface | pro | medium | @pro @white-label @ui @a11y | planned |
@@ -255,8 +255,8 @@ the run. The release gate stays open until every catalog case has one.
 | TB-FLOW-002 | Locked or held predecessor | pro | critical | @pro @flow @version-lock @schedule | implemented |
 | TB-FLOW-003 | Failed predecessor and independent branches | pro | critical | @pro @flow | implemented |
 | TB-FLOW-004 | Chain shapes | pro | high | @pro @flow | implemented |
-| TB-SCHED-001 | 24h+60m picker and hold boundaries | free | high | @free @schedule | planned |
-| TB-SCHED-002 | Native time and truthful copy | free | high | @free @schedule @ui | planned |
+| TB-SCHED-001 | 24h+60m picker and hold boundaries | free | high | @free @schedule | implemented |
+| TB-SCHED-002 | Native time and truthful copy | free | high | @free @schedule @ui | implemented |
 | TB-LOG-001 | Decision filters and details | free | high | @free @logger | implemented |
 | TB-EXPORT-001 | Export formats and columns | shared | high | @free @pro @export | planned |
 | TB-EXPORT-002 | Empty, expired, rate-limited, chunked | free | medium | @free @pro @export | planned |

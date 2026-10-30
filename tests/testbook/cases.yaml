@@ -68,7 +68,7 @@ surface_cases:
       - A stale pass, disabled WP-Cron, or busy lock is surfaced.
       - The copy does not promise a queue.
     oracle: [ui, options, cron]
-    automation: planned
+    automation: implemented
 
   - id: TB-UI-005
     title: Settings surface
@@ -94,7 +94,7 @@ surface_cases:
     steps: [Open the documentation destination.]
     assertions: [Every link resolves; the Pro badge is correct; no unsupported promise.]
     oracle: [ui, http]
-    automation: planned
+    automation: partial
 
   - id: TB-UI-007
     title: Support surface
@@ -105,7 +105,7 @@ surface_cases:
     steps: [Open the support destination.]
     assertions: [The WordPress.org forum link resolves; no private channel is claimed.]
     oracle: [ui, http]
-    automation: planned
+    automation: partial
 
   - id: TB-UI-008
     title: Update Shield surface
@@ -379,7 +379,7 @@ flow_cases:
     steps: [Set 00:00, 23:59, and every recurrence; set hold 0, 1, 365.]
     assertions: [The picker offers all hours/minutes; the time survives; 0 is off; 365 is accepted; 366 is rejected.]
     oracle: [ui, options, cron]
-    automation: planned
+    automation: implemented
 
   - id: TB-SCHED-002
     title: Native time and truthful copy
@@ -390,7 +390,7 @@ flow_cases:
     steps: [Open plugins, themes, and update-core with a held and a waiting offer.]
     assertions: [The row shows the truthful state; the next check is not the install time; the big notice is gone.]
     oracle: [ui, log]
-    automation: planned
+    automation: implemented
 
   - id: TB-LOG-001
     title: Decision filters and details

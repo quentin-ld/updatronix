@@ -1,3 +1,5 @@
+const fs = require( 'fs' );
+const path = require( 'path' );
 const { test, expect } = require( '@playwright/test' );
 const { expectResponsiveLayout, writeMetrics } = require( '../helpers/a11y' );
 
@@ -22,6 +24,26 @@ test( `surface: ${ surface }`, async ( { page } ) => {
 			).toBeVisible();
 			await expect(
 				page.getByText( /Times use/i ).first()
+			).toBeVisible();
+			break;
+		case 'health':
+			await page.goto( `${ updatronixBase }&tab=health` );
+			await expect(
+				page.getByText( 'View diagnostics', { exact: true } ).first()
+			).toBeVisible();
+			break;
+		case 'documentation':
+			await page.goto( `${ updatronixBase }&tab=documentation` );
+			await expect(
+				page
+					.getByText( 'Updatronix documentation', { exact: true } )
+					.first()
+			).toBeVisible();
+			break;
+		case 'support':
+			await page.goto( `${ updatronixBase }&tab=support` );
+			await expect(
+				page.getByText( 'Before you ask', { exact: true } ).first()
 			).toBeVisible();
 			break;
 		case 'settings':
@@ -98,4 +120,27 @@ test( `surface: ${ surface }`, async ( { page } ) => {
 
 	await expectResponsiveLayout( page );
 	await writeMetrics( page );
+
+	const linksTarget = process.env.TESTBOOK_LINKS_PATH;
+	if ( linksTarget && [ 'documentation', 'support' ].includes( surface ) ) {
+		const links = await page
+			.locator( 'a[href]' )
+			.evaluateAll( ( elements ) =>
+				elements.map( ( element ) => ( {
+					href: element.href,
+					text: ( element.textContent || '' ).trim(),
+					target: element.getAttribute( 'target' ),
+					rel: element.getAttribute( 'rel' ),
+				} ) )
+			);
+		const body = await page.locator( 'body' ).innerText();
+		const proBadges = await page
+			.locator( '.updatronix-doc-icon--pro' )
+			.count();
+		fs.mkdirSync( path.dirname( linksTarget ), { recursive: true } );
+		fs.writeFileSync(
+			linksTarget,
+			JSON.stringify( { links, body, proBadges }, null, 2 )
+		);
+	}
 } );
