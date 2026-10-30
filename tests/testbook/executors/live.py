@@ -32,13 +32,15 @@ def pass_rows( observation: dict ) -> list[dict]:
 	return [ row for row in observation.get( "logs", [] ) if row.get( "action_type" ) == "pass" ]
 
 
-def item_rows( observation: dict, slugs: list[str] | None = None ) -> list[dict]:
+def item_rows( observation: dict, slugs: list[str] | None = None, log_types: list[str] | None = None ) -> list[dict]:
 	rows = [
 		row
 		for row in observation.get( "logs", [] )
 		if ( row.get( "log_type" ) or "" ) not in ( "system", "" )
 		and ( row.get( "item_slug" ) or "" )
 	]
+	if log_types:
+		rows = [ row for row in rows if ( row.get( "log_type" ) or "" ) in log_types ]
 	if slugs:
 		rows = [ row for row in rows if any( slug in ( row.get( "item_slug" ) or "" ) for slug in slugs ) ]
 	return rows
