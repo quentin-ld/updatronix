@@ -9,9 +9,12 @@ from __future__ import annotations
 
 import time
 
-from testbook_site import Site, base_observation, parse_json, php_json
+import json
+
+from testbook_site import ROOT, Site, base_observation, parse_json, php_json
 
 from . import CaseSpec
+from .dimensions import _run_playwright
 from .live import PLUGIN_ALPHA, item_rows, ok, pump, reset_item, version
 
 TRANSLATION_MO = "WP_LANG_DIR . '/plugins/fixture-alpha-fr_FR.mo'"
@@ -1164,6 +1167,137 @@ echo wp_json_encode(
 	return base_observation( site.observe() ), { "on": on, "off": off }
 
 
+def health_checks( site: Site ) -> tuple[dict, dict]:
+	"""TB-HEALTH-101: the nine checks, the three pass checks, the live states."""
+	reset_item( site )
+	state = site.json_eval(
+		r"""<?php
+update_option( 'auto_updater.lock', time() );
+update_site_option(
+	'updatronix_pro_last_pass',
+	array(
+		'pass_id'     => '0123456789abcdef0123456789abcdef',
+		'status'      => 'partial',
+		'total'       => 2,
+		'done'        => 1,
+		'failed'      => 1,
+		'uncertain'   => 0,
+		'started_at'  => wp_date( 'Y-m-d H:i:s', time() - HOUR_IN_SECONDS ),
+		'finished_at' => wp_date( 'Y-m-d H:i:s', time() - 30 * MINUTE_IN_SECONDS ),
+	)
+);
+wp_cache_flush();
+$snapshot = Updatronix_Health::get_snapshot( true );
+$checks   = array();
+foreach ( $snapshot['checks'] as $check ) {
+	$checks[ $check['id'] ] = $check;
+}
+echo wp_json_encode( array( 'checks' => $checks, 'counts' => $snapshot['counts'] ) );
+"""
+	)
+	checks = state["checks"]
+	expected = {
+		"WordPress",
+		"php",
+		"disk",
+		"cron",
+		"lock",
+		"retries",
+		"pass_state",
+		"pass_last_run",
+		"pass_follow_up",
+	}
+	ok( set( checks ) == expected, f"the health checks are {sorted(checks)}" )
+	ok( int( state["counts"]["total"] ) == 9, f"the snapshot reports {state['counts']['total']} checks" )
+	for check_id, check in checks.items():
+		ok( bool( check.get( "label" ) ), f"{check_id}: the check has no label" )
+		ok( check.get( "status" ) in ( "good", "attention", "critical" ), f"{check_id}: status is {check.get('status')}" )
+		ok( "queue" not in ( check.get( "label" ) + check.get( "detail" ) ).lower(), f"{check_id}: the copy still promises a queue" )
+	ok( checks["cron"]["status"] == "attention", f"the disabled WP-Cron is not surfaced: {checks['cron']}" )
+	ok( checks["cron"]["value"] == "Disabled", f"the cron check reads {checks['cron']['value']}" )
+	ok( checks["lock"]["status"] == "attention", f"the busy lock is not surfaced: {checks['lock']}" )
+	ok( checks["lock"]["value"] == "Locked", f"the lock check reads {checks['lock']['value']}" )
+	ok( checks["pass_last_run"]["status"] == "attention", f"the failed pass is not surfaced: {checks['pass_last_run']}" )
+	ok( "1 failed" in checks["pass_last_run"]["detail"], f"the failed count is not named: {checks['pass_last_run']}" )
+	ok( checks["pass_state"]["value"] == "Idle", f"the pass state is {checks['pass_state']['value']}" )
+	ok( checks["pass_follow_up"]["value"] == "Idle", f"the drain state is {checks['pass_follow_up']['value']}" )
+	ok( "automatic_update_pass" not in checks, "a queue check id survived" )
+
+	clean = site.json_eval(
+		r"""<?php
+delete_option( 'auto_updater.lock' );
+delete_site_option( 'updatronix_pro_last_pass' );
+wp_cache_flush();
+$snapshot = Updatronix_Health::get_snapshot( true );
+$checks   = array();
+foreach ( $snapshot['checks'] as $check ) {
+	$checks[ $check['id'] ] = $check;
+}
+echo wp_json_encode( array( 'lock' => $checks['lock']['status'], 'last' => $checks['pass_last_run']['status'] ) );
+"""
+	)
+	ok( clean["lock"] == "good", f"the cleared lock still reports {clean['lock']}" )
+	ok( clean["last"] == "good", f"the absent pass still reports {clean['last']}" )
+	return base_observation( site.observe() ), { "checks": checks, "clean": clean }
+
+
+def _route_metrics( site: Site ) -> tuple[dict, dict]:
+	path = f".cache/testbook/routes-{site.name}.json"
+	stdout = _run_playwright(
+		site,
+		"tests/testbook/playwright-routes.config.js",
+		{ "TESTBOOK_ROUTES_PATH": path },
+	)
+	target = ROOT / path
+	if not target.exists():
+		raise RuntimeError( f"route metrics were not written: {path}" )
+	return json.loads( target.read_text( encoding="utf-8" ) ), {
+		"playwright": stdout.splitlines()[-3:],
+	}
+
+
+def ui_routes( site: Site ) -> tuple[dict, dict]:
+	"""TB-UI-102: every destination renders in the shell."""
+	metrics, detail = _route_metrics( site )
+	routes = metrics.get( "routes", {} )
+	expected = {
+		"logs",
+		"auto-updates",
+		"schedule",
+		"updatronix-3000",
+		"update-shield",
+		"update-flow",
+		"white-label",
+		"health",
+		"settings",
+		"documentation",
+		"support",
+	}
+	ok( set( routes ) == expected, f"the shell exposes {sorted(routes)}" )
+	ok( all( routes.values() ), f"a destination did not render: {routes}" )
+	observation = site.observe()
+	data = base_observation( observation )
+	data.update( { "http_status": 200, "fatal": False } )
+	return data, { **detail, "routes": routes }
+
+
+def ui_viewports( site: Site ) -> tuple[dict, dict]:
+	"""TB-UI-103: no destination overflows at 390, 760, or desktop."""
+	metrics, detail = _route_metrics( site )
+	viewports = metrics.get( "viewports", {} )
+	ok( len( viewports ) == 11, f"only {len(viewports)} destinations were measured" )
+	failures = {
+		slug: widths
+		for slug, widths in viewports.items()
+		if any( widths.get( width ) for width in ( "390", "760", "desktop" ) )
+	}
+	ok( not failures, f"horizontal overflow: {failures}" )
+	observation = site.observe()
+	data = base_observation( observation )
+	data.update( { "http_status": 200, "fatal": False } )
+	return data, { **detail, "viewports": viewports }
+
+
 def esc_html_text( value: str ) -> str:
 	return (
 		value.replace( "&", "&amp;" )
@@ -1301,6 +1435,30 @@ CASES = [
 		( "single", ),
 		( "INV-08", ),
 		phase="dimensions",
+		reset="state",
+	),
+	CaseSpec(
+		"TB-HEALTH-101",
+		health_checks,
+		( "single", ),
+		( "INV-08", ),
+		phase="dimensions",
+		reset="state",
+	),
+	CaseSpec(
+		"TB-UI-102",
+		ui_routes,
+		( "single", ),
+		( "INV-08", ),
+		phase="ui",
+		reset="state",
+	),
+	CaseSpec(
+		"TB-UI-103",
+		ui_viewports,
+		( "single", ),
+		( "INV-08", ),
+		phase="ui",
 		reset="state",
 	),
 ]

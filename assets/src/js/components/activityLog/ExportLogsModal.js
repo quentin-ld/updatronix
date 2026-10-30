@@ -109,16 +109,28 @@ const FORMAT_LABELS = {
 /** Formats that the Free edition may request from the export API. */
 const DEFAULT_FORMATS = [ 'txt' ];
 
-/** Stable JSON keys mapped to localized CSV headings. */
+/** Stable JSON keys mapped to localized CSV headings and column toggles. */
 const CSV_COLUMNS = [
-	[ 'element', __( 'Element', 'updatronix' ) ],
-	[ 'action', __( 'Action', 'updatronix' ) ],
-	[ 'version', __( 'Version', 'updatronix' ) ],
-	[ 'date', __( 'Date', 'updatronix' ) ],
-	[ 'context', __( 'Run context', 'updatronix' ) ],
-	[ 'user', __( 'User', 'updatronix' ) ],
-	[ 'status', __( 'Status', 'updatronix' ) ],
-	[ 'category', __( 'Category', 'updatronix' ) ],
+	[ 'element', __( 'Element', 'updatronix' ), null ],
+	[ 'action', __( 'Action', 'updatronix' ), 'action' ],
+	[ 'version', __( 'Version', 'updatronix' ), null ],
+	[ 'date', __( 'Date', 'updatronix' ), null ],
+	[ 'context', __( 'Run context', 'updatronix' ), 'runContext' ],
+	[ 'user', __( 'User', 'updatronix' ), 'user' ],
+	[ 'status', __( 'Status', 'updatronix' ), 'status' ],
+	[ 'category', __( 'Category', 'updatronix' ), 'category' ],
+	[ 'reason', __( 'Reason', 'updatronix' ), 'reason' ],
+	[ 'state', __( 'State', 'updatronix' ), 'state' ],
+	[ 'origin', __( 'Origin', 'updatronix' ), 'origin' ],
+	[ 'pass', __( 'Pass', 'updatronix' ), 'pass' ],
+	[ 'chain', __( 'Chain', 'updatronix' ), 'chain' ],
+	[ 'next_eligible', __( 'Next eligible', 'updatronix' ), 'nextEligible' ],
+	[
+		'decision_context',
+		__( 'Decision context', 'updatronix' ),
+		'decisionContext',
+	],
+	[ 'retained', __( 'Retained', 'updatronix' ), 'retained' ],
 ];
 
 /**
@@ -139,13 +151,18 @@ function csvCell( value ) {
  * @return {string} CSV report.
  */
 function buildCsvReport( rows, columns ) {
-	const keys = CSV_COLUMNS.filter(
-		( [ key ] ) =>
+	const keys = CSV_COLUMNS.filter( ( [ key, , toggle ] ) => {
+		if ( toggle && columns[ toggle ] === false ) {
+			return false;
+		}
+
+		return (
 			key in ( rows[ 0 ] ?? {} ) ||
 			key === 'element' ||
 			key === 'version' ||
 			key === 'date'
-	);
+		);
+	} );
 	const lines = [];
 	if ( columns.headingTable !== false ) {
 		lines.push(
@@ -192,7 +209,7 @@ function formatExportBody( text, exportFormat, columns ) {
 	}
 
 	if ( exportFormat === 'xml' ) {
-		return buildXmlReport( rows );
+		return buildXmlReport( rows, columns );
 	}
 
 	return buildCsvReport( rows, columns );

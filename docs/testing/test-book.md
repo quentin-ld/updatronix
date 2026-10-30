@@ -165,14 +165,14 @@ the run. The release gate stays open until every catalog case has one.
 | TB-UI-101 | Dimension: Native update time display enabled (free.kill_switch.native_update_time) | free | medium | @free @schedule @kill-switch @dimension | implemented |
 | TB-LOG-103 | Dimension: Log row kind (free.log.row_kind) | free | high | @free @logger @dimension | implemented |
 | TB-LOG-102 | Dimension: Activity-log filters (free.log.filters) | free | medium | @free @logger @ui @dimension | implemented |
-| TB-EXPORT-103 | Dimension: Export format (free.export.format) | shared | high | @free @pro @export @dimension | planned |
-| TB-EXPORT-105 | Dimension: Export scope (free.export.scope) | free | high | @free @export @dimension | planned |
-| TB-EXPORT-104 | Dimension: Merge same-item rows (free.export.merge) | free | medium | @free @export @dimension | planned |
-| TB-EXPORT-101 | Dimension: Export columns (free.export.columns) | free | medium | @free @pro @export @dimension | planned |
-| TB-EXPORT-102 | Dimension: Empty export (free.export.empty) | free | medium | @free @export @dimension | planned |
-| TB-HEALTH-101 | Dimension: Health checks (free.health.checks) | free | medium | @free @pro @health @dimension | planned |
-| TB-UI-102 | Dimension: Admin surface (free.ui.surface) | shared | high | @free @pro @ui @dimension | planned |
-| TB-UI-103 | Dimension: Viewport (free.ui.viewport) | shared | low | @free @pro @a11y @dimension | planned |
+| TB-EXPORT-103 | Dimension: Export format (free.export.format) | shared | high | @free @pro @export @dimension | implemented |
+| TB-EXPORT-105 | Dimension: Export scope (free.export.scope) | free | high | @free @export @dimension | implemented |
+| TB-EXPORT-104 | Dimension: Merge same-item rows (free.export.merge) | free | medium | @free @export @dimension | implemented |
+| TB-EXPORT-101 | Dimension: Export columns (free.export.columns) | free | medium | @free @pro @export @dimension | implemented |
+| TB-EXPORT-102 | Dimension: Empty export (free.export.empty) | free | medium | @free @export @dimension | implemented |
+| TB-HEALTH-101 | Dimension: Health checks (free.health.checks) | free | medium | @free @pro @health @dimension | implemented |
+| TB-UI-102 | Dimension: Admin surface (free.ui.surface) | shared | high | @free @pro @ui @dimension | implemented |
+| TB-UI-103 | Dimension: Viewport (free.ui.viewport) | shared | low | @free @pro @a11y @dimension | implemented |
 | TB-SHIELD-109 | Dimension: Protect this site (pro.shield.safe_mode) | pro | critical | @pro @shield @invariant @dimension | implemented |
 | TB-SHIELD-102 | Dimension: Check PHP compatibility (pro.shield.control_php_version) | pro | critical | @pro @shield @dimension | implemented |
 | TB-SHIELD-103 | Dimension: Check WordPress compatibility (pro.shield.control_wp_version) | pro | critical | @pro @shield @dimension | implemented |

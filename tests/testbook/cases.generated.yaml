@@ -707,7 +707,7 @@ cases:
   oracle:
   - ui
   - integration
-  automation: planned
+  automation: implemented
 - id: TB-EXPORT-105
   title: 'Dimension: Export scope (free.export.scope)'
   owner: free
@@ -732,7 +732,7 @@ cases:
   oracle:
   - ui
   - integration
-  automation: planned
+  automation: implemented
 - id: TB-EXPORT-104
   title: 'Dimension: Merge same-item rows (free.export.merge)'
   owner: free
@@ -755,7 +755,7 @@ cases:
   oracle:
   - ui
   - integration
-  automation: planned
+  automation: implemented
 - id: TB-EXPORT-101
   title: 'Dimension: Export columns (free.export.columns)'
   owner: free
@@ -794,7 +794,7 @@ cases:
   oracle:
   - ui
   - integration
-  automation: planned
+  automation: implemented
 - id: TB-EXPORT-102
   title: 'Dimension: Empty export (free.export.empty)'
   owner: free
@@ -820,7 +820,7 @@ cases:
   oracle:
   - ui
   - integration
-  automation: planned
+  automation: implemented
 - id: TB-HEALTH-101
   title: 'Dimension: Health checks (free.health.checks)'
   owner: free
@@ -855,7 +855,7 @@ cases:
   oracle:
   - ui
   - integration
-  automation: planned
+  automation: implemented
 - id: TB-UI-102
   title: 'Dimension: Admin surface (free.ui.surface)'
   owner: shared
@@ -884,7 +884,7 @@ cases:
   oracle:
   - ui
   - integration
-  automation: planned
+  automation: implemented
 - id: TB-UI-103
   title: 'Dimension: Viewport (free.ui.viewport)'
   owner: shared
@@ -909,7 +909,7 @@ cases:
   oracle:
   - ui
   - integration
-  automation: planned
+  automation: implemented
 - id: TB-SHIELD-109
   title: 'Dimension: Protect this site (pro.shield.safe_mode)'
   owner: pro

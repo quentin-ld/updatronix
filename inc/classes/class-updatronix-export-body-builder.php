@@ -102,6 +102,7 @@ final class Updatronix_Export_Body_Builder {
 		'pass',
 		'chain',
 		'next_eligible',
+		'decision_context',
 		'retained',
 	);
 
@@ -115,6 +116,7 @@ final class Updatronix_Export_Body_Builder {
 		'pass',
 		'chain',
 		'next_eligible',
+		'decision_context',
 		'retained',
 	);
 
@@ -137,9 +139,10 @@ final class Updatronix_Export_Body_Builder {
 		'state'         => 'state',
 		'origin'        => 'origin',
 		'pass'          => 'pass',
-		'chain'         => 'chain',
-		'next_eligible' => 'next_eligible',
-		'retained'      => 'retained',
+		'chain'            => 'chain',
+		'next_eligible'    => 'next_eligible',
+		'decision_context' => 'decision_context',
+		'retained'         => 'retained',
 	);
 
 	/**
@@ -640,6 +643,9 @@ final class Updatronix_Export_Body_Builder {
 		if ( $columns['next_eligible'] ?? true ) {
 			$data['next_eligible'] = $parts['next_eligible'] ?? '';
 		}
+		if ( $columns['decision_context'] ?? false ) {
+			$data['decision_context'] = $parts['decision_context'] ?? '';
+		}
 		if ( $columns['retained'] ?? true ) {
 			$data['retained'] = $parts['retained'] ?? '';
 		}
@@ -922,6 +928,7 @@ final class Updatronix_Export_Body_Builder {
 			'next_eligible' => isset( $first_row['next_eligible_at'] )
 				// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 				&& '' !== (string) $first_row['next_eligible_at'] ? self::format_next_eligible( (string) $first_row['next_eligible_at'] ) : '',
+			'decision_context' => self::decision_context_label( $first_row ),
 			'retained'      => (int) ( $first_row['retained'] ?? 0 ) > 0 ? __(
 				'Retained',
 				'updatronix'
@@ -936,6 +943,30 @@ final class Updatronix_Export_Body_Builder {
 		}
 
 		return $parts;
+	}
+
+	/**
+	 * Build the opt-in decision-context value for one row.
+	 *
+	 * The other decision facts already have their own columns (reason, state,
+	 * origin, pass, chain, next eligible). This column adds the stage and, when
+	 * present, the predecessor, so a reader can tell why the decision happened.
+	 *
+	 * @param array<string, mixed> $row First row of the group, as an array.
+	 * @return string Empty when the row has neither a stage nor a predecessor.
+	 */
+	private static function decision_context_label( array $row ): string {
+		$parts = array();
+		$stage = (string) ( $row['decision_stage'] ?? '' );
+		if ( '' !== $stage ) {
+			$parts[] = Updatronix_Log_Taxonomy::stage_label( $stage );
+		}
+		$predecessor = (string) ( $row['predecessor'] ?? '' );
+		if ( '' !== $predecessor ) {
+			$parts[] = $predecessor;
+		}
+
+		return implode( ' · ', $parts );
 	}
 
 	/**
@@ -1114,6 +1145,7 @@ final class Updatronix_Export_Body_Builder {
 			'pass' => __( 'Pass', 'updatronix' ),
 			'chain' => __( 'Chain', 'updatronix' ),
 			'next_eligible' => __( 'Next eligible', 'updatronix' ),
+			'decision_context' => __( 'Decision context', 'updatronix' ),
 			'retained' => __( 'Retained', 'updatronix' ),
 			default => '',
 		};
