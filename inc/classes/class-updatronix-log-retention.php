@@ -150,9 +150,9 @@ final class Updatronix_Log_Retention {
 							AND pass_id <> ''
 							AND pass_id IN (
 								SELECT pass_id FROM (
-									// phpcs:ignore Generic.Files.LineLength -- Long directive.
-									// phpcs:ignore Generic.Files.LineLength, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-									SELECT DISTINCT pass_id FROM %i WHERE retained = 1 AND pass_id <> ''
+									SELECT DISTINCT pass_id
+									FROM %i
+									WHERE retained = 1 AND pass_id <> ''
 								) retained_passes
 							)
 						)",
