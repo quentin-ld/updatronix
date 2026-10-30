@@ -22,7 +22,10 @@
 		"harness:pot": "bash bin/harness pot",
 		"harness:zip": "bash bin/harness zip",
 		"test:js": "bash bin/harness test:js",
-		"test:e2e": "bash bin/harness e2e"
+		"test:e2e": "bash bin/harness e2e",
+		"test:book:smoke": "bash tests/testbook/gate-smoke.sh",
+		"test:book:full": "bash tests/testbook/gate-full.sh",
+		"test:book:all": "bash tests/testbook/gate-all.sh"
 	},
 	"author": "Quentin Le Duff (--Q--)",
 	"license": "GPL-2.0-or-later",

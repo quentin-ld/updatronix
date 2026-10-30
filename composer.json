@@ -55,7 +55,10 @@
 		"harness:verify": "bash bin/harness verify",
 		"harness:mutation": "bash bin/harness mutation",
 		"harness:pot": "bash bin/harness pot",
-		"harness:zip": "bash bin/harness zip"
+		"harness:zip": "bash bin/harness zip",
+		"test:book:smoke": "bash tests/testbook/gate-smoke.sh",
+		"test:book:full": "bash tests/testbook/gate-full.sh",
+		"test:book:all": "bash tests/testbook/gate-all.sh"
 	},
 	"config": {
 		"allow-plugins": {
