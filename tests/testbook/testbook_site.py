@@ -604,6 +604,14 @@ echo wp_json_encode( array(
 """
 		return self.json_eval( php )
 
+	def auto_update_plugins( self ) -> list[str]:
+		result = self.json_eval( "<?php echo wp_json_encode( get_option( 'auto_update_plugins', array() ) );" )
+		return result if isinstance( result, list ) else []
+
+	def pro_routes( self ) -> list[str]:
+		result = self.json_eval( "<?php echo wp_json_encode( array_keys( rest_get_server()->get_routes() ) );" )
+		return result if isinstance( result, list ) else []
+
 	def set_delay( self, days: int, enabled: bool = True ) -> dict:
 		php = f"""<?php
 $settings = updatronix_get_settings();

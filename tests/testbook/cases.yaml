@@ -434,7 +434,7 @@ flow_cases:
     steps: [Toggle Safe Mode off and on; run a native update.]
     assertions: [Off disables Shield/Version Lock and does not block; on evaluates the policies.]
     oracle: [ui, disk, log]
-    automation: planned
+    automation: implemented
 
   - id: TB-SHIELD-002
     title: Incompatible behavior
@@ -603,7 +603,7 @@ triples:
     why: The master switch is inside Shield; with Shield off, the lock must be inactive and the native update must still run.
     assertions: [No lock policy blocks the update; the native option is unchanged; no false “Locked” label.]
     oracle: [disk, ui, options]
-    automation: planned
+    automation: implemented
 
   - id: COMBO-002
     title: Hold 365 + locked item
@@ -617,7 +617,7 @@ triples:
     why: A long hold and a lock must both wait; neither may bypass the other.
     assertions: [The item is held/locked, not installed; the reason names both; the next pass re-evaluates.]
     oracle: [disk, ui, pass]
-    automation: planned
+    automation: implemented
 
   - id: COMBO-003
     title: License inactive + pass enabled
@@ -631,7 +631,7 @@ triples:
     why: The kill switch is on, but the license gate must fail closed before execution.
     assertions: [No pass, no Pro route, no native gate; the license page remains usable.]
     oracle: [http, pass, options]
-    automation: planned
+    automation: implemented
 
   - id: COMBO-004
     title: Multisite + network activation + main-site pass
@@ -659,7 +659,7 @@ triples:
     why: The manual hard block must cover the admin routes and leave WP-CLI as the escape hatch.
     assertions: [The admin direct URL is blocked; bulk and update-core are blocked; WP-CLI succeeds; the option is unchanged.]
     oracle: [disk, http, options]
-    automation: planned
+    automation: implemented
 
   - id: COMBO-006
     title: Composer/VCS + pending update + manual switch off
@@ -673,7 +673,7 @@ triples:
     why: Automatic updates are locked; manual admin updates remain available unless the manual switch says otherwise.
     assertions: [The automatic update is blocked with the manager label; the manual admin update is allowed; no option rewrite.]
     oracle: [disk, ui, options]
-    automation: planned
+    automation: implemented
 
   - id: COMBO-007
     title: Shield on + incompatible PHP + re-enable on + hold 0
@@ -688,7 +688,7 @@ triples:
     why: An incompatible update must be blocked, its auto-update turned off, and re-enabled only after a passing release.
     assertions: [The update is blocked; the toggle is off; a later passing release re-enables it; one row per outcome.]
     oracle: [options, log, mail]
-    automation: planned
+    automation: implemented
 
   - id: COMBO-008
     title: Pass enabled + two items + one failure

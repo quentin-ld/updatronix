@@ -41,6 +41,7 @@ MODULES = (
 	"shield",
 	"vlock",
 	"license",
+	"combo",
 	"multisite",
 	"environment",
 	"roles",

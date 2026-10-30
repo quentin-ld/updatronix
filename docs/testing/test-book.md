@@ -173,18 +173,18 @@ the run. The release gate stays open until every catalog case has one.
 | TB-HEALTH-101 | Dimension: Health checks (free.health.checks) | free | medium | @free @pro @health @dimension | planned |
 | TB-UI-102 | Dimension: Admin surface (free.ui.surface) | shared | high | @free @pro @ui @dimension | planned |
 | TB-UI-103 | Dimension: Viewport (free.ui.viewport) | shared | low | @free @pro @a11y @dimension | planned |
-| TB-SHIELD-109 | Dimension: Protect this site (pro.shield.safe_mode) | pro | critical | @pro @shield @invariant @dimension | planned |
-| TB-SHIELD-102 | Dimension: Check PHP compatibility (pro.shield.control_php_version) | pro | critical | @pro @shield @dimension | planned |
-| TB-SHIELD-103 | Dimension: Check WordPress compatibility (pro.shield.control_wp_version) | pro | critical | @pro @shield @dimension | planned |
-| TB-SHIELD-105 | Dimension: Incompatible update behavior (pro.shield.incompatible_behavior) | pro | critical | @pro @shield @dimension | planned |
+| TB-SHIELD-109 | Dimension: Protect this site (pro.shield.safe_mode) | pro | critical | @pro @shield @invariant @dimension | implemented |
+| TB-SHIELD-102 | Dimension: Check PHP compatibility (pro.shield.control_php_version) | pro | critical | @pro @shield @dimension | implemented |
+| TB-SHIELD-103 | Dimension: Check WordPress compatibility (pro.shield.control_wp_version) | pro | critical | @pro @shield @dimension | implemented |
+| TB-SHIELD-105 | Dimension: Incompatible update behavior (pro.shield.incompatible_behavior) | pro | critical | @pro @shield @dimension | implemented |
 | TB-SHIELD-108 | Dimension: Re-enable auto-updates automatically (pro.shield.re_enable) | pro | high | @pro @shield @dimension | planned |
 | TB-SHIELD-107 | Dimension: Notify the technical manager on block (pro.shield.notify_on_block) | pro | high | @pro @shield @mail @dimension | planned |
 | TB-SHIELD-106 | Dimension: Email the technical manager (pro.shield.notify_email) | pro | high | @pro @shield @mail @dimension | planned |
 | TB-SHIELD-104 | Dimension: Flag abandoned plugins (pro.shield.flag_abandoned) | pro | medium | @pro @shield @dimension | planned |
 | TB-SHIELD-101 | Dimension: Recently blocked window (pro.shield.blocked_history) | pro | low | @pro @shield @ui @dimension | planned |
-| TB-VLOCK-102 | Dimension: Version Lock master switch (pro.version_lock.enabled) | pro | critical | @pro @version-lock @invariant @dimension | planned |
-| TB-VLOCK-104 | Dimension: Block manual updates (pro.version_lock.manual_updates) | pro | critical | @pro @version-lock @invariant @dimension | planned |
-| TB-VLOCK-101 | Dimension: Version-control detection (pro.version_lock.detection) | pro | critical | @pro @version-lock @invariant @dimension | planned |
+| TB-VLOCK-102 | Dimension: Version Lock master switch (pro.version_lock.enabled) | pro | critical | @pro @version-lock @invariant @dimension | implemented |
+| TB-VLOCK-104 | Dimension: Block manual updates (pro.version_lock.manual_updates) | pro | critical | @pro @version-lock @invariant @dimension | implemented |
+| TB-VLOCK-101 | Dimension: Version-control detection (pro.version_lock.detection) | pro | critical | @pro @version-lock @invariant @dimension | implemented |
 | TB-VLOCK-103 | Dimension: Manager label (pro.version_lock.manager) | pro | medium | @pro @version-lock @ui @dimension | planned |
 | TB-PASS-101 | Dimension: Automatic update pass enabled (pro.pass.enabled) | pro | critical | @pro @pass @kill-switch @invariant @dimension | implemented |
 | TB-PASS-105 | Dimension: Pass nodes (pro.pass.node_count) | pro | high | @pro @pass @dimension | planned |
@@ -200,8 +200,8 @@ the run. The release gate stays open until every catalog case has one.
 | TB-FLOW-103 | Dimension: Chain shape (pro.flow.chain_shape) | pro | critical | @pro @flow @invariant @dimension | implemented |
 | TB-FLOW-105 | Dimension: Predecessor state (pro.flow.predecessor_state) | pro | critical | @pro @flow @pass @invariant @dimension | implemented |
 | TB-FLOW-104 | Dimension: Non-opted item (pro.flow.non_opted) | pro | critical | @pro @flow @invariant @dimension | implemented |
-| TB-LIC-103 | Dimension: License status (pro.license.status) | pro | critical | @pro @license @gating @invariant @dimension | planned |
-| TB-LIC-102 | Dimension: Product presence (pro.license.mode) | pro | critical | @pro @license @gating @dimension | planned |
+| TB-LIC-103 | Dimension: License status (pro.license.status) | pro | critical | @pro @license @gating @invariant @dimension | implemented |
+| TB-LIC-102 | Dimension: Product presence (pro.license.mode) | pro | critical | @pro @license @gating @dimension | implemented |
 | TB-LIC-101 | Dimension: License lifecycle action (pro.license.activation) | pro | high | @pro @license @dimension | planned |
 | TB-WL-104 | Dimension: White Label enabled (pro.white_label.enabled) | pro | medium | @pro @white-label @dimension | planned |
 | TB-WL-101 | Dimension: Brand name (pro.white_label.brand) | pro | medium | @pro @white-label @security @dimension | planned |
@@ -260,7 +260,7 @@ the run. The release gate stays open until every catalog case has one.
 | TB-LOG-001 | Decision filters and details | free | high | @free @logger | implemented |
 | TB-EXPORT-001 | Export formats and columns | shared | high | @free @pro @export | planned |
 | TB-EXPORT-002 | Empty, expired, rate-limited, chunked | free | medium | @free @pro @export | planned |
-| TB-SHIELD-001 | Safe Mode off and on | pro | critical | @pro @shield | planned |
+| TB-SHIELD-001 | Safe Mode off and on | pro | critical | @pro @shield | implemented |
 | TB-SHIELD-002 | Incompatible behavior | pro | critical | @pro @shield | implemented |
 | TB-SHIELD-003 | Shield block email | pro | high | @pro @shield @mail | implemented |
 | TB-VLOCK-001 | Detection matrix | pro | critical | @pro @version-lock | implemented |
@@ -275,17 +275,17 @@ the run. The release gate stays open until every catalog case has one.
 | TB-ENV-001 | Constants and locked controls | shared | critical | @free @pro @constants | planned |
 | TB-ENV-002 | Cron and timezone | free | high | @free @schedule @timezone | implemented |
 | TB-ENV-003 | Filesystem and disk failures | shared | critical | @free @pro @environment | planned |
-| COMBO-001 | Shield off + Version Lock on + locked item | pro | critical | @pro @combo @shield @version-lock | planned |
-| COMBO-002 | Hold 365 + locked item | pro | critical | @pro @combo @schedule @version-lock | planned |
-| COMBO-003 | License inactive + pass enabled | pro | critical | @pro @combo @license @pass | planned |
+| COMBO-001 | Shield off + Version Lock on + locked item | pro | critical | @pro @combo @shield @version-lock | implemented |
+| COMBO-002 | Hold 365 + locked item | pro | critical | @pro @combo @schedule @version-lock | implemented |
+| COMBO-003 | License inactive + pass enabled | pro | critical | @pro @combo @license @pass | implemented |
 | COMBO-004 | Multisite + network activation + main-site pass | pro | critical | @pro @combo @multisite @pass | planned |
-| COMBO-005 | Manual lock on + direct URL + WP-CLI | pro | critical | @pro @combo @version-lock | planned |
-| COMBO-006 | Composer/VCS + pending update + manual switch off | pro | critical | @pro @combo @version-lock | planned |
-| COMBO-007 | Shield on + incompatible PHP + re-enable on + hold 0 | pro | critical | @pro @combo @shield @schedule | planned |
+| COMBO-005 | Manual lock on + direct URL + WP-CLI | pro | critical | @pro @combo @version-lock | implemented |
+| COMBO-006 | Composer/VCS + pending update + manual switch off | pro | critical | @pro @combo @version-lock | implemented |
+| COMBO-007 | Shield on + incompatible PHP + re-enable on + hold 0 | pro | critical | @pro @combo @shield @schedule | implemented |
 | COMBO-008 | Pass enabled + two items + one failure | pro | critical | @pro @combo @pass @update | implemented |
-| TB-PRO-001 | Pro gating and license states | pro | critical | @pro @license @gating @smoke | planned |
-| TB-PRO-002 | Version Lock manager labels | pro | critical | @pro @version-lock @ui | planned |
-| TB-PRO-003 | Shield incompatible behavior and re-enable | pro | critical | @pro @shield | planned |
+| TB-PRO-001 | Pro gating and license states | pro | critical | @pro @license @gating @smoke | implemented |
+| TB-PRO-002 | Version Lock manager labels | pro | critical | @pro @version-lock @ui | implemented |
+| TB-PRO-003 | Shield incompatible behavior and re-enable | pro | critical | @pro @shield | implemented |
 | TB-PRO-004 | Pass two-item execution | pro | critical | @pro @pass @smoke | implemented |
 | TB-PRO-005 | Flow ordering | pro | critical | @pro @flow @smoke | implemented |
 | TB-PRO-006 | White Label lifecycle | pro | medium | @pro @white-label @a11y | planned |

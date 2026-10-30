@@ -933,7 +933,7 @@ cases:
   oracle:
   - ui
   - integration
-  automation: planned
+  automation: implemented
 - id: TB-SHIELD-102
   title: 'Dimension: Check PHP compatibility (pro.shield.control_php_version)'
   owner: pro
@@ -956,7 +956,7 @@ cases:
   oracle:
   - ui
   - integration
-  automation: planned
+  automation: implemented
 - id: TB-SHIELD-103
   title: 'Dimension: Check WordPress compatibility (pro.shield.control_wp_version)'
   owner: pro
@@ -979,7 +979,7 @@ cases:
   oracle:
   - ui
   - integration
-  automation: planned
+  automation: implemented
 - id: TB-SHIELD-105
   title: 'Dimension: Incompatible update behavior (pro.shield.incompatible_behavior)'
   owner: pro
@@ -1003,7 +1003,7 @@ cases:
   oracle:
   - ui
   - integration
-  automation: planned
+  automation: implemented
 - id: TB-SHIELD-108
   title: 'Dimension: Re-enable auto-updates automatically (pro.shield.re_enable)'
   owner: pro
@@ -1147,7 +1147,7 @@ cases:
   oracle:
   - ui
   - integration
-  automation: planned
+  automation: implemented
 - id: TB-VLOCK-104
   title: 'Dimension: Block manual updates (pro.version_lock.manual_updates)'
   owner: pro
@@ -1171,7 +1171,7 @@ cases:
   oracle:
   - ui
   - integration
-  automation: planned
+  automation: implemented
 - id: TB-VLOCK-101
   title: 'Dimension: Version-control detection (pro.version_lock.detection)'
   owner: pro
@@ -1200,7 +1200,7 @@ cases:
   oracle:
   - ui
   - integration
-  automation: planned
+  automation: implemented
 - id: TB-VLOCK-103
   title: 'Dimension: Manager label (pro.version_lock.manager)'
   owner: pro
@@ -1635,7 +1635,7 @@ cases:
   oracle:
   - ui
   - integration
-  automation: planned
+  automation: implemented
 - id: TB-LIC-102
   title: 'Dimension: Product presence (pro.license.mode)'
   owner: pro
@@ -1663,7 +1663,7 @@ cases:
   oracle:
   - ui
   - integration
-  automation: planned
+  automation: implemented
 - id: TB-LIC-101
   title: 'Dimension: License lifecycle action (pro.license.activation)'
   owner: pro

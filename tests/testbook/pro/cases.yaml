@@ -16,7 +16,7 @@ cases:
     steps: [Run free-only, inactive, invalid, active, dev-mode, and salt-rotation states.]
     assertions: [Only Free screens without an active license; Pro routes register only when active; the license page recovers.]
     oracle: [ui, http, pass]
-    automation: planned
+    automation: implemented
 
   - id: TB-PRO-002
     title: Version Lock manager labels
@@ -27,7 +27,7 @@ cases:
     steps: [Open Shield, plugins, themes, update-core, and Auto updates with locked fixtures.]
     assertions: [Each row names the real manager and evidence; no lock label when Shield is off.]
     oracle: [ui, log]
-    automation: planned
+    automation: implemented
 
   - id: TB-PRO-003
     title: Shield incompatible behavior and re-enable
@@ -38,7 +38,7 @@ cases:
     steps: [Block an incompatible release with disable and cancel; publish a passing release.]
     assertions: [Disable turns the toggle off; cancel keeps it on; re-enable only after a pass.]
     oracle: [options, log, mail]
-    automation: planned
+    automation: implemented
 
   - id: TB-PRO-004
     title: Pass two-item execution
