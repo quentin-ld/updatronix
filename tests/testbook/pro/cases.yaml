@@ -49,7 +49,7 @@ cases:
     steps: [Run a pass with two eligible items and one failure.]
     assertions: [Two invocations; two emails; one item row each; one pass row; no duplicate.]
     oracle: [disk, pass, log, mail]
-    automation: planned
+    automation: implemented
 
   - id: TB-PRO-005
     title: Flow ordering
@@ -60,7 +60,7 @@ cases:
     steps: [Run a chain with a held predecessor, a failed predecessor, and an independent branch.]
     assertions: [No bypass; descendants wait; the independent branch continues.]
     oracle: [pass, log, ui]
-    automation: planned
+    automation: implemented
 
   - id: TB-PRO-006
     title: White Label lifecycle

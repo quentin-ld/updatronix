@@ -335,7 +335,7 @@ flow_cases:
     steps: [Run a two-step chain; run it again on the next day.]
     assertions: [The predecessor installs first; the successor waits; the next pass advances it.]
     oracle: [disk, pass, log]
-    automation: planned
+    automation: implemented
 
   - id: TB-FLOW-002
     title: Locked or held predecessor
@@ -346,7 +346,7 @@ flow_cases:
     steps: [Make the predecessor locked, then held; run the pass.]
     assertions: [The successor waits; no bypass; the reason names the predecessor; the next pass re-evaluates.]
     oracle: [pass, log, ui]
-    automation: planned
+    automation: implemented
 
   - id: TB-FLOW-003
     title: Failed predecessor and independent branches
@@ -357,7 +357,7 @@ flow_cases:
     steps: [Fail one branch; keep an independent branch.]
     assertions: [Only descendants wait; the independent branch continues; no spin.]
     oracle: [pass, log]
-    automation: planned
+    automation: implemented
 
   - id: TB-FLOW-004
     title: Chain shapes
@@ -368,7 +368,7 @@ flow_cases:
     steps: [Create a valid chain, a cycle, a duplicate, a missing item, and an overflow.]
     assertions: [Cycles block the save; missing items block descendants; overflow is reported, not truncated.]
     oracle: [ui, pass]
-    automation: planned
+    automation: implemented
 
   - id: TB-SCHED-001
     title: 24h+60m picker and hold boundaries
@@ -703,4 +703,4 @@ triples:
     why: One item failing must not duplicate execution, lose the pass summary, or suppress the healthy item's email.
     assertions: [Two invocations; one failure row; one healthy install; one email each; one pass row.]
     oracle: [disk, log, pass, mail]
-    automation: planned
+    automation: implemented

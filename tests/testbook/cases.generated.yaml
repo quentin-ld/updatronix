@@ -1254,7 +1254,7 @@ cases:
   oracle:
   - ui
   - integration
-  automation: planned
+  automation: implemented
 - id: TB-PASS-105
   title: 'Dimension: Pass nodes (pro.pass.node_count)'
   owner: pro
@@ -1310,7 +1310,7 @@ cases:
   oracle:
   - ui
   - integration
-  automation: planned
+  automation: implemented
 - id: TB-PASS-103
   title: 'Dimension: Native lock contention (pro.pass.lock_wait)'
   owner: pro
@@ -1419,7 +1419,7 @@ cases:
   oracle:
   - ui
   - integration
-  automation: planned
+  automation: implemented
 - id: TB-PLAN-101
   title: 'Dimension: One-item gate result (pro.planning.gate_result)'
   owner: pro
@@ -1447,7 +1447,7 @@ cases:
   oracle:
   - ui
   - integration
-  automation: planned
+  automation: implemented
 - id: TB-FLOW-101
   title: 'Dimension: Chain count (pro.flow.chain_count)'
   owner: pro
@@ -1550,7 +1550,7 @@ cases:
   oracle:
   - ui
   - integration
-  automation: planned
+  automation: implemented
 - id: TB-FLOW-105
   title: 'Dimension: Predecessor state (pro.flow.predecessor_state)'
   owner: pro
@@ -1580,7 +1580,7 @@ cases:
   oracle:
   - ui
   - integration
-  automation: planned
+  automation: implemented
 - id: TB-FLOW-104
   title: 'Dimension: Non-opted item (pro.flow.non_opted)'
   owner: pro
@@ -1605,7 +1605,7 @@ cases:
   oracle:
   - ui
   - integration
-  automation: planned
+  automation: implemented
 - id: TB-LIC-103
   title: 'Dimension: License status (pro.license.status)'
   owner: pro
@@ -1874,7 +1874,7 @@ cases:
   oracle:
   - ui
   - integration
-  automation: planned
+  automation: implemented
 - id: TB-UPDATE-103
   title: 'Dimension: Update origin (update.origin)'
   owner: shared
@@ -1902,7 +1902,7 @@ cases:
   oracle:
   - ui
   - integration
-  automation: planned
+  automation: implemented
 - id: TB-UPDATE-102
   title: 'Dimension: Item decision state (update.item_state)'
   owner: shared
@@ -1932,7 +1932,7 @@ cases:
   oracle:
   - ui
   - integration
-  automation: planned
+  automation: implemented
 - id: TB-UPDATE-104
   title: 'Dimension: Update package outcome (update.package)'
   owner: shared
@@ -1962,7 +1962,7 @@ cases:
   oracle:
   - ui
   - integration
-  automation: planned
+  automation: implemented
 - id: TB-UPDATE-101
   title: 'Dimension: Native per-item email (update.email)'
   owner: shared
@@ -1991,7 +1991,7 @@ cases:
   oracle:
   - ui
   - integration
-  automation: planned
+  automation: implemented
 - id: TB-ENV-109
   title: 'Dimension: WordPress version (env.wp_version)'
   owner: shared

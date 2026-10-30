@@ -38,10 +38,12 @@ RESET_MODES = ( "full", "state", "files", "none" )
 RESET_COST = { "full": 0, "files": 1, "state": 2, "none": 3 }
 
 
-def parse_json( output: str ) -> dict:
+def parse_json( output: str ) -> dict | list:
 	for line in reversed( output.splitlines() ):
 		line = line.strip()
-		if line.startswith( "{" ) and line.endswith( "}" ):
+		if ( line.startswith( "{" ) and line.endswith( "}" ) ) or (
+			line.startswith( "[" ) and line.endswith( "]" )
+		):
 			return json.loads( line )
 	raise RuntimeError( f"no JSON object in output: {output[-2000:]}" )
 
@@ -552,6 +554,257 @@ wp_cache_flush();
 echo wp_json_encode( array( 'ok' => true, 'chains' => Updatronix_Update_Flow::get_saved_chains() ) );
 """
 		return self.json_eval( php )
+
+	def validate_flow_chains( self, chains: list[dict] ) -> dict:
+		php = f"""<?php
+$chains = json_decode( '{php_json(chains)}', true );
+if ( ! class_exists( 'Updatronix_Update_Flow' ) ) {{ echo wp_json_encode( array( 'error' => 'flow_missing' ) ); return; }}
+$clean = Updatronix_Update_Flow::validate_chains( $chains );
+if ( is_wp_error( $clean ) ) {{
+	echo wp_json_encode( array( 'error' => $clean->get_error_code(), 'message' => $clean->get_error_message() ) );
+	return;
+}}
+echo wp_json_encode( array( 'ok' => true, 'chains' => $clean ) );
+"""
+		return self.json_eval( php )
+
+	def save_flow_chains( self, chains: list[dict] ) -> dict:
+		"""Validate a chain list, including that every step is installed."""
+		php = f"""<?php
+$chains = json_decode( '{php_json(chains)}', true );
+if ( ! class_exists( 'Updatronix_Update_Flow' ) ) {{ echo wp_json_encode( array( 'error' => 'flow_missing' ) ); return; }}
+$clean = Updatronix_Update_Flow::validate_chains( $chains );
+if ( is_wp_error( $clean ) ) {{
+	echo wp_json_encode( array( 'error' => $clean->get_error_code(), 'message' => $clean->get_error_message() ) );
+	return;
+}}
+$installed = Updatronix_Update_Flow::validate_installed_items( $clean );
+if ( is_wp_error( $installed ) ) {{
+	echo wp_json_encode( array( 'error' => $installed->get_error_code(), 'message' => $installed->get_error_message() ) );
+	return;
+}}
+update_site_option( 'updatronix_pro_flow_chains', array( 'version' => 1, 'chains' => $clean ) );
+wp_cache_flush();
+echo wp_json_encode( array( 'ok' => true, 'chains' => $clean ) );
+"""
+		return self.json_eval( php )
+
+	def set_auto_update( self, plugins: list[str] | None = None, themes: list[str] | None = None ) -> dict:
+		lines = []
+		if plugins is not None:
+			lines.append( f"update_option( 'auto_update_plugins', {php_list(plugins)} );" )
+		if themes is not None:
+			lines.append( f"update_option( 'auto_update_themes', {php_list(themes)} );" )
+		php = "<?php\n" + "\n".join( lines ) + """
+wp_cache_flush();
+echo wp_json_encode( array(
+	'plugins' => get_option( 'auto_update_plugins', array() ),
+	'themes'  => get_option( 'auto_update_themes', array() ),
+) );
+"""
+		return self.json_eval( php )
+
+	def set_delay( self, days: int, enabled: bool = True ) -> dict:
+		php = f"""<?php
+$settings = updatronix_get_settings();
+$settings['schedule'] = array_merge(
+	(array) ( $settings['schedule'] ?? array() ),
+	array(
+		'delay_updates' => array(
+			'enabled'     => {"true" if enabled else "false"},
+			'delay_value' => {int(days)},
+		),
+	)
+);
+updatronix_save_settings_array( $settings );
+if ( class_exists( 'Updatronix_AutoUpdateDelay' ) ) {{
+	Updatronix_AutoUpdateDelay::reset_cache();
+	Updatronix_AutoUpdateDelay::register_filters();
+}}
+echo wp_json_encode( $settings['schedule'] );
+"""
+		return self.json_eval( php )
+
+	def set_notifications( self, mode: str = "default", enabled: bool = True, emails: str = "ops@example.test" ) -> dict:
+		return self.set_settings(
+			{
+				"notify_enabled": enabled,
+				"notifications_mode": mode,
+				"notify_emails": emails,
+				"notify_on": [ "plugin_theme", "core" ],
+			}
+		)
+
+	def pump_pass(
+		self,
+		keep: list[str] | None = None,
+		max_requests: int = 8,
+		enable_pass: bool = True,
+		fail_download: str = "",
+		package_overrides: dict[str, str] | None = None,
+		keep_lock: bool = False,
+	) -> dict:
+		"""Run the real pass one simulated request at a time.
+
+		This mirrors the Pro integration fixture: reset the gate/runner/item
+		state, clear the native lock, fire `wp_maybe_auto_update`, finalize the
+		pass, and repeat until the pass is gone or the request budget is spent.
+		"""
+		keep = keep or []
+		keep_php = php_list( keep )
+		fail_php = (
+			f"add_filter( 'upgrader_pre_download', static function () {{ return new WP_Error( 'download_timeout', 'Injected timeout.' ); }}, 10, 2 );"
+			if fail_download == "timeout"
+			else ""
+		)
+		disable_php = (
+			"add_filter( 'updatronix_pro_update_pass_enabled', '__return_false' );"
+			if not enable_pass
+			else ""
+		)
+		override_php = ""
+		if package_overrides:
+			override_php = f"""add_filter( 'site_transient_update_plugins', static function ( $value ) {{
+	$overrides = json_decode( '{php_json(package_overrides)}', true );
+	if ( is_object( $value ) && isset( $value->response ) && is_array( $value->response ) ) {{
+		foreach ( $overrides as $plugin => $package ) {{
+			if ( isset( $value->response[ $plugin ] ) ) {{ $value->response[ $plugin ]->package = $package; }}
+		}}
+	}}
+	return $value;
+}}, 30 );"""
+		php = f"""<?php
+$keep = {keep_php};
+$keep_lock = {"true" if keep_lock else "false"};
+if ( $keep ) {{
+	add_filter( 'site_transient_update_plugins', static function ( $value ) use ( $keep ) {{
+		if ( ! is_object( $value ) ) {{ return $value; }}
+		if ( isset( $value->response ) && is_array( $value->response ) ) {{
+			foreach ( array_keys( $value->response ) as $key ) {{
+				if ( ! in_array( $key, $keep, true ) ) {{ unset( $value->response[ $key ] ); }}
+			}}
+		}}
+		$value->translations = array();
+		return $value;
+	}}, 20 );
+	add_filter( 'site_transient_update_themes', static function ( $value ) {{
+		if ( is_object( $value ) && isset( $value->response ) ) {{ $value->response = array(); }}
+		return $value;
+	}}, 20 );
+	add_filter( 'site_transient_update_core', static function ( $value ) {{
+		if ( is_object( $value ) && isset( $value->updates ) ) {{ $value->updates = array(); }}
+		return $value;
+	}}, 20 );
+}}
+{disable_php}
+{override_php}
+{fail_php}
+$mail_file = WP_CONTENT_DIR . '/testbook-mail.log';
+$before    = get_plugins();
+$trace     = array();
+for ( $request = 1; $request <= {int(max_requests)}; $request++ ) {{
+	if ( class_exists( 'Updatronix_Update_Pass_Gate' ) ) {{ Updatronix_Update_Pass_Gate::reset(); }}
+	if ( class_exists( 'Updatronix_Update_Pass_Runner' ) ) {{ Updatronix_Update_Pass_Runner::reset(); }}
+	if ( class_exists( 'Updatronix_Item_State' ) ) {{ Updatronix_Item_State::reset_cache(); }}
+	wp_clear_scheduled_hook( 'updatronix_pro_update_pass_follow_up' );
+	if ( ! $keep_lock ) {{ delete_option( 'auto_updater.lock' ); }}
+	$mail_before = file_exists( $mail_file ) ? count( file( $mail_file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES ) ) : 0;
+	do_action( 'wp_maybe_auto_update' );
+	if ( class_exists( 'Updatronix_Update_Pass_Runner' ) ) {{ Updatronix_Update_Pass_Runner::finalize(); }}
+	wp_clean_plugins_cache();
+	wp_clean_themes_cache();
+	$after   = get_plugins();
+	$changed = array();
+	foreach ( $after as $file => $data ) {{
+		if ( ! isset( $before[ $file ] ) || (string) ( $before[ $file ]['Version'] ?? '' ) !== (string) ( $data['Version'] ?? '' ) ) {{
+			$changed[] = 'plugin:' . $file;
+		}}
+	}}
+	$themes = array();
+	foreach ( wp_get_themes() as $slug => $theme ) {{ $themes[ $slug ] = (string) $theme->get( 'Version' ); }}
+	$mail_after = file_exists( $mail_file ) ? count( file( $mail_file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES ) ) : 0;
+	$trace[]    = array(
+		'request'  => $request,
+		'changed'  => $changed,
+		'mails'    => $mail_after - $mail_before,
+		'selected' => class_exists( 'Updatronix_Update_Pass_Gate' ) ? (string) ( Updatronix_Update_Pass_Gate::selection()['key'] ?? '' ) : '',
+		'exists'   => class_exists( 'Updatronix_Update_Pass' ) && Updatronix_Update_Pass::exists(),
+	);
+	$before = $after;
+	if ( ! class_exists( 'Updatronix_Update_Pass' ) || ! Updatronix_Update_Pass::exists() ) {{ break; }}
+}}
+$versions = array();
+foreach ( get_plugins() as $file => $data ) {{ $versions[ $file ] = (string) ( $data['Version'] ?? '' ); }}
+$theme_versions = array();
+foreach ( wp_get_themes() as $slug => $theme ) {{ $theme_versions[ $slug ] = (string) $theme->get( 'Version' ); }}
+echo wp_json_encode(
+	array(
+		'trace'          => $trace,
+		'last'           => class_exists( 'Updatronix_Update_Pass' ) ? Updatronix_Update_Pass::get_last_pass() : array(),
+		'versions'       => $versions,
+		'theme_versions' => $theme_versions,
+	)
+);
+"""
+		return self.json_eval( php )
+
+	def seed_pass(
+		self,
+		plugin_ids: list[str],
+		overrides: dict | None = None,
+		second: str = "",
+		target: str = "2.0.0",
+	) -> dict:
+		ids = list( plugin_ids )
+		if second and second not in ids:
+			ids.append( second )
+		php = f"""<?php
+$ids = {php_list(ids)};
+$nodes = array();
+$order = array();
+foreach ( $ids as $id ) {{
+	$key = 'plugin:' . $id;
+	$order[] = $key;
+	$nodes[ $key ] = array(
+		'type'         => 'plugin',
+		'id'           => $id,
+		'target'       => {php_list([target])}[0],
+		'state'        => Updatronix_Update_Pass::STATE_OFFER_ELIGIBLE,
+		'predecessors' => array(),
+		'waiting_for'  => '',
+		'eligible_at'  => 0,
+		'attempts'     => 0,
+		'reason'       => '',
+		'reason_code'  => '',
+		'from'         => '1.0.0',
+	);
+}}
+$args = array_merge(
+	array(
+		'pass_id'        => str_repeat( 'd', 32 ),
+		'started_at'     => '2026-10-29 10:00:00',
+		'next_check_at'  => time() + 3600,
+		'last_heartbeat' => time(),
+	),
+	json_decode( '{php_json(overrides or {})}', true )
+);
+$pass = Updatronix_Update_Pass::create( $order, $nodes, $args );
+echo wp_json_encode( array( 'created' => null !== $pass, 'data' => null !== $pass ? $pass->data() : array() ) );
+"""
+		return self.json_eval( php )
+
+	def install_target( self, slug: str, version: str ) -> Path:
+		directory = self.path / "wp-content/plugins" / slug
+		directory.mkdir( parents=True, exist_ok=True )
+		file = directory / f"{slug}.php"
+		file.write_text(
+			f"<?php\n/*\nPlugin Name: {slug}\nVersion: {version}\nRequires PHP: 8.0\n*/\n",
+			encoding="utf-8",
+		)
+		return file
+
+	def remove_plugin( self, slug: str ) -> None:
+		self._remove_path( self.path / "wp-content/plugins" / slug )
 
 	def get_flow_chains( self ) -> list[dict]:
 		return self.json_eval(
