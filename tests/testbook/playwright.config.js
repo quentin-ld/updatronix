@@ -12,6 +12,8 @@ module.exports = defineConfig( {
 	globalSetup:
 		require.resolve( '@wordpress/scripts/config/playwright/global-setup.js' ),
 	testDir: path.join( __dirname, 'playwright' ),
+	// routes/ and schedule/ have their own configs; do not run them twice.
+	testIgnore: [ '**/routes/**', '**/schedule/**' ],
 	fullyParallel: false,
 	forbidOnly: !! process.env.CI,
 	retries: 0,
