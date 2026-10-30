@@ -12,13 +12,18 @@ from .dimensions import _a11y_metrics, _run_playwright
 from .live import (
 	PLUGIN_ALPHA,
 	PLUGIN_BROKEN,
+	PLUGIN_INCOMPATIBLE,
 	item_rows,
+	mail,
 	ok,
 	pass_rows,
 	pump,
 	reset_item,
 	version,
 )
+from .shield import shield_notify_matrix
+from .vlock import label_matrix
+from .export_dims import export_columns, export_empty, export_format, export_merge
 
 WHITE_LABEL = "/updatronix-pro/v1/white-label"
 
@@ -788,6 +793,583 @@ echo wp_json_encode(
 	return base_observation( site.observe() ), state
 
 
+def _shield_get( site: Site, route: str, params: dict | None = None ) -> dict:
+	return site.json_eval(
+		f"""<?php
+$user = get_user_by( 'login', 'testbook' );
+if ( $user ) {{ wp_set_current_user( $user->ID ); }}
+$request = new WP_REST_Request( 'GET', '{route}' );
+$params  = json_decode( '{php_json(params or {})}', true );
+foreach ( $params as $key => $value ) {{ $request->set_param( $key, $value ); }}
+$response = rest_do_request( $request );
+$data     = $response->get_data();
+echo wp_json_encode( array( 'status' => $response->get_status(), 'data' => $data ) );
+"""
+	)
+
+
+def _shield_save( site: Site, values: dict ) -> dict:
+	return site.rest( "POST", "/updatronix-pro/v1/shield/settings", values, login="testbook" )
+
+
+def shield_blocked_history( site: Site ) -> tuple[dict, dict]:
+	"""TB-SHIELD-101: the 30-day window, empty, and paginated history."""
+	reset_item( site )
+	site.set_shield( { "safe_mode": True } )
+	seeded = site.json_eval(
+		r"""<?php
+global $wpdb;
+$table = Updatronix_Database::get_table_name();
+$make  = static function ( string $name, string $when ) use ( $wpdb, $table ): int {
+	$id = Updatronix_Logger::log_event(
+		array(
+			'log_type'       => 'plugin',
+			'action_type'    => 'incompatible',
+			'item_name'      => $name,
+			'item_slug'      => 'tb/' . sanitize_key( $name ) . '.php',
+			'version_before' => '1.0.0',
+			'target_version' => '2.0.0',
+			'status'         => 'warning',
+			'message'        => $name,
+			'performed_as'   => 'automatic',
+			'reason_code'    => 'shield_incompatible_php',
+			'decision_state' => 'blocked',
+			'origin'         => 'automatic',
+			'decision_stage' => 'policy',
+		)
+	);
+	$wpdb->query( $wpdb->prepare( "UPDATE %i SET created_at = %s WHERE id = %d", $table, $when, $id ) );
+	return $id;
+};
+$recent = $make( 'TB shield recent', wp_date( 'Y-m-d H:i:s', time() - DAY_IN_SECONDS ) );
+$old    = $make( 'TB shield old', wp_date( 'Y-m-d H:i:s', time() - 40 * DAY_IN_SECONDS ) );
+for ( $i = 1; $i <= 55; $i++ ) {
+	$make( 'TB shield many ' . $i, wp_date( 'Y-m-d H:i:s', time() - $i * HOUR_IN_SECONDS ) );
+}
+echo wp_json_encode( array( 'recent' => $recent, 'old' => $old ) );
+"""
+	)
+	first = _shield_get( site, "/updatronix-pro/v1/shield/blocked", { "per_page": 50, "page": 1 } )
+	ok( first["status"] == 200, f"the blocked history failed: {first}" )
+	ok( int( first["data"]["total"] ) == 56, f"the 30-day total is {first['data']['total']}" )
+	ok( len( first["data"]["items"] ) == 50, f"page one returned {len(first['data']['items'])}" )
+	items = { str( item.get( "item" ) ) for item in first["data"]["items"] }
+	ok( "TB shield old" not in items, "the 40-day-old block is inside the 30-day window" )
+	second = _shield_get( site, "/updatronix-pro/v1/shield/blocked", { "per_page": 50, "page": 2 } )
+	ok( len( second["data"]["items"] ) == 6, f"page two returned {len(second['data']['items'])}" )
+
+	site.eval_php( "<?php Updatronix_Logger::delete_all_logs(); echo 'ok';" )
+	empty = _shield_get( site, "/updatronix-pro/v1/shield/blocked" )
+	ok( empty["status"] == 200 and int( empty["data"]["total"] ) == 0, f"the empty history is {empty}" )
+	ok( empty["data"]["items"] == [], f"the empty history returned items: {empty}" )
+	return base_observation( site.observe() ), { "first": first["data"]["total"], "second": len( second["data"]["items"] ), "seeded": seeded }
+
+
+def shield_flag_abandoned( site: Site ) -> tuple[dict, dict]:
+	"""TB-SHIELD-104: abandoned flags only surface while the switch is on."""
+	reset_item( site )
+	key = "fixture-abandoned/fixture-abandoned.php"
+	site.json_eval(
+		f"""<?php
+$cache = array(
+	'{key}' => array(
+		'last_updated' => gmdate( 'Y-m-d H:i:s', time() - 800 * DAY_IN_SECONDS ),
+		'checked_at'   => time(),
+	),
+);
+set_site_transient( Updatronix_Abandoned_Detector::CACHE_KEY, $cache, DAY_IN_SECONDS );
+wp_cache_flush();
+echo wp_json_encode( array( 'ok' => true ) );
+"""
+	)
+	on = _shield_save( site, { "flag_abandoned": True } )
+	ok( on["status"] == 200, f"the shield save failed: {on}" )
+	on_data = site.rest( "GET", "/updatronix-pro/v1/shield/settings", login="testbook" )
+	ok( on_data["data"]["flag_abandoned"] is True, f"the switch is {on_data['data']['flag_abandoned']}" )
+	abandoned = on_data["data"]["shield_status"]["abandoned"]
+	ok( key in abandoned, f"the abandoned fixture is not flagged: {abandoned}" )
+	ok( int( abandoned[key]["days"] ) >= 30, f"the abandoned age is {abandoned[key]['days']} days" )
+
+	off = _shield_save( site, { "flag_abandoned": False } )
+	ok( off["status"] == 200, f"the disable save failed: {off}" )
+	off_data = site.rest( "GET", "/updatronix-pro/v1/shield/settings", login="testbook" )
+	ok( off_data["data"]["flag_abandoned"] is False, f"the switch stayed on: {off_data['data']['flag_abandoned']}" )
+	ok( off_data["data"]["shield_status"]["abandoned"] == [], f"abandoned flags survived the switch: {off_data['data']['shield_status']['abandoned']}" )
+	return base_observation( site.observe() ), { "on": on_data["data"]["shield_status"]["abandoned"], "off": off_data["data"]["shield_status"]["abandoned"] }
+
+
+def shield_notify_email( site: Site ) -> tuple[dict, dict]:
+	"""TB-SHIELD-106: the email switch decides the blocked mail."""
+	reset_item( site )
+	site.set_shield(
+		{
+			"safe_mode": True,
+			"version_control_lock": False,
+			"control_php_version": True,
+			"control_wp_version": False,
+			"incompatible_behavior": "cancel",
+			"re_enable": False,
+			"notify_on_block": True,
+			"notify_email": "testbook@example.test",
+		}
+	)
+	result, obs = pump( site, [ PLUGIN_INCOMPATIBLE ], max_requests=2 )
+	on_mail = mail( site, obs )
+	ok( version( result, PLUGIN_INCOMPATIBLE ) == "1.0.0", "the incompatible item installed" )
+	ok( bool( on_mail ), "notify_email produced no mail" )
+	ok( any( "testbook@example.test" in str( entry.get( "to" ) ) for entry in on_mail ), f"the mail recipient is {on_mail}" )
+
+	reset_item( site )
+	site.set_shield(
+		{
+			"safe_mode": True,
+			"version_control_lock": False,
+			"control_php_version": True,
+			"control_wp_version": False,
+			"incompatible_behavior": "cancel",
+			"re_enable": False,
+			"notify_on_block": True,
+			"notify_email": False,
+		}
+	)
+	off_result, off_obs = pump( site, [ PLUGIN_INCOMPATIBLE ], max_requests=2 )
+	off_mail = mail( site, off_obs )
+	ok( version( off_result, PLUGIN_INCOMPATIBLE ) == "1.0.0", "the block was lost with the mail off" )
+	ok( not off_mail, f"notify_email false still mailed: {off_mail}" )
+	return base_observation( off_obs ), { "on": len( on_mail ), "off": len( off_mail ) }
+
+
+def shield_notify_on_block( site: Site ) -> tuple[dict, dict]:
+	"""TB-SHIELD-107: the block-event switch decides the mail."""
+	return shield_notify_matrix( site )
+
+
+def shield_re_enable( site: Site ) -> tuple[dict, dict]:
+	"""TB-SHIELD-108: a passing release restores the native toggle only when on."""
+	reset_item( site )
+	site.set_shield(
+		{
+			"safe_mode": True,
+			"version_control_lock": False,
+			"control_php_version": True,
+			"control_wp_version": False,
+			"incompatible_behavior": "disable",
+			"re_enable": True,
+			"notify_on_block": False,
+		}
+	)
+	site.set_auto_update( plugins=[ PLUGIN_INCOMPATIBLE ] )
+	site.pump_pass( keep=[ PLUGIN_INCOMPATIBLE ], max_requests=2 )
+	ok( PLUGIN_INCOMPATIBLE not in site.auto_update_plugins(), "the disable behavior kept the toggle" )
+	ledger = site.json_eval(
+		"<?php echo wp_json_encode( Updatronix_Shield_Ledger::all() );"
+	)
+	ok( bool( ledger ), f"the block was not recorded in the ledger: {ledger}" )
+
+	on = site.json_eval(
+		r"""<?php
+add_filter( 'site_transient_update_plugins', static function ( $value ) {
+	if ( is_object( $value ) && isset( $value->response['fixture-incompatible/fixture-incompatible.php'] ) ) {
+		$value->response['fixture-incompatible/fixture-incompatible.php']->requires_php = '8.0';
+		$value->response['fixture-incompatible/fixture-incompatible.php']->new_version  = '2.0.1';
+	}
+	return $value;
+}, 50 );
+wp_cache_flush();
+$count = Updatronix_Shield_Enforcement::maybe_reenable();
+echo wp_json_encode( array( 'count' => $count, 'auto' => get_option( 'auto_update_plugins', array() ), 'ledger' => Updatronix_Shield_Ledger::all() ) );
+"""
+	)
+	ok( on["count"] == 1, f"the re-enable count is {on['count']}" )
+	ok( PLUGIN_INCOMPATIBLE in ( on["auto"] or [] ), f"the toggle was not restored: {on['auto']}" )
+	ok( not on["ledger"], f"the ledger entry survived: {on['ledger']}" )
+
+	reset_item( site )
+	site.set_shield(
+		{
+			"safe_mode": True,
+			"version_control_lock": False,
+			"control_php_version": True,
+			"control_wp_version": False,
+			"incompatible_behavior": "disable",
+			"re_enable": False,
+			"notify_on_block": False,
+		}
+	)
+	site.set_auto_update( plugins=[ PLUGIN_INCOMPATIBLE ] )
+	site.pump_pass( keep=[ PLUGIN_INCOMPATIBLE ], max_requests=2 )
+	off = site.json_eval(
+		r"""<?php
+add_filter( 'site_transient_update_plugins', static function ( $value ) {
+	if ( is_object( $value ) && isset( $value->response['fixture-incompatible/fixture-incompatible.php'] ) ) {
+		$value->response['fixture-incompatible/fixture-incompatible.php']->requires_php = '8.0';
+		$value->response['fixture-incompatible/fixture-incompatible.php']->new_version  = '2.0.1';
+	}
+	return $value;
+}, 50 );
+wp_cache_flush();
+$count = Updatronix_Shield_Enforcement::maybe_reenable();
+echo wp_json_encode( array( 'count' => $count, 'auto' => get_option( 'auto_update_plugins', array() ) ) );
+"""
+	)
+	ok( off["count"] == 0, f"the disabled re-enable ran: {off}" )
+	ok( PLUGIN_INCOMPATIBLE not in ( off["auto"] or [] ), f"the toggle was restored with the switch off: {off['auto']}" )
+	return base_observation( site.observe() ), { "on": on, "off": off }
+
+
+def flow_chain_count( site: Site ) -> tuple[dict, dict]:
+	"""TB-FLOW-101: twenty chains fit and twenty-one are reported."""
+	reset_item( site )
+	state = site.json_eval(
+		r"""<?php
+$make = static function ( int $count ): array {
+	$chains = array();
+	for ( $i = 0; $i < $count; $i++ ) {
+		$chains[] = array(
+			'id'      => 'tb-chain-' . $i,
+			'name'    => 'TB chain ' . $i,
+			'enabled' => true,
+			'steps'   => array( 'plugin:fixture-alpha/fixture-alpha.php', 'plugin:fixture-bravo/fixture-bravo.php' ),
+		);
+	}
+	return $chains;
+};
+$twenty = Updatronix_Update_Flow::validate_chains( $make( 20 ) );
+$twenty_one = Updatronix_Update_Flow::validate_chains( $make( 21 ) );
+$saved = Updatronix_Update_Flow::validate_chains( $make( 3 ) );
+update_site_option( Updatronix_Update_Flow::OPTION, array( 'version' => 1, 'chains' => $saved ) );
+echo wp_json_encode(
+	array(
+		'twenty'     => is_wp_error( $twenty ) ? $twenty->get_error_code() : count( $twenty ),
+		'twenty_one' => is_wp_error( $twenty_one ) ? $twenty_one->get_error_code() : count( $twenty_one ),
+		'saved'      => count( Updatronix_Update_Flow::get_saved_chains() ),
+	)
+);
+"""
+	)
+	ok( state["twenty"] == 20, f"twenty chains failed: {state}" )
+	ok( state["twenty_one"] == "flow_chain_limit", f"twenty-one chains: {state['twenty_one']}" )
+	ok( state["saved"] == 3, f"the saved chains are {state['saved']}" )
+	return base_observation( site.observe() ), state
+
+
+def flow_chain_enabled( site: Site ) -> tuple[dict, dict]:
+	"""TB-FLOW-102: only enabled chains shape the plan."""
+	reset_item( site )
+	state = site.json_eval(
+		r"""<?php
+$chains = array(
+	array(
+		'id'      => 'tb-enabled',
+		'name'    => 'Enabled chain',
+		'enabled' => true,
+		'steps'   => array( 'plugin:fixture-alpha/fixture-alpha.php', 'plugin:fixture-bravo/fixture-bravo.php' ),
+	),
+	array(
+		'id'      => 'tb-disabled',
+		'name'    => 'Disabled chain',
+		'enabled' => false,
+		'steps'   => array( 'theme:fixture-theme', 'plugin:fixture-alpha/fixture-alpha.php' ),
+	),
+);
+$clean = Updatronix_Update_Flow::validate_chains( $chains );
+update_site_option( Updatronix_Update_Flow::OPTION, array( 'version' => 1, 'chains' => $clean ) );
+$saved = Updatronix_Update_Flow::get_saved_chains();
+$all   = ( new Updatronix_Flow_Planner() )->plan( array( 'origin' => 'flow', 'enabled_only' => false ) );
+$on    = ( new Updatronix_Flow_Planner() )->plan( array( 'origin' => 'flow', 'enabled_only' => true ) );
+echo wp_json_encode(
+	array(
+		'saved'   => array_map( static fn( $chain ) => array( 'id' => $chain['id'], 'enabled' => $chain['enabled'] ), $saved ),
+		'all'     => count( $all->flow_edges ),
+		'enabled' => count( $on->flow_edges ),
+		'ids'     => array_keys( $on->flow_snapshot ),
+	)
+);
+"""
+	)
+	saved = { chain["id"]: chain["enabled"] for chain in state["saved"] }
+	ok( saved.get( "tb-enabled" ) is True and saved.get( "tb-disabled" ) is False, f"the flags are {saved}" )
+	ok( state["enabled"] < state["all"], f"the disabled chain still shapes the enabled plan: {state}" )
+	ok( state["enabled"] >= 1, f"the enabled chain produced no edge: {state}" )
+	return base_observation( site.observe() ), state
+
+
+def flow_step_count( site: Site ) -> tuple[dict, dict]:
+	"""TB-FLOW-106: fifty steps fit and fifty-one are reported."""
+	reset_item( site )
+	state = site.json_eval(
+		r"""<?php
+$steps = array();
+for ( $i = 1; $i <= 50; $i++ ) {
+	$steps[] = 'plugin:fixture-step-' . $i . '/fixture-step-' . $i . '.php';
+}
+$fifty = Updatronix_Update_Flow::validate_chains(
+	array( array( 'id' => 'tb-steps', 'name' => 'Steps', 'enabled' => true, 'steps' => $steps ) )
+);
+$over = Updatronix_Update_Flow::validate_chains(
+	array( array( 'id' => 'tb-steps-over', 'name' => 'Steps over', 'enabled' => true, 'steps' => array_merge( $steps, array( 'plugin:fixture-alpha/fixture-alpha.php' ) ) ) )
+);
+$short = Updatronix_Update_Flow::validate_chains(
+	array( array( 'id' => 'tb-short', 'name' => 'Short', 'enabled' => true, 'steps' => array( 'plugin:fixture-alpha/fixture-alpha.php' ) ) )
+);
+echo wp_json_encode(
+	array(
+		'fifty' => is_wp_error( $fifty ) ? $fifty->get_error_code() : count( $fifty[0]['steps'] ),
+		'over'  => is_wp_error( $over ) ? $over->get_error_code() : count( $over[0]['steps'] ),
+		'short' => is_wp_error( $short ) ? array( 'code' => $short->get_error_code(), 'data' => $short->get_error_data() ) : count( $short[0]['steps'] ),
+	)
+);
+"""
+	)
+	ok( state["fifty"] == 50, f"fifty steps failed: {state['fifty']}" )
+	ok( state["over"] == "flow_step_limit", f"fifty-one steps: {state['over']}" )
+	short = state["short"]
+	short_code = short["code"] if isinstance( short, dict ) else short
+	ok( short_code == "flow_steps_min", f"a one-step chain: {short}" )
+	return base_observation( site.observe() ), state
+
+
+def license_lifecycle( site: Site ) -> tuple[dict, dict]:
+	"""TB-LIC-101: activate, deactivate, clear, and revalidate."""
+	reset_item( site )
+	key = "UPD-PRO-ABCDEFGH-IJKLMNOP-QRSTUVWX"
+	active = site.json_eval(
+		f"""<?php
+$saved = Updatronix_Pro_License_Storage::save_license_data(
+	array(
+		'license_key'       => '{key}',
+		'status'            => 'active',
+		'registered_domain' => wp_parse_url( home_url(), PHP_URL_HOST ),
+		'last_checked'      => time(),
+	)
+);
+echo wp_json_encode(
+	array(
+		'saved'   => $saved,
+		'active'  => Updatronix_Pro_Bootstrap::is_license_active(),
+		'valid'   => ( new Updatronix_Pro_License_Handler() )->is_license_valid(),
+		'masked'  => Updatronix_Pro_License_Storage::mask_license_key( Updatronix_Pro_License_Storage::get_license_data()['license_key'] ),
+		'pro_routes' => count( array_filter( array_keys( rest_get_server()->get_routes() ), static fn( $route ) => 0 === strpos( $route, '/updatronix-pro/v1/' ) ) ),
+	)
+);
+"""
+	)
+	ok( active["saved"] is True, f"the license was not saved: {active}" )
+	ok( active["active"] is True and active["valid"] is True, f"the license is not active/valid: {active}" )
+	ok( active["masked"].startswith( "UPD-PRO-" ) and key not in active["masked"], f"the key is not masked: {active['masked']}" )
+	ok( int( active["pro_routes"] ) > 0, "no Pro routes registered with an active license" )
+
+	status = _shield_get( site, "/updatronix-pro/v1/license/status" )
+	ok( status["status"] == 200 and status["data"]["status"] == "active", f"the status route is {status}" )
+
+	deactivated = site.json_eval(
+		"""<?php
+$saved = Updatronix_Pro_License_Storage::save_license_data( array( 'status' => 'inactive' ) );
+echo wp_json_encode( array( 'saved' => $saved, 'active' => Updatronix_Pro_Bootstrap::is_license_active() ) );
+"""
+	)
+	ok( deactivated["active"] is False, f"the inactive license is still active: {deactivated}" )
+	off_status = _shield_get( site, "/updatronix-pro/v1/license/status" )
+	ok( off_status["data"]["status"] == "inactive", f"the inactive status is {off_status}" )
+
+	cleared = site.json_eval(
+		"""<?php
+$deleted = Updatronix_Pro_License_Storage::delete_license_data();
+$data    = Updatronix_Pro_License_Storage::get_license_data();
+echo wp_json_encode( array( 'deleted' => $deleted, 'status' => $data['status'], 'key' => $data['license_key'], 'encrypted' => $data['encrypted_key'] ) );
+"""
+	)
+	ok( cleared["status"] == "inactive" and cleared["key"] == "" and cleared["encrypted"] == "", f"the cleared license is {cleared}" )
+	return base_observation( site.observe() ), { "active": active, "deactivated": deactivated, "cleared": cleared }
+
+
+def license_salt_throttle( site: Site ) -> tuple[dict, dict]:
+	"""TB-LIC-002: salt rotation, clear, throttle, and revalidate."""
+	reset_item( site )
+	rotated = site.json_eval(
+		r"""<?php
+update_site_option(
+	UPDATRONIX_PRO_OPTION_LICENSE,
+	array(
+		'encrypted_key'     => 'not-a-valid-ciphertext',
+		'status'            => 'active',
+		'registered_domain' => wp_parse_url( home_url(), PHP_URL_HOST ),
+		'last_checked'      => time(),
+	)
+);
+$data = Updatronix_Pro_License_Storage::get_license_data();
+echo wp_json_encode(
+	array(
+		'error'  => Updatronix_Pro_License_Storage::has_decryption_error(),
+		'status' => $data['status'],
+		'key'    => $data['license_key'],
+		'active' => Updatronix_Pro_Bootstrap::is_license_active(),
+	)
+);
+"""
+	)
+	ok( rotated["error"] is True, f"the rotated salt was not detected: {rotated}" )
+	ok( rotated["status"] == "inactive" and rotated["key"] == "", f"the rotated key is still readable: {rotated}" )
+	ok( rotated["active"] is False, "Pro is active after a salt rotation" )
+
+	cleared = site.json_eval(
+		"""<?php
+$saved = Updatronix_Pro_License_Storage::save_license_data( array( 'license_key' => '' ) );
+$data  = Updatronix_Pro_License_Storage::get_license_data();
+echo wp_json_encode( array( 'saved' => $saved, 'encrypted' => $data['encrypted_key'] ) );
+"""
+	)
+	ok( cleared["saved"] is True and cleared["encrypted"] == "", f"the key was not cleared: {cleared}" )
+
+	throttled = site.json_eval(
+		"""<?php
+set_site_transient( 'updatronix_pro_activation_throttle', time(), HOUR_IN_SECONDS );
+wp_set_current_user( get_user_by( 'login', 'testbook' )->ID );
+$request = new WP_REST_Request( 'POST', '/updatronix-pro/v1/license/activate' );
+$request->set_param( 'license_key', 'UPD-PRO-ABCDEFGH-IJKLMNOP-QRSTUVWX' );
+$response = rest_do_request( $request );
+delete_site_transient( 'updatronix_pro_activation_throttle' );
+echo wp_json_encode( array( 'status' => $response->get_status(), 'data' => $response->get_data() ) );
+"""
+	)
+	ok( throttled["status"] == 429, f"the throttled activation returned {throttled['status']}" )
+	ok( "throttle" in str( throttled["data"] ).lower() or "wait" in str( throttled["data"] ).lower(), f"the throttle copy is {throttled['data']}" )
+
+	revalidated = site.json_eval(
+		f"""<?php
+Updatronix_Pro_License_Storage::save_license_data(
+	array(
+		'license_key'       => 'UPD-PRO-ABCDEFGH-IJKLMNOP-QRSTUVWX',
+		'status'            => 'active',
+		'registered_domain' => wp_parse_url( home_url(), PHP_URL_HOST ),
+		'last_checked'      => time(),
+	)
+);
+echo wp_json_encode( array( 'valid' => ( new Updatronix_Pro_License_Handler() )->is_license_valid() ) );
+"""
+	)
+	ok( revalidated["valid"] is True, f"the license did not revalidate: {revalidated}" )
+	return base_observation( site.observe() ), { "rotated": rotated, "cleared": cleared, "throttled": throttled, "revalidated": revalidated }
+
+
+def pro_export_formats( site: Site ) -> tuple[dict, dict]:
+	"""TB-PRO-008: Pro adds csv/json/xml only while the license is active."""
+	reset_item( site )
+	active = site.json_eval( "<?php echo wp_json_encode( array( 'offered' => updatronix_get_export_formats(), 'server' => updatronix_get_server_export_formats() ) );" )
+	ok( active["offered"] == [ "txt", "csv", "json", "xml" ], f"the Pro formats are {active['offered']}" )
+	ok( active["server"] == [ "txt", "json" ], f"the server formats are {active['server']}" )
+
+	site.set_license( "inactive" )
+	try:
+		off = site.json_eval( "<?php echo wp_json_encode( array( 'offered' => updatronix_get_export_formats(), 'server' => updatronix_get_server_export_formats() ) );" )
+	finally:
+		site.set_license( "active", "TB-FIXTURE-KEY" )
+	ok( off["offered"] == [ "txt" ], f"Pro formats are offered without a license: {off['offered']}" )
+	ok( off["server"] == [ "txt" ], f"the server accepts a structured format without a license: {off['server']}" )
+
+	data, detail = export_format( site )
+	return data, { **detail, "active": active, "inactive": off }
+
+
+def export_surface_matrix( site: Site ) -> tuple[dict, dict]:
+	"""TB-EXPORT-001: formats, columns, and merge through one flow."""
+	_, formats = export_format( site )
+	_, columns = export_columns( site )
+	data, merge = export_merge( site )
+	return data, { "formats": formats, "columns": columns, "merge": merge }
+
+
+def export_empty_matrix( site: Site ) -> tuple[dict, dict]:
+	"""TB-EXPORT-002: the empty, expired, rate-limited, and chunked states."""
+	return export_empty( site )
+
+
+def _flow_surface( site: Site ) -> dict:
+	links_path = f".cache/testbook/links-{site.name}-flow.json"
+	a11y_path = f".cache/testbook/a11y-{site.name}-flow.json"
+	_run_playwright(
+		site,
+		"tests/testbook/playwright-surfaces.config.js",
+		{
+			"TESTBOOK_SURFACE": "flow",
+			"TESTBOOK_A11Y_PATH": a11y_path,
+			"TESTBOOK_LINKS_PATH": links_path,
+		},
+	)
+	target = ROOT / links_path
+	if not target.exists():
+		raise RuntimeError( f"flow metrics were not written: {links_path}" )
+	return json.loads( target.read_text( encoding="utf-8" ) )
+
+
+def pass_summary_states( site: Site ) -> tuple[dict, dict]:
+	"""TB-PASS-004: absent, completed, and stale/expired summaries."""
+	reset_item( site )
+	absent = _flow_surface( site )
+	ok( "Last pass" not in absent["body"], f"the absent summary still renders: {absent['body'][:400]}" )
+	empty = _pass_state( site )
+	ok( empty["last"] in ( {}, [] ), f"a last pass exists before any run: {empty['last']}" )
+
+	summary = {
+		"pass_id": "0123456789abcdef0123456789abcdef",
+		"started_at": "2026-10-30 10:00:00",
+		"finished_at": "2026-10-30 10:01:00",
+		"status": "completed",
+		"counts": { "total": 2, "done": 2, "failed": 0, "uncertain": 0 },
+		"total": 2,
+		"done": 2,
+		"failed": 0,
+		"uncertain": 0,
+	}
+	site.json_eval(
+		f"""<?php
+Updatronix_Update_Pass::cache_last_pass( json_decode( '{php_json(summary)}', true ) );
+echo wp_json_encode( array( 'ok' => true ) );
+"""
+	)
+	completed = _flow_surface( site )
+	lower = completed["body"].lower()
+	ok( "last pass" in lower, f"the completed summary is missing: {completed['body'][:400]}" )
+	ok( "completed" in lower, f"the completed status is missing: {completed['body'][:400]}" )
+	ok( "0123456789abcdef0123456789abcdef" in completed["body"] or "0123456789" in completed["body"], "the pass id is missing from the card" )
+	ok( "run now" not in lower, "the Last pass card offers a Run now control" )
+
+	expired = site.json_eval(
+		r"""<?php
+Updatronix_Update_Pass::create(
+	array( 'plugin:fixture-alpha/fixture-alpha.php' ),
+	array(
+		'plugin:fixture-alpha/fixture-alpha.php' => array(
+			'type' => 'plugin', 'id' => 'fixture-alpha/fixture-alpha.php', 'target' => '2.0.0',
+			'state' => Updatronix_Update_Pass::STATE_OFFER_ELIGIBLE, 'predecessors' => array(),
+			'waiting_for' => '', 'eligible_at' => 0, 'attempts' => 0, 'reason' => '',
+			'reason_code' => '', 'from' => '1.0.0',
+		),
+	),
+	array(
+		'pass_id' => str_repeat( 'f', 32 ), 'started_at' => '2026-10-29 10:00:00',
+		'next_check_at' => time() - 60, 'last_heartbeat' => time() - 3600,
+	)
+);
+$pass = Updatronix_Update_Pass::load();
+$health = Updatronix_Health::get_snapshot( true );
+$state  = array();
+foreach ( $health['checks'] as $check ) {
+	if ( 'pass_state' === $check['id'] ) {
+		$state = $check;
+	}
+}
+echo wp_json_encode( array( 'expired' => null !== $pass ? $pass->is_expired() : null, 'health' => $state, 'last' => Updatronix_Update_Pass::get_last_pass() ) );
+"""
+	)
+	ok( expired["expired"] is True, f"the stale pass did not expire: {expired}" )
+	ok( expired["health"].get( "value" ) == "Idle", f"the stale pass renders as {expired['health'].get('value')}" )
+	ok( expired["last"].get( "pass_id" ) == summary["pass_id"], "the stale pass replaced the last-pass cache" )
+	stale_surface = _flow_surface( site )
+	ok( "last pass" in stale_surface["body"].lower(), "the stale pass hid the completed summary" )
+	return base_observation( site.observe() ), { "absent": absent["body"][:120], "completed": completed["body"][:200], "expired": expired }
+
+
 CASES = [
 	CaseSpec(
 		"TB-UI-010",
@@ -859,6 +1441,126 @@ CASES = [
 		( "single", ),
 		( "INV-08", ),
 		phase="dimensions",
+		reset="state",
+	),
+	CaseSpec(
+		"TB-SHIELD-101",
+		shield_blocked_history,
+		( "single", ),
+		( "INV-08", ),
+		phase="dimensions",
+		reset="state",
+	),
+	CaseSpec(
+		"TB-SHIELD-104",
+		shield_flag_abandoned,
+		( "single", ),
+		( "INV-08", ),
+		phase="dimensions",
+		reset="state",
+	),
+	CaseSpec(
+		"TB-SHIELD-106",
+		shield_notify_email,
+		( "single", ),
+		( "INV-08", ),
+		phase="dimensions",
+		reset="full",
+	),
+	CaseSpec(
+		"TB-SHIELD-107",
+		shield_notify_on_block,
+		( "single", ),
+		( "INV-08", ),
+		phase="dimensions",
+		reset="full",
+	),
+	CaseSpec(
+		"TB-SHIELD-108",
+		shield_re_enable,
+		( "single", ),
+		( "INV-08", ),
+		phase="dimensions",
+		reset="full",
+	),
+	CaseSpec(
+		"TB-FLOW-101",
+		flow_chain_count,
+		( "single", ),
+		( "INV-08", ),
+		phase="dimensions",
+		reset="state",
+	),
+	CaseSpec(
+		"TB-FLOW-102",
+		flow_chain_enabled,
+		( "single", ),
+		( "INV-08", ),
+		phase="dimensions",
+		reset="state",
+	),
+	CaseSpec(
+		"TB-FLOW-106",
+		flow_step_count,
+		( "single", ),
+		( "INV-08", ),
+		phase="dimensions",
+		reset="state",
+	),
+	CaseSpec(
+		"TB-VLOCK-103",
+		label_matrix,
+		( "single", ),
+		( "INV-08", ),
+		phase="dimensions",
+		reset="state",
+	),
+	CaseSpec(
+		"TB-LIC-101",
+		license_lifecycle,
+		( "single", ),
+		( "INV-08", ),
+		phase="dimensions",
+		reset="state",
+	),
+	CaseSpec(
+		"TB-LIC-002",
+		license_salt_throttle,
+		( "single", ),
+		( "INV-08", ),
+		phase="dimensions",
+		reset="state",
+	),
+	CaseSpec(
+		"TB-PRO-008",
+		pro_export_formats,
+		( "single", ),
+		( "INV-08", ),
+		phase="dimensions",
+		reset="state",
+	),
+	CaseSpec(
+		"TB-EXPORT-001",
+		export_surface_matrix,
+		( "single", ),
+		( "INV-08", ),
+		phase="dimensions",
+		reset="state",
+	),
+	CaseSpec(
+		"TB-EXPORT-002",
+		export_empty_matrix,
+		( "single", ),
+		( "INV-08", ),
+		phase="dimensions",
+		reset="state",
+	),
+	CaseSpec(
+		"TB-PASS-004",
+		pass_summary_states,
+		( "single", ),
+		( "INV-08", ),
+		phase="pass",
 		reset="state",
 	),
 	CaseSpec(

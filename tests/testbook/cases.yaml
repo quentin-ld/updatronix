@@ -324,7 +324,7 @@ flow_cases:
     steps: [Seed a completed pass, a stale pass, and an expired pass.]
     assertions: [The card is read-only; a stale/expired pass is not shown as active; “No pass summary” when absent.]
     oracle: [pass, ui]
-    automation: planned
+    automation: implemented
 
   - id: TB-FLOW-001
     title: Day-1 and day-2 ordering
@@ -412,7 +412,7 @@ flow_cases:
     steps: [Export txt, csv, json, and xml with merge on/off and decision context on/off.]
     assertions: [The format is real; columns match; the feed total and export total agree; decision context is opt-in.]
     oracle: [export, log]
-    automation: planned
+    automation: implemented
 
   - id: TB-EXPORT-002
     title: Empty, expired, rate-limited, chunked
@@ -423,7 +423,7 @@ flow_cases:
     steps: [Export an empty filter, wait past expiry, exceed the rate limit, continue a chunked export.]
     assertions: [Each state has a truthful message; no partial row is lost; no data leak.]
     oracle: [export, http]
-    automation: planned
+    automation: implemented
 
   - id: TB-SHIELD-001
     title: Safe Mode off and on
@@ -500,7 +500,7 @@ flow_cases:
     steps: [Rotate salts, clear the key, throttle activation, revalidate.]
     assertions: [The notice is truthful; the key can be cleared; the throttle is respected; no fatal.]
     oracle: [ui, options, http]
-    automation: planned
+    automation: implemented
 
   - id: TB-WL-001
     title: White Label save, reset, logo, sanitize

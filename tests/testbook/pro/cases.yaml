@@ -93,4 +93,4 @@ cases:
     steps: [Download CSV, JSON, and XML from the log export with decision context on and off.]
     assertions: [The files are real and parse; columns match; the feed total agrees.]
     oracle: [export, log]
-    automation: planned
+    automation: implemented

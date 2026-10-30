@@ -1026,7 +1026,7 @@ cases:
   oracle:
   - ui
   - integration
-  automation: planned
+  automation: implemented
 - id: TB-SHIELD-107
   title: 'Dimension: Notify the technical manager on block (pro.shield.notify_on_block)'
   owner: pro
@@ -1050,7 +1050,7 @@ cases:
   oracle:
   - ui
   - integration
-  automation: planned
+  automation: implemented
 - id: TB-SHIELD-106
   title: 'Dimension: Email the technical manager (pro.shield.notify_email)'
   owner: pro
@@ -1074,7 +1074,7 @@ cases:
   oracle:
   - ui
   - integration
-  automation: planned
+  automation: implemented
 - id: TB-SHIELD-104
   title: 'Dimension: Flag abandoned plugins (pro.shield.flag_abandoned)'
   owner: pro
@@ -1097,7 +1097,7 @@ cases:
   oracle:
   - ui
   - integration
-  automation: planned
+  automation: implemented
 - id: TB-SHIELD-101
   title: 'Dimension: Recently blocked window (pro.shield.blocked_history)'
   owner: pro
@@ -1123,7 +1123,7 @@ cases:
   oracle:
   - ui
   - integration
-  automation: planned
+  automation: implemented
 - id: TB-VLOCK-102
   title: 'Dimension: Version Lock master switch (pro.version_lock.enabled)'
   owner: pro
@@ -1229,7 +1229,7 @@ cases:
   oracle:
   - ui
   - integration
-  automation: planned
+  automation: implemented
 - id: TB-PASS-101
   title: 'Dimension: Automatic update pass enabled (pro.pass.enabled)'
   owner: pro
@@ -1472,7 +1472,7 @@ cases:
   oracle:
   - ui
   - integration
-  automation: planned
+  automation: implemented
 - id: TB-FLOW-102
   title: 'Dimension: Chain enabled (pro.flow.chain_enabled)'
   owner: pro
@@ -1495,7 +1495,7 @@ cases:
   oracle:
   - ui
   - integration
-  automation: planned
+  automation: implemented
 - id: TB-FLOW-106
   title: 'Dimension: Steps per chain (pro.flow.step_count)'
   owner: pro
@@ -1521,7 +1521,7 @@ cases:
   oracle:
   - ui
   - integration
-  automation: planned
+  automation: implemented
 - id: TB-FLOW-103
   title: 'Dimension: Chain shape (pro.flow.chain_shape)'
   owner: pro
@@ -1690,7 +1690,7 @@ cases:
   oracle:
   - ui
   - integration
-  automation: planned
+  automation: implemented
 - id: TB-WL-104
   title: 'Dimension: White Label enabled (pro.white_label.enabled)'
   owner: pro

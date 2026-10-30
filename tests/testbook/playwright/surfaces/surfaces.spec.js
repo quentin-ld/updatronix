@@ -143,7 +143,9 @@ test( `surface: ${ surface }`, async ( { page } ) => {
 	const linksTarget = process.env.TESTBOOK_LINKS_PATH;
 	if (
 		linksTarget &&
-		[ 'documentation', 'support', 'white-label' ].includes( surface )
+		[ 'documentation', 'support', 'white-label', 'flow' ].includes(
+			surface
+		)
 	) {
 		const links = await page
 			.locator( 'a[href]' )
