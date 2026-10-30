@@ -43,6 +43,12 @@ def pass_enabled_matrix( site: Site ) -> tuple[dict, dict]:
 	ok( result["last"].get( "status" ) == "completed", f"pass status is {result['last'].get('status')}" )
 	ok( len( pass_rows( obs ) ) == 1, "expected one pass summary row" )
 	ok( len( mail( site, obs ) ) == 2, "expected two per-item emails" )
+	selected = [ entry.get( "selected" ) for entry in result["trace"] if entry.get( "selected" ) ]
+	ok( len( selected ) == 2, f"expected two native invocations, got {selected}" )
+	alpha_rows = item_rows( obs, [ "fixture-alpha" ], [ "plugin" ] )
+	bravo_rows = item_rows( obs, [ "fixture-bravo" ], [ "plugin" ] )
+	ok( len( alpha_rows ) == 1 and alpha_rows[0].get( "status" ) == "success", f"alpha rows: {alpha_rows}" )
+	ok( len( bravo_rows ) == 1 and bravo_rows[0].get( "status" ) == "success", f"bravo rows: {bravo_rows}" )
 	results.append( { "item": "enabled", "installed": True, "status": "success" } )
 
 	# disabled: the native loop runs both items and groups the mail.
@@ -54,7 +60,7 @@ def pass_enabled_matrix( site: Site ) -> tuple[dict, dict]:
 	ok( len( mail( site, obs ) ) == 1, "the native loop did not group the mail" )
 	results.append( { "item": "disabled", "installed": True, "status": "success" } )
 
-	return observation( results, [ "fixture-alpha", "fixture-bravo" ], [ "fixture-alpha", "fixture-bravo" ], { "fixture-alpha": 1, "fixture-bravo": 1 }, {}, 1 ), {
+	return observation( results, [ "fixture-alpha", "fixture-bravo" ], [ "fixture-alpha", "fixture-bravo" ], { "fixture-alpha": 1, "fixture-bravo": 1 }, { "fixture-alpha": 1, "fixture-bravo": 1 }, 1 ), {
 		"scenarios": results
 	}
 
@@ -629,7 +635,7 @@ CASES = [
 		"TB-PASS-001",
 		pass_enabled_matrix,
 		( "single", ),
-		( "INV-04", "INV-08" ),
+		( "INV-01", "INV-03", "INV-04", "INV-08" ),
 		phase="pass",
 		reset="full",
 	),
