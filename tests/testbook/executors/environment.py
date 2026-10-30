@@ -30,6 +30,7 @@ from . import CaseSpec
 from .live import (
 	PLUGIN_ALPHA,
 	PLUGIN_CORRUPT,
+	PLUGIN_PARTIAL,
 	item_rows,
 	observation,
 	ok,
@@ -135,9 +136,19 @@ def filesystem_failure( site: Site ) -> tuple[dict, dict]:
 	ok( item_rows( obs, [ "fixture-corrupt" ] ), "the invalid zip wrote no row" )
 	results.append( { "item": "invalid_zip", "installed": False, "status": "failed" } )
 
-	return observation( results, [ "fixture-alpha", "fixture-corrupt" ], [], {}, {}, 1, [ "fixture-alpha", "fixture-corrupt" ] ), {
+	# A readme-only package must not delete the installed plugin.
+	reset_item( site )
+	plugin_file = site.path / "wp-content/plugins/fixture-partial/fixture-partial.php"
+	ok( plugin_file.exists(), "the partial fixture is missing before the update" )
+	result, obs = pump( site, [ PLUGIN_PARTIAL ], max_requests=3 )
+	ok( version( result, PLUGIN_PARTIAL ) == "1.0.0", "the readme-only package changed the installed version" )
+	ok( plugin_file.exists(), "the readme-only package deleted the installed plugin file" )
+	ok( not [ row for row in item_rows( obs, [ "fixture-partial" ] ) if row.get( "status" ) == "success" ], "a success row was written for the readme-only package" )
+	results.append( { "item": "partial_write", "installed": False, "status": "failed" } )
+
+	return observation( results, [ "fixture-alpha", "fixture-corrupt", "fixture-partial" ], [], {}, {}, 2, [ "fixture-alpha", "fixture-corrupt", "fixture-partial" ] ), {
 		"scenarios": results,
-		"note": "partial_write and disk_full are the Phase 5 rollback/product work; the probe is documented in the task Log.",
+		"note": "disk_full remains the documented Phase 5 probe; partial_write is guarded by the Free package guard.",
 	}
 
 

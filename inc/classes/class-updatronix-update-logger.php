@@ -28,6 +28,7 @@ final class Updatronix_Update_Logger {
 		add_action( 'upgrader_process_complete', array( self::class, 'on_upgrader_process_complete' ), 10, 2 );
 		add_action( 'automatic_updates_complete', array( self::class, 'log_automatic_updates' ), 10, 1 );
 		add_filter( 'upgrader_pre_install', array( self::class, 'store_core_version_before' ), 5, 2 );
+		add_filter( 'upgrader_source_selection', array( self::class, 'reject_plugin_package_without_plugin_file' ), 5, 4 );
 		add_filter( 'upgrader_package_options', array( self::class, 'initialize_pending_logs' ), 10, 1 );
 		add_filter( 'upgrader_source_selection', array( self::class, 'store_plugin_version_before_upload_overwrite' ), 20, 4 );
 		add_filter( 'upgrader_source_selection', array( self::class, 'store_theme_version_before_upload_overwrite' ), 20, 4 );
@@ -1151,6 +1152,47 @@ final class Updatronix_Update_Logger {
 		}
 
 		return $value;
+	}
+
+	/**
+	 * Reject a plugin package without a plugin file before WordPress clears the
+	 * installed copy.
+	 *
+	 * A readme-only or otherwise incomplete zip makes WordPress delete the
+	 * working plugin and install nothing. Returning a WP_Error here aborts the
+	 * upgrader before `clear_destination()` runs, so the installed version is
+	 * kept and the failure is reported truthfully.
+	 *
+	 * @param string|\WP_Error     $source        Path to the unpacked package source (or WP_Error).
+	 * @param string               $remote_source Remote source (unused).
+	 * @param \WP_Upgrader         $upgrader      Upgrader instance.
+	 * @param array<string, mixed> $hook_extra    hook_extra from the upgrader run.
+	 * @return string|\WP_Error Unchanged source path or an error that aborts the install.
+	 */
+	public static function reject_plugin_package_without_plugin_file( string|\WP_Error $source, string $remote_source, \WP_Upgrader $upgrader, array $hook_extra ): string|\WP_Error {
+		if ( ! is_string( $source ) || '' === $source ) {
+			return $source;
+		}
+		if ( ( $hook_extra['type'] ?? '' ) !== 'plugin' ) {
+			return $source;
+		}
+		if ( ! $upgrader instanceof \Plugin_Upgrader ) {
+			return $source;
+		}
+		$files = glob( trailingslashit( $source ) . '*.php' );
+		if ( ! is_array( $files ) ) {
+			return $source;
+		}
+		foreach ( $files as $file ) {
+			$data = get_file_data( $file, array( 'Name' => 'Plugin Name' ) );
+			if ( ! empty( $data['Name'] ) ) {
+				return $source;
+			}
+		}
+		return new \WP_Error(
+			'updatronix_plugin_package_without_plugin_file',
+			'The update package does not contain a plugin file. The installed version was kept.'
+		);
 	}
 
 	/**
