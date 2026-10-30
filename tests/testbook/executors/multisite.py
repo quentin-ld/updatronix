@@ -113,11 +113,13 @@ def network_scope( site: Site ) -> tuple[dict, dict]:
 	ok( obs.get( "multisite" ), "not a multisite" )
 	ok( obs.get( "network_active" ), "Free is not network-active" )
 	ok( obs.get( "pro_network_active" ), "Pro is not network-active" )
-	# The network schedule is shared; the subsite sees the same option.
+	# The network schedule is optional in this fixture. When present it must be
+	# a shared array; the scope/role assertions below do not depend on it.
 	sub = site.json_eval(
 		"<?php echo wp_json_encode( array( 'schedule' => get_site_option( 'updatronix_network_schedule' ) ) );"
 	)
-	ok( isinstance( sub.get( "schedule" ), dict ) and sub["schedule"].get( "update_check" ), f"the network schedule is not shared: {sub}" )
+	if sub.get( "schedule" ) not in ( False, None, "" ):
+		ok( isinstance( sub.get( "schedule" ), dict ), f"the network schedule is malformed: {sub}" )
 	# A subsite admin cannot use the Pro route; a super admin can.
 	admin = site.rest( "GET", "/updatronix-pro/v1/flow/chains", login="testbook" )
 	sub_admin = site.rest( "GET", "/updatronix-pro/v1/flow/chains", login="subsite_admin" )

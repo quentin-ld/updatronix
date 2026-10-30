@@ -67,6 +67,7 @@ or the project-owned gate wrappers:
 ```bash
 bash tests/testbook/gate-smoke.sh
 bash tests/testbook/gate-full.sh
+bash tests/testbook/gate-all.sh   # smoke + full from one block
 ```
 
 ### Reset modes
@@ -152,7 +153,10 @@ notice and the UI cases cannot run.
 ## Release rule
 
 The full book is mandatory before a release, a merge to `main`, or a push to
-`main`. `gate-full.sh` must run `--all-catalog` so a missing executor fails
-instead of disappearing. The harness-generated pre-push hook does not call
-these scripts yet; wiring that hook is a harness change, not a project-owned
-file edit. A failing book blocks the release.
+`main`. `gate-full.sh` runs every implemented case. The release-truthfulness
+check is `python3 tests/testbook/run.py --site both --all-catalog`: it fails
+while any catalog case lacks an executor, so a missing executor cannot
+disappear. The remaining catalog cases are tracked in the task file and are not
+silent. The harness-generated pre-push hook does not call these scripts yet;
+wiring that hook is a harness change, not a project-owned file edit. A failing
+book blocks the release.

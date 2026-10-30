@@ -15,7 +15,6 @@ if ( class_exists( 'Updatronix_Logger' ) ) {
 
 $options = array(
 	'updatronix_settings',
-	'updatronix_network_schedule',
 	'updatronix_pro_update_pass',
 	'updatronix_pro_last_pass',
 	'updatronix_pro_shield_ledger',
