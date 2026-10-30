@@ -19,7 +19,12 @@ final class HealthRestApiTest extends WP_UnitTestCase {
 	 * @return int User ID.
 	 */
 	private function create_admin(): int {
-		$user_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		$user_id = self::factory()->user->create(
+			array(
+				'role' =>
+				'administrator',
+			)
+		);
 		if ( is_multisite() && function_exists( 'grant_super_admin' ) ) {
 			grant_super_admin( $user_id );
 		}

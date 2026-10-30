@@ -1,6 +1,7 @@
 <?php
 /**
- * Integration tests for unified Schedule tab cron behaviour (Core hooks + wp-admin messaging parity).
+ * Integration tests for unified Schedule tab cron behaviour (Core hooks +
+ * wp-admin messaging parity).
  *
  * @package updatronix
  */
@@ -8,7 +9,8 @@
 declare(strict_types=1);
 
 /**
- * Tests unified Schedule tab cron behaviour (Core hooks + wp-admin messaging parity).
+ * Tests unified Schedule tab cron behaviour (Core hooks + wp-admin messaging
+ * parity).
  *
  * @coversNothing
  */
@@ -21,7 +23,8 @@ final class CronUnifiedScheduleTest extends WP_UnitTestCase {
 	private ?\Closure $http_mock = null;
 
 	/**
-	 * Short-circuit every WordPress.org update-API request so `wp_update_plugins()`,
+	 * Short-circuit every WordPress.org update-API request so
+	 * `wp_update_plugins()`,
 	 * `wp_update_themes()`, and `wp_version_check()` never touch the live network.
 	 *
 	 * @return void
@@ -32,8 +35,10 @@ final class CronUnifiedScheduleTest extends WP_UnitTestCase {
 				return $pre;
 			}
 
-			// WP 7.0's update functions read several keys from the shared response body:
-			// wp_update_plugins() -> plugins/translations/no_update, wp_update_themes() -> themes/translations/no_update,
+			// WP 7.0's update functions read several keys from the shared response body.
+			// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+			// wp_update_plugins() -> plugins/translations/no_update, wp_update_themes() -> themes/translations/no_update,.
+			// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 			// wp_version_check() -> offers. All are provided as empty arrays so each function short-circuits cleanly.
 			return array(
 				'headers'  => array(),
@@ -87,14 +92,15 @@ final class CronUnifiedScheduleTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * When recurrence is plugin-controlled, `wp_version_check` stays scheduled (admin UI messaging) while
+	 * When recurrence is plugin-controlled, `wp_version_check` stays scheduled
+	 * (admin UI messaging) while
 	 * redundant plugin/theme recurring checks are suppressed.
 	 *
 	 * WordPress-default recurrence restores Core's three-hook pattern.
 	 *
 	 * @return void
 	 */
-	public function test_unified_schedule_keeps_wp_version_check_and_suppresses_plugin_theme_crons(): void {
+	public function test_unified_schedule_keeps_core_check(): void {
 		wp_clear_scheduled_hook( 'wp_version_check' );
 		wp_clear_scheduled_hook( 'wp_update_plugins' );
 		wp_clear_scheduled_hook( 'wp_update_themes' );
@@ -102,14 +108,21 @@ final class CronUnifiedScheduleTest extends WP_UnitTestCase {
 			wp_schedule_update_checks();
 		}
 
-		self::assertIsInt( wp_next_scheduled( 'wp_version_check' ), 'Test setup should register Core update crons.' );
+		self::assertIsInt(
+			wp_next_scheduled( 'wp_version_check' ),
+			'Test setup should register Core update crons.'
+		);
 
 		$current = updatronix_get_settings();
 		$current['schedule']['update_check']['recurrence'] = 'daily';
 		$current['schedule']['update_check']['time']       = '03:00';
 		updatronix_save_settings_array( $current );
 
-		self::assertIsInt( wp_next_scheduled( Updatronix_Cron::HOOK_WP_CRON_CORE_VERSION_CHECK ) );
+		self::assertIsInt(
+			wp_next_scheduled(
+				Updatronix_Cron::HOOK_WP_CRON_CORE_VERSION_CHECK
+			)
+		);
 		self::assertFalse( wp_next_scheduled( 'wp_update_plugins' ) );
 		self::assertFalse( wp_next_scheduled( 'wp_update_themes' ) );
 
@@ -130,21 +143,36 @@ final class CronUnifiedScheduleTest extends WP_UnitTestCase {
 		$meta = Updatronix_Cron::get_schedule_rest_meta();
 		self::assertArrayHasKey( 'schedule_driver', $meta );
 		self::assertArrayHasKey( 'unified_schedule_active', $meta );
-		self::assertContains( $meta['schedule_driver'], array( 'WordPress', 'updatronix' ) );
+		self::assertContains(
+			$meta['schedule_driver'],
+			array(
+				'WordPress',
+				'updatronix',
+			)
+		);
 		self::assertIsBool( $meta['unified_schedule_active'] );
 	}
 
 	/**
-	 * Regression guard for M1 (`.agents/notes/archive/2026-05-09-code-review-opus-notifications-schedule-features.md`):
-	 * `Updatronix_Cron::prime_unified_discovery_before_core()` must not cause Core's priority-10
-	 * callback (`wp_version_check()`) to run twice in a single `do_action( 'wp_version_check' )` tick.
+	 * Regression guard for M1
+	 * (`.agents/notes/archive/2026-05-09-code-review-opus-notifications-schedule-features.md`):
+	 * `Updatronix_Cron::prime_unified_discovery_before_core()` must not cause
+	 * Core's priority-10
+	 * callback (`wp_version_check()`) to run twice in a single `do_action(
+	 * 'wp_version_check' )` tick.
 	 *
-	 * The plugin's listener primes plugin/theme transients at priority 9 and lets Core's listener
-	 * run untouched at priority 10. The proxy counts `core_version_check_locale`, a filter
-	 * `wp_version_check()` fires exactly once per non-short-circuited run (before the API request);
-	 * the plugin primer calls `wp_update_plugins()` / `wp_update_themes()`, which do not fire it.
-	 * (`pre_set_site_transient_update_core` is unusable here: WordPress 7.0's `wp_version_check()`
-	 * sets the `update_core` transient twice within a single run — a defensive early set plus the
+	 * The plugin's listener primes plugin/theme transients at priority 9 and lets
+	 * Core's listener
+	 * run untouched at priority 10. The proxy counts `core_version_check_locale`,
+	 * a filter
+	 * `wp_version_check()` fires exactly once per non-short-circuited run (before
+	 * the API request);
+	 * the plugin primer calls `wp_update_plugins()` / `wp_update_themes()`, which
+	 * do not fire it.
+	 * (`pre_set_site_transient_update_core` is unusable here: WordPress 7.0's
+	 * `wp_version_check()`
+	 * sets the `update_core` transient twice within a single run — a defensive
+	 * early set plus the
 	 * result set — so it no longer maps 1:1 to a run.)
 	 *
 	 * @return void
@@ -174,13 +202,16 @@ final class CronUnifiedScheduleTest extends WP_UnitTestCase {
 		self::assertSame(
 			1,
 			$core_check_runs,
+			// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 			'wp_version_check() must run exactly once per cron tick when unified scheduling is active.'
 		);
 	}
 
 	/**
-	 * The {@see block_single_contamination()} filter prevents non-recurring `wp_version_check`
-	 * events from being written to the cron option when unified scheduling is active.
+	 * The {@see block_single_contamination()} filter prevents non-recurring
+	 * `wp_version_check`
+	 * events from being written to the cron option when unified scheduling is
+	 * active.
 	 *
 	 * @return void
 	 */
@@ -192,18 +223,34 @@ final class CronUnifiedScheduleTest extends WP_UnitTestCase {
 
 		self::assertTrue( Updatronix_Cron::is_unified_schedule_active() );
 
-		$event_before = wp_get_scheduled_event( Updatronix_Cron::HOOK_WP_CRON_CORE_VERSION_CHECK );
+		$event_before = wp_get_scheduled_event(
+			Updatronix_Cron::HOOK_WP_CRON_CORE_VERSION_CHECK
+		);
 		self::assertNotFalse( $event_before, 'A recurring event should exist.' );
 		$previous_timestamp = $event_before->timestamp;
 
+		// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 		// Simulate Core's TTL logic: attempt to schedule a non-recurring single event.
-		$result = wp_schedule_single_event( time() + HOUR_IN_SECONDS, Updatronix_Cron::HOOK_WP_CRON_CORE_VERSION_CHECK );
-		self::assertFalse( $result, 'The single event should be blocked by the filter.' );
+		$result = wp_schedule_single_event(
+			time() + HOUR_IN_SECONDS,
+			Updatronix_Cron::HOOK_WP_CRON_CORE_VERSION_CHECK
+		);
+		self::assertFalse(
+			$result,
+			'The single event should be blocked by the filter.'
+		);
 
+		// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 		// Verify the cron event is unchanged (still the recurring event, not the single event).
-		$event_after = wp_get_scheduled_event( Updatronix_Cron::HOOK_WP_CRON_CORE_VERSION_CHECK );
+		$event_after = wp_get_scheduled_event(
+			Updatronix_Cron::HOOK_WP_CRON_CORE_VERSION_CHECK
+		);
 		self::assertNotFalse( $event_after, 'A recurring event should still exist.' );
-		self::assertSame( 'daily', $event_after->schedule, 'Should still be the configured daily recurrence.' );
+		self::assertSame(
+			'daily',
+			$event_after->schedule,
+			'Should still be the configured daily recurrence.'
+		);
 		self::assertSame(
 			$previous_timestamp,
 			$event_after->timestamp,

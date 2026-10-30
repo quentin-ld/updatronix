@@ -26,7 +26,12 @@ final class Updatronix_Export_Cursor {
 	 * @param int    $user_id       User ID bound into the token.
 	 * @return string Cursor string safe for JSON transport.
 	 */
-	public static function mint( string $transient_key, int $offset, int $site_id, int $user_id ): string {
+	public static function mint(
+		string $transient_key,
+		int $offset,
+		int $site_id,
+		int $user_id
+	): string {
 		$payload = wp_json_encode(
 			array(
 				'v' => 1,
@@ -41,7 +46,9 @@ final class Updatronix_Export_Cursor {
 		$payload = is_string( $payload ) ? $payload : '{}';
 		$sig     = hash_hmac( 'sha256', $payload, self::secret(), true );
 
-		return self::base64url_encode( $payload ) . '.' . self::base64url_encode( $sig );
+		return self::base64url_encode( $payload ) . '.' . self::base64url_encode(
+			$sig
+		);
 	}
 
 	/**
@@ -52,9 +59,14 @@ final class Updatronix_Export_Cursor {
 	 * @param string $cursor  Raw cursor from the client.
 	 * @param int    $site_id Current resolved site ID.
 	 * @param int    $user_id Current user ID.
-	 * @return array<string, mixed>|\WP_Error Array with keys k, o, t, s, u on success.
+	 * @return array<string, mixed>|\WP_Error Array with keys k, o, t, s, u on
+	 * success.
 	 */
-	public static function verify( string $cursor, int $site_id, int $user_id ): array|\WP_Error {
+	public static function verify(
+		string $cursor,
+		int $site_id,
+		int $user_id
+	): array|\WP_Error {
 		$cursor = sanitize_text_field( $cursor );
 		$parts  = explode( '.', $cursor, 2 );
 		if ( count( $parts ) !== 2 ) {
@@ -84,7 +96,10 @@ final class Updatronix_Export_Cursor {
 		$s = isset( $data['s'] ) ? (int) $data['s'] : 0;
 		$u = isset( $data['u'] ) ? (int) $data['u'] : 0;
 
-		if ( 1 !== $v || 1 !== preg_match( Updatronix_Export_Transient_Manager::KEY_PATTERN, $k )
+		if ( 1 !== $v || 1 !== preg_match(
+			Updatronix_Export_Transient_Manager::KEY_PATTERN,
+			$k
+		)
 			|| $o < 0 || $t <= 0 || ( time() - $t ) > Updatronix_Export::TRANSIENT_TTL
 			|| $s !== $site_id || $u !== $user_id ) {
 			return new WP_Error( 'view_invalid', '', array( 'status' => 400 ) );
@@ -110,7 +125,14 @@ final class Updatronix_Export_Cursor {
 			return $memo;
 		}
 
-		$memo = hash_hmac( 'sha256', 'updatronix_export_cursor_v1', wp_salt( 'nonce' ), true );
+		$memo = hash_hmac(
+			'sha256',
+			'updatronix_export_cursor_v1',
+			wp_salt(
+				'nonce'
+			),
+			true
+		);
 
 		return $memo;
 	}
@@ -122,7 +144,8 @@ final class Updatronix_Export_Cursor {
 	 * @return string
 	 */
 	private static function base64url_encode( string $bin ): string {
-		// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode -- Deliberate: URL-safe cursor transport, not obfuscation.
+		// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+		// phpcs:ignore Generic.Files.LineLength, WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode -- Deliberate: URL-safe cursor transport, not obfuscation.
 		return rtrim( strtr( base64_encode( $bin ), '+/', '-_' ), '=' );
 	}
 
@@ -138,7 +161,8 @@ final class Updatronix_Export_Cursor {
 		if ( $pad > 0 ) {
 			$b64 .= str_repeat( '=', 4 - $pad );
 		}
-		$out = base64_decode( $b64, true ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode -- Deliberate: URL-safe cursor transport, not obfuscation.
+		// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+		$out = base64_decode( $b64, true ); // phpcs:ignore Generic.Files.LineLength, WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode -- Deliberate: URL-safe cursor transport, not obfuscation.
 
 		return is_string( $out ) ? $out : '';
 	}

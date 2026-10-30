@@ -23,7 +23,8 @@ final class LogContextRedactionTest extends TestCase {
 	protected function setUp(): void {
 		parent::setUp();
 
-		require_once dirname( __DIR__, 2 ) . '/inc/classes/class-updatronix-security.php';
+		require_once dirname( __DIR__, 2 )
+			. '/inc/classes/class-updatronix-security.php';
 	}
 
 	/**
@@ -67,7 +68,12 @@ final class LogContextRedactionTest extends TestCase {
 	 */
 	public function test_lists_are_capped(): void {
 		$json    = Updatronix_Security::sanitize_context(
-			array( 'secondary_reasons' => array_map( static fn ( int $i ): string => 'reason_' . $i, range( 1, 80 ) ) )
+			array(
+				'secondary_reasons' => array_map(
+					static fn ( int $i ): string => 'reason_' . $i,
+					range( 1, 80 )
+				),
+			)
 		);
 		$context = Updatronix_Security::decode_context( $json );
 
@@ -81,7 +87,14 @@ final class LogContextRedactionTest extends TestCase {
 	 * @return void
 	 */
 	public function test_long_strings_are_cut_to_bytes(): void {
-		$json    = Updatronix_Security::sanitize_context( array( 'last_error' => str_repeat( 'é', 2000 ) ) );
+		$json    = Updatronix_Security::sanitize_context(
+			array(
+				'last_error' => str_repeat(
+					'é',
+					2000
+				),
+			)
+		);
 		$context = Updatronix_Security::decode_context( $json );
 
 		self::assertLessThanOrEqual( 1024, strlen( $context['last_error'] ) );
@@ -96,7 +109,18 @@ final class LogContextRedactionTest extends TestCase {
 	 */
 	public function test_total_context_is_capped_at_8kb(): void {
 		$context = array();
-		foreach ( array( 'policy_message', 'manager', 'evidence', 'last_error', 'chain_name', 'release', 'basename', 'first_waiting_reason', 'retained_reason', 'source' ) as $key ) {
+		foreach ( array(
+			'policy_message',
+			'manager',
+			'evidence',
+			'last_error',
+			'chain_name',
+			'release',
+			'basename',
+			'first_waiting_reason',
+			'retained_reason',
+			'source',
+		) as $key ) {
 			$context[ $key ] = str_repeat( 'x', 1024 );
 		}
 
@@ -116,7 +140,8 @@ final class LogContextRedactionTest extends TestCase {
 	public function test_every_value_is_redacted(): void {
 		$json    = Updatronix_Security::sanitize_context(
 			array(
-				'policy_message'  => 'Download https://mirror.example.com/plugin/x.zip?token=abc123',
+				'policy_message'  =>
+					'Download https://mirror.example.com/plugin/x.zip?token=abc123',
 				'evidence'        => '/srv/private/packages/plugin.zip',
 				'last_error'      => 'Recipient admin@example.com could not be notified.',
 				'retained_reason' => 'Key ?secret=abcdef',
@@ -125,13 +150,28 @@ final class LogContextRedactionTest extends TestCase {
 		);
 		$context = Updatronix_Security::decode_context( $json );
 
-		self::assertStringNotContainsString( 'mirror.example.com', $context['policy_message'] );
-		self::assertStringNotContainsString( 'token=abc123', $context['policy_message'] );
-		self::assertStringContainsString( '[redacted-url]', $context['policy_message'] );
+		self::assertStringNotContainsString(
+			'mirror.example.com',
+			$context['policy_message']
+		);
+		self::assertStringNotContainsString(
+			'token=abc123',
+			$context['policy_message']
+		);
+		self::assertStringContainsString(
+			'[redacted-url]',
+			$context['policy_message']
+		);
 		self::assertStringNotContainsString( '/srv/private', $context['evidence'] );
 		self::assertStringContainsString( '[redacted-path]', $context['evidence'] );
-		self::assertStringNotContainsString( 'admin@example.com', $context['last_error'] );
-		self::assertStringContainsString( '[redacted-email]', $context['last_error'] );
+		self::assertStringNotContainsString(
+			'admin@example.com',
+			$context['last_error']
+		);
+		self::assertStringContainsString(
+			'[redacted-email]',
+			$context['last_error']
+		);
 		self::assertStringNotContainsString( 'abcdef', $context['retained_reason'] );
 		self::assertStringNotContainsString( 'abc.def.ghi', $context['chain_name'] );
 	}
@@ -143,7 +183,15 @@ final class LogContextRedactionTest extends TestCase {
 	 */
 	public function test_empty_context_stores_nothing(): void {
 		self::assertSame( '', Updatronix_Security::sanitize_context( array() ) );
-		self::assertSame( '', Updatronix_Security::sanitize_context( array( 'unknown' => 'value' ) ) );
+		self::assertSame(
+			'',
+			Updatronix_Security::sanitize_context(
+				array(
+					'unknown' =>
+					'value',
+				)
+			)
+		);
 	}
 
 	/**
@@ -179,9 +227,20 @@ final class LogContextRedactionTest extends TestCase {
 	 * @return void
 	 */
 	public function test_redact_text_covers_urls_and_package_paths(): void {
-		self::assertSame( '[redacted-url]', Updatronix_Security::redact_text( 'https://downloads.example.org/plugin/x.zip' ) );
-		self::assertSame( '[redacted-path]', Updatronix_Security::redact_text( '/var/cache/packages/x.zip' ) );
-		self::assertSame( 'Plain text stays.', Updatronix_Security::redact_text( 'Plain text stays.' ) );
+		self::assertSame(
+			'[redacted-url]',
+			Updatronix_Security::redact_text(
+				'https://downloads.example.org/plugin/x.zip'
+			)
+		);
+		self::assertSame(
+			'[redacted-path]',
+			Updatronix_Security::redact_text( '/var/cache/packages/x.zip' )
+		);
+		self::assertSame(
+			'Plain text stays.',
+			Updatronix_Security::redact_text( 'Plain text stays.' )
+		);
 	}
 
 	/**
@@ -190,8 +249,18 @@ final class LogContextRedactionTest extends TestCase {
 	 * @return void
 	 */
 	public function test_invalid_json_decodes_to_empty(): void {
-		self::assertSame( array(), Updatronix_Security::decode_context( 'not json' ) );
+		self::assertSame(
+			array(),
+			Updatronix_Security::decode_context(
+				'not json'
+			)
+		);
 		self::assertSame( array(), Updatronix_Security::decode_context( '' ) );
-		self::assertSame( array( 'a' => 'b' ), Updatronix_Security::decode_context( '{"a":"b"}' ) );
+		self::assertSame(
+			array( 'a' => 'b' ),
+			Updatronix_Security::decode_context(
+				'{"a":"b"}'
+			)
+		);
 	}
 }

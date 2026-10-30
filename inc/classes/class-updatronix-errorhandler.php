@@ -19,22 +19,45 @@ final class Updatronix_ErrorHandler {
 	 * @return void
 	 */
 	public static function register(): void {
-		add_filter( 'wp_redirect', array( self::class, 'capture_redirect_error' ), 10, 2 );
-		add_filter( 'upgrader_pre_download', array( self::class, 'capture_download_error' ), 10, 3 );
-		add_action( 'upgrader_process_complete', array( self::class, 'log_upgrader_failure' ), 20, 2 );
+		add_filter(
+			'wp_redirect',
+			array( self::class, 'capture_redirect_error' ),
+			10,
+			2
+		);
+		add_filter(
+			'upgrader_pre_download',
+			array(
+				self::class,
+				'capture_download_error',
+			),
+			10,
+			3
+		);
+		add_action(
+			'upgrader_process_complete',
+			array( self::class, 'log_upgrader_failure' ),
+			20,
+			2
+		);
 	}
 
 	/**
 	 * Log upgrader failure if the skin result is a WP_Error.
 	 *
-	 * Resolve plugin/theme identity (including upload "destination exists") and append process messages.
+	 * Resolve plugin/theme identity (including upload "destination exists") and
+	 * append process messages.
 	 *
 	 * @param WP_Upgrader          $upgrader Upgrader instance.
-	 * @param array<string, mixed> $options Options (type, action, plugins, themes, etc.).
+	 * @param array<string, mixed> $options Options (type, action, plugins, themes,
+	 * etc.).
 	 * @return void
 	 */
-	public static function log_upgrader_failure( WP_Upgrader $upgrader, array $options ): void {
-		if ( ! updatronix_get_settings()['logging_enabled'] ) {
+	public static function log_upgrader_failure(
+		WP_Upgrader $upgrader,
+		array $options
+	): void {
+		if ( ! (bool) updatronix_get_settings()['logging_enabled'] ) {
 			return;
 		}
 
@@ -58,7 +81,10 @@ final class Updatronix_ErrorHandler {
 		$plugin_file = '';
 		$theme_slug  = '';
 		if ( 'plugin' === $type ) {
-			$plugin_file = self::get_plugin_file_from_options_or_upgrader( $options, $upgrader );
+			$plugin_file = self::get_plugin_file_from_options_or_upgrader(
+				$options,
+				$upgrader
+			);
 			if ( '' === $plugin_file ) {
 				$plugin_file = self::get_plugin_file_from_folder_exists_error( $result );
 			}
@@ -72,22 +98,34 @@ final class Updatronix_ErrorHandler {
 				}
 			} elseif ( '' !== $plugin_file ) {
 				$name = $plugin_file;
-				$slug = dirname( $plugin_file ) !== '.' ? dirname( $plugin_file ) : $plugin_file;
+				$slug = dirname( $plugin_file ) !== '.' ? dirname(
+					$plugin_file
+				) : $plugin_file;
 			}
 		} elseif ( 'theme' === $type ) {
-			$theme_slug = ( isset( $options['themes'] ) && is_array( $options['themes'] ) && isset( $options['themes'][0] ) )
+			$theme_slug = ( isset( $options['themes'] ) && is_array( $options['themes'] )
+				&& isset( $options['themes'][0] ) )
 				? $options['themes'][0]
 				: ( $options['theme'] ?? '' );
 			if ( '' === $theme_slug && method_exists( $upgrader, 'theme_info' ) ) {
 				$theme_info = $upgrader->theme_info();
-				if ( is_object( $theme_info ) && method_exists( $theme_info, 'get_stylesheet' ) ) {
+				if ( is_object( $theme_info ) && method_exists(
+					$theme_info,
+					'get_stylesheet'
+				) ) {
 					$theme_slug = $theme_info->get_stylesheet();
 				}
 			}
 			if ( '' !== $theme_slug ) {
 				$themes         = wp_get_themes();
-				$name           = isset( $themes[ $theme_slug ] ) ? $themes[ $theme_slug ]->get( 'Name' ) : $theme_slug;
-				$version_before = isset( $themes[ $theme_slug ] ) ? (string) $themes[ $theme_slug ]->get( 'Version' ) : '';
+				$name           =
+					isset( $themes[ $theme_slug ] ) ? $themes[ $theme_slug ]->get(
+						'Name'
+					) : $theme_slug;
+				$version_before =
+					isset( $themes[ $theme_slug ] ) ? (string) $themes[ $theme_slug ]->get(
+						'Version'
+					) : '';
 				$slug           = $theme_slug;
 			}
 		} else {
@@ -101,8 +139,12 @@ final class Updatronix_ErrorHandler {
 		}
 
 		$trace        = self::capture_trace();
-		$performed_as = Updatronix_Update_Logger::is_automatic_update() ? 'automatic' : 'manual';
-		$event_key    = Updatronix_UpdateLogState::find_pending_event_key( $type, '' !== $slug ? $slug : 'core' );
+		$performed_as = Updatronix_Update_Logger::is_automatic_update(
+		) ? 'automatic' : 'manual';
+		$event_key    = Updatronix_UpdateLogState::find_pending_event_key(
+			$type,
+			'' !== $slug ? $slug : 'core'
+		);
 
 		Updatronix_Logger::log(
 			$type,
@@ -124,20 +166,29 @@ final class Updatronix_ErrorHandler {
 	}
 
 	/**
-	 * Resolve plugin file from options or upgrader (e.g. upload flow where hook_extra has no plugin key).
+	 * Resolve plugin file from options or upgrader (e.g. upload flow where
+	 * hook_extra has no plugin key).
 	 *
-	 * @param array<string, mixed> $options  hook_extra passed to upgrader_process_complete.
+	 * @param array<string, mixed> $options hook_extra passed to
+	 * upgrader_process_complete.
 	 * @param WP_Upgrader          $upgrader Upgrader instance.
 	 * @return string Plugin file path or empty.
 	 */
-	private static function get_plugin_file_from_options_or_upgrader( array $options, WP_Upgrader $upgrader ): string {
-		if ( (bool) ( $options['plugins'] ?? null ) && is_array( $options['plugins'] ) ) {
+	private static function get_plugin_file_from_options_or_upgrader(
+		array $options,
+		WP_Upgrader $upgrader
+	): string {
+		if ( (bool) ( $options['plugins'] ?? null ) && is_array(
+			$options['plugins']
+		) ) {
 			$file = $options['plugins'][0] ?? '';
 			if ( is_string( $file ) && '' !== $file ) {
 				return $file;
 			}
 		}
-		if ( (bool) ( $options['plugin'] ?? null ) && is_string( $options['plugin'] ) ) {
+		if ( (bool) ( $options['plugin'] ?? null ) && is_string(
+			$options['plugin']
+		) ) {
 			return $options['plugin'];
 		}
 		if ( method_exists( $upgrader, 'plugin_info' ) ) {
@@ -156,20 +207,36 @@ final class Updatronix_ErrorHandler {
 	 * @param \WP_Error $result Upgrader result.
 	 * @return string Plugin file path or empty.
 	 */
-	private static function get_plugin_file_from_folder_exists_error( \WP_Error $result ): string {
+	private static function get_plugin_file_from_folder_exists_error(
+		\WP_Error $result
+	): string {
 		$path = $result->get_error_data( 'folder_exists' );
 		if ( ! is_string( $path ) || '' === $path ) {
 			return '';
 		}
-		$path = function_exists( 'wp_normalize_path' ) ? wp_normalize_path( $path ) : str_replace( '\\', '/', $path );
+		$path =
+			function_exists( 'wp_normalize_path' ) ? wp_normalize_path(
+				$path
+			) : str_replace(
+				'\\',
+				'/',
+				$path
+			);
 		$path = rtrim( $path, '/' );
 
 		$plugin_dir = defined( 'WP_PLUGIN_DIR' ) ? WP_PLUGIN_DIR : '';
 		if ( '' !== $plugin_dir ) {
-			$plugin_dir = function_exists( 'wp_normalize_path' ) ? wp_normalize_path( $plugin_dir ) : str_replace( '\\', '/', $plugin_dir );
+			$plugin_dir =
+				// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+				function_exists( 'wp_normalize_path' ) ? wp_normalize_path(
+					$plugin_dir
+				) : str_replace( '\\', '/', $plugin_dir );
 			$plugin_dir = rtrim( $plugin_dir, '/' );
 			if ( strpos( $path, $plugin_dir . '/' ) === 0 || $path === $plugin_dir ) {
-				$folder = $plugin_dir === $path ? '' : ltrim( substr( $path, strlen( $plugin_dir ) + 1 ), '/' );
+				$folder = $plugin_dir === $path ? '' : ltrim(
+					substr( $path, strlen( $plugin_dir ) + 1 ),
+					'/'
+				);
 				$folder = '' === $folder ? '' : explode( '/', $folder )[0];
 				if ( '' !== $folder ) {
 					$plugin_file = self::match_plugin_file_by_folder( $folder );
@@ -200,7 +267,9 @@ final class Updatronix_ErrorHandler {
 		}
 		$all = get_plugins();
 		foreach ( array_keys( $all ) as $plugin_file ) {
-			if ( strpos( $plugin_file, $folder . '/' ) === 0 || dirname( $plugin_file ) === $folder ) {
+			if ( strpos( $plugin_file, $folder . '/' ) === 0 || dirname(
+				$plugin_file
+			) === $folder ) {
 				return $plugin_file;
 			}
 		}
@@ -209,12 +278,15 @@ final class Updatronix_ErrorHandler {
 	}
 
 	/**
-	 * Get process messages from skin when available (e.g. Automatic_Upgrader_Skin).
+	 * Get process messages from skin when available (e.g.
+	 * Automatic_Upgrader_Skin).
 	 *
 	 * @param WP_Upgrader $upgrader Upgrader instance.
 	 * @return string Newline-separated process messages.
 	 */
-	public static function get_skin_process_message( WP_Upgrader $upgrader ): string {
+	public static function get_skin_process_message(
+		WP_Upgrader $upgrader
+	): string {
 		$skin = $upgrader->skin;
 		if ( ! method_exists( $skin, 'get_upgrade_messages' ) ) {
 			return '';
@@ -235,10 +307,19 @@ final class Updatronix_ErrorHandler {
 	 * @return string Lines like "#1 path (line): function(args)".
 	 */
 	public static function capture_trace(): string {
-        // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_debug_backtrace -- Intentional: audit log trace, not debug output.
+        // phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+        // phpcs:ignore Generic.Files.LineLength, WordPress.PHP.DevelopmentFunctions.error_log_debug_backtrace -- Intentional: audit log trace, not debug output.
 		$bt    = debug_backtrace( DEBUG_BACKTRACE_PROVIDE_OBJECT, 50 );
 		$lines = array();
-		$skip  = array( 'capture_trace', 'log', 'log_upgrader_failure', 'log_plugin_update', 'log_theme_update', 'log_core_update', 'on_upgrader_process_complete' );
+		$skip  = array(
+			'capture_trace',
+			'log',
+			'log_upgrader_failure',
+			'log_plugin_update',
+			'log_theme_update',
+			'log_core_update',
+			'on_upgrader_process_complete',
+		);
 		$i     = 0;
 		foreach ( $bt as $frame ) {
 			$file = $frame['file'] ?? '';
@@ -261,43 +342,56 @@ final class Updatronix_ErrorHandler {
 				}
 			}
 			$args_str = implode( ', ', $args );
-			$lines[]  = '#' . ( ++$i ) . ' ' . $file . ' (' . $line . '): ' . $func . '(' . $args_str . ')';
+			$lines[]  = '#' . ( ++$i ) . ' ' . $file . ' (' . $line . '): ' . $func
+				. '(' . $args_str
+				. ')';
 		}
 
 		return implode( "\n", $lines );
 	}
 
 	/**
-	 * Capture redirects that may indicate update failures (e.g. to wp-admin/update-core.php?action=do-core-upgrade with error).
+	 * Capture redirects that may indicate update failures (e.g. to
+	 * wp-admin/update-core.php?action=do-core-upgrade with error).
 	 *
 	 * @param string $location Redirect location.
 	 * @param int    $status   Status code.
 	 * @return string Unchanged location.
 	 */
-	public static function capture_redirect_error( string $location, int $status ): string {
+	public static function capture_redirect_error(
+		string $location,
+		int $status
+	): string {
 		if ( $status < 400 ) {
 			return $location;
 		}
 
 		$parse = static function ( string $url, int $component ) {
-			return function_exists( 'wp_parse_url' ) ? wp_parse_url( $url, $component ) : parse_url( $url, $component ); // phpcs:ignore WordPress.WP.AlternativeFunctions.parse_url_parse_url -- wp_parse_url is preferred when WordPress is loaded.
+			// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+			return function_exists( 'wp_parse_url' ) ? wp_parse_url( $url, $component ) : parse_url( $url, $component ); // phpcs:ignore Generic.Files.LineLength, WordPress.WP.AlternativeFunctions.parse_url_parse_url -- wp_parse_url is preferred when WordPress is loaded.
 		};
 
 		$location_path = $parse( $location, PHP_URL_PATH );
 		$target_path   = $parse( admin_url( 'update-core.php' ), PHP_URL_PATH );
 
-		if ( ! is_string( $location_path ) || ! is_string( $target_path ) || $location_path !== $target_path ) {
+		if ( ! is_string( $location_path ) || ! is_string( $target_path )
+			|| $location_path !== $target_path ) {
 			return $location;
 		}
 
 		$location_host = $parse( $location, PHP_URL_HOST );
 		$site_host     = $parse( admin_url(), PHP_URL_HOST );
-		if ( is_string( $location_host ) && is_string( $site_host ) && strtolower( $location_host ) !== strtolower( $site_host ) ) {
+		if ( is_string( $location_host ) && is_string( $site_host )
+			&& strtolower( $location_host ) !== strtolower( $site_host ) ) {
 			return $location;
 		}
 
-		$performed_as = Updatronix_Update_Logger::is_automatic_update() ? 'automatic' : 'manual';
-		$event_key    = Updatronix_UpdateLogState::find_pending_event_key( 'core', 'core' );
+		$performed_as = Updatronix_Update_Logger::is_automatic_update(
+		) ? 'automatic' : 'manual';
+		$event_key    = Updatronix_UpdateLogState::find_pending_event_key(
+			'core',
+			'core'
+		);
 		Updatronix_Logger::log(
 			'core',
 			'failed',
@@ -308,7 +402,11 @@ final class Updatronix_ErrorHandler {
 			'error',
 			sprintf(
 				/* translators: %d: HTTP status code */
-				__( 'The core update encountered a redirect error (HTTP %d). Check your server configuration.', 'updatronix' ),
+				__(
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					'The core update encountered a redirect error (HTTP %d). Check your server configuration.',
+					'updatronix'
+				),
 				$status
 			),
 			self::capture_trace(),
@@ -326,12 +424,17 @@ final class Updatronix_ErrorHandler {
 	/**
 	 * Capture download errors during package install/update.
 	 *
-	 * @param bool|WP_Error $reply    Whether to short-circuit. Pass WP_Error to record error.
+	 * @param bool|WP_Error $reply Whether to short-circuit. Pass WP_Error to
+	 * record error.
 	 * @param string        $package  Package URL.
 	 * @param WP_Upgrader   $upgrader Upgrader instance.
 	 * @return bool|WP_Error
 	 */
-	public static function capture_download_error( bool|\WP_Error $reply, string $package, WP_Upgrader $upgrader ): bool|\WP_Error {
+	public static function capture_download_error(
+		bool|\WP_Error $reply,
+		string $package,
+		WP_Upgrader $upgrader
+	): bool|\WP_Error {
 		if ( ! is_wp_error( $reply ) ) {
 			return $reply;
 		}
@@ -344,9 +447,26 @@ final class Updatronix_ErrorHandler {
 			$type = 'theme';
 			$name = $skin->theme;
 		}
-		$performed_as = Updatronix_Update_Logger::is_automatic_update() ? 'automatic' : 'manual';
-		$event_key    = Updatronix_UpdateLogState::find_pending_event_key( $type, $name );
-		Updatronix_Logger::log( $type, 'failed', (bool) $name ? $name : 'unknown', '', '', '', 'error', $reply->get_error_message(), self::capture_trace(), $performed_as, '', $event_key );
+		$performed_as = Updatronix_Update_Logger::is_automatic_update(
+		) ? 'automatic' : 'manual';
+		$event_key    = Updatronix_UpdateLogState::find_pending_event_key(
+			$type,
+			$name
+		);
+		Updatronix_Logger::log(
+			$type,
+			'failed',
+			(bool) $name ? $name : 'unknown',
+			'',
+			'',
+			'',
+			'error',
+			$reply->get_error_message(),
+			self::capture_trace(),
+			$performed_as,
+			'',
+			$event_key
+		);
 		if ( '' !== $event_key ) {
 			Updatronix_UpdateLogState::mark_finalized( $event_key );
 		}

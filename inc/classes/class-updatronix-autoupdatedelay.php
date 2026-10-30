@@ -1,9 +1,12 @@
 <?php
 /**
- * Offer-age gate for WordPress automatic background updates (reads schedule.delay_updates only).
+ * Offer-age gate for WordPress automatic background updates (reads
+ * schedule.delay_updates only).
  *
- * Hooks {@see WP_Automatic_Updater::should_update()} via `auto_update_{$type}` (wordpress-native-updates-reference.md §3.3, §6.5).
- * Manual updates (`update-core.php`, uploads, WP-CLI installs) bypass this stack entirely.
+ * Hooks {@see WP_Automatic_Updater::should_update()} via `auto_update_{$type}`
+ * (wordpress-native-updates-reference.md §3.3, §6.5).
+ * Manual updates (`update-core.php`, uploads, WP-CLI installs) bypass this
+ * stack entirely.
  *
  * @package updatronix
  * @since 1.1.0
@@ -14,7 +17,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Defers eligible automatic updates until each offer exceeds a configured soak window.
+ * Defers eligible automatic updates until each offer exceeds a configured soak
+ * window.
  *
  * @since 1.1.0
  */
@@ -32,10 +36,13 @@ final class Updatronix_AutoUpdateDelay {
 	private const MAX_LEDGER_ENTRIES = 384;
 
 	/**
-	 * Runs after Core's default opt-in and eligibility merges (`wordpress-native-updates-reference.md` §3.3).
+	 * Runs after Core's default opt-in and eligibility merges
+	 * (`wordpress-native-updates-reference.md` §3.3).
 	 *
-	 * Sibling features that hook the same `auto_update_{$type}` filter family must document their priority
-	 * and the resulting decision-order semantics in their own class docblock and a regression test.
+	 * Sibling features that hook the same `auto_update_{$type}` filter family must
+	 * document their priority
+	 * and the resulting decision-order semantics in their own class docblock and a
+	 * regression test.
 	 *
 	 * @since 1.1.0
 	 */
@@ -201,10 +208,30 @@ final class Updatronix_AutoUpdateDelay {
 			return;
 		}
 
-		add_filter( 'auto_update_plugin', array( self::class, 'filter_plugin' ), self::FILTER_PRIORITY, 2 );
-		add_filter( 'auto_update_theme', array( self::class, 'filter_theme' ), self::FILTER_PRIORITY, 2 );
-		add_filter( 'auto_update_core', array( self::class, 'filter_core' ), self::FILTER_PRIORITY, 2 );
-		add_filter( 'auto_update_translation', array( self::class, 'filter_translation' ), self::FILTER_PRIORITY, 2 );
+		add_filter(
+			'auto_update_plugin',
+			array( self::class, 'filter_plugin' ),
+			self::FILTER_PRIORITY,
+			2
+		);
+		add_filter(
+			'auto_update_theme',
+			array( self::class, 'filter_theme' ),
+			self::FILTER_PRIORITY,
+			2
+		);
+		add_filter(
+			'auto_update_core',
+			array( self::class, 'filter_core' ),
+			self::FILTER_PRIORITY,
+			2
+		);
+		add_filter(
+			'auto_update_translation',
+			array( self::class, 'filter_translation' ),
+			self::FILTER_PRIORITY,
+			2
+		);
 	}
 
 	/**
@@ -224,16 +251,16 @@ final class Updatronix_AutoUpdateDelay {
 		self::$delay_settings_slice = array(
 			'enabled' => $enabled,
 			// The window below is clamped by the sanitizer before this runs.
-			// A ratio over a one-line diff cannot say "four mutants here are
-			// unobservable and five are killed by the tests" -- so Infection is
-			// told to skip the expression, and `bin/harness counterfactual`
-			// answers for the line instead. DESIGN.md section 5 is the hand-over
-			// between the two gates, and the classification mutant by mutant is
+			// A ratio over a one-line diff cannot say "four mutants here are.
+			// unobservable and five are killed by the tests" -- so Infection is.
+			// told to skip the expression, and `bin/harness counterfactual`.
+			// answers for the line instead. DESIGN.md section 5 is the hand-over.
+			// between the two gates, and the classification mutant by mutant is.
 			// written out in tests/Unit/AutoUpdateDelayBehaviorTest.php.
 			// @infection-ignore-all.
 			'days'    => max( 1, min( 365, 0 !== $days ? $days : 1 ) ),
 		);
-		self::$delay_enabled_cache  = $enabled && $days > 0;
+		self::$delay_enabled_cache  = (bool) $enabled && $days > 0;
 
 		return self::$delay_enabled_cache;
 	}
@@ -258,23 +285,32 @@ final class Updatronix_AutoUpdateDelay {
 	 * Synthetic offers that must bypass the soak gate and the activity log.
 	 *
 	 * Covers the two well-known mock objects injected by
-	 * {@see WP_Site_Health::detect_plugin_theme_auto_update_issues()} when it round-trips
-	 * `wp_is_auto_update_forced_for_item()` through the `auto_update_{$type}` filter chain
-	 * (`a-fake-plugin/a-fake-plugin.php`, `a-fake-theme`), plus any plugin/theme offer
-	 * whose file/stylesheet is not present on disk — that pattern catches future Site
+	 * {@see WP_Site_Health::detect_plugin_theme_auto_update_issues()} when it
+	 * round-trips
+	 * `wp_is_auto_update_forced_for_item()` through the `auto_update_{$type}`
+	 * filter chain
+	 * (`a-fake-plugin/a-fake-plugin.php`, `a-fake-theme`), plus any plugin/theme
+	 * offer
+	 * whose file/stylesheet is not present on disk — that pattern catches future
+	 * Site
 	 * Health mocks and any third-party probe that follows the same convention.
 	 *
 	 * Vetoing those offers would (a) make Site Health report a false "auto-updates
-	 * disabled" warning and (b) write misleading rows into the audit log for items the
+	 * disabled" warning and (b) write misleading rows into the audit log for items
+	 * the
 	 * site does not actually have installed.
 	 *
-	 * Core and translation offers are not generated by Site Health's probe; this guard
+	 * Core and translation offers are not generated by Site Health's probe; this
+	 * guard
 	 * is a no-op for them.
 	 *
 	 * @param 'plugin'|'theme'|'core'|'translation' $type Offer type.
 	 * @param object                                $item Automatic-updater offer object.
 	 */
-	private static function is_excluded_auto_update_offer( string $type, object $item ): bool {
+	private static function is_excluded_auto_update_offer(
+		string $type,
+		object $item
+	): bool {
 		return updatronix_is_site_health_mock( $type, $item );
 	}
 
@@ -283,24 +319,35 @@ final class Updatronix_AutoUpdateDelay {
 	 *
 	 * @param object                                $item Automatic-updater offer object.
 	 * @param 'plugin'|'theme'|'core'|'translation' $type Offer type.
-	 * @return bool True when WordPress may proceed with automatic update for this offer.
+	 * @return bool True when WordPress may proceed with automatic update for this
+	 * offer.
 	 */
-	private static function evaluate_offer_delay( object $item, string $type ): bool {
+	private static function evaluate_offer_delay(
+		object $item,
+		string $type
+	): bool {
 		if ( self::is_excluded_auto_update_offer( $type, $item ) ) {
 			return true;
 		}
 
-		if ( apply_filters( 'updatronix_skip_auto_update_delay', false, $type, $item ) ) {
+		if ( apply_filters(
+			'updatronix_skip_auto_update_delay',
+			false,
+			$type,
+			$item
+		) ) {
 			return true;
 		}
 
 		$delay_seconds = (int) apply_filters(
 			/**
-			 * Filters the soak window duration (seconds) before Updatronix allows automatic updates for this offer.
+			 * Filters the soak window duration (seconds) before Updatronix allows
+			 * automatic updates for this offer.
 			 *
 			 * @since 1.1.0
 			 *
-			 * @param int    $delay_seconds Canonical default computed from Schedule settings (`schedule.delay_updates`).
+			 * @param int $delay_seconds Canonical default computed from Schedule
+			 * settings (`schedule.delay_updates`).
 			 * @param string $type          plugin, theme, core, translation.
 			 * @param object $item          Automatic-updater offer object.
 			 */
@@ -359,18 +406,29 @@ final class Updatronix_AutoUpdateDelay {
 	 * @param 'plugin'|'theme'|'core'|'translation' $type Offer type.
 	 * @param object                                $item Automatic-updater offer object.
 	 */
-	private static function stable_ledger_hash( string $type, object $item ): string {
+	private static function stable_ledger_hash(
+		string $type,
+		object $item
+	): string {
 		$parts = match ( $type ) {
 			'plugin' => ( isset( $item->plugin, $item->new_version )
-				? 'plugin|' . strtolower( (string) $item->plugin ) . '|' . (string) $item->new_version
+				? 'plugin|' . strtolower( (string) $item->plugin ) . '|'
+					. (string) $item->new_version
 				: '' ),
 			'theme' => ( isset( $item->theme, $item->new_version )
-				? 'theme|' . strtolower( (string) $item->theme ) . '|' . (string) $item->new_version
+				? 'theme|' . strtolower( (string) $item->theme ) . '|'
+					. (string) $item->new_version
 				: '' ),
 			'core' => ( isset( $item->current )
-				? 'core|' . (string) $item->current . '|' . (string) ( $item->version ?? '' )
+				? 'core|' . (string) $item->current . '|' . (string) (
+					$item->version ?? '' )
 				: ( isset( $item->version ) ? 'core|' . (string) $item->version : '' ) ),
-			default => ( isset( $item->type, $item->slug, $item->language, $item->version )
+			default => ( isset(
+				$item->type,
+				$item->slug,
+				$item->language,
+				$item->version
+			)
 				? sprintf(
 					'translation|%s|%s|%s|%s',
 					(string) $item->type,
@@ -444,12 +502,17 @@ final class Updatronix_AutoUpdateDelay {
 		}
 
 		$encoded_ledger = wp_json_encode( $ledger );
-		updatronix_update_plugin_option( self::OPTION_LEDGER, (bool) $encoded_ledger ? $encoded_ledger : '{}', false );
+		updatronix_update_plugin_option(
+			self::OPTION_LEDGER,
+			(bool) $encoded_ledger ? $encoded_ledger : '{}',
+			false
+		);
 		self::$ledger_cache = $ledger;
 	}
 
 	/**
-	 * Drops ledger rows absent from live update API transients (does not instantiate {@see WP_Automatic_Updater}).
+	 * Drops ledger rows absent from live update API transients (does not
+	 * instantiate {@see WP_Automatic_Updater}).
 	 */
 	private static function maybe_prune_ledger(): void {
 		if ( self::$pruned_this_request ) {
@@ -461,17 +524,21 @@ final class Updatronix_AutoUpdateDelay {
 		$alive = array();
 
 		$plugins = get_site_transient( 'update_plugins' );
-		if ( $plugins instanceof \stdClass && (bool) ( $plugins->response ?? null ) && is_array( $plugins->response ) ) {
+		if ( $plugins instanceof \stdClass && (bool) ( $plugins->response ?? null )
+			&& is_array( $plugins->response ) ) {
 			foreach ( $plugins->response as $offer ) {
 				if ( is_object( $offer ) ) {
 					// @infection-ignore-all.
-					$alive[ self::stable_ledger_hash( 'plugin', $offer ) ] = true; // counterfactual: equivalent — the map's value is never read — it is consulted through `isset()`, `count()` or `array_key_first()` — so `true` and `false` behave the same here.
+					$alive[ self::stable_ledger_hash( 'plugin', $offer ) ] = true;
+// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					// counterfactual: equivalent — the map's value is never read — it is consulted through `isset()`, `count()` or `array_key_first()` — so `true` and `false` behave the same here.
 				}
 			}
 		}
 
 		$themes = get_site_transient( 'update_themes' );
-		if ( $themes instanceof \stdClass && (bool) ( $themes->response ?? null ) && is_array( $themes->response ) ) {
+		if ( $themes instanceof \stdClass && (bool) ( $themes->response ?? null )
+			&& is_array( $themes->response ) ) {
 			foreach ( $themes->response as $stylesheet => $row ) {
 				$obj = (object) $row;
 				if ( ! isset( $obj->theme ) ) {
@@ -479,20 +546,27 @@ final class Updatronix_AutoUpdateDelay {
 				}
 
 				// @infection-ignore-all.
-				$alive[ self::stable_ledger_hash( 'theme', $obj ) ] = true; // counterfactual: equivalent — the map's value is never read — it is consulted through `isset()`, `count()` or `array_key_first()` — so `true` and `false` behave the same here.
+				$alive[ self::stable_ledger_hash( 'theme', $obj ) ] = true;
+// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+				// counterfactual: equivalent — the map's value is never read — it is consulted through `isset()`, `count()` or `array_key_first()` — so `true` and `false` behave the same here.
 			}
 		}
 
 		$core_bundle = get_site_transient( 'update_core' );
-		if ( $core_bundle instanceof \stdClass && (bool) ( $core_bundle->updates ?? null ) && is_array( $core_bundle->updates ) ) {
+		if ( $core_bundle instanceof \stdClass && (bool) (
+			$core_bundle->updates ?? null )
+			&& is_array( $core_bundle->updates ) ) {
 			foreach ( $core_bundle->updates as $core_offer ) {
 				if ( ! is_object( $core_offer ) ) {
 					continue;
 				}
 
-				if ( isset( $core_offer->response ) && 'autoupdate' === $core_offer->response ) {
+				if ( isset( $core_offer->response )
+					&& 'autoupdate' === $core_offer->response ) {
 					// @infection-ignore-all.
-					$alive[ self::stable_ledger_hash( 'core', $core_offer ) ] = true; // counterfactual: equivalent — the map's value is never read — it is consulted through `isset()`, `count()` or `array_key_first()` — so `true` and `false` behave the same here.
+					$alive[ self::stable_ledger_hash( 'core', $core_offer ) ] = true;
+// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					// counterfactual: equivalent — the map's value is never read — it is consulted through `isset()`, `count()` or `array_key_first()` — so `true` and `false` behave the same here.
 				}
 			}
 		}
@@ -520,11 +594,16 @@ final class Updatronix_AutoUpdateDelay {
 	 * Write an audit-log row for an offer held back by the soak window.
 	 *
 	 * @param 'plugin'|'theme'|'core'|'translation' $type            Offer type.
-	 * @param object                                $item            Automatic-updater offer object.
-	 * @param int                                   $first_seen_unix Unix timestamp of first detection.
-	 * @param int                                   $delay_seconds   Soak window in seconds.
+	 * @param object                                $item Automatic-updater offer object.
+	 * @param int                                   $first_seen_unix First seen.
+	 * @param int                                   $delay_seconds Soak window in seconds.
 	 */
-	private static function log_deferred_offer( string $type, object $item, int $first_seen_unix, int $delay_seconds ): void {
+	private static function log_deferred_offer(
+		string $type,
+		object $item,
+		int $first_seen_unix,
+		int $delay_seconds
+	): void {
 		$slice        = self::$delay_settings_slice ?? array(
 			'enabled' => false,
 			'days'    => 7,
@@ -547,18 +626,33 @@ final class Updatronix_AutoUpdateDelay {
 		$eligible_at_ts          = self::eligible_at_for_log( $hold_until, $now );
 
 		$msg = sprintf(
+			// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+			// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 			/* translators: 1: number of soak days configured, 2: datetime string when eligibility starts if the update is still offered. */
-			__( 'Updatronix deferred this automatic update: soak is %1$d full day(s) after first detection; eligible no earlier than %2$s.', 'updatronix' ),
+			__(
+				// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+				'Updatronix deferred this automatic update: soak is %1$d full day(s) after first detection; eligible no earlier than %2$s.',
+				'updatronix'
+			),
 			$days_setting,
 			wp_date( trim( $date_fragment ), $eligible_at_ts )
 		);
 
-		$event_key_tail = sanitize_key( substr( self::stable_ledger_hash( $type, $item ), 0, 60 ) );
+		$event_key_tail = sanitize_key(
+			substr(
+				self::stable_ledger_hash(
+					$type,
+					$item
+				),
+				0,
+				60
+			)
+		);
 		$event_key      = 'udly|' . $event_key_tail;
 
 		$log_type_safe = ( 'translation' === $type ) ? 'translation' : $type;
 
-		// One time source: the calculator's eligible_at, never
+		// One time source: the calculator's eligible_at, never.
 		// max( first_seen + delay, time() ) (analysis 04 §6.4, synthesis C8).
 		Updatronix_Logger::log_event(
 			array(
@@ -596,7 +690,8 @@ final class Updatronix_AutoUpdateDelay {
 	 * @return int Timestamp used in the delayed row.
 	 */
 	private static function eligible_at_for_log( int $hold_until, int $now ): int {
-		if ( ! class_exists( 'Updatronix_Schedule_State' ) || ! class_exists( 'Updatronix_Schedule_Context' ) ) {
+		if ( ! class_exists( 'Updatronix_Schedule_State' )
+			|| ! class_exists( 'Updatronix_Schedule_Context' ) ) {
 			return max( $hold_until, $now );
 		}
 
@@ -606,7 +701,12 @@ final class Updatronix_AutoUpdateDelay {
 			(string) $schedule['update_check']['recurrence'],
 			$next_check
 		);
-		$eligible   = Updatronix_Schedule_State::first_check_at_or_after( $hold_until, $next_check, $interval, $now );
+		$eligible   = Updatronix_Schedule_State::first_check_at_or_after(
+			$hold_until,
+			$next_check,
+			$interval,
+			$now
+		);
 
 		return null === $eligible ? $hold_until : $eligible;
 	}
@@ -617,22 +717,40 @@ final class Updatronix_AutoUpdateDelay {
 	 * @param 'plugin'|'theme'|'core'|'translation' $type Offer type.
 	 * @param object                                $item Automatic-updater offer object.
 	 *
-	 * @return array{0:string,1:string,2:string,3:string} name, slug, version_before, version_after
+	 * @return array{0:string,1:string,2:string,3:string} name, slug,
+	 * version_before, version_after
 	 */
-	private static function resolve_offer_dimensions( string $type, object $item ): array {
+	private static function resolve_offer_dimensions(
+		string $type,
+		object $item
+	): array {
 		switch ( $type ) {
 			case 'plugin':
 				$file = isset( $item->plugin ) ? (string) $item->plugin : '';
 				if ( '' === $file ) {
-					return array( __( 'Unknown plugin', 'updatronix' ), '', '', (string) ( $item->new_version ?? '' ) );
+					return array(
+						__( 'Unknown plugin', 'updatronix' ),
+						'',
+						'',
+						(string) ( $item->new_version ?? '' ),
+					);
 				}
 
 				if ( ! function_exists( 'get_plugin_data' ) ) {
 					require_once ABSPATH . 'wp-admin/includes/plugin.php';
 				}
 
-				if ( str_contains( $file, '..' ) || str_starts_with( $file, '/' ) || str_contains( $file, '\\' ) ) {
-					return array( __( 'Unknown plugin', 'updatronix' ), '', '', (string) ( $item->new_version ?? '' ) );
+				if ( str_contains( $file, '..' ) || str_starts_with( $file, '/' )
+					|| str_contains(
+						$file,
+						'\\'
+					) ) {
+					return array(
+						__( 'Unknown plugin', 'updatronix' ),
+						'',
+						'',
+						(string) ( $item->new_version ?? '' ),
+					);
 				}
 
 				$data  = get_plugin_data( \WP_PLUGIN_DIR . '/' . $file, false );
@@ -648,7 +766,12 @@ final class Updatronix_AutoUpdateDelay {
 			case 'theme':
 				$stylesheet = isset( $item->theme ) ? (string) $item->theme : '';
 				if ( '' === $stylesheet ) {
-					return array( __( 'Unknown theme', 'updatronix' ), '', '', (string) ( $item->new_version ?? '' ) );
+					return array(
+						__( 'Unknown theme', 'updatronix' ),
+						'',
+						'',
+						(string) ( $item->new_version ?? '' ),
+					);
 				}
 
 				$theme_wp   = wp_get_theme( $stylesheet );

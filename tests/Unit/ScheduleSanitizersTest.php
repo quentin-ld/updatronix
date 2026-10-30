@@ -34,7 +34,7 @@ final class ScheduleSanitizersTest extends TestCase {
 		require_once dirname( __DIR__, 2 ) . '/inc/settings/options.php';
 	}
 
-	// --- updatronix_sanitize_schedule_wall_time ---
+	// --- updatronix_sanitize_schedule_wall_time ---.
 
 	/**
 	 * Valid time strings are normalized to HH:mm.
@@ -60,8 +60,16 @@ final class ScheduleSanitizersTest extends TestCase {
 	 * @param string $input    Raw time string to sanitize.
 	 * @param string $expected Expected normalized result.
 	 */
-	public function test_sanitize_wall_time_valid( string $input, string $expected ): void {
-		$this->assertSame( $expected, updatronix_sanitize_schedule_wall_time( $input ) );
+	public function test_sanitize_wall_time_valid(
+		string $input,
+		string $expected
+	): void {
+		$this->assertSame(
+			$expected,
+			updatronix_sanitize_schedule_wall_time(
+				$input
+			)
+		);
 	}
 
 	/**
@@ -92,11 +100,18 @@ final class ScheduleSanitizersTest extends TestCase {
 	 *
 	 * @param string $input Raw time string to sanitize.
 	 */
-	public function test_sanitize_wall_time_invalid_falls_back( string $input ): void {
-		$this->assertSame( '03:00', updatronix_sanitize_schedule_wall_time( $input ) );
+	public function test_sanitize_wall_time_invalid_falls_back(
+		string $input
+	): void {
+		$this->assertSame(
+			'03:00',
+			updatronix_sanitize_schedule_wall_time(
+				$input
+			)
+		);
 	}
 
-	// --- updatronix_sanitize_schedule_array ---
+	// --- updatronix_sanitize_schedule_array ---.
 
 	/**
 	 * Empty input returns all defaults.
@@ -297,7 +312,7 @@ final class ScheduleSanitizersTest extends TestCase {
 		$this->assertSame( '', $result['update_check']['time'] );
 	}
 
-	// --- updatronix_next_update_check_timestamp ---
+	// --- updatronix_next_update_check_timestamp ---.
 
 	/**
 	 * Twice daily never returns a timestamp in the past.
@@ -330,7 +345,7 @@ final class ScheduleSanitizersTest extends TestCase {
 	 * @return void
 	 */
 	public function test_next_check_weekly_is_in_the_future(): void {
-		// A wall clock an hour ago can cross midnight; use the start of today
+		// A wall clock an hour ago can cross midnight; use the start of today.
 		// when it would, so the input is always in the past today.
 		$now  = new \DateTimeImmutable( 'now' );
 		$past = $now->modify( '-1 hour' );
@@ -367,7 +382,7 @@ final class ScheduleSanitizersTest extends TestCase {
 		$this->assertLessThan( DAY_IN_SECONDS, $next - time() );
 	}
 
-	// --- updatronix_merge_partial_schedule_into ---
+	// --- updatronix_merge_partial_schedule_into ---.
 
 	/**
 	 * Empty partial returns baseline unchanged.
@@ -416,7 +431,8 @@ final class ScheduleSanitizersTest extends TestCase {
 	}
 
 	/**
-	 * Partial with null-like values uses array_key_exists, so explicit false is kept.
+	 * Partial with null-like values uses array_key_exists, so explicit false is
+	 * kept.
 	 */
 	public function test_merge_partial_explicit_false_overrides(): void {
 		$baseline = array(

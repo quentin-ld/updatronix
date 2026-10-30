@@ -1,6 +1,7 @@
 <?php
 /**
- * Admin menu: Updatronix under Tools and Dashboard (single-site) or Network Admin (Multisite).
+ * Admin menu: Updatronix under Tools and Dashboard (single-site) or Network
+ * Admin (Multisite).
  *
  * @package updatronix
  */
@@ -29,14 +30,16 @@ add_filter( 'admin_body_class', 'updatronix_admin_body_class' );
  * @return string Body classes.
  */
 function updatronix_admin_body_class( string $classes ): string {
-	$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+	$screen = function_exists( 'get_current_screen' ) ? get_current_screen(
+	) : null;
 
 	if ( null !== $screen && false !== strpos( $screen->id, 'updatronix' ) ) {
 		$classes .= ' updatronix-admin-page';
 
 		$brand = updatronix_get_admin_brand();
 
-		if ( (bool) ( $brand['replace'] ?? false ) && '#F0F0F1' === strtoupper( (string) ( $brand['menuColor'] ?? '' ) ) ) {
+		if ( (bool) ( $brand['replace'] ?? false )
+			&& '#F0F0F1' === strtoupper( (string) ( $brand['menuColor'] ?? '' ) ) ) {
 			$classes .= ' updatronix-brand-menu-light';
 		}
 	}
@@ -45,14 +48,21 @@ function updatronix_admin_body_class( string $classes ): string {
 }
 
 /**
- * Registers **Tools → Updatronix** and **Dashboard → Update logs**, both opening the same app shell.
+ * Registers **Tools → Updatronix** and **Dashboard → Update logs**, both
+ * opening the same app shell.
  *
  * @since 1.0.0
  *
  * @return void
  */
 function updatronix_add_option_page(): void {
-	$label = (string) apply_filters( 'updatronix_admin_menu_label', __( 'Updatronix', 'updatronix' ) );
+	$label = (string) apply_filters(
+		'updatronix_admin_menu_label',
+		__(
+			'Updatronix',
+			'updatronix'
+		)
+	);
 
 	add_management_page(
 		$label,
@@ -83,7 +93,13 @@ function updatronix_add_network_option_page(): void {
 		return;
 	}
 
-	$label = (string) apply_filters( 'updatronix_admin_menu_label', __( 'Updatronix', 'updatronix' ) );
+	$label = (string) apply_filters(
+		'updatronix_admin_menu_label',
+		__(
+			'Updatronix',
+			'updatronix'
+		)
+	);
 
 	add_menu_page(
 		$label,
@@ -97,7 +113,8 @@ function updatronix_add_network_option_page(): void {
 }
 
 /**
- * Outputs the admin page shell; the React app mounts into `#updatronix-settings`.
+ * Outputs the admin page shell; the React app mounts into
+ * `#updatronix-settings`.
  *
  * The gradient header, the cross-links row, and the version line are gone:
  * the shell owns the brand, the navigation, and the page header.
@@ -108,22 +125,34 @@ function updatronix_add_network_option_page(): void {
  */
 function updatronix_options_page(): void {
 	if ( is_multisite() && ! is_super_admin() ) {
-		wp_die( esc_html__( 'You do not have sufficient permissions to access this page.', 'updatronix' ) );
+		wp_die(
+			esc_html__(
+				'You do not have sufficient permissions to access this page.',
+				'updatronix'
+			)
+		);
 	}
 
 	$tabs       = updatronix_get_admin_tabs();
 	$active_tab = updatronix_get_active_tab( $tabs );
+	// phpcs:disable -- Admin dashboard shell; dynamic values are escaped below.
 	?>
 	<div class="updatronix-dashboard-wrap">
 		<div id="updatronix-settings" class="updatronix-settings">
 			<div class="updatronix-loading card">
 					<div class="updatronix-loading-body">
 						<p class="updatronix-loading-text">
-							<?php echo esc_html__( 'Loading your Updatronix settings…', 'updatronix' ); ?>
+							<?php
+							echo esc_html__(
+								'Loading your Updatronix settings…',
+								'updatronix'
+							);
+							?>
 						</p>
 					</div>
 				</div>
 				<?php
+				// phpcs:enable
 				/**
 				 * Fires inside the admin page shell, after the default content area.
 				 *

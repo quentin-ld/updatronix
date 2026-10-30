@@ -28,11 +28,16 @@ final class LogEventDedupeTest extends WP_UnitTestCase {
 	protected function setUp(): void {
 		parent::setUp();
 
-		require_once UPDATRONIX_PLUGIN_DIR . 'inc/classes/class-updatronix-database.php';
-		require_once UPDATRONIX_PLUGIN_DIR . 'inc/classes/class-updatronix-log-taxonomy.php';
-		require_once UPDATRONIX_PLUGIN_DIR . 'inc/classes/class-updatronix-log-event.php';
-		require_once UPDATRONIX_PLUGIN_DIR . 'inc/classes/class-updatronix-security.php';
-		require_once UPDATRONIX_PLUGIN_DIR . 'inc/classes/class-updatronix-logger.php';
+		require_once UPDATRONIX_PLUGIN_DIR
+			. 'inc/classes/class-updatronix-database.php';
+		require_once UPDATRONIX_PLUGIN_DIR
+			. 'inc/classes/class-updatronix-log-taxonomy.php';
+		require_once UPDATRONIX_PLUGIN_DIR
+			. 'inc/classes/class-updatronix-log-event.php';
+		require_once UPDATRONIX_PLUGIN_DIR
+			. 'inc/classes/class-updatronix-security.php';
+		require_once UPDATRONIX_PLUGIN_DIR
+			. 'inc/classes/class-updatronix-logger.php';
 		require_once dirname( __DIR__ ) . '/Support/LogEventFactory.php';
 
 		Updatronix_Database::create_table();
@@ -77,7 +82,15 @@ final class LogEventDedupeTest extends WP_UnitTestCase {
 		$waiting = LogEventFactory::flow_waiting();
 
 		$first  = Updatronix_Logger::log_event( $waiting );
-		$second = Updatronix_Logger::log_event( array_merge( $waiting, array( 'pass_id' => LogEventFactory::NEXT_PASS_ID ) ) );
+		$second = Updatronix_Logger::log_event(
+			array_merge(
+				$waiting,
+				array(
+					'pass_id' =>
+					LogEventFactory::NEXT_PASS_ID,
+				)
+			)
+		);
 
 		self::assertIsInt( $first );
 		self::assertSame( $first, $second );
@@ -126,9 +139,29 @@ final class LogEventDedupeTest extends WP_UnitTestCase {
 		);
 
 		$first       = Updatronix_Logger::log_event( $block );
-		$new_target  = Updatronix_Logger::log_event( array_merge( $block, array( 'target_version' => '3.0.0' ) ) );
-		$new_reason  = Updatronix_Logger::log_event( array_merge( $block, $php_reason ) );
-		$new_attempt = Updatronix_Logger::log_event( array_merge( $block, array( 'attempt' => 2 ) ) );
+		$new_target  = Updatronix_Logger::log_event(
+			array_merge(
+				$block,
+				array(
+					'target_version' =>
+					'3.0.0',
+				)
+			)
+		);
+		$new_reason  = Updatronix_Logger::log_event(
+			array_merge(
+				$block,
+				$php_reason
+			)
+		);
+		$new_attempt = Updatronix_Logger::log_event(
+			array_merge(
+				$block,
+				array(
+					'attempt' => 2,
+				)
+			)
+		);
 
 		self::assertIsInt( $first );
 		self::assertNotSame( $first, $new_target );
@@ -215,7 +248,20 @@ final class LogEventDedupeTest extends WP_UnitTestCase {
 	 * @return void
 	 */
 	public function test_legacy_log_keeps_empty_key_behavior(): void {
-		$args = array( 'plugin', 'update', 'Legacy fixture', 'fixture/legacy.php', '1.0.0', '1.1.0', 'success', 'Done.', '', 'automatic', 'single', '' );
+		$args = array(
+			'plugin',
+			'update',
+			'Legacy fixture',
+			'fixture/legacy.php',
+			'1.0.0',
+			'1.1.0',
+			'success',
+			'Done.',
+			'',
+			'automatic',
+			'single',
+			'',
+		);
 
 		$first  = Updatronix_Logger::log( ...$args );
 		$second = Updatronix_Logger::log( ...$args );
@@ -237,7 +283,20 @@ final class LogEventDedupeTest extends WP_UnitTestCase {
 	 * @return void
 	 */
 	public function test_legacy_log_dedupes_by_event_key(): void {
-		$args = array( 'plugin', 'update', 'Legacy fixture', 'fixture/legacy.php', '1.0.0', '1.1.0', 'success', 'Done.', '', 'automatic', 'single', 'legacy|key|fixture' );
+		$args = array(
+			'plugin',
+			'update',
+			'Legacy fixture',
+			'fixture/legacy.php',
+			'1.0.0',
+			'1.1.0',
+			'success',
+			'Done.',
+			'',
+			'automatic',
+			'single',
+			'legacy|key|fixture',
+		);
 
 		$first  = Updatronix_Logger::log( ...$args );
 		$second = Updatronix_Logger::log( ...$args );
@@ -275,7 +334,13 @@ final class LogEventDedupeTest extends WP_UnitTestCase {
 	 */
 	public function test_logging_disabled_writes_nothing(): void {
 		updatronix_save_settings_array(
-			array_merge( UPDATRONIX_SETTINGS_DEFAULTS, array( 'logging_enabled' => false ) )
+			array_merge(
+				UPDATRONIX_SETTINGS_DEFAULTS,
+				array(
+					'logging_enabled' =>
+								false,
+				)
+			)
 		);
 
 		$id = Updatronix_Logger::log_event( LogEventFactory::pass_summary() );
@@ -294,13 +359,39 @@ final class LogEventDedupeTest extends WP_UnitTestCase {
 
 		self::assertIsInt( $first );
 
-		$latest = Updatronix_Logger::get_latest_for_item( get_current_blog_id(), 'plugin', 'fixture/shield-wp.php', '2.0.0' );
+		$latest = Updatronix_Logger::get_latest_for_item(
+			get_current_blog_id(),
+			'plugin',
+			'fixture/shield-wp.php',
+			'2.0.0'
+		);
 
 		self::assertIsObject( $latest );
 		self::assertSame( $first, (int) $latest->id );
-		self::assertNull( Updatronix_Logger::get_latest_for_item( get_current_blog_id(), 'plugin', 'fixture/shield-wp.php', '9.9.9' ) );
-		self::assertNull( Updatronix_Logger::get_latest_for_item( get_current_blog_id(), 'theme', 'fixture/shield-wp.php', '2.0.0' ) );
-		self::assertNull( Updatronix_Logger::get_latest_for_item( get_current_blog_id() + 1, 'plugin', 'fixture/shield-wp.php', '2.0.0' ) );
+		self::assertNull(
+			Updatronix_Logger::get_latest_for_item(
+				get_current_blog_id(),
+				'plugin',
+				'fixture/shield-wp.php',
+				'9.9.9'
+			)
+		);
+		self::assertNull(
+			Updatronix_Logger::get_latest_for_item(
+				get_current_blog_id(),
+				'theme',
+				'fixture/shield-wp.php',
+				'2.0.0'
+			)
+		);
+		self::assertNull(
+			Updatronix_Logger::get_latest_for_item(
+				get_current_blog_id() + 1,
+				'plugin',
+				'fixture/shield-wp.php',
+				'2.0.0'
+			)
+		);
 	}
 
 	/**
@@ -309,7 +400,10 @@ final class LogEventDedupeTest extends WP_UnitTestCase {
 	 * @return void
 	 */
 	public function test_attach_context_enriches_without_changing_the_outcome(): void {
-		$id = Updatronix_Logger::log_event( LogEventFactory::native_automatic_success() );
+		$id = Updatronix_Logger::log_event(
+			LogEventFactory::native_automatic_success(
+			)
+		);
 		self::assertIsInt( $id );
 
 		$before = Updatronix_Logger::get_log( (int) $id, true );
@@ -336,10 +430,17 @@ final class LogEventDedupeTest extends WP_UnitTestCase {
 		self::assertSame( 'chain-attached', $after->chain_id );
 		self::assertSame( 'plugin:fixture/predecessor.php', $after->predecessor );
 		self::assertSame( 2, (int) $after->attempt );
-		self::assertSame( 'Attached chain', Updatronix_Security::decode_context( (string) $after->context )['chain_name'] );
+		self::assertSame(
+			'Attached chain',
+			Updatronix_Security::decode_context( (string) $after->context )['chain_name']
+		);
 
 		// Never changes the item, versions, action, status, or message.
-		self::assertSame( '1.1.0', $after->version_after, 'The enriched target must not overwrite a recorded version.' );
+		self::assertSame(
+			'1.1.0',
+			$after->version_after,
+			'The enriched target must not overwrite a recorded version.'
+		);
 		self::assertSame( 'update', $after->action_type );
 		self::assertSame( 'success', $after->status );
 		self::assertSame( 'done', $after->decision_state );
@@ -347,7 +448,14 @@ final class LogEventDedupeTest extends WP_UnitTestCase {
 		self::assertSame( $before->item_slug, $after->item_slug );
 
 		// Enriching an unknown row is a no-op.
-		self::assertFalse( Updatronix_Logger::attach_context( 999999, array( 'origin' => 'flow' ) ) );
+		self::assertFalse(
+			Updatronix_Logger::attach_context(
+				999999,
+				array(
+					'origin' => 'flow',
+				)
+			)
+		);
 	}
 
 	/**
@@ -357,7 +465,9 @@ final class LogEventDedupeTest extends WP_UnitTestCase {
 	 */
 	public function test_update_summary_updates_only_a_pass_summary(): void {
 		$summary_id = Updatronix_Logger::log_event( LogEventFactory::pass_summary() );
-		$item_id    = Updatronix_Logger::log_event( LogEventFactory::native_automatic_success() );
+		$item_id    = Updatronix_Logger::log_event(
+			LogEventFactory::native_automatic_success()
+		);
 
 		self::assertIsInt( $summary_id );
 		self::assertIsInt( $item_id );
@@ -376,11 +486,25 @@ final class LogEventDedupeTest extends WP_UnitTestCase {
 		$row = Updatronix_Logger::get_log( (int) $summary_id, true );
 		self::assertSame( 'warning', $row->status );
 		self::assertSame( 'blocked', $row->decision_state );
-		self::assertSame( 9, Updatronix_Security::decode_context( (string) $row->context )['blocked'] );
-		self::assertSame( 50, Updatronix_Security::decode_context( (string) $row->context )['total'] );
+		self::assertSame(
+			9,
+			Updatronix_Security::decode_context( (string) $row->context )['blocked']
+		);
+		self::assertSame(
+			50,
+			Updatronix_Security::decode_context( (string) $row->context )['total']
+		);
 
 		// A normal item row is not a pass summary.
-		self::assertFalse( Updatronix_Logger::update_summary( (int) $item_id, array( 'status' => 'error' ) ) );
+		self::assertFalse(
+			Updatronix_Logger::update_summary(
+				(int) $item_id,
+				array(
+					'status' =>
+					'error',
+				)
+			)
+		);
 	}
 
 	/**
@@ -406,6 +530,11 @@ final class LogEventDedupeTest extends WP_UnitTestCase {
 
 		$table = Updatronix_Database::get_table_name();
 
-		return (int) $wpdb->get_var( $wpdb->prepare( 'SELECT COUNT(*) FROM %i', $table ) );
+		return (int) $wpdb->get_var(
+			$wpdb->prepare(
+				'SELECT COUNT(*) FROM %i',
+				$table
+			)
+		);
 	}
 }

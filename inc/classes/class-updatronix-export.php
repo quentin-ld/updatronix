@@ -10,7 +10,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Registers POST /updatronix/v1/logs/export and coordinates export sub-services.
+ * Registers POST /updatronix/v1/logs/export and coordinates export
+ * sub-services.
  *
  * @since 1.1.0
  */
@@ -50,7 +51,18 @@ final class Updatronix_Export {
 	 *
 	 * @var list<string>
 	 */
-	public const SORT_FIELDS = array( 'date', 'created_at', 'log_type', 'item_name', 'status', 'performed_as', 'reason_code', 'decision_state', 'origin', 'pass_id' );
+	public const SORT_FIELDS = array(
+		'date',
+		'created_at',
+		'log_type',
+		'item_name',
+		'status',
+		'performed_as',
+		'reason_code',
+		'decision_state',
+		'origin',
+		'pass_id',
+	);
 
 	/**
 	 * Valid sort directions for the export API.
@@ -64,7 +76,21 @@ final class Updatronix_Export {
 	 *
 	 * @var list<string>
 	 */
-	public const FILTER_FIELDS = array( 'category', 'actionType', 'status', 'triggeredBy', 'runType', 'user', 'date', 'reason', 'state', 'origin', 'pass', 'chain', 'nextEligible' );
+	public const FILTER_FIELDS = array(
+		'category',
+		'actionType',
+		'status',
+		'triggeredBy',
+		'runType',
+		'user',
+		'date',
+		'reason',
+		'state',
+		'origin',
+		'pass',
+		'chain',
+		'nextEligible',
+	);
 
 	/**
 	 * Categorical filter operators.
@@ -78,7 +104,16 @@ final class Updatronix_Export {
 	 *
 	 * @var list<string>
 	 */
-	public const DATE_OPERATORS = array( 'on', 'before', 'after', 'beforeInc', 'afterInc', 'inThePast', 'over', 'between' );
+	public const DATE_OPERATORS = array(
+		'on',
+		'before',
+		'after',
+		'beforeInc',
+		'afterInc',
+		'inThePast',
+		'over',
+		'between',
+	);
 
 	/**
 	 * Exportable column keys.
@@ -127,7 +162,10 @@ final class Updatronix_Export {
 			array(
 				'methods'             => \WP_REST_Server::CREATABLE,
 				'callback'            => array( self::class, 'rest_export' ),
-				'permission_callback' => array( Updatronix_Security::class, 'user_can_manage_logs' ),
+				'permission_callback' => array(
+					Updatronix_Security::class,
+					'user_can_manage_logs',
+				),
 				'args'                => array(
 					'view'    => array(
 						'required'   => true,
@@ -147,7 +185,14 @@ final class Updatronix_Export {
 								'properties' => array(
 									'field'     => array(
 										'type' => 'string',
-										'enum' => array( 'date', 'created_at', 'log_type', 'item_name', 'status', 'performed_as' ),
+										'enum' => array(
+											'date',
+											'created_at',
+											'log_type',
+											'item_name',
+											'status',
+											'performed_as',
+										),
 									),
 									'direction' => array(
 										'type' => 'string',
@@ -202,7 +247,9 @@ final class Updatronix_Export {
 	 * @param \WP_REST_Request $request Request.
 	 * @return \WP_REST_Response|\WP_Error
 	 */
-	public static function rest_export( \WP_REST_Request $request ): \WP_REST_Response|\WP_Error {
+	public static function rest_export(
+		\WP_REST_Request $request
+	): \WP_REST_Response|\WP_Error {
 		/**
 		 * Raw JSON request parameters.
 		 *
@@ -220,12 +267,15 @@ final class Updatronix_Export {
 		 */
 		$params = $raw_params;
 
-		$cursor_raw = isset( $params['cursor'] ) ? trim( (string) $params['cursor'] ) : '';
+		$cursor_raw = isset( $params['cursor'] ) ? trim(
+			(string) $params['cursor']
+		) : '';
 
 		$user_id = (int) get_current_user_id();
 		$blog_id = (int) get_current_blog_id();
 
-		$site_for_cursor = Updatronix_Export_Request_Schema::resolve_site_id_from_params( $params );
+		$site_for_cursor =
+			Updatronix_Export_Request_Schema::resolve_site_id_from_params( $params );
 
 		$started = microtime( true );
 
@@ -257,7 +307,11 @@ final class Updatronix_Export {
 			$transient_key = $init['transient_key'];
 			$offset        = $init['offset'];
 		} else {
-			$cont = self::init_cursor_continuation( $cursor_raw, $site_for_cursor, $user_id );
+			$cont = self::init_cursor_continuation(
+				$cursor_raw,
+				$site_for_cursor,
+				$user_id
+			);
 			if ( is_wp_error( $cont ) ) {
 				return $cont;
 			}
@@ -282,7 +336,8 @@ final class Updatronix_Export {
 		 *
 		 * @var array<string, bool>
 		 */
-		$columns = isset( $validated['columns'] ) && is_array( $validated['columns'] ) ? $validated['columns'] : array();
+		$columns = isset( $validated['columns'] )
+			&& is_array( $validated['columns'] ) ? $validated['columns'] : array();
 		$format  = (string) ( $validated['format'] ?? 'txt' );
 
 		$max_rows_attempt = min(
@@ -291,7 +346,8 @@ final class Updatronix_Export {
 		);
 		$max_rows_attempt = max( 1, min( 10_000_000, $max_rows_attempt ) );
 
-		$slice_max_rows = (int) ( $validated['slice_max_rows'] ?? self::MAX_ROWS_TOTAL );
+		$slice_max_rows = (int) (
+			$validated['slice_max_rows'] ?? self::MAX_ROWS_TOTAL );
 		$slice_max_rows = max( 1, min( self::MAX_ROWS_TOTAL, $slice_max_rows ) );
 		$row_cap_job    = max( 1, min( $max_rows_attempt, $slice_max_rows ) );
 
@@ -314,7 +370,11 @@ final class Updatronix_Export {
 		if ( ! $truncated && $remaining_budget > 0 ) {
 			$per_query = min( self::MAX_ROWS_PER_CHUNK, $remaining_budget );
 
-			$rows       = Updatronix_Export_Query_Builder::fetch_rows( $validated, $offset, $per_query + 1 );
+			$rows       = Updatronix_Export_Query_Builder::fetch_rows(
+				$validated,
+				$offset,
+				$per_query + 1
+			);
 			$more_in_db = count( $rows ) > $per_query;
 			if ( $more_in_db ) {
 				$rows = array_slice( $rows, 0, $per_query );
@@ -340,21 +400,28 @@ final class Updatronix_Export {
 			$row_count_fetched = count( $rows );
 			$partial_batch     = $row_count_fetched > $rows_emitted;
 
-			// Rows whose log_type is outside the render allowlist are dropped by
-			// the body builder. Advance past them so a continuation cannot repeat
+			// Rows whose log_type is outside the render allowlist are dropped by.
+			// the body builder. Advance past them so a continuation cannot repeat.
 			// the same query forever.
 			if ( 0 === $rows_emitted && $row_count_fetched > 0 ) {
 				$offset += $row_count_fetched;
 			}
 		}
 
-		$glue            = ( '' !== $accumulated_body && '' !== $chunk_delta ) ? "\n" : '';
+		$glue            = ( '' !== $accumulated_body
+			&& '' !== $chunk_delta ) ? "\n" : '';
 		$new_accumulated = $accumulated_body . $glue . $chunk_delta;
 
 		if ( ! $truncated && strlen( $new_accumulated ) > self::MAX_BYTES_TOTAL ) {
-			$allow             = max( 0, self::MAX_BYTES_TOTAL - strlen( $accumulated_body ) );
+			$allow             = max(
+				0,
+				self::MAX_BYTES_TOTAL - strlen(
+					$accumulated_body
+				)
+			);
 			$chunk_delta       = substr( $chunk_delta, 0, $allow );
-			$glue              = ( '' !== $accumulated_body && '' !== $chunk_delta ) ? "\n" : '';
+			$glue              = ( '' !== $accumulated_body
+				&& '' !== $chunk_delta ) ? "\n" : '';
 			$new_accumulated   = $accumulated_body . $glue . $chunk_delta;
 			$truncated         = true;
 			$truncation_reason = 'byte_cap';
@@ -366,7 +433,9 @@ final class Updatronix_Export {
 			&& strlen( $new_accumulated ) < self::MAX_BYTES_TOTAL
 			&& ( $more_in_db || $partial_batch );
 
-		if ( $needs_continue && ( microtime( true ) - $started ) > self::HARD_TIME_SECONDS ) {
+		if ( $needs_continue && ( microtime(
+			true
+		) - $started ) > self::HARD_TIME_SECONDS ) {
 			$truncated         = true;
 			$truncation_reason = 'time';
 			$needs_continue    = false;
@@ -378,7 +447,13 @@ final class Updatronix_Export {
 			$needs_continue    = false;
 		}
 
-		$filters_fp   = hash( 'sha256', (bool) wp_json_encode( $validated['fingerprint_source'] ?? array() ) ? wp_json_encode( $validated['fingerprint_source'] ?? array() ) : '' );
+		$filters_fp = hash(
+			'sha256',
+			// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+			(bool) wp_json_encode(
+				$validated['fingerprint_source'] ?? array()
+			) ? wp_json_encode( $validated['fingerprint_source'] ?? array() ) : ''
+		);
 		$generated_at = time();
 
 		$payload_meta = array(
@@ -394,7 +469,8 @@ final class Updatronix_Export {
 			'issued_cursor_tokens' => $issued_cursor_tokens,
 		);
 
-		if ( $needs_continue && ( '' !== $chunk_delta || $partial_batch || $more_in_db ) ) {
+		if ( $needs_continue && ( '' !== $chunk_delta || $partial_batch
+			|| $more_in_db ) ) {
 			return self::build_chunk_response(
 				$payload_meta,
 				$new_accumulated,
@@ -444,14 +520,21 @@ final class Updatronix_Export {
 	 * @param int              $user_id Current user ID.
 	 * @return array<string, mixed>|\WP_Error
 	 */
-	private static function init_new_export( \WP_REST_Request $request, int $blog_id, int $user_id ): array|\WP_Error {
+	private static function init_new_export(
+		\WP_REST_Request $request,
+		int $blog_id,
+		int $user_id
+	): array|\WP_Error {
 		$validated = Updatronix_Export_Request_Schema::validate( $request );
 		if ( is_wp_error( $validated ) ) {
 			return $validated;
 		}
 
 		$site_id_new   = (int) ( $validated['site_id'] ?? $blog_id );
-		$transient_key = Updatronix_Export_Transient_Manager::generate_key( $site_id_new, $user_id );
+		$transient_key = Updatronix_Export_Transient_Manager::generate_key(
+			$site_id_new,
+			$user_id
+		);
 		$offset        = (int) ( $validated['slice_sql_offset'] ?? 0 );
 
 		return array(
@@ -471,8 +554,16 @@ final class Updatronix_Export {
 	 * @param int    $user_id        Current user ID.
 	 * @return array<string, mixed>|\WP_Error
 	 */
-	private static function init_cursor_continuation( string $cursor_raw, int $site_for_cursor, int $user_id ): array|\WP_Error {
-		$decoded = Updatronix_Export_Cursor::verify( $cursor_raw, $site_for_cursor, $user_id );
+	private static function init_cursor_continuation(
+		string $cursor_raw,
+		int $site_for_cursor,
+		int $user_id
+	): array|\WP_Error {
+		$decoded = Updatronix_Export_Cursor::verify(
+			$cursor_raw,
+			$site_for_cursor,
+			$user_id
+		);
 		if ( is_wp_error( $decoded ) ) {
 			return $decoded;
 		}
@@ -481,7 +572,8 @@ final class Updatronix_Export {
 		$offset        = (int) $decoded['o'];
 
 		$stored = updatronix_get_plugin_transient( $transient_key );
-		if ( ! is_array( $stored ) || ! (bool) ( $stored['validated_export'] ?? null ) || ! is_array( $stored['validated_export'] ) ) {
+		if ( ! is_array( $stored ) || ! (bool) ( $stored['validated_export'] ?? null )
+			|| ! is_array( $stored['validated_export'] ) ) {
 			return new WP_Error( 'cursor_expired', '', array( 'status' => 410 ) );
 		}
 
@@ -491,7 +583,9 @@ final class Updatronix_Export {
 		 * @var array<string, mixed>
 		 */
 		$validated            = $stored['validated_export'];
-		$accumulated_body     = isset( $stored['body'] ) ? (string) $stored['body'] : '';
+		$accumulated_body     = isset(
+			$stored['body']
+		) ? (string) $stored['body'] : '';
 		$total_rows_scanned   = (int) ( $stored['rows_scanned'] ?? 0 );
 		$merged_lines_total   = (int) ( $stored['merged_lines_total'] ?? 0 );
 		$issued_cursor_tokens = (int) ( $stored['issued_cursor_tokens'] ?? 0 );
@@ -521,7 +615,7 @@ final class Updatronix_Export {
 	 * @param int                  $offset             Next row offset.
 	 * @param int                  $user_id            Current user ID.
 	 * @param int                  $site_id            Resolved site ID.
-	 * @param string               $chunk_delta        Body fragment for this chunk.
+	 * @param string               $chunk_delta Body fragment for this chunk.
 	 * @param int                  $rows_emitted       Rows emitted in this chunk.
 	 * @param int                  $generated_at       Timestamp.
 	 * @return \WP_REST_Response
@@ -552,12 +646,21 @@ final class Updatronix_Export {
 			)
 		);
 
-		$written = Updatronix_Export_Transient_Manager::replace( $user_id, $transient_key, $payload_continue );
+		$written = Updatronix_Export_Transient_Manager::replace(
+			$user_id,
+			$transient_key,
+			$payload_continue
+		);
 		if ( is_wp_error( $written ) ) {
 			return rest_convert_error_to_response( $written );
 		}
 
-		$next_cursor = Updatronix_Export_Cursor::mint( $transient_key, $offset, $site_id, $user_id );
+		$next_cursor = Updatronix_Export_Cursor::mint(
+			$transient_key,
+			$offset,
+			$site_id,
+			$user_id
+		);
 
 		return new WP_REST_Response(
 			array(
@@ -587,10 +690,10 @@ final class Updatronix_Export {
 	 * @param string               $new_accumulated    Full accumulated body.
 	 * @param int                  $total_rows_scanned Rows scanned so far.
 	 * @param int                  $merged_lines_total Merged lines count.
-	 * @param string               $chunk_delta        Body fragment for this chunk.
-	 * @param bool                 $more_in_db         Whether more rows exist in the DB.
-	 * @param bool                 $partial_batch      Whether the last batch was partial.
-	 * @param bool                 $truncated          Whether the export was truncated.
+	 * @param string               $chunk_delta Body fragment for this chunk.
+	 * @param bool                 $more_in_db Whether more rows exist in the DB.
+	 * @param bool                 $partial_batch Whether the last batch was partial.
+	 * @param bool                 $truncated Whether the export was truncated.
 	 * @param string               $truncation_reason  Reason for truncation.
 	 * @param string               $transient_key      Export transient key.
 	 * @param int                  $user_id            Current user ID.
@@ -634,7 +737,11 @@ final class Updatronix_Export {
 		$format        = (string) ( $validated['format'] ?? 'txt' );
 
 		if ( $truncated && 'json' !== $format ) {
-			$footer              = Updatronix_Export_Body_Builder::truncation_footer( $total_rows_scanned, $matched_estimate );
+			$footer              =
+				Updatronix_Export_Body_Builder::truncation_footer(
+					$total_rows_scanned,
+					$matched_estimate
+				);
 			$response_body      .= ( '' !== $response_body ? "\n" : '' ) . $footer;
 			$glue_f              = ( '' !== $new_accumulated ) ? "\n" : '';
 			$terminal_store_body = $new_accumulated . $glue_f . $footer;
@@ -655,7 +762,11 @@ final class Updatronix_Export {
 			)
 		);
 
-		$written_final = Updatronix_Export_Transient_Manager::replace( $user_id, $transient_key, $payload_final );
+		$written_final = Updatronix_Export_Transient_Manager::replace(
+			$user_id,
+			$transient_key,
+			$payload_final
+		);
 		if ( is_wp_error( $written_final ) ) {
 			return rest_convert_error_to_response( $written_final );
 		}
@@ -682,7 +793,8 @@ final class Updatronix_Export {
 			 *
 			 * @since 1.1.0
 			 *
-			 * @param array<string, mixed> $data Hook payload (no transient key, raw view, or body).
+			 * @param array<string, mixed> $data Hook payload (no transient key, raw
+			 * view, or body).
 			 */
 			do_action(
 				'updatronix_after_export_logs',
@@ -704,7 +816,9 @@ final class Updatronix_Export {
 			);
 		} catch ( \Throwable $e ) {
 			if ( defined( 'WP_DEBUG_LOG' ) && WP_DEBUG_LOG ) {
-                // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- gated diagnostic only.
+                // phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+                // phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+                // phpcs:ignore Generic.Files.LineLength, WordPress.PHP.DevelopmentFunctions.error_log_error_log -- gated diagnostic only.
 				error_log( '[updatronix] updatronix_after_export_logs listener threw' );
 			}
 		}
@@ -718,7 +832,8 @@ final class Updatronix_Export {
 				'truncation_reason'  => $truncation_reason,
 				'next_cursor'        => null,
 				'truncated_included' => $total_rows_scanned,
-				'truncated_total'    => $truncated ? $matched_estimate : $total_rows_scanned,
+				'truncated_total'    =>
+					$truncated ? $matched_estimate : $total_rows_scanned,
 				'view_applied'       => $validated['view_applied'] ?? array(),
 				'meta'               => array(
 					'generated_at'  => $generated_at,
@@ -737,7 +852,9 @@ final class Updatronix_Export {
 	 * @param \WP_Error $error Error from the rate limiter.
 	 * @return \WP_REST_Response
 	 */
-	private static function decorate_rate_limit_response( \WP_Error $error ): \WP_REST_Response {
+	private static function decorate_rate_limit_response(
+		\WP_Error $error
+	): \WP_REST_Response {
 		$response = rest_convert_error_to_response( $error );
 		$response->header( 'Retry-After', '60' );
 

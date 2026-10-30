@@ -172,7 +172,7 @@ final class Updatronix_Item_State {
 	 *     @type bool        $exists            Whether the item is installed.
 	 *     @type string      $installed_version Installed version.
 	 *     @type string      $target_version    Offered version, empty when none.
-	 *     @type object|null $offer             The offer object the gate evaluates.
+	 * @type object|null $offer The offer object the gate evaluates.
 	 *     @type string      $offer_state       none|pending|stale|unknown.
 	 *     @type string      $auto_update       on|off|forced_off|forced_on.
 	 *     @type int         $last_checked      Transient timestamp.
@@ -258,7 +258,12 @@ final class Updatronix_Item_State {
 	 * @param int|null    $last_checked Transient timestamp, when known.
 	 * @return array{offer_state: string, last_checked: int}
 	 */
-	private static function classify( ?object $transient, bool $has_offer, bool $in_checked, ?int $last_checked = null ): array {
+	private static function classify(
+		?object $transient,
+		bool $has_offer,
+		bool $in_checked,
+		?int $last_checked = null
+	): array {
 		$last_checked = null !== $last_checked
 			? $last_checked
 			: ( null !== $transient ? (int) ( $transient->last_checked ?? 0 ) : 0 );
@@ -279,7 +284,9 @@ final class Updatronix_Item_State {
 			);
 		}
 
-		if ( null === $transient || 0 === $last_checked || ( time() - $last_checked ) > self::ttl() || ! $in_checked ) {
+		if ( null === $transient || 0 === $last_checked || ( time(
+		) - $last_checked ) > self::ttl()
+			|| ! $in_checked ) {
 			return array(
 				'offer_state'  => self::OFFER_UNKNOWN,
 				'last_checked' => $last_checked,
@@ -323,7 +330,8 @@ final class Updatronix_Item_State {
 		$catalogue = self::plugin_catalogue();
 		$offer     = null;
 
-		if ( null !== $transient && isset( $transient->response[ $file ] ) && is_object( $transient->response[ $file ] ) ) {
+		if ( null !== $transient && isset( $transient->response[ $file ] )
+			&& is_object( $transient->response[ $file ] ) ) {
 			$offer = $transient->response[ $file ];
 			if ( ! property_exists( $offer, 'plugin' ) ) {
 				/**
@@ -335,19 +343,30 @@ final class Updatronix_Item_State {
 			}
 		}
 
-		$checked   = null !== $transient && isset( $transient->checked ) && is_array( $transient->checked );
+		$checked   = null !== $transient && isset( $transient->checked )
+			&& is_array( $transient->checked );
 		$row       = $checked ? ( $transient->checked[ $file ] ?? null ) : null;
-		$installed = isset( $catalogue[ $file ]['Version'] ) ? (string) $catalogue[ $file ]['Version'] : (string) ( $row ?? '' );
-		$class     = self::classify( $transient, null !== $offer, null !== $row );
+		$installed =
+			// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+			isset(
+				// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+				$catalogue[ $file ]['Version']
+			) ? (string) $catalogue[ $file ]['Version'] : (string) ( $row ?? '' );
+		$class = self::classify( $transient, null !== $offer, null !== $row );
 
 		return array(
 			'type'              => 'plugin',
 			'id'                => $file,
 			'key'               => self::normalize_key( 'plugin', $file ),
-			'name'              => isset( $catalogue[ $file ]['Name'] ) ? (string) $catalogue[ $file ]['Name'] : $file,
+			'name'              =>
+				isset(
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					$catalogue[ $file ]['Name']
+				) ? (string) $catalogue[ $file ]['Name'] : $file,
 			'exists'            => isset( $catalogue[ $file ] ),
 			'installed_version' => $installed,
-			'target_version'    => null !== $offer ? (string) ( $offer->new_version ?? '' ) : '',
+			'target_version'    => null !== $offer ? (string) (
+				$offer->new_version ?? '' ) : '',
 			'offer'             => $offer,
 			'offer_state'       => $class['offer_state'],
 			'auto_update'       => self::plugin_auto_update( $file ),
@@ -366,28 +385,34 @@ final class Updatronix_Item_State {
 		$theme     = wp_get_theme( $stylesheet );
 		$offer     = null;
 
-		if ( null !== $transient && isset( $transient->response[ $stylesheet ] ) && is_array( $transient->response[ $stylesheet ] ) ) {
+		if ( null !== $transient && isset( $transient->response[ $stylesheet ] )
+			&& is_array( $transient->response[ $stylesheet ] ) ) {
 			$offer = (object) $transient->response[ $stylesheet ];
-			// The ledger and the gate hash `theme`; the transient row moved to
+			// The ledger and the gate hash `theme`; the transient row moved to.
 			// the stylesheet key without it, so re-add it (T3).
 			if ( ! isset( $offer->theme ) ) {
 				$offer->theme = $stylesheet;
 			}
 		}
 
-		$checked   = null !== $transient && isset( $transient->checked ) && is_array( $transient->checked );
+		$checked   = null !== $transient && isset( $transient->checked )
+			&& is_array( $transient->checked );
 		$row       = $checked ? ( $transient->checked[ $stylesheet ] ?? null ) : null;
-		$installed = $theme->exists() ? (string) $theme->get( 'Version' ) : (string) ( $row ?? '' );
+		$installed = $theme->exists() ? (string) $theme->get( 'Version' ) : (string) (
+			$row ?? '' );
 		$class     = self::classify( $transient, null !== $offer, null !== $row );
 
 		return array(
 			'type'              => 'theme',
 			'id'                => $stylesheet,
 			'key'               => self::normalize_key( 'theme', $stylesheet ),
-			'name'              => $theme->exists() ? (string) $theme->get( 'Name' ) : $stylesheet,
+			'name'              => $theme->exists() ? (string) $theme->get(
+				'Name'
+			) : $stylesheet,
 			'exists'            => $theme->exists(),
 			'installed_version' => $installed,
-			'target_version'    => null !== $offer ? (string) ( $offer->new_version ?? '' ) : '',
+			'target_version'    => null !== $offer ? (string) (
+				$offer->new_version ?? '' ) : '',
 			'offer'             => $offer,
 			'offer_state'       => $class['offer_state'],
 			'auto_update'       => self::theme_auto_update( $stylesheet ),
@@ -407,7 +432,8 @@ final class Updatronix_Item_State {
 		$checked   = null;
 
 		if ( null !== $transient ) {
-			if ( isset( $transient->version_checked ) && '' !== (string) $transient->version_checked ) {
+			if ( isset( $transient->version_checked )
+				&& '' !== (string) $transient->version_checked ) {
 				$checked = (string) $transient->version_checked;
 			}
 
@@ -491,7 +517,8 @@ final class Updatronix_Item_State {
 			return true;
 		}
 
-		return function_exists( 'wp_is_file_mod_allowed' ) && ! wp_is_file_mod_allowed( 'updatronix_automatic_updates' );
+		return function_exists( 'wp_is_file_mod_allowed' )
+			&& ! wp_is_file_mod_allowed( 'updatronix_automatic_updates' );
 	}
 
 	/**
@@ -523,7 +550,11 @@ final class Updatronix_Item_State {
 
 		$enabled = (array) get_site_option( 'auto_update_themes', array() );
 
-		return in_array( $stylesheet, $enabled, true ) ? self::AUTO_ON : self::AUTO_OFF;
+		return in_array(
+			$stylesheet,
+			$enabled,
+			true
+		) ? self::AUTO_ON : self::AUTO_OFF;
 	}
 
 	/**
@@ -539,7 +570,16 @@ final class Updatronix_Item_State {
 
 		if ( defined( 'WP_AUTO_UPDATE_CORE' ) ) {
 			$constant = constant( 'WP_AUTO_UPDATE_CORE' );
-			if ( true === $constant || in_array( $constant, array( 'beta', 'rc', 'development', 'branch-development' ), true ) ) {
+			if ( true === $constant || in_array(
+				$constant,
+				array(
+					'beta',
+					'rc',
+					'development',
+					'branch-development',
+				),
+				true
+			) ) {
 				return self::AUTO_FORCED_ON;
 			}
 			if ( false === $constant ) {
@@ -547,8 +587,13 @@ final class Updatronix_Item_State {
 			}
 		}
 
-		$config = class_exists( 'Updatronix_AutoUpdates' ) ? Updatronix_AutoUpdates::get_core_config() : array( 'mode' => 'minor' );
-		$mode   = (string) ( $config['mode'] ?? 'minor' );
+		$config =
+			// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+			class_exists(
+				'Updatronix_AutoUpdates'
+			) ? Updatronix_AutoUpdates::get_core_config(
+			) : array( 'mode' => 'minor' );
+		$mode = (string) ( $config['mode'] ?? 'minor' );
 
 		if ( 'disabled' === $mode ) {
 			return self::AUTO_OFF;

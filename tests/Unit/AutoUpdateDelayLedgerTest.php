@@ -2,7 +2,8 @@
 /**
  * Unit tests for Updatronix_AutoUpdateDelay ledger pipeline.
  *
- * Tests stable_ledger_hash for all four types (plugin, theme, core, translation)
+ * Tests stable_ledger_hash for all four types (plugin, theme, core,
+ * translation)
  * including edge cases with missing fields and empty data.
  *
  * @package updatronix
@@ -62,7 +63,7 @@ final class AutoUpdateDelayLedgerTest extends TestCase {
 		return hash( 'sha256', $parts );
 	}
 
-	// --- Plugin ---
+	// --- Plugin ---.
 
 	/**
 	 * Tests that a plugin offer with name and version produces a 64-char hash.
@@ -73,7 +74,10 @@ final class AutoUpdateDelayLedgerTest extends TestCase {
 			'new_version' => '5.3',
 		);
 		$hash = $this->hash( 'plugin', $item );
-		self::assertSame( $this->parts_hash( 'plugin|akismet/akismet.php|5.3' ), $hash );
+		self::assertSame(
+			$this->parts_hash( 'plugin|akismet/akismet.php|5.3' ),
+			$hash
+		);
 		// Same input must produce same hash.
 		self::assertSame( $hash, $this->hash( 'plugin', $item ) );
 	}
@@ -97,7 +101,10 @@ final class AutoUpdateDelayLedgerTest extends TestCase {
 			)
 		);
 		self::assertSame( $lower, $upper );
-		self::assertSame( $this->parts_hash( 'plugin|akismet/akismet.php|5.3' ), $upper );
+		self::assertSame(
+			$this->parts_hash( 'plugin|akismet/akismet.php|5.3' ),
+			$upper
+		);
 	}
 
 	/**
@@ -111,7 +118,13 @@ final class AutoUpdateDelayLedgerTest extends TestCase {
 				'new_version' => '1.1',
 			)
 		);
-		$partial  = $this->hash( 'plugin', (object) array( 'plugin' => 'hello.php' ) );
+		$partial  = $this->hash(
+			'plugin',
+			(object) array(
+				'plugin' =>
+				'hello.php',
+			)
+		);
 		self::assertSame( 64, strlen( $partial ) );
 		self::assertNotSame( $complete, $partial );
 	}
@@ -132,7 +145,7 @@ final class AutoUpdateDelayLedgerTest extends TestCase {
 		self::assertNotSame( $complete, $partial );
 	}
 
-	// --- Theme ---
+	// --- Theme ---.
 
 	/**
 	 * Tests that a theme offer with name and version produces a 64-char hash.
@@ -170,7 +183,7 @@ final class AutoUpdateDelayLedgerTest extends TestCase {
 		self::assertSame( $this->parts_hash( 'theme|twentytwentyfive|2.0' ), $upper );
 	}
 
-	// --- Core ---
+	// --- Core ---.
 
 	/**
 	 * Tests that a core offer includes both current and offered versions.
@@ -207,6 +220,7 @@ final class AutoUpdateDelayLedgerTest extends TestCase {
 		self::assertNotSame(
 			$hash_a,
 			$hash_b,
+			// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 			'Two different core offers for the same running version must produce different hashes.'
 		);
 	}
@@ -217,7 +231,7 @@ final class AutoUpdateDelayLedgerTest extends TestCase {
 	public function test_core_hash_without_version_uses_current_only(): void {
 		$item = (object) array( 'current' => '6.5.0' );
 		$hash = $this->hash( 'core', $item );
-		// No offered version: the row keeps the trailing separator and nothing
+		// No offered version: the row keeps the trailing separator and nothing.
 		// after it, which is neither the fallback nor `'core|6.5.0|6.6.1'`.
 		self::assertSame( $this->parts_hash( 'core|6.5.0|' ), $hash );
 	}
@@ -251,7 +265,7 @@ final class AutoUpdateDelayLedgerTest extends TestCase {
 		self::assertNotSame( $this->hash( 'core', $complete ), $hash );
 	}
 
-	// --- Translation ---
+	// --- Translation ---.
 
 	/**
 	 * Tests that a translation offer with all fields produces a hash.
@@ -264,7 +278,10 @@ final class AutoUpdateDelayLedgerTest extends TestCase {
 			'version'  => '1.0',
 		);
 		$hash = $this->hash( 'translation', $item );
-		self::assertSame( $this->parts_hash( 'translation|plugin|akismet|fr_FR|1.0' ), $hash );
+		self::assertSame(
+			$this->parts_hash( 'translation|plugin|akismet|fr_FR|1.0' ),
+			$hash
+		);
 		self::assertSame( $hash, $this->hash( 'translation', $item ) );
 	}
 
@@ -284,7 +301,7 @@ final class AutoUpdateDelayLedgerTest extends TestCase {
 		self::assertNotSame( $this->hash( 'translation', $complete ), $hash );
 	}
 
-	// --- Determinism ---
+	// --- Determinism ---.
 
 	/**
 	 * Tests that identical input always produces the same hash.

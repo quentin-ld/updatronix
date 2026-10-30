@@ -28,13 +28,20 @@ final class HooksShimTest extends TestCase {
 	}
 
 	/**
-	 * A callback registered with accepted_args=3 receives value plus two extra args.
+	 * A callback registered with accepted_args=3 receives value plus two extra
+	 * args.
 	 *
 	 * @return void
 	 */
 	public function test_apply_filters_passes_value_and_extra_args_up_to_accepted_args(): void {
 		$received = null;
-		$cb       = static function ( $value, $extra_one, $extra_two ) use ( &$received ): string {
+		$cb       = static function (
+			$value,
+			$extra_one,
+			$extra_two
+		) use (
+			&$received
+): string {
 			$received = array( $value, $extra_one, $extra_two );
 
 			return $value . $extra_one . $extra_two;
@@ -50,14 +57,20 @@ final class HooksShimTest extends TestCase {
 	/**
 	 * A callback with the default accepted_args=1 receives only the value.
 	 *
-	 * The second parameter is optional so the callback can be invoked with a single
+	 * The second parameter is optional so the callback can be invoked with a
+	 * single
 	 * argument (WordPress forwards only accepted_args arguments).
 	 *
 	 * @return void
 	 */
 	public function test_apply_filters_defaults_to_single_arg(): void {
 		$received = null;
-		$cb       = static function ( $value, $extra_one = null ) use ( &$received ): string {
+		$cb       = static function (
+			$value,
+			$extra_one = null
+		) use (
+			&$received
+): string {
 			$received = array( $value, $extra_one );
 
 			return $value;
@@ -66,6 +79,11 @@ final class HooksShimTest extends TestCase {
 
 		apply_filters( 'updatronix_test_multi_arg', 'base', 'a' );
 
-		$this->assertSame( array( 'base', null ), $received, 'Default accepted_args must pass only the value; extra args must not be forwarded.' );
+		$this->assertSame(
+			array( 'base', null ),
+			$received,
+			// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+			'Default accepted_args must pass only the value; extra args must not be forwarded.'
+		);
 	}
 }

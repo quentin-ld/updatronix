@@ -28,8 +28,10 @@ final class ScheduleStateTest extends TestCase {
 	 * @return void
 	 */
 	protected function setUp(): void {
-		require_once dirname( __DIR__, 2 ) . '/inc/classes/class-updatronix-item-state.php';
-		require_once dirname( __DIR__, 2 ) . '/inc/classes/class-updatronix-schedule-state.php';
+		require_once dirname( __DIR__, 2 )
+			. '/inc/classes/class-updatronix-item-state.php';
+		require_once dirname( __DIR__, 2 )
+			. '/inc/classes/class-updatronix-schedule-state.php';
 	}
 
 	/**
@@ -39,10 +41,14 @@ final class ScheduleStateTest extends TestCase {
 	 * @return array<string, mixed>
 	 */
 	private function calc( array $overrides = array() ): array {
-		return Updatronix_Schedule_State::calculate( ScheduleInput::base( $overrides ) );
+		return Updatronix_Schedule_State::calculate(
+			ScheduleInput::base(
+				$overrides
+			)
+		);
 	}
 
-	// --- States -----------------------------------------------------------
+	// --- States -----------------------------------------------------------.
 
 	/**
 	 * The held branch: hold on, first seen present, now before hold end.
@@ -55,8 +61,14 @@ final class ScheduleStateTest extends TestCase {
 		self::assertSame( Updatronix_Schedule_State::STATE_HELD, $out['state'] );
 		self::assertSame( 'earliest', $out['display_kind'] );
 		self::assertSame( 'schedule_hold', $out['reason_code'] );
-		self::assertSame( ScheduleInput::NOW - 26 * HOUR_IN_SECONDS + 2 * DAY_IN_SECONDS, $out['hold_until'] );
-		self::assertSame( ScheduleInput::NOW + 6 * HOUR_IN_SECONDS + DAY_IN_SECONDS, $out['eligible_at'] );
+		self::assertSame(
+			ScheduleInput::NOW - 26 * HOUR_IN_SECONDS + 2 * DAY_IN_SECONDS,
+			$out['hold_until']
+		);
+		self::assertSame(
+			ScheduleInput::NOW + 6 * HOUR_IN_SECONDS + DAY_IN_SECONDS,
+			$out['eligible_at']
+		);
 		self::assertNull( $out['execution_at'] );
 		self::assertStringContainsString( '2026-10-30 19:00', $out['display'] );
 		self::assertStringContainsString( 'Europe/Paris', $out['display'] );
@@ -76,8 +88,14 @@ final class ScheduleStateTest extends TestCase {
 
 		self::assertSame( Updatronix_Schedule_State::STATE_ELIGIBLE, $out['state'] );
 		self::assertSame( 'exact', $out['display_kind'] );
-		self::assertSame( ScheduleInput::NOW + 6 * HOUR_IN_SECONDS, $out['execution_at'] );
-		self::assertStringContainsString( 'Next automatic install: 2026-10-29 19:00 (Europe/Paris).', $out['display'] );
+		self::assertSame(
+			ScheduleInput::NOW + 6 * HOUR_IN_SECONDS,
+			$out['execution_at']
+		);
+		self::assertStringContainsString(
+			'Next automatic install: 2026-10-29 19:00 (Europe/Paris).',
+			$out['display']
+		);
 	}
 
 	/**
@@ -95,7 +113,10 @@ final class ScheduleStateTest extends TestCase {
 
 		self::assertSame( Updatronix_Schedule_State::STATE_ELIGIBLE, $out['state'] );
 		self::assertNull( $out['hold_until'] );
-		self::assertSame( ScheduleInput::NOW + 6 * HOUR_IN_SECONDS, $out['eligible_at'] );
+		self::assertSame(
+			ScheduleInput::NOW + 6 * HOUR_IN_SECONDS,
+			$out['eligible_at']
+		);
 	}
 
 	/**
@@ -128,8 +149,14 @@ final class ScheduleStateTest extends TestCase {
 		);
 
 		self::assertSame( Updatronix_Schedule_State::STATE_ELIGIBLE, $out['state'] );
-		self::assertSame( ScheduleInput::NOW - 26 * HOUR_IN_SECONDS + DAY_IN_SECONDS, $out['hold_until'] );
-		self::assertSame( ScheduleInput::NOW + 6 * HOUR_IN_SECONDS, $out['execution_at'] );
+		self::assertSame(
+			ScheduleInput::NOW - 26 * HOUR_IN_SECONDS + DAY_IN_SECONDS,
+			$out['hold_until']
+		);
+		self::assertSame(
+			ScheduleInput::NOW + 6 * HOUR_IN_SECONDS,
+			$out['execution_at']
+		);
 	}
 
 	/**
@@ -145,7 +172,10 @@ final class ScheduleStateTest extends TestCase {
 		);
 
 		self::assertSame( Updatronix_Schedule_State::STATE_HELD, $out['state'] );
-		self::assertSame( ScheduleInput::NOW - 26 * HOUR_IN_SECONDS + 365 * DAY_IN_SECONDS, $out['hold_until'] );
+		self::assertSame(
+			ScheduleInput::NOW - 26 * HOUR_IN_SECONDS + 365 * DAY_IN_SECONDS,
+			$out['hold_until']
+		);
 		self::assertGreaterThan( $out['hold_until'], $out['eligible_at'] );
 	}
 
@@ -161,11 +191,17 @@ final class ScheduleStateTest extends TestCase {
 			)
 		);
 
-		self::assertSame( Updatronix_Schedule_State::STATE_NOT_OBSERVED, $out['state'] );
+		self::assertSame(
+			Updatronix_Schedule_State::STATE_NOT_OBSERVED,
+			$out['state']
+		);
 		self::assertSame( 'not_observed', $out['display_kind'] );
 		self::assertNull( $out['hold_until'] );
 		self::assertNull( $out['eligible_at'] );
-		self::assertStringContainsString( 'Next check: 2026-10-29 19:00', $out['display'] );
+		self::assertStringContainsString(
+			'Next check: 2026-10-29 19:00',
+			$out['display']
+		);
 	}
 
 	/**
@@ -176,10 +212,16 @@ final class ScheduleStateTest extends TestCase {
 	public function test_wp_cron_disabled_wins(): void {
 		$out = $this->calc( array( 'cron_disabled' => true ) );
 
-		self::assertSame( Updatronix_Schedule_State::STATE_WP_CRON_DISABLED, $out['state'] );
+		self::assertSame(
+			Updatronix_Schedule_State::STATE_WP_CRON_DISABLED,
+			$out['state']
+		);
 		self::assertSame( 'cron', $out['display_kind'] );
 		self::assertNull( $out['execution_at'] );
-		self::assertStringContainsString( 'WP-Cron spawning is disabled', $out['display'] );
+		self::assertStringContainsString(
+			'WP-Cron spawning is disabled',
+			$out['display']
+		);
 	}
 
 	/**
@@ -190,7 +232,10 @@ final class ScheduleStateTest extends TestCase {
 	public function test_not_scheduled(): void {
 		$out = $this->calc( array( 'next_check' => false ) );
 
-		self::assertSame( Updatronix_Schedule_State::STATE_NOT_SCHEDULED, $out['state'] );
+		self::assertSame(
+			Updatronix_Schedule_State::STATE_NOT_SCHEDULED,
+			$out['state']
+		);
 		self::assertNull( $out['eligible_at'] );
 		self::assertStringContainsString( 'not scheduled', $out['display'] );
 	}
@@ -229,7 +274,10 @@ final class ScheduleStateTest extends TestCase {
 		);
 
 		self::assertSame( Updatronix_Schedule_State::STATE_NETWORK, $out['state'] );
-		self::assertStringContainsString( 'network update schedule', $out['display'] );
+		self::assertStringContainsString(
+			'network update schedule',
+			$out['display']
+		);
 	}
 
 	/**
@@ -256,7 +304,10 @@ final class ScheduleStateTest extends TestCase {
 		self::assertSame( Updatronix_Schedule_State::STATE_LOCKED, $out['state'] );
 		self::assertSame( 'managed', $out['display_kind'] );
 		self::assertSame( 'Git', $out['manager'] );
-		self::assertSame( 'Managed via Git. Update through your manager.', $out['display'] );
+		self::assertSame(
+			'Managed via Git. Update through your manager.',
+			$out['display']
+		);
 		self::assertNull( $out['execution_at'] );
 	}
 
@@ -278,7 +329,10 @@ final class ScheduleStateTest extends TestCase {
 
 		self::assertSame( Updatronix_Schedule_State::STATE_BLOCKED, $out['state'] );
 		self::assertSame( 'Requires PHP 8.3', $out['policy_label'] );
-		self::assertSame( 'Blocked by Requires PHP 8.3. No automatic install time.', $out['display'] );
+		self::assertSame(
+			'Blocked by Requires PHP 8.3. No automatic install time.',
+			$out['display']
+		);
 	}
 
 	/**
@@ -301,8 +355,14 @@ final class ScheduleStateTest extends TestCase {
 	public function test_not_managed(): void {
 		$out = $this->calc( array( 'auto_update' => 'off' ) );
 
-		self::assertSame( Updatronix_Schedule_State::STATE_NOT_MANAGED, $out['state'] );
-		self::assertSame( 'Automatic updates are off for this item.', $out['display'] );
+		self::assertSame(
+			Updatronix_Schedule_State::STATE_NOT_MANAGED,
+			$out['state']
+		);
+		self::assertSame(
+			'Automatic updates are off for this item.',
+			$out['display']
+		);
 		self::assertNull( $out['eligible_at'] );
 	}
 
@@ -314,7 +374,10 @@ final class ScheduleStateTest extends TestCase {
 	public function test_forced_off_is_named(): void {
 		$out = $this->calc( array( 'auto_update' => 'forced_off' ) );
 
-		self::assertSame( Updatronix_Schedule_State::STATE_NOT_MANAGED, $out['state'] );
+		self::assertSame(
+			Updatronix_Schedule_State::STATE_NOT_MANAGED,
+			$out['state']
+		);
 		self::assertSame( 'environment_disabled', $out['reason_code'] );
 		self::assertStringContainsString( 'site configuration', $out['display'] );
 	}
@@ -374,7 +437,10 @@ final class ScheduleStateTest extends TestCase {
 		foreach ( array( 'stale', 'unknown' ) as $state ) {
 			$out = $this->calc( array( 'offer_state' => $state ) );
 
-			self::assertSame( Updatronix_Schedule_State::STATE_UNKNOWN_OFFER, $out['state'] );
+			self::assertSame(
+				Updatronix_Schedule_State::STATE_UNKNOWN_OFFER,
+				$out['state']
+			);
 			self::assertNull( $out['eligible_at'] );
 			self::assertStringContainsString( 'stale or unknown', $out['display'] );
 		}
@@ -398,7 +464,10 @@ final class ScheduleStateTest extends TestCase {
 
 		self::assertSame( Updatronix_Schedule_State::STATE_WAITING, $out['state'] );
 		self::assertSame( 'waiting', $out['display_kind'] );
-		self::assertSame( 'Waiting for Payment Gateway. No automatic install time yet.', $out['display'] );
+		self::assertSame(
+			'Waiting for Payment Gateway. No automatic install time yet.',
+			$out['display']
+		);
 		self::assertNull( $out['execution_at'] );
 	}
 
@@ -418,7 +487,12 @@ final class ScheduleStateTest extends TestCase {
 			)
 		);
 
-		self::assertSame( 'Waiting for Payment Gateway to be updated by Composer. No automatic install time yet.', $out['display'] );
+		// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+		self::assertSame(
+			// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+			'Waiting for Payment Gateway to be updated by Composer. No automatic install time yet.',
+			$out['display']
+		);
 	}
 
 	/**
@@ -436,7 +510,10 @@ final class ScheduleStateTest extends TestCase {
 			)
 		);
 
-		self::assertSame( 'Waiting for Payment Gateway to recover. No automatic install time yet.', $out['display'] );
+		self::assertSame(
+			'Waiting for Payment Gateway to recover. No automatic install time yet.',
+			$out['display']
+		);
 	}
 
 	/**
@@ -476,7 +553,10 @@ final class ScheduleStateTest extends TestCase {
 
 		self::assertSame( Updatronix_Schedule_State::STATE_QUEUED, $out['state'] );
 		self::assertSame( 3, $out['queue_position'] );
-		self::assertSame( ScheduleInput::NOW + 6 * HOUR_IN_SECONDS, $out['eligible_at'] );
+		self::assertSame(
+			ScheduleInput::NOW + 6 * HOUR_IN_SECONDS,
+			$out['eligible_at']
+		);
 		self::assertStringContainsString( 'queued after 3 items', $out['display'] );
 	}
 
@@ -497,7 +577,10 @@ final class ScheduleStateTest extends TestCase {
 		);
 
 		self::assertSame( Updatronix_Schedule_State::STATE_QUEUED, $out['state'] );
-		self::assertStringContainsString( 'Next in the current pass', $out['display'] );
+		self::assertStringContainsString(
+			'Next in the current pass',
+			$out['display']
+		);
 	}
 
 	/**
@@ -578,7 +661,7 @@ final class ScheduleStateTest extends TestCase {
 		self::assertSame( ScheduleInput::NOW, $out['execution_at'] );
 	}
 
-	// --- Core -------------------------------------------------------------
+	// --- Core -------------------------------------------------------------.
 
 	/**
 	 * A minor core offer carries the minor label and no security claim.
@@ -597,7 +680,10 @@ final class ScheduleStateTest extends TestCase {
 
 		self::assertSame( 'minor', $out['core_kind'] );
 		self::assertStringContainsString( 'Core minor release.', $out['display'] );
-		self::assertStringNotContainsStringIgnoringCase( 'security', $out['display'] );
+		self::assertStringNotContainsStringIgnoringCase(
+			'security',
+			$out['display']
+		);
 	}
 
 	/**
@@ -635,7 +721,10 @@ final class ScheduleStateTest extends TestCase {
 			)
 		);
 
-		self::assertSame( Updatronix_Schedule_State::STATE_NOT_MANAGED, $out['state'] );
+		self::assertSame(
+			Updatronix_Schedule_State::STATE_NOT_MANAGED,
+			$out['state']
+		);
 		self::assertSame( 'major', $out['core_kind'] );
 		self::assertStringNotContainsString( 'Core major release.', $out['display'] );
 	}
@@ -656,7 +745,10 @@ final class ScheduleStateTest extends TestCase {
 			)
 		);
 
-		self::assertSame( Updatronix_Schedule_State::STATE_NOT_MANAGED, $out['state'] );
+		self::assertSame(
+			Updatronix_Schedule_State::STATE_NOT_MANAGED,
+			$out['state']
+		);
 	}
 
 	/**
@@ -677,7 +769,7 @@ final class ScheduleStateTest extends TestCase {
 		self::assertSame( '', $out['core_kind'] );
 	}
 
-	// --- Recurrence and first check --------------------------------------
+	// --- Recurrence and first check --------------------------------------.
 
 	/**
 	 * Every recurrence resolves to its real interval.
@@ -686,11 +778,28 @@ final class ScheduleStateTest extends TestCase {
 	 */
 	public function test_interval_for_every_recurrence(): void {
 		self::assertSame( 3600, Updatronix_Schedule_State::interval_for( 'hourly' ) );
-		self::assertSame( 43200, Updatronix_Schedule_State::interval_for( 'twicedaily' ) );
+		self::assertSame(
+			43200,
+			Updatronix_Schedule_State::interval_for(
+				'twicedaily'
+			)
+		);
 		self::assertSame( 86400, Updatronix_Schedule_State::interval_for( 'daily' ) );
-		self::assertSame( 604800, Updatronix_Schedule_State::interval_for( 'weekly' ) );
+		self::assertSame(
+			604800,
+			Updatronix_Schedule_State::interval_for(
+				'weekly'
+			)
+		);
 		self::assertSame( 43200, Updatronix_Schedule_State::interval_for( '' ) );
-		self::assertSame( 900, Updatronix_Schedule_State::interval_for( '', false, 900 ) );
+		self::assertSame(
+			900,
+			Updatronix_Schedule_State::interval_for(
+				'',
+				false,
+				900
+			)
+		);
 	}
 
 	/**
@@ -701,11 +810,49 @@ final class ScheduleStateTest extends TestCase {
 	public function test_first_check_at_or_after(): void {
 		$now = ScheduleInput::NOW;
 
-		self::assertSame( $now + 100, Updatronix_Schedule_State::first_check_at_or_after( $now, $now + 100, 3600, $now ) );
-		self::assertSame( $now + 3700, Updatronix_Schedule_State::first_check_at_or_after( $now + 2000, $now + 100, 3600, $now ) );
-		self::assertNull( Updatronix_Schedule_State::first_check_at_or_after( $now, $now - 1, 3600, $now ) );
-		self::assertNull( Updatronix_Schedule_State::first_check_at_or_after( $now, false, 3600, $now ) );
-		self::assertSame( $now + 100, Updatronix_Schedule_State::first_check_at_or_after( $now, $now + 100, 0, $now ) );
+		self::assertSame(
+			$now + 100,
+			Updatronix_Schedule_State::first_check_at_or_after(
+				$now,
+				$now + 100,
+				3600,
+				$now
+			)
+		);
+		self::assertSame(
+			$now + 3700,
+			Updatronix_Schedule_State::first_check_at_or_after(
+				$now + 2000,
+				$now + 100,
+				3600,
+				$now
+			)
+		);
+		self::assertNull(
+			Updatronix_Schedule_State::first_check_at_or_after(
+				$now,
+				$now - 1,
+				3600,
+				$now
+			)
+		);
+		self::assertNull(
+			Updatronix_Schedule_State::first_check_at_or_after(
+				$now,
+				false,
+				3600,
+				$now
+			)
+		);
+		self::assertSame(
+			$now + 100,
+			Updatronix_Schedule_State::first_check_at_or_after(
+				$now,
+				$now + 100,
+				0,
+				$now
+			)
+		);
 	}
 
 	/**
@@ -743,7 +890,10 @@ final class ScheduleStateTest extends TestCase {
 		);
 
 		self::assertSame( Updatronix_Schedule_State::STATE_HELD, $out['state'] );
-		self::assertSame( ScheduleInput::NOW + 8 * HOUR_IN_SECONDS + 2 * WEEK_IN_SECONDS, $out['eligible_at'] );
+		self::assertSame(
+			ScheduleInput::NOW + 8 * HOUR_IN_SECONDS + 2 * WEEK_IN_SECONDS,
+			$out['eligible_at']
+		);
 	}
 
 	/**
@@ -775,9 +925,12 @@ final class ScheduleStateTest extends TestCase {
 	 * @return void
 	 */
 	public function test_dst_shift_is_flagged(): void {
-		// 2026-03-29 01:00 UTC is 03:00 Europe/Paris after the spring shift;
+		// 2026-03-29 01:00 UTC is 03:00 Europe/Paris after the spring shift;.
 		// the saved 02:00 no longer matches the event.
-		$next = (int) ( new \DateTimeImmutable( '2026-03-29 01:00:00', new \DateTimeZone( 'UTC' ) ) )->getTimestamp();
+		$next = (int) ( new \DateTimeImmutable(
+			'2026-03-29 01:00:00',
+			new \DateTimeZone( 'UTC' )
+		) )->getTimestamp();
 		$out  = $this->calc(
 			array(
 				'now'            => $next - HOUR_IN_SECONDS,
@@ -849,7 +1002,7 @@ final class ScheduleStateTest extends TestCase {
 		self::assertStringContainsString( '(UTC)', $out['display'] );
 	}
 
-	// --- Determinism and contracts ---------------------------------------
+	// --- Determinism and contracts ---------------------------------------.
 
 	/**
 	 * The same input returns the same output.
@@ -868,7 +1021,21 @@ final class ScheduleStateTest extends TestCase {
 	public function test_output_shape(): void {
 		$out = $this->calc();
 
-		foreach ( array( 'state', 'next_check', 'first_seen', 'hold_until', 'eligible_at', 'execution_at', 'queue_position', 'waiting_for', 'manager', 'display_kind', 'reason_code', 'details_url', 'display' ) as $key ) {
+		foreach ( array(
+			'state',
+			'next_check',
+			'first_seen',
+			'hold_until',
+			'eligible_at',
+			'execution_at',
+			'queue_position',
+			'waiting_for',
+			'manager',
+			'display_kind',
+			'reason_code',
+			'details_url',
+			'display',
+		) as $key ) {
 			self::assertArrayHasKey( $key, $out );
 		}
 	}
@@ -879,8 +1046,20 @@ final class ScheduleStateTest extends TestCase {
 	 * @return void
 	 */
 	public function test_core_key_is_canonical(): void {
-		self::assertSame( 'core:' . Updatronix_Item_State::CORE_ID, Updatronix_Item_State::normalize_key( 'core', 'core' ) );
-		self::assertSame( 'core:' . Updatronix_Item_State::CORE_ID, Updatronix_Item_State::normalize_key( 'core', 'core' ) );
-		self::assertSame( 'plugin:a/a.php', Updatronix_Item_State::normalize_key( 'plugin', 'a/a.php' ) );
+		self::assertSame(
+			'core:' . Updatronix_Item_State::CORE_ID,
+			Updatronix_Item_State::normalize_key( 'core', 'core' )
+		);
+		self::assertSame(
+			'core:' . Updatronix_Item_State::CORE_ID,
+			Updatronix_Item_State::normalize_key( 'core', 'core' )
+		);
+		self::assertSame(
+			'plugin:a/a.php',
+			Updatronix_Item_State::normalize_key(
+				'plugin',
+				'a/a.php'
+			)
+		);
 	}
 }

@@ -36,13 +36,20 @@ final class NativeLoggerRowTest extends WP_UnitTestCase {
 	protected function setUp(): void {
 		parent::setUp();
 
-		require_once UPDATRONIX_PLUGIN_DIR . 'inc/classes/class-updatronix-database.php';
-		require_once UPDATRONIX_PLUGIN_DIR . 'inc/classes/class-updatronix-log-taxonomy.php';
-		require_once UPDATRONIX_PLUGIN_DIR . 'inc/classes/class-updatronix-log-event.php';
-		require_once UPDATRONIX_PLUGIN_DIR . 'inc/classes/class-updatronix-security.php';
-		require_once UPDATRONIX_PLUGIN_DIR . 'inc/classes/class-updatronix-logger.php';
-		require_once UPDATRONIX_PLUGIN_DIR . 'inc/classes/class-updatronix-updatelogstate.php';
-		require_once UPDATRONIX_PLUGIN_DIR . 'inc/classes/class-updatronix-update-logger.php';
+		require_once UPDATRONIX_PLUGIN_DIR
+			. 'inc/classes/class-updatronix-database.php';
+		require_once UPDATRONIX_PLUGIN_DIR
+			. 'inc/classes/class-updatronix-log-taxonomy.php';
+		require_once UPDATRONIX_PLUGIN_DIR
+			. 'inc/classes/class-updatronix-log-event.php';
+		require_once UPDATRONIX_PLUGIN_DIR
+			. 'inc/classes/class-updatronix-security.php';
+		require_once UPDATRONIX_PLUGIN_DIR
+			. 'inc/classes/class-updatronix-logger.php';
+		require_once UPDATRONIX_PLUGIN_DIR
+			. 'inc/classes/class-updatronix-updatelogstate.php';
+		require_once UPDATRONIX_PLUGIN_DIR
+			. 'inc/classes/class-updatronix-update-logger.php';
 		require_once dirname( __DIR__ ) . '/Support/LogEventFactory.php';
 
 		Updatronix_Database::create_table();
@@ -91,7 +98,10 @@ final class NativeLoggerRowTest extends WP_UnitTestCase {
 		self::assertSame( 'finalize', $row->decision_stage );
 		self::assertSame( $installed, $row->target_version );
 		self::assertSame( $installed, $row->version_after );
-		self::assertStringNotContainsString( 'may not have completed', (string) $row->message );
+		self::assertStringNotContainsString(
+			'may not have completed',
+			(string) $row->message
+		);
 	}
 
 	/**
@@ -111,7 +121,10 @@ final class NativeLoggerRowTest extends WP_UnitTestCase {
 		$row = $this->latest_row();
 		self::assertSame( 'success', $row->status );
 		self::assertSame( 'done', $row->decision_state );
-		self::assertStringNotContainsString( 'may not have completed', (string) $row->message );
+		self::assertStringNotContainsString(
+			'may not have completed',
+			(string) $row->message
+		);
 	}
 
 	/**
@@ -132,7 +145,10 @@ final class NativeLoggerRowTest extends WP_UnitTestCase {
 		self::assertSame( 'update_failed', $row->reason_code );
 		self::assertSame( 'failed', $row->decision_state );
 		self::assertSame( '', $row->version_after );
-		self::assertStringContainsString( 'may not have completed', (string) $row->message );
+		self::assertStringContainsString(
+			'may not have completed',
+			(string) $row->message
+		);
 	}
 
 	/**
@@ -230,7 +246,10 @@ final class NativeLoggerRowTest extends WP_UnitTestCase {
 						'slug'           => 'core:wordpress',
 						'version_before' => $before,
 						'version_after'  => $after,
-						'event_key'      => 'udly|native-test-' . wp_generate_password( 6, false ),
+						'event_key'      => 'udly|native-test-' . wp_generate_password(
+							6,
+							false
+						),
 					),
 				),
 			)
@@ -263,7 +282,12 @@ final class NativeLoggerRowTest extends WP_UnitTestCase {
 
 		$table = Updatronix_Database::get_table_name();
 
-		return $wpdb->get_row( $wpdb->prepare( 'SELECT * FROM %i ORDER BY id DESC LIMIT 1', $table ) );
+		return $wpdb->get_row(
+			$wpdb->prepare(
+				'SELECT * FROM %i ORDER BY id DESC LIMIT 1',
+				$table
+			)
+		);
 	}
 
 	/**
@@ -276,7 +300,12 @@ final class NativeLoggerRowTest extends WP_UnitTestCase {
 
 		$table = Updatronix_Database::get_table_name();
 
-		return (int) $wpdb->get_var( $wpdb->prepare( 'SELECT COUNT(*) FROM %i', $table ) );
+		return (int) $wpdb->get_var(
+			$wpdb->prepare(
+				'SELECT COUNT(*) FROM %i',
+				$table
+			)
+		);
 	}
 
 	/**

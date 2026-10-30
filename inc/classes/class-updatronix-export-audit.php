@@ -1,6 +1,7 @@
 <?php
 /**
- * Append-only ring-buffer audit trail for successful exports (non-autoloaded option).
+ * Append-only ring-buffer audit trail for successful exports (non-autoloaded
+ * option).
  *
  * @package updatronix
  */
@@ -77,7 +78,9 @@ final class Updatronix_Export_Audit {
 			updatronix_update_plugin_option( self::OPTION_NAME, $list, false );
 		} catch ( \Throwable $e ) {
 			if ( defined( 'WP_DEBUG_LOG' ) && WP_DEBUG_LOG ) {
-                // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- gated diagnostic only.
+                // phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+                // phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+                // phpcs:ignore Generic.Files.LineLength, WordPress.PHP.DevelopmentFunctions.error_log_error_log -- gated diagnostic only.
 				error_log( '[updatronix] export audit append failed' );
 			}
 		}

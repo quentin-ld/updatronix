@@ -21,12 +21,18 @@ final class LogPerformanceTest extends WP_UnitTestCase {
 	protected function setUp(): void {
 		parent::setUp();
 
-		require_once UPDATRONIX_PLUGIN_DIR . 'inc/classes/class-updatronix-database.php';
-		require_once UPDATRONIX_PLUGIN_DIR . 'inc/classes/class-updatronix-log-taxonomy.php';
-		require_once UPDATRONIX_PLUGIN_DIR . 'inc/classes/class-updatronix-log-event.php';
-		require_once UPDATRONIX_PLUGIN_DIR . 'inc/classes/class-updatronix-log-query.php';
-		require_once UPDATRONIX_PLUGIN_DIR . 'inc/classes/class-updatronix-security.php';
-		require_once UPDATRONIX_PLUGIN_DIR . 'inc/classes/class-updatronix-logger.php';
+		require_once UPDATRONIX_PLUGIN_DIR
+			. 'inc/classes/class-updatronix-database.php';
+		require_once UPDATRONIX_PLUGIN_DIR
+			. 'inc/classes/class-updatronix-log-taxonomy.php';
+		require_once UPDATRONIX_PLUGIN_DIR
+			. 'inc/classes/class-updatronix-log-event.php';
+		require_once UPDATRONIX_PLUGIN_DIR
+			. 'inc/classes/class-updatronix-log-query.php';
+		require_once UPDATRONIX_PLUGIN_DIR
+			. 'inc/classes/class-updatronix-security.php';
+		require_once UPDATRONIX_PLUGIN_DIR
+			. 'inc/classes/class-updatronix-logger.php';
 		require_once dirname( __DIR__ ) . '/Support/LogEventFactory.php';
 
 		Updatronix_Database::create_table();
@@ -69,12 +75,19 @@ final class LogPerformanceTest extends WP_UnitTestCase {
 			),
 		);
 
-		$rows  = Updatronix_Logger::get_logs( array_merge( $filter, array( 'per_page' => 50 ) ), false );
+		$rows  = Updatronix_Logger::get_logs(
+			array_merge( $filter, array( 'per_page' => 50 ) ),
+			false
+		);
 		$total = Updatronix_Logger::get_logs_count( $filter );
 
 		self::assertCount( 50, $rows );
 		self::assertSame( 51, $total );
-		self::assertLessThanOrEqual( 2, (int) $wpdb->num_queries - $before, 'The feed and its total are one query each.' );
+		self::assertLessThanOrEqual(
+			2,
+			(int) $wpdb->num_queries - $before,
+			'The feed and its total are one query each.'
+		);
 	}
 
 	/**
@@ -103,7 +116,11 @@ final class LogPerformanceTest extends WP_UnitTestCase {
 		$after  = (int) $wpdb->num_queries;
 
 		self::assertCount( 1000, $rows );
-		self::assertLessThanOrEqual( 1, $after - $before, 'One chunk is one query; the caller pages the rest.' );
+		self::assertLessThanOrEqual(
+			1,
+			$after - $before,
+			'One chunk is one query; the caller pages the rest.'
+		);
 	}
 
 	/**
@@ -139,9 +156,12 @@ final class LogPerformanceTest extends WP_UnitTestCase {
 				);
 			}
 
-			$sql = 'INSERT INTO ' . $table . ' (site_id, log_type, action_type, item_name, item_slug, target_version, status, event_key, reason_code, decision_state, pass_id) VALUES ' . implode( ',', $values );
+			$sql = 'INSERT INTO ' . $table
+				// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+				. ' (site_id, log_type, action_type, item_name, item_slug, target_version, status, event_key, reason_code, decision_state, pass_id) VALUES ' . implode( ',', $values );
 
-			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Test fixture; identifiers are plugin-owned and values are prepared above.
+			// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+			// phpcs:ignore Generic.Files.LineLength, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Test fixture; identifiers are plugin-owned and values are prepared above.
 			$wpdb->query( $sql );
 		}
 	}
@@ -156,7 +176,12 @@ final class LogPerformanceTest extends WP_UnitTestCase {
 
 		$table = Updatronix_Database::get_table_name();
 
-		return (int) $wpdb->get_var( $wpdb->prepare( 'SELECT COUNT(*) FROM %i', $table ) );
+		return (int) $wpdb->get_var(
+			$wpdb->prepare(
+				'SELECT COUNT(*) FROM %i',
+				$table
+			)
+		);
 	}
 
 	/**

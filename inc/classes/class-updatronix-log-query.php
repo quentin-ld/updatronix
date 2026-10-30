@@ -102,7 +102,12 @@ final class Updatronix_Log_Query {
 			}
 
 			if ( isset( self::DATE_FIELDS[ $field ] ) ) {
-				$args = self::parse_date( $args, self::DATE_FIELDS[ $field ], $operator, $value );
+				$args = self::parse_date(
+					$args,
+					self::DATE_FIELDS[ $field ],
+					$operator,
+					$value
+				);
 				continue;
 			}
 
@@ -118,7 +123,9 @@ final class Updatronix_Log_Query {
 			if ( 'performed_as' === $field ) {
 				$single = is_array( $value ) ? reset( $value ) : $value;
 				if ( is_string( $single ) && '' !== $single ) {
-					$args['performed_as'] = Updatronix_Security::sanitize_performed_as( $single );
+					$args['performed_as'] = Updatronix_Security::sanitize_performed_as(
+						$single
+					);
 				}
 				continue;
 			}
@@ -145,7 +152,15 @@ final class Updatronix_Log_Query {
 			$exclude = in_array( $operator, array( 'isnot', 'isnone' ), true );
 			$key     = self::LIST_FIELDS[ $field ] . ( $exclude ? '_exclude' : '' );
 
-			$args[ $key ] = array_values( array_unique( array_merge( (array) ( $args[ $key ] ?? array() ), $values ) ) );
+			$args[ $key ] =
+				array_values(
+					array_unique(
+						array_merge(
+							(array) ( $args[ $key ] ?? array() ),
+							$values
+						)
+					)
+				);
 		}
 
 		return $args;
@@ -166,7 +181,7 @@ final class Updatronix_Log_Query {
 		$values = array();
 
 		$site_id = $args['site_id'] ?? null;
-		// A site_id of 0 (or negative) is the network-global sentinel: no scope
+		// A site_id of 0 (or negative) is the network-global sentinel: no scope.
 		// filter, so a Super Admin sees every originating site's rows.
 		if ( null !== $site_id && 0 < (int) $site_id ) {
 			$where[]  = 'site_id = %d';
@@ -181,7 +196,9 @@ final class Updatronix_Log_Query {
 		$performed_as = $args['performed_as'] ?? null;
 		if ( null !== $performed_as && '' !== $performed_as ) {
 			$where[]  = 'performed_as = %s';
-			$values[] = Updatronix_Security::sanitize_performed_as( (string) $performed_as );
+			$values[] = Updatronix_Security::sanitize_performed_as(
+				(string) $performed_as
+			);
 		}
 
 		$created_at_after = $args['created_at_after'] ?? null;
@@ -228,8 +245,10 @@ final class Updatronix_Log_Query {
 		$search = $args['search'] ?? null;
 		if ( null !== $search && '' !== $search ) {
 			global $wpdb;
-			$like     = '%' . $wpdb->esc_like( (string) $search ) . '%';
-			$where[]  = '(item_name LIKE %s OR item_slug LIKE %s OR COALESCE(message, \'\') LIKE %s)';
+			$like    = '%' . $wpdb->esc_like( (string) $search ) . '%';
+			$where[] =
+				// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+				'(item_name LIKE %s OR item_slug LIKE %s OR COALESCE(message, \'\') LIKE %s)';
 			$values[] = $like;
 			$values[] = $like;
 			$values[] = $like;
@@ -299,13 +318,25 @@ final class Updatronix_Log_Query {
 		);
 
 		foreach ( $definitions as $key => $definition ) {
-			$include = self::sanitize_list( $args[ $key ] ?? array(), $definition['sanitizer'] );
-			$exclude = self::sanitize_list( $args[ $key . '_exclude' ] ?? array(), $definition['sanitizer'] );
+			$include = self::sanitize_list(
+				$args[ $key ] ?? array(),
+				$definition['sanitizer']
+			);
+			$exclude = self::sanitize_list(
+				$args[ $key . '_exclude' ] ?? array(),
+				$definition['sanitizer']
+			);
 
 			// Legacy scalar args keep working alongside the list form.
 			$scalar = $args[ $definition['scalar'] ] ?? null;
 			if ( null !== $scalar && '' !== $scalar ) {
-				$include = array_merge( $include, self::sanitize_list( array( $scalar ), $definition['sanitizer'] ) );
+				$include = array_merge(
+					$include,
+					self::sanitize_list(
+						array( $scalar ),
+						$definition['sanitizer']
+					)
+				);
 				$include = array_values( array_unique( $include ) );
 			}
 
@@ -327,8 +358,18 @@ final class Updatronix_Log_Query {
 	 * @param bool              $exclude Whether to negate.
 	 * @return array<int, array{sql: string, values: array<int, int|string>}>
 	 */
-	private static function in_condition( string $column, array $values, bool $exclude ): array {
-		$values = array_values( array_filter( $values, static fn ( $value ): bool => '' !== (string) $value ) );
+	private static function in_condition(
+		string $column,
+		array $values,
+		bool $exclude
+	): array {
+		$values = array_values(
+			array_filter(
+				$values,
+				static fn ( $value ): bool =>
+				'' !== (string) $value
+			)
+		);
 		if ( array() === $values ) {
 			return array();
 		}
@@ -337,7 +378,8 @@ final class Updatronix_Log_Query {
 
 		return array(
 			array(
-				'sql'    => $column . ( $exclude ? ' NOT IN (' : ' IN (' ) . $placeholders . ')',
+				'sql'    => $column . ( $exclude ? ' NOT IN (' : ' IN (' ) . $placeholders
+					. ')',
 				'values' => $values,
 			),
 		);
@@ -350,7 +392,10 @@ final class Updatronix_Log_Query {
 	 * @param callable|null $sanitizer Sanitizer callable.
 	 * @return array<int, string|int>
 	 */
-	private static function sanitize_list( mixed $values, ?callable $sanitizer ): array {
+	private static function sanitize_list(
+		mixed $values,
+		?callable $sanitizer
+	): array {
 		if ( ! is_array( $values ) ) {
 			$values = array( $values );
 		}
@@ -366,7 +411,10 @@ final class Updatronix_Log_Query {
 				continue;
 			}
 
-			$sanitized = null !== $sanitizer ? (string) call_user_func( $sanitizer, $value ) : sanitize_key( $value );
+			$sanitized = null !== $sanitizer ? (string) call_user_func(
+				$sanitizer,
+				$value
+			) : sanitize_key( $value );
 
 			if ( '' !== $sanitized ) {
 				$clean[] = $sanitized;
@@ -390,7 +438,12 @@ final class Updatronix_Log_Query {
 	 * @param mixed                $value    Raw value.
 	 * @return array<string, mixed>
 	 */
-	private static function parse_date( array $args, string $field, string $operator, mixed $value ): array {
+	private static function parse_date(
+		array $args,
+		string $field,
+		string $operator,
+		mixed $value
+	): array {
 		$single = is_array( $value ) ? reset( $value ) : $value;
 		if ( ! is_string( $single ) || '' === trim( $single ) ) {
 			return $args;
@@ -404,7 +457,10 @@ final class Updatronix_Log_Query {
 		$is_day = 1 === preg_match( '/^\d{4}-\d{2}-\d{2}$/', trim( $single ) );
 
 		if ( 'before' === $operator ) {
-			$args[ $field . '_before' ] = gmdate( 'Y-m-d H:i:s', $is_day ? $timestamp + DAY_IN_SECONDS - 1 : $timestamp );
+			$args[ $field . '_before' ] = gmdate(
+				'Y-m-d H:i:s',
+				$is_day ? $timestamp + DAY_IN_SECONDS - 1 : $timestamp
+			);
 
 			return $args;
 		}
@@ -433,7 +489,11 @@ final class Updatronix_Log_Query {
 	 * @param bool   $utc        Whether the value is UTC (`next_eligible_at`).
 	 * @return string
 	 */
-	private static function normalize_datetime( string $value, bool $end_of_day, bool $utc = false ): string {
+	private static function normalize_datetime(
+		string $value,
+		bool $end_of_day,
+		bool $utc = false
+	): string {
 		$value = trim( $value );
 		if ( '' === $value ) {
 			return '';
@@ -468,7 +528,16 @@ final class Updatronix_Log_Query {
 		}
 
 		if ( is_string( $value ) ) {
-			return in_array( strtolower( trim( $value ) ), array( '1', 'true', 'yes', 'on' ), true );
+			return in_array(
+				strtolower( trim( $value ) ),
+				array(
+					'1',
+					'true',
+					'yes',
+					'on',
+				),
+				true
+			);
 		}
 
 		return 1 === (int) $value;

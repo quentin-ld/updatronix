@@ -47,7 +47,10 @@ final class Updatronix_External_Log {
 		 *
 		 * @param array<int, string> $sources Source keys.
 		 */
-		$sources = (array) apply_filters( 'updatronix_external_update_sources', self::SOURCES );
+		$sources = (array) apply_filters(
+			'updatronix_external_update_sources',
+			self::SOURCES
+		);
 
 		$sources = array_values(
 			array_unique(
@@ -129,11 +132,14 @@ final class Updatronix_External_Log {
 			);
 		}
 
-		$log_type = Updatronix_Security::sanitize_log_type( (string) $args['log_type'] );
+		$log_type = Updatronix_Security::sanitize_log_type(
+			(string) $args['log_type']
+		);
 		$status   = Updatronix_Security::sanitize_status( (string) $args['status'] );
 		$message  = trim( (string) $args['message'] );
 
 		$prefix = sprintf(
+			// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 			/* translators: %s: external update source key (ftp, sftp, ssh, cli, custom). */
 			__( 'External source: %s.', 'updatronix' ),
 			$source
@@ -173,7 +179,9 @@ final class Updatronix_External_Log {
 				'item_slug'        => (string) $args['item_slug'],
 				'version_before'   => (string) $args['version_before'],
 				'version_after'    => (string) $args['version_after'],
-				'target_version'   => '' !== (string) $args['target_version'] ? (string) $args['target_version'] : (string) $args['version_after'],
+				'target_version'   =>
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					'' !== (string) $args['target_version'] ? (string) $args['target_version'] : (string) $args['version_after'],
 				'status'           => $status,
 				'message'          => $message,
 				'performed_as'     => 'upload',
@@ -195,7 +203,12 @@ final class Updatronix_External_Log {
 		if ( false === $log_id ) {
 			return new WP_Error(
 				'updatronix_external_log_failed',
-				__( 'The external update could not be logged. Check that logging is enabled and the log table exists.', 'updatronix' ),
+				// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+				__(
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					'The external update could not be logged. Check that logging is enabled and the log table exists.',
+					'updatronix'
+				),
 				array( 'status' => 500 )
 			);
 		}

@@ -25,21 +25,22 @@ use PHPUnit\Framework\TestCase;
  * - line 131 (four mutants, `IncrementInteger`/`DecrementInteger`): the window
  *   is clamped to 1..365 by `updatronix_sanitize_schedule_array()` when the
  *   delay is on and to 0 when it is off, so `max( 0, ...)`, `min( 366, ...)`,
- *   the ternary's `: 0` and `0` -> `-1` agree with the original on every operand
+ * the ternary's `: 0` and `0` -> `-1` agree with the original on every operand
  *   the line can hold. Infection is told to skip the expression -- see the
- *   `@infection-ignore-all` annotation on the array item in the source -- because
+ * `@infection-ignore-all` annotation on the array item in the source -- because
  *   a ratio over a one-line diff cannot hold four unobservable mutants beside
  *   the five the tests here kill. The line is answered by
  *   `bin/harness counterfactual` instead, which is the hand-over DESIGN.md
  *   section 5 wires these two gates together with.
  *
- *   The fifth mutant, the ternary's `: 1` -> `: 2`, was *not* equivalent and was
+ * The fifth mutant, the ternary's `: 1` -> `: 2`, was *not* equivalent and was
  *   the gap this classification had been hiding: with the delay off the stored
  *   window is 0 and the ternary takes its else-branch, which nothing asserted.
  *   `test_schedule_slice_coerces_the_stored_flag_and_clamps_the_window` asserts
  *   it now, and that assertion is also what kills the `min(` -> `max(` twin
  *   `bin/harness counterfactual` substitutes on this line.
- * - line 269 `CastString`: `(string)` on a concatenation operand coerces exactly
+ * - line 269 `CastString`: `(string)` on a concatenation operand coerces
+ * exactly
  *   the way PHP coerces it anyway. Stated in the ledger test that covers it.
  * - line 344 `CastBool`: `wp_json_encode()` of an array is never a falsy
  *   non-empty string, so the cast and the bare truthiness agree on every value
@@ -104,9 +105,13 @@ final class AutoUpdateDelayBehaviorTest extends TestCase {
 		);
 
 		foreach ( $defaults as $prop_name => $value ) {
-			$prop = new ReflectionProperty( Updatronix_AutoUpdateDelay::class, $prop_name );
+			$prop = new ReflectionProperty(
+				Updatronix_AutoUpdateDelay::class,
+				$prop_name
+			);
 			$prop->setAccessible( true );
-			$prop->setValue( null, $value ); // phpcs:ignore Universal.Classes.RequiresAnnotatedClass
+			// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+			$prop->setValue( null, $value ); // phpcs:ignore Generic.Files.LineLength, Universal.Classes.RequiresAnnotatedClass
 		}
 	}
 
@@ -117,14 +122,15 @@ final class AutoUpdateDelayBehaviorTest extends TestCase {
 	 * @return void
 	 */
 	private function enable_delay( int $days = 7 ): void {
-		$GLOBALS['updatronix_test_options'][ UPDATRONIX_OPTION_NETWORK_SCHEDULE ] = wp_json_encode(
-			array(
-				'delay_updates' => array(
-					'enabled'     => true,
-					'delay_value' => $days,
-				),
-			)
-		);
+		$GLOBALS['updatronix_test_options'][ UPDATRONIX_OPTION_NETWORK_SCHEDULE ] =
+			wp_json_encode(
+				array(
+					'delay_updates' => array(
+						'enabled'     => true,
+						'delay_value' => $days,
+					),
+				)
+			);
 	}
 
 	/**
@@ -134,12 +140,18 @@ final class AutoUpdateDelayBehaviorTest extends TestCase {
 	 * @param string $version New version.
 	 * @return object
 	 */
-	private function plugin_offer( string $file = 'akismet/akismet.php', string $version = '5.3' ): object {
+	private function plugin_offer(
+		string $file = 'akismet/akismet.php',
+		string $version = '5.3'
+	): object {
 		return (object) array(
 			'slug'        => dirname( $file ),
 			'plugin'      => $file,
 			'new_version' => $version,
-			'url'         => 'https://downloads.wordpress.org/plugin/' . basename( dirname( $file ) ) . '.' . $version . '.zip',
+			'url'         => 'https://downloads.wordpress.org/plugin/' . basename(
+				dirname( $file )
+			)
+				. '.' . $version . '.zip',
 		);
 	}
 
@@ -149,7 +161,10 @@ final class AutoUpdateDelayBehaviorTest extends TestCase {
 	 * @return array<string, int>
 	 */
 	private function ledger(): array {
-		$raw = updatronix_get_plugin_option( Updatronix_AutoUpdateDelay::OPTION_LEDGER, '' );
+		$raw = updatronix_get_plugin_option(
+			Updatronix_AutoUpdateDelay::OPTION_LEDGER,
+			''
+		);
 
 		if ( ! is_string( $raw ) || '' === $raw ) {
 			return array();
@@ -166,7 +181,10 @@ final class AutoUpdateDelayBehaviorTest extends TestCase {
 	 * @return array<string, mixed>
 	 */
 	private function setting_slice(): array {
-		$prop = new ReflectionProperty( Updatronix_AutoUpdateDelay::class, 'delay_settings_slice' );
+		$prop = new ReflectionProperty(
+			Updatronix_AutoUpdateDelay::class,
+			'delay_settings_slice'
+		);
 		$prop->setAccessible( true );
 
 		$slice = $prop->getValue();
@@ -182,13 +200,16 @@ final class AutoUpdateDelayBehaviorTest extends TestCase {
 	 * @return mixed
 	 */
 	private function invoke_static( string $method, array $args = array() ) {
-		$reflection = new ReflectionMethod( Updatronix_AutoUpdateDelay::class, $method );
+		$reflection = new ReflectionMethod(
+			Updatronix_AutoUpdateDelay::class,
+			$method
+		);
 		$reflection->setAccessible( true );
 
 		return $reflection->invokeArgs( null, $args );
 	}
 
-	// --- Gate wiring ----------------------------------------------------------
+	// --- Gate wiring ----------------------------------------------------------.
 
 	/**
 	 * With delay disabled, register_filters() must not hook any auto_update_*
@@ -199,8 +220,17 @@ final class AutoUpdateDelayBehaviorTest extends TestCase {
 	public function test_register_filters_noop_when_delay_disabled(): void {
 		Updatronix_AutoUpdateDelay::register_filters();
 
-		foreach ( array( 'auto_update_plugin', 'auto_update_theme', 'auto_update_core', 'auto_update_translation' ) as $hook ) {
-			$this->assertArrayNotHasKey( $hook, $GLOBALS['_updatronix_filters'], "$hook must not be registered when delay is disabled." );
+		foreach ( array(
+			'auto_update_plugin',
+			'auto_update_theme',
+			'auto_update_core',
+			'auto_update_translation',
+		) as $hook ) {
+			$this->assertArrayNotHasKey(
+				$hook,
+				$GLOBALS['_updatronix_filters'],
+				"$hook must not be registered when delay is disabled."
+			);
 		}
 	}
 
@@ -215,12 +245,20 @@ final class AutoUpdateDelayBehaviorTest extends TestCase {
 
 		Updatronix_AutoUpdateDelay::register_filters();
 
-		foreach ( array( 'auto_update_plugin', 'auto_update_theme', 'auto_update_core', 'auto_update_translation' ) as $hook ) {
-			$this->assertNotEmpty( $GLOBALS['_updatronix_filters'][ $hook ], "$hook must be registered when delay is enabled." );
+		foreach ( array(
+			'auto_update_plugin',
+			'auto_update_theme',
+			'auto_update_core',
+			'auto_update_translation',
+		) as $hook ) {
+			$this->assertNotEmpty(
+				$GLOBALS['_updatronix_filters'][ $hook ],
+				"$hook must be registered when delay is enabled."
+			);
 		}
 	}
 
-	// --- Soak outcome ---------------------------------------------------------
+	// --- Soak outcome ---------------------------------------------------------.
 
 	/**
 	 * A fresh offer under the soak window must be held back (false) and its
@@ -231,9 +269,15 @@ final class AutoUpdateDelayBehaviorTest extends TestCase {
 	public function test_fresh_offer_is_deferred_and_audit_logged(): void {
 		$this->enable_delay( 7 );
 
-		$result = Updatronix_AutoUpdateDelay::filter_plugin( true, $this->plugin_offer() );
+		$result = Updatronix_AutoUpdateDelay::filter_plugin(
+			true,
+			$this->plugin_offer()
+		);
 
-		$this->assertFalse( $result, 'A freshly detected offer must be held back by the soak window.' );
+		$this->assertFalse(
+			$result,
+			'A freshly detected offer must be held back by the soak window.'
+		);
 
 		$ledger = $this->ledger();
 		$this->assertCount( 1, $ledger );
@@ -256,28 +300,43 @@ final class AutoUpdateDelayBehaviorTest extends TestCase {
 
 		$offer = $this->plugin_offer();
 
-		// The offer stays offered: seed the live update_plugins transient so
+		// The offer stays offered: seed the live update_plugins transient so.
 		// ledger pruning keeps its row.
-		$GLOBALS['updatronix_test_site_transients']['update_plugins'] = (object) array(
-			'response' => array(
-				'akismet/akismet.php' => $offer,
-			),
-		);
+		$GLOBALS['updatronix_test_site_transients']['update_plugins'] =
+			(object) array(
+				'response' => array(
+					'akismet/akismet.php' => $offer,
+				),
+			);
 
 		// First detection: deferred, row recorded with "now".
-		$this->assertFalse( Updatronix_AutoUpdateDelay::filter_plugin( true, $offer ) );
+		$this->assertFalse(
+			Updatronix_AutoUpdateDelay::filter_plugin(
+				true,
+				$offer
+			)
+		);
 
 		// Age the row past the 7-day window (8 days ago).
 		$ledger          = $this->ledger();
 		$hash            = array_key_first( $ledger );
 		$ledger[ $hash ] = time() - 8 * DAY_IN_SECONDS;
-		$GLOBALS['updatronix_test_options'][ Updatronix_AutoUpdateDelay::OPTION_LEDGER ] = wp_json_encode( $ledger );
+		// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+		$GLOBALS['updatronix_test_options'][ Updatronix_AutoUpdateDelay::OPTION_LEDGER ] =
+			wp_json_encode( $ledger );
 		self::reset_delay_state();
 
 		$result = Updatronix_AutoUpdateDelay::filter_plugin( true, $offer );
 
-		$this->assertTrue( $result, 'An offer past the soak window must be allowed through.' );
-		$this->assertArrayHasKey( $hash, $this->ledger(), 'The matured row must remain in the ledger.' );
+		$this->assertTrue(
+			$result,
+			'An offer past the soak window must be allowed through.'
+		);
+		$this->assertArrayHasKey(
+			$hash,
+			$this->ledger(),
+			'The matured row must remain in the ledger.'
+		);
 	}
 
 	/**
@@ -305,21 +364,30 @@ final class AutoUpdateDelayBehaviorTest extends TestCase {
 
 		foreach ( $cases as $label => $case ) {
 			self::reset_delay_state();
-			$GLOBALS['updatronix_test_options'][ UPDATRONIX_OPTION_NETWORK_SCHEDULE ] = wp_json_encode(
-				array(
-					'delay_updates' => array(
-						'enabled'     => $case[0],
-						'delay_value' => $case[1],
-					),
-				)
-			);
+			$GLOBALS['updatronix_test_options'][ UPDATRONIX_OPTION_NETWORK_SCHEDULE ] =
+				wp_json_encode(
+					array(
+						'delay_updates' => array(
+							'enabled'     => $case[0],
+							'delay_value' => $case[1],
+						),
+					)
+				);
 
 			Updatronix_AutoUpdateDelay::register_filters();
 
 			$slice = $this->setting_slice();
 
-			$this->assertSame( $case[3], $slice['days'] ?? null, "$label: the soak window must be clamped to 1..365 whole days." );
-			$this->assertSame( $case[2], $slice['enabled'] ?? null, "$label: the stored flag must reach the slice as a real boolean." );
+			$this->assertSame(
+				$case[3],
+				$slice['days'] ?? null,
+				"$label: the soak window must be clamped to 1..365 whole days."
+			);
+			$this->assertSame(
+				$case[2],
+				$slice['enabled'] ?? null,
+				"$label: the stored flag must reach the slice as a real boolean."
+			);
 		}
 	}
 
@@ -334,12 +402,16 @@ final class AutoUpdateDelayBehaviorTest extends TestCase {
 	public function test_prune_reads_bare_transients_without_running_over_them(): void {
 		$this->enable_delay( 1 );
 
-		$GLOBALS['updatronix_test_site_transients']['update_plugins'] = new stdClass();
-		$GLOBALS['updatronix_test_site_transients']['update_themes']  = new stdClass();
-		$GLOBALS['updatronix_test_site_transients']['update_core']    = new stdClass();
+		$GLOBALS['updatronix_test_site_transients']['update_plugins'] = new stdClass(
+		);
+		$GLOBALS['updatronix_test_site_transients']['update_themes']  = new stdClass(
+		);
+		$GLOBALS['updatronix_test_site_transients']['update_core']    = new stdClass(
+		);
 
 		$this->assertFalse(
 			Updatronix_AutoUpdateDelay::filter_plugin( true, $this->plugin_offer() ),
+			// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 			'The first sighting is deferred, and the prune runs before the row is written.'
 		);
 	}
@@ -356,6 +428,7 @@ final class AutoUpdateDelayBehaviorTest extends TestCase {
 
 		$this->assertSame(
 			false,
+			// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 			$GLOBALS['updatronix_test_option_autoload'][ Updatronix_AutoUpdateDelay::OPTION_LEDGER ] ?? null,
 			'The delay ledger must not autoload.'
 		);
@@ -378,18 +451,34 @@ final class AutoUpdateDelayBehaviorTest extends TestCase {
 		$hash  = hash( 'sha256', 'theme|twentytwentyfive|2.0' );
 		$aged  = time() - 2 * DAY_IN_SECONDS;
 
-		$GLOBALS['updatronix_test_site_transients']['update_themes']                     = (object) array(
-			'response' => array(
-				'twentytwentyfive' => array( 'new_version' => '2.0' ),
-			),
-		);
-		$GLOBALS['updatronix_test_options'][ Updatronix_AutoUpdateDelay::OPTION_LEDGER ] = wp_json_encode( array( $hash => $aged ) );
+		// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+		$GLOBALS['updatronix_test_site_transients']['update_themes'] =
+			(object) array(
+				'response' => array(
+					'twentytwentyfive' => array( 'new_version' => '2.0' ),
+				),
+			);
+		// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+		$GLOBALS['updatronix_test_options'][ Updatronix_AutoUpdateDelay::OPTION_LEDGER ] =
+			wp_json_encode( array( $hash => $aged ) );
 
-		$this->assertTrue( Updatronix_AutoUpdateDelay::filter_theme( true, $offer ), 'An offer past the soak window must be allowed through.' );
+		$this->assertTrue(
+			Updatronix_AutoUpdateDelay::filter_theme( true, $offer ),
+			'An offer past the soak window must be allowed through.'
+		);
 
 		$ledger = $this->ledger();
-		$this->assertArrayHasKey( $hash, $ledger, 'The row the update API still offers must not be pruned.' );
-		$this->assertSame( $aged, $ledger[ $hash ], 'And it must keep the first-seen stamp it had: re-seeding restarts the soak window.' );
+		$this->assertArrayHasKey(
+			$hash,
+			$ledger,
+			'The row the update API still offers must not be pruned.'
+		);
+		$this->assertSame(
+			$aged,
+			$ledger[ $hash ],
+			// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+			'And it must keep the first-seen stamp it had: re-seeding restarts the soak window.'
+		);
 	}
 
 	/**
@@ -407,22 +496,38 @@ final class AutoUpdateDelayBehaviorTest extends TestCase {
 		$hash  = hash( 'sha256', 'core|6.5.0|6.6.1' );
 		$aged  = time() - 2 * DAY_IN_SECONDS;
 
-		$GLOBALS['updatronix_test_site_transients']['update_core']                       = (object) array(
-			'updates' => array(
-				(object) array(
-					'response' => 'autoupdate',
-					'current'  => '6.5.0',
-					'version'  => '6.6.1',
+		// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+		$GLOBALS['updatronix_test_site_transients']['update_core'] =
+			(object) array(
+				'updates' => array(
+					(object) array(
+						'response' => 'autoupdate',
+						'current'  => '6.5.0',
+						'version'  => '6.6.1',
+					),
 				),
-			),
-		);
-		$GLOBALS['updatronix_test_options'][ Updatronix_AutoUpdateDelay::OPTION_LEDGER ] = wp_json_encode( array( $hash => $aged ) );
+			);
+		// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+		$GLOBALS['updatronix_test_options'][ Updatronix_AutoUpdateDelay::OPTION_LEDGER ] =
+			wp_json_encode( array( $hash => $aged ) );
 
-		$this->assertTrue( Updatronix_AutoUpdateDelay::filter_core( true, $offer ), 'An offer past the soak window must be allowed through.' );
+		$this->assertTrue(
+			Updatronix_AutoUpdateDelay::filter_core( true, $offer ),
+			'An offer past the soak window must be allowed through.'
+		);
 
 		$ledger = $this->ledger();
-		$this->assertArrayHasKey( $hash, $ledger, 'The row the update API still offers must not be pruned.' );
-		$this->assertSame( $aged, $ledger[ $hash ], 'And it must keep the first-seen stamp it had: re-seeding restarts the soak window.' );
+		$this->assertArrayHasKey(
+			$hash,
+			$ledger,
+			'The row the update API still offers must not be pruned.'
+		);
+		$this->assertSame(
+			$aged,
+			$ledger[ $hash ],
+			// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+			'And it must keep the first-seen stamp it had: re-seeding restarts the soak window.'
+		);
 	}
 
 	/**
@@ -433,20 +538,46 @@ final class AutoUpdateDelayBehaviorTest extends TestCase {
 	public function test_distinct_offers_get_distinct_ledger_rows(): void {
 		$this->enable_delay( 7 );
 
-		$this->assertFalse( Updatronix_AutoUpdateDelay::filter_plugin( true, $this->plugin_offer( 'akismet/akismet.php', '5.3' ) ) );
-		$this->assertFalse( Updatronix_AutoUpdateDelay::filter_plugin( true, $this->plugin_offer( 'hello.php', '1.1' ) ) );
+		$this->assertFalse(
+			Updatronix_AutoUpdateDelay::filter_plugin(
+				true,
+				$this->plugin_offer( 'akismet/akismet.php', '5.3' )
+			)
+		);
+		$this->assertFalse(
+			Updatronix_AutoUpdateDelay::filter_plugin(
+				true,
+				$this->plugin_offer( 'hello.php', '1.1' )
+			)
+		);
 
 		$ledger = $this->ledger();
 
-		$this->assertCount( 2, $ledger, 'Two distinct offers must produce two ledger rows.' );
+		$this->assertCount(
+			2,
+			$ledger,
+			'Two distinct offers must produce two ledger rows.'
+		);
 		$this->assertNotSame(
-			$this->invoke_static( 'stable_ledger_hash', array( 'plugin', $this->plugin_offer( 'akismet/akismet.php', '5.3' ) ) ),
-			$this->invoke_static( 'stable_ledger_hash', array( 'plugin', $this->plugin_offer( 'hello.php', '1.1' ) ) ),
+			$this->invoke_static(
+				'stable_ledger_hash',
+				array(
+					'plugin',
+					$this->plugin_offer( 'akismet/akismet.php', '5.3' ),
+				)
+			),
+			$this->invoke_static(
+				'stable_ledger_hash',
+				array(
+					'plugin',
+					$this->plugin_offer( 'hello.php', '1.1' ),
+				)
+			),
 			'Distinct offers must hash differently.'
 		);
 	}
 
-	// --- Exclusions and filter overrides -------------------------------------
+	// --- Exclusions and filter overrides -------------------------------------.
 
 	/**
 	 * Site Health synthetic probes must bypass the soak gate entirely and write
@@ -459,7 +590,12 @@ final class AutoUpdateDelayBehaviorTest extends TestCase {
 
 		$offer = $this->plugin_offer( 'a-fake-plugin/a-fake-plugin.php', '1.0' );
 
-		$this->assertTrue( Updatronix_AutoUpdateDelay::filter_plugin( true, $offer ) );
+		$this->assertTrue(
+			Updatronix_AutoUpdateDelay::filter_plugin(
+				true,
+				$offer
+			)
+		);
 		$this->assertSame( array(), $this->ledger() );
 		$this->assertSame( array(), Updatronix_Logger::$calls );
 	}
@@ -480,7 +616,12 @@ final class AutoUpdateDelayBehaviorTest extends TestCase {
 			}
 		);
 
-		$this->assertTrue( Updatronix_AutoUpdateDelay::filter_plugin( true, $this->plugin_offer() ) );
+		$this->assertTrue(
+			Updatronix_AutoUpdateDelay::filter_plugin(
+				true,
+				$this->plugin_offer()
+			)
+		);
 		$this->assertSame( array(), $this->ledger() );
 	}
 
@@ -503,9 +644,22 @@ final class AutoUpdateDelayBehaviorTest extends TestCase {
 			}
 		);
 
-		$this->assertTrue( Updatronix_AutoUpdateDelay::filter_plugin( true, $this->plugin_offer() ) );
-		$this->assertSame( 7 * DAY_IN_SECONDS, $captured, 'The filter must receive the canonical 7-day soak in seconds.' );
-		$this->assertSame( array(), $this->ledger(), 'A zero-length soak must not touch the ledger.' );
+		$this->assertTrue(
+			Updatronix_AutoUpdateDelay::filter_plugin(
+				true,
+				$this->plugin_offer()
+			)
+		);
+		$this->assertSame(
+			7 * DAY_IN_SECONDS,
+			$captured,
+			'The filter must receive the canonical 7-day soak in seconds.'
+		);
+		$this->assertSame(
+			array(),
+			$this->ledger(),
+			'A zero-length soak must not touch the ledger.'
+		);
 	}
 
 	/**
@@ -524,7 +678,12 @@ final class AutoUpdateDelayBehaviorTest extends TestCase {
 			}
 		);
 
-		$this->assertTrue( Updatronix_AutoUpdateDelay::filter_plugin( true, $this->plugin_offer() ) );
+		$this->assertTrue(
+			Updatronix_AutoUpdateDelay::filter_plugin(
+				true,
+				$this->plugin_offer()
+			)
+		);
 	}
 
 	/**
@@ -536,12 +695,26 @@ final class AutoUpdateDelayBehaviorTest extends TestCase {
 	public function test_filter_passthrough_when_update_not_true(): void {
 		$this->enable_delay( 7 );
 
-		$this->assertFalse( Updatronix_AutoUpdateDelay::filter_plugin( false, $this->plugin_offer() ) );
-		$this->assertNull( Updatronix_AutoUpdateDelay::filter_plugin( null, $this->plugin_offer() ) );
-		$this->assertSame( array(), $this->ledger(), 'A non-true incoming decision must not touch the ledger.' );
+		$this->assertFalse(
+			Updatronix_AutoUpdateDelay::filter_plugin(
+				false,
+				$this->plugin_offer()
+			)
+		);
+		$this->assertNull(
+			Updatronix_AutoUpdateDelay::filter_plugin(
+				null,
+				$this->plugin_offer()
+			)
+		);
+		$this->assertSame(
+			array(),
+			$this->ledger(),
+			'A non-true incoming decision must not touch the ledger.'
+		);
 	}
 
-	// --- Ledger prune / flush -------------------------------------------------
+	// --- Ledger prune / flush -------------------------------------------------.
 
 	/**
 	 * Pruning drops ledger rows whose offer is no longer present in the live
@@ -555,27 +728,56 @@ final class AutoUpdateDelayBehaviorTest extends TestCase {
 		$stale_offer = $this->plugin_offer( 'stale/stale.php', '1.0' );
 		$live_offer  = $this->plugin_offer();
 
-		$stale_hash = (string) $this->invoke_static( 'stable_ledger_hash', array( 'plugin', $stale_offer ) );
-		$live_hash  = (string) $this->invoke_static( 'stable_ledger_hash', array( 'plugin', $live_offer ) );
-
-		$GLOBALS['updatronix_test_options'][ Updatronix_AutoUpdateDelay::OPTION_LEDGER ] = wp_json_encode(
+		$stale_hash = (string) $this->invoke_static(
+			'stable_ledger_hash',
 			array(
-				$stale_hash => time() - 8 * DAY_IN_SECONDS,
-				$live_hash  => time() - 8 * DAY_IN_SECONDS,
+				'plugin',
+				$stale_offer,
 			)
 		);
-		$GLOBALS['updatronix_test_site_transients']['update_plugins']                    = (object) array(
-			'response' => array(
-				'akismet/akismet.php' => $live_offer,
-			),
+		$live_hash  = (string) $this->invoke_static(
+			'stable_ledger_hash',
+			array(
+				'plugin',
+				$live_offer,
+			)
 		);
 
+		// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+		$GLOBALS['updatronix_test_options'][ Updatronix_AutoUpdateDelay::OPTION_LEDGER ] =
+			wp_json_encode(
+				array(
+					$stale_hash => time() - 8 * DAY_IN_SECONDS,
+					$live_hash  => time() - 8 * DAY_IN_SECONDS,
+				)
+			);
+		// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+		$GLOBALS['updatronix_test_site_transients']['update_plugins'] =
+			(object) array(
+				'response' => array(
+					'akismet/akismet.php' => $live_offer,
+				),
+			);
+
 		// The live offer is mature (row aged); pruning must drop only the stale row.
-		$this->assertTrue( Updatronix_AutoUpdateDelay::filter_plugin( true, $live_offer ) );
+		$this->assertTrue(
+			Updatronix_AutoUpdateDelay::filter_plugin(
+				true,
+				$live_offer
+			)
+		);
 
 		$ledger = $this->ledger();
-		$this->assertArrayNotHasKey( $stale_hash, $ledger, 'A row for an offer no longer offered must be pruned.' );
-		$this->assertArrayHasKey( $live_hash, $ledger, 'A row for an offer still offered must survive pruning.' );
+		$this->assertArrayNotHasKey(
+			$stale_hash,
+			$ledger,
+			'A row for an offer no longer offered must be pruned.'
+		);
+		$this->assertArrayHasKey(
+			$live_hash,
+			$ledger,
+			'A row for an offer still offered must survive pruning.'
+		);
 	}
 
 	/**
@@ -593,7 +795,11 @@ final class AutoUpdateDelayBehaviorTest extends TestCase {
 
 		$this->invoke_static( 'ledger_flush', array( $over_cap ) );
 
-		$this->assertCount( 384, $this->ledger(), 'ledger_flush must trim rows to MAX_LEDGER_ENTRIES.' );
+		$this->assertCount(
+			384,
+			$this->ledger(),
+			'ledger_flush must trim rows to MAX_LEDGER_ENTRIES.'
+		);
 	}
 
 	/**
@@ -612,16 +818,20 @@ final class AutoUpdateDelayBehaviorTest extends TestCase {
 		);
 		$hash  = hash( 'sha256', 'theme|twentytwentyfive|2.0' );
 
-		$GLOBALS['updatronix_test_site_transients']['update_themes']                     = (object) array(
-			'response' => array(
-				'twentytwentyfive' => array( 'new_version' => '2.0' ),
-			),
-		);
-		$GLOBALS['updatronix_test_options'][ Updatronix_AutoUpdateDelay::OPTION_LEDGER ] = wp_json_encode(
-			array( $hash => time() - 2 * DAY_IN_SECONDS )
-		);
+		// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+		$GLOBALS['updatronix_test_site_transients']['update_themes'] =
+			(object) array(
+				'response' => array(
+					'twentytwentyfive' => array( 'new_version' => '2.0' ),
+				),
+			);
+		// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+		$GLOBALS['updatronix_test_options'][ Updatronix_AutoUpdateDelay::OPTION_LEDGER ] =
+			wp_json_encode(
+				array( $hash => time() - 2 * DAY_IN_SECONDS )
+			);
 
-		// The delay would let this offer through, so a `false` that comes back
+		// The delay would let this offer through, so a `false` that comes back.
 		// `false` is the prior decision surviving — not the delay agreeing.
 		$this->assertTrue( Updatronix_AutoUpdateDelay::filter_theme( true, $offer ) );
 		$this->assertFalse(
@@ -643,7 +853,10 @@ final class AutoUpdateDelayBehaviorTest extends TestCase {
 	 * @return void
 	 */
 	public function test_resolve_offer_dimensions_rejects_path_traversal(): void {
-		$method = new ReflectionMethod( Updatronix_AutoUpdateDelay::class, 'resolve_offer_dimensions' );
+		$method = new ReflectionMethod(
+			Updatronix_AutoUpdateDelay::class,
+			'resolve_offer_dimensions'
+		);
 		$method->setAccessible( true );
 
 		$paths = array(
@@ -676,6 +889,10 @@ final class AutoUpdateDelayBehaviorTest extends TestCase {
 				'new_version' => 99,
 			)
 		);
-		$this->assertSame( '99', $non_string_version[3], 'The version field must be returned as a string.' );
+		$this->assertSame(
+			'99',
+			$non_string_version[3],
+			'The version field must be returned as a string.'
+		);
 	}
 }

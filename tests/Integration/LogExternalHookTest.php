@@ -36,18 +36,28 @@ final class LogExternalHookTest extends WP_UnitTestCase {
 	protected function setUp(): void {
 		parent::setUp();
 
-		require_once UPDATRONIX_PLUGIN_DIR . 'inc/classes/class-updatronix-database.php';
-		require_once UPDATRONIX_PLUGIN_DIR . 'inc/classes/class-updatronix-log-taxonomy.php';
-		require_once UPDATRONIX_PLUGIN_DIR . 'inc/classes/class-updatronix-log-event.php';
-		require_once UPDATRONIX_PLUGIN_DIR . 'inc/classes/class-updatronix-security.php';
-		require_once UPDATRONIX_PLUGIN_DIR . 'inc/classes/class-updatronix-logger.php';
+		require_once UPDATRONIX_PLUGIN_DIR
+			. 'inc/classes/class-updatronix-database.php';
+		require_once UPDATRONIX_PLUGIN_DIR
+			. 'inc/classes/class-updatronix-log-taxonomy.php';
+		require_once UPDATRONIX_PLUGIN_DIR
+			. 'inc/classes/class-updatronix-log-event.php';
+		require_once UPDATRONIX_PLUGIN_DIR
+			. 'inc/classes/class-updatronix-security.php';
+		require_once UPDATRONIX_PLUGIN_DIR
+			. 'inc/classes/class-updatronix-logger.php';
 		require_once dirname( __DIR__ ) . '/Support/LogEventFactory.php';
 
 		Updatronix_Database::create_table();
 		$this->delete_all_rows();
 
 		add_action( 'updatronix_after_log', array( $this, 'capture_insert' ), 10, 2 );
-		add_action( 'updatronix_log_updated', array( $this, 'capture_update' ), 10, 2 );
+		add_action(
+			'updatronix_log_updated',
+			array( $this, 'capture_update' ),
+			10,
+			2
+		);
 	}
 
 	/**
@@ -57,7 +67,11 @@ final class LogExternalHookTest extends WP_UnitTestCase {
 	 */
 	protected function tearDown(): void {
 		remove_action( 'updatronix_after_log', array( $this, 'capture_insert' ), 10 );
-		remove_action( 'updatronix_log_updated', array( $this, 'capture_update' ), 10 );
+		remove_action(
+			'updatronix_log_updated',
+			array( $this, 'capture_update' ),
+			10
+		);
 
 		$this->delete_all_rows();
 
@@ -92,7 +106,20 @@ final class LogExternalHookTest extends WP_UnitTestCase {
 	 * @return void
 	 */
 	public function test_legacy_insert_payload_keeps_the_original_keys(): void {
-		$id = Updatronix_Logger::log( 'plugin', 'update', 'Legacy fixture', 'fixture/legacy.php', '1.0.0', '1.1.0', 'success', 'Done.', '', 'automatic', 'single', 'legacy|hook|fixture' );
+		$id = Updatronix_Logger::log(
+			'plugin',
+			'update',
+			'Legacy fixture',
+			'fixture/legacy.php',
+			'1.0.0',
+			'1.1.0',
+			'success',
+			'Done.',
+			'',
+			'automatic',
+			'single',
+			'legacy|hook|fixture'
+		);
 
 		self::assertIsInt( $id );
 		self::assertCount( 1, $this->inserted );
@@ -101,7 +128,20 @@ final class LogExternalHookTest extends WP_UnitTestCase {
 
 		self::assertSame( $id, $log_id );
 
-		$legacy_keys = array( 'log_type', 'action_type', 'item_name', 'item_slug', 'version_before', 'version_after', 'status', 'message', 'trace', 'update_context', 'event_key', 'created_at' );
+		$legacy_keys = array(
+			'log_type',
+			'action_type',
+			'item_name',
+			'item_slug',
+			'version_before',
+			'version_after',
+			'status',
+			'message',
+			'trace',
+			'update_context',
+			'event_key',
+			'created_at',
+		);
 		foreach ( $legacy_keys as $key ) {
 			self::assertArrayHasKey( $key, $payload, $key );
 		}
@@ -126,7 +166,12 @@ final class LogExternalHookTest extends WP_UnitTestCase {
 	public function test_decision_insert_payload_is_additive_and_complete(): void {
 		$event = array_merge(
 			LogEventFactory::shield_wp_block(),
-			array( 'context' => array_merge( LogEventFactory::shield_wp_block()['context'], array( 'chain_name' => 'Hook chain' ) ) )
+			array(
+				'context' => array_merge(
+					LogEventFactory::shield_wp_block()['context'],
+					array( 'chain_name' => 'Hook chain' )
+				),
+			)
 		);
 
 		$id = Updatronix_Logger::log_event( $event );
@@ -184,12 +229,23 @@ final class LogExternalHookTest extends WP_UnitTestCase {
 	 * @return void
 	 */
 	public function test_enrichment_fires_only_the_update_hook(): void {
-		$id = Updatronix_Logger::log_event( LogEventFactory::native_automatic_success() );
+		$id = Updatronix_Logger::log_event(
+			LogEventFactory::native_automatic_success(
+			)
+		);
 		self::assertIsInt( $id );
 		self::assertCount( 1, $this->inserted );
 		self::assertCount( 0, $this->updated );
 
-		self::assertTrue( Updatronix_Logger::attach_context( (int) $id, array( 'chain_id' => 'chain-hook' ) ) );
+		self::assertTrue(
+			Updatronix_Logger::attach_context(
+				(int) $id,
+				array(
+					'chain_id' =>
+					'chain-hook',
+				)
+			)
+		);
 
 		self::assertCount( 1, $this->inserted );
 		self::assertCount( 1, $this->updated );
@@ -210,14 +266,25 @@ final class LogExternalHookTest extends WP_UnitTestCase {
 		$id = Updatronix_Logger::log_event( LogEventFactory::pass_summary() );
 		self::assertIsInt( $id );
 
-		self::assertTrue( Updatronix_Logger::update_summary( (int) $id, array( 'context' => array( 'skipped' => 7 ) ) ) );
+		self::assertTrue(
+			Updatronix_Logger::update_summary(
+				(int) $id,
+				array(
+					'context' =>
+					array( 'skipped' => 7 ),
+				)
+			)
+		);
 
 		self::assertCount( 1, $this->inserted );
 		self::assertCount( 1, $this->updated );
 		self::assertSame( 7, $this->updated[0][1]['context']['skipped'] );
 
 		$row = Updatronix_Logger::get_log( (int) $id, true );
-		self::assertSame( 7, Updatronix_Security::decode_context( (string) $row->context )['skipped'] );
+		self::assertSame(
+			7,
+			Updatronix_Security::decode_context( (string) $row->context )['skipped']
+		);
 	}
 
 	/**
@@ -226,7 +293,35 @@ final class LogExternalHookTest extends WP_UnitTestCase {
 	 * @return void
 	 */
 	public function test_strict_consumer_accepts_both_payloads(): void {
-		$required = array( 'log_type', 'action_type', 'item_name', 'item_slug', 'version_before', 'version_after', 'status', 'message', 'trace', 'update_context', 'event_key', 'created_at', 'site_id', 'user_id', 'performed_by', 'target_version', 'reason_code', 'decision_state', 'origin', 'decision_stage', 'pass_id', 'chain_id', 'predecessor', 'next_eligible_at', 'attempt', 'network', 'context' );
+		$required = array(
+			'log_type',
+			'action_type',
+			'item_name',
+			'item_slug',
+			'version_before',
+			'version_after',
+			'status',
+			'message',
+			'trace',
+			'update_context',
+			'event_key',
+			'created_at',
+			'site_id',
+			'user_id',
+			'performed_by',
+			'target_version',
+			'reason_code',
+			'decision_state',
+			'origin',
+			'decision_stage',
+			'pass_id',
+			'chain_id',
+			'predecessor',
+			'next_eligible_at',
+			'attempt',
+			'network',
+			'context',
+		);
 		$strict   = static function ( array $payload ) use ( $required ): bool {
 			foreach ( $required as $key ) {
 				if ( ! array_key_exists( $key, $payload ) ) {
@@ -237,12 +332,31 @@ final class LogExternalHookTest extends WP_UnitTestCase {
 			return true;
 		};
 
-		Updatronix_Logger::log( 'plugin', 'update', 'Strict fixture', 'fixture/strict.php', '1.0.0', '1.1.0', 'success', '', '', 'manual', '', 'strict|fixture|key' );
+		Updatronix_Logger::log(
+			'plugin',
+			'update',
+			'Strict fixture',
+			'fixture/strict.php',
+			'1.0.0',
+			'1.1.0',
+			'success',
+			'',
+			'',
+			'manual',
+			'',
+			'strict|fixture|key'
+		);
 		Updatronix_Logger::log_event( LogEventFactory::shield_wp_block() );
 
 		self::assertCount( 2, $this->inserted );
-		self::assertTrue( $strict( $this->inserted[0][1] ), 'The legacy payload must satisfy a strict consumer.' );
-		self::assertTrue( $strict( $this->inserted[1][1] ), 'The decision payload must satisfy a strict consumer.' );
+		self::assertTrue(
+			$strict( $this->inserted[0][1] ),
+			'The legacy payload must satisfy a strict consumer.'
+		);
+		self::assertTrue(
+			$strict( $this->inserted[1][1] ),
+			'The decision payload must satisfy a strict consumer.'
+		);
 	}
 
 	/**

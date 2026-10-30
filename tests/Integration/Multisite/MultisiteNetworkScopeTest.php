@@ -1,6 +1,7 @@
 <?php
 /**
- * Multisite network-scope tests: subsite run-time inertness, REST gating, network storage, and main-site-only cron.
+ * Multisite network-scope tests: subsite run-time inertness, REST gating,
+ * network storage, and main-site-only cron.
  *
  * Run with:
  *
@@ -12,7 +13,8 @@
 declare(strict_types=1);
 
 /**
- * Verifies the native-network load gate, REST scope resolution, shared storage, and cron placement.
+ * Verifies the native-network load gate, REST scope resolution, shared storage,
+ * and cron placement.
  *
  * @coversNothing
  */
@@ -25,7 +27,9 @@ final class MultisiteNetworkScopeTest extends WP_UnitTestCase {
 	protected function setUp(): void {
 		parent::setUp();
 		if ( ! is_multisite() ) {
-			self::markTestSkipped( 'MultisiteNetworkScopeTest requires WP_MULTISITE=1.' );
+			self::markTestSkipped(
+				'MultisiteNetworkScopeTest requires WP_MULTISITE=1.'
+			);
 		}
 	}
 
@@ -46,7 +50,8 @@ final class MultisiteNetworkScopeTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Create a real subsite and return its blog id, or skip when the factory is unavailable.
+	 * Create a real subsite and return its blog id, or skip when the factory is
+	 * unavailable.
 	 *
 	 * @return int Blog ID.
 	 */
@@ -68,7 +73,12 @@ final class MultisiteNetworkScopeTest extends WP_UnitTestCase {
 			self::markTestSkipped( 'grant_super_admin unavailable.' );
 		}
 
-		$user_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		$user_id = self::factory()->user->create(
+			array(
+				'role' =>
+				'administrator',
+			)
+		);
 		grant_super_admin( $user_id );
 		wp_set_current_user( $user_id );
 
@@ -78,9 +88,12 @@ final class MultisiteNetworkScopeTest extends WP_UnitTestCase {
 	/**
 	 * A subsite must not load the plugin runtime (native-network load gate).
 	 *
-	 * This is the mechanism that keeps subsites inert: `updatronix.php` returns before
-	 * requiring any runtime/class/admin file when `updatronix_should_load()` is false, so
-	 * no REST route, cron hook, menu, notice, or filter registers on a subsite request.
+	 * This is the mechanism that keeps subsites inert: `updatronix.php` returns
+	 * before
+	 * requiring any runtime/class/admin file when `updatronix_should_load()` is
+	 * false, so
+	 * no REST route, cron hook, menu, notice, or filter registers on a subsite
+	 * request.
 	 *
 	 * @return void
 	 */
@@ -88,24 +101,37 @@ final class MultisiteNetworkScopeTest extends WP_UnitTestCase {
 		$subsite_id = $this->create_subsite();
 		switch_to_blog( $subsite_id );
 		try {
-			self::assertFalse( updatronix_should_load(), 'Subsite context must not load Updatronix runtime.' );
-			self::assertFalse( updatronix_activation_allowed(), 'Subsite activation mutations must be rejected.' );
+			self::assertFalse(
+				updatronix_should_load(),
+				'Subsite context must not load Updatronix runtime.'
+			);
+			self::assertFalse(
+				updatronix_activation_allowed(),
+				'Subsite activation mutations must be rejected.'
+			);
 		} finally {
 			restore_current_blog();
 		}
 	}
 
 	/**
-	 * A non-super-admin subsite admin cannot manage network logs (REST permission gate).
+	 * A non-super-admin subsite admin cannot manage network logs (REST permission
+	 * gate).
 	 *
-	 * Complements the unit-level coverage in `SecurityTest::user_can_manage_logs_*` by
+	 * Complements the unit-level coverage in
+	 * `SecurityTest::user_can_manage_logs_*` by
 	 * proving the gate holds from a real subsite context.
 	 *
 	 * @return void
 	 */
 	public function test_subsite_admin_cannot_manage_network_logs(): void {
 		$subsite_id = $this->create_subsite();
-		$admin      = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		$admin      = self::factory()->user->create(
+			array(
+				'role' =>
+				'administrator',
+			)
+		);
 		wp_set_current_user( $admin );
 
 		switch_to_blog( $subsite_id );
@@ -120,7 +146,8 @@ final class MultisiteNetworkScopeTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Settings saved on the main site are visible from a different subsite (shared sitemeta).
+	 * Settings saved on the main site are visible from a different subsite (shared
+	 * sitemeta).
 	 *
 	 * @return void
 	 */
@@ -144,7 +171,8 @@ final class MultisiteNetworkScopeTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * The plugin cleanup cron event exists only on the main site after artifact cleanup.
+	 * The plugin cleanup cron event exists only on the main site after artifact
+	 * cleanup.
 	 *
 	 * @return void
 	 */
@@ -152,7 +180,10 @@ final class MultisiteNetworkScopeTest extends WP_UnitTestCase {
 		$subsite_id = $this->create_subsite();
 
 		Updatronix_Cron::schedule_if_needed();
-		self::assertNotFalse( wp_next_scheduled( Updatronix_Cron::HOOK_CLEANUP ), 'Main site must hold the cleanup event.' );
+		self::assertNotFalse(
+			wp_next_scheduled( Updatronix_Cron::HOOK_CLEANUP ),
+			'Main site must hold the cleanup event.'
+		);
 
 		Updatronix_Cron::clear_subsite_cron_artifacts();
 
@@ -170,13 +201,18 @@ final class MultisiteNetworkScopeTest extends WP_UnitTestCase {
 			restore_current_blog();
 		}
 
-		self::assertNotFalse( wp_next_scheduled( Updatronix_Cron::HOOK_CLEANUP ), 'Main-site cleanup event must survive cleanup.' );
+		self::assertNotFalse(
+			wp_next_scheduled( Updatronix_Cron::HOOK_CLEANUP ),
+			'Main-site cleanup event must survive cleanup.'
+		);
 	}
 
 	/**
-	 * A Super Admin unresolved log request spans all originating sites (network-global scope).
+	 * A Super Admin unresolved log request spans all originating sites
+	 * (network-global scope).
 	 *
-	 * `resolve_site_id()` defaults to `0` (network-global sentinel) for a Super Admin with no
+	 * `resolve_site_id()` defaults to `0` (network-global sentinel) for a Super
+	 * Admin with no
 	 * explicit `site_id`, so the log list is not narrowed to the current blog.
 	 *
 	 * @return void
@@ -187,10 +223,26 @@ final class MultisiteNetworkScopeTest extends WP_UnitTestCase {
 		}
 		$subsite_id = $this->create_subsite();
 
-		Updatronix_Logger::log( 'plugin', 'update', 'Main Site Item', 'main-global', '1.0', '1.1', 'success' );
+		Updatronix_Logger::log(
+			'plugin',
+			'update',
+			'Main Site Item',
+			'main-global',
+			'1.0',
+			'1.1',
+			'success'
+		);
 		switch_to_blog( $subsite_id );
 		try {
-			Updatronix_Logger::log( 'plugin', 'update', 'Subsite Item', 'subsite-global', '1.0', '1.1', 'success' );
+			Updatronix_Logger::log(
+				'plugin',
+				'update',
+				'Subsite Item',
+				'subsite-global',
+				'1.0',
+				'1.1',
+				'success'
+			);
 		} finally {
 			restore_current_blog();
 		}
@@ -206,8 +258,16 @@ final class MultisiteNetworkScopeTest extends WP_UnitTestCase {
 			static fn ( object $row ): string => (string) ( $row->item_name ?? '' ),
 			$data['logs']
 		);
-		self::assertContains( 'Main Site Item', $names, 'Network-global log scope must include main-site rows.' );
-		self::assertContains( 'Subsite Item', $names, 'Network-global log scope must include subsite-origin rows.' );
+		self::assertContains(
+			'Main Site Item',
+			$names,
+			'Network-global log scope must include main-site rows.'
+		);
+		self::assertContains(
+			'Subsite Item',
+			$names,
+			'Network-global log scope must include subsite-origin rows.'
+		);
 
 		Updatronix_Logger::delete_all_logs();
 	}

@@ -28,12 +28,18 @@ final class LogQueryFilterTest extends WP_UnitTestCase {
 	protected function setUp(): void {
 		parent::setUp();
 
-		require_once UPDATRONIX_PLUGIN_DIR . 'inc/classes/class-updatronix-database.php';
-		require_once UPDATRONIX_PLUGIN_DIR . 'inc/classes/class-updatronix-log-taxonomy.php';
-		require_once UPDATRONIX_PLUGIN_DIR . 'inc/classes/class-updatronix-log-event.php';
-		require_once UPDATRONIX_PLUGIN_DIR . 'inc/classes/class-updatronix-log-query.php';
-		require_once UPDATRONIX_PLUGIN_DIR . 'inc/classes/class-updatronix-security.php';
-		require_once UPDATRONIX_PLUGIN_DIR . 'inc/classes/class-updatronix-logger.php';
+		require_once UPDATRONIX_PLUGIN_DIR
+			. 'inc/classes/class-updatronix-database.php';
+		require_once UPDATRONIX_PLUGIN_DIR
+			. 'inc/classes/class-updatronix-log-taxonomy.php';
+		require_once UPDATRONIX_PLUGIN_DIR
+			. 'inc/classes/class-updatronix-log-event.php';
+		require_once UPDATRONIX_PLUGIN_DIR
+			. 'inc/classes/class-updatronix-log-query.php';
+		require_once UPDATRONIX_PLUGIN_DIR
+			. 'inc/classes/class-updatronix-security.php';
+		require_once UPDATRONIX_PLUGIN_DIR
+			. 'inc/classes/class-updatronix-logger.php';
 		require_once dirname( __DIR__ ) . '/Support/LogEventFactory.php';
 
 		Updatronix_Database::create_table();
@@ -146,7 +152,10 @@ final class LogQueryFilterTest extends WP_UnitTestCase {
 		);
 
 		$any_rows = Updatronix_Logger::get_logs( $is_any, false );
-		$states   = array_map( static fn ( $row ): string => (string) $row->decision_state, $any_rows );
+		$states   = array_map(
+			static fn ( $row ): string => (string) $row->decision_state,
+			$any_rows
+		);
 		sort( $states );
 
 		self::assertSame( array( 'blocked', 'waiting' ), $states );
@@ -244,7 +253,12 @@ final class LogQueryFilterTest extends WP_UnitTestCase {
 	 * @return void
 	 */
 	public function test_user_filter_is_server_side(): void {
-		$first_user = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		$first_user = self::factory()->user->create(
+			array(
+				'role' =>
+				'administrator',
+			)
+		);
 		wp_set_current_user( $first_user );
 
 		$id = Updatronix_Logger::log_event(
@@ -280,10 +294,42 @@ final class LogQueryFilterTest extends WP_UnitTestCase {
 	 * @return void
 	 */
 	public function test_legacy_scalar_args_still_work(): void {
-		self::assertSame( 1, Updatronix_Logger::get_logs_count( array( 'status' => 'warning' ) ) );
-		self::assertSame( 1, Updatronix_Logger::get_logs_count( array( 'log_type' => 'system' ) ) );
-		self::assertSame( 2, Updatronix_Logger::get_logs_count( array( 'action_types' => array( 'pass', 'disabled' ) ) ) );
-		self::assertSame( 0, Updatronix_Logger::get_logs_count( array( 'created_at_after' => '2999-01-01 00:00:00' ) ) );
+		self::assertSame(
+			1,
+			Updatronix_Logger::get_logs_count(
+				array(
+					'status' =>
+					'warning',
+				)
+			)
+		);
+		self::assertSame(
+			1,
+			Updatronix_Logger::get_logs_count(
+				array(
+					'log_type' =>
+					'system',
+				)
+			)
+		);
+		self::assertSame(
+			2,
+			Updatronix_Logger::get_logs_count(
+				array(
+					'action_types' =>
+					array( 'pass', 'disabled' ),
+				)
+			)
+		);
+		self::assertSame(
+			0,
+			Updatronix_Logger::get_logs_count(
+				array(
+					'created_at_after' =>
+					'2999-01-01 00:00:00',
+				)
+			)
+		);
 	}
 
 	/**
@@ -292,7 +338,14 @@ final class LogQueryFilterTest extends WP_UnitTestCase {
 	 * @return void
 	 */
 	public function test_rest_feed_filters_and_enriches(): void {
-		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		wp_set_current_user(
+			self::factory()->user->create(
+				array(
+					'role' =>
+					'administrator',
+				)
+			)
+		);
 
 		$request = new \WP_REST_Request( 'GET', '/updatronix/v1/logs' );
 		$request->set_param(
@@ -338,7 +391,14 @@ final class LogQueryFilterTest extends WP_UnitTestCase {
 	 * @return void
 	 */
 	public function test_rest_scalar_param_and_legacy_row(): void {
-		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		wp_set_current_user(
+			self::factory()->user->create(
+				array(
+					'role' =>
+					'administrator',
+				)
+			)
+		);
 
 		$request = new \WP_REST_Request( 'GET', '/updatronix/v1/logs' );
 		$request->set_param( 'per_page', 50 );
@@ -355,7 +415,9 @@ final class LogQueryFilterTest extends WP_UnitTestCase {
 		$legacy_request->set_param( 'page', 1 );
 		$legacy_request->set_param( 'search', 'Legacy fixture' );
 
-		$legacy_data = Updatronix_Settings::rest_get_logs( $legacy_request )->get_data();
+		$legacy_data = Updatronix_Settings::rest_get_logs(
+			$legacy_request
+		)->get_data();
 
 		self::assertSame( 1, $legacy_data['total'] );
 		$legacy = $legacy_data['logs'][0];
@@ -387,9 +449,15 @@ final class LogQueryFilterTest extends WP_UnitTestCase {
 
 		$details = Updatronix_Settings::enrich_log_details( $rows[0] );
 
-		self::assertSame( 'wp_compatibility', $details->decision_context['policy_id'] );
+		self::assertSame(
+			'wp_compatibility',
+			$details->decision_context['policy_id']
+		);
 		self::assertSame( '6.2', $details->decision_context['installed_wp'] );
-		self::assertSame( 'WordPress 6.6 required (installed 6.2)', $details->policy_detail );
+		self::assertSame(
+			'WordPress 6.6 required (installed 6.2)',
+			$details->policy_detail
+		);
 		self::assertSame( 'Blocked', $details->decision_state_label );
 		self::assertSame( '', $details->next_eligible_at_display );
 	}
@@ -414,10 +482,15 @@ final class LogQueryFilterTest extends WP_UnitTestCase {
 		);
 
 		self::assertCount( 1, $rows );
-		self::assertSame( LogEventFactory::NEXT_ELIGIBLE_AT, $rows[0]->next_eligible_at );
+		self::assertSame(
+			LogEventFactory::NEXT_ELIGIBLE_AT,
+			$rows[0]->next_eligible_at
+		);
 
 		$utc     = strtotime( LogEventFactory::NEXT_ELIGIBLE_AT . ' UTC' );
-		$display = Updatronix_Settings::enrich_log_for_display( $rows[0] )->next_eligible_at_display;
+		$display = Updatronix_Settings::enrich_log_for_display(
+			$rows[0]
+		)->next_eligible_at_display;
 
 		self::assertSame( wp_date( 'Y-m-d H:i:s', (int) $utc ), $display );
 		self::assertSame( 'waiting', $rows[0]->decision_state );

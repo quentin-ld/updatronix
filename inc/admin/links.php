@@ -10,9 +10,17 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 if ( is_multisite() ) {
-	add_filter( 'network_admin_plugin_action_links_' . plugin_basename( updatronix_PLUGIN_FILE ), 'updatronix_add_settings_link' );
+	add_filter(
+		'network_admin_plugin_action_links_' . plugin_basename(
+			updatronix_PLUGIN_FILE
+		),
+		'updatronix_add_settings_link'
+	);
 } else {
-	add_filter( 'plugin_action_links_' . plugin_basename( updatronix_PLUGIN_FILE ), 'updatronix_add_settings_link' );
+	add_filter(
+		'plugin_action_links_' . plugin_basename( updatronix_PLUGIN_FILE ),
+		'updatronix_add_settings_link'
+	);
 }
 
 /**
@@ -61,21 +69,33 @@ function updatronix_plugin_row_meta( array $links, string $file ): array {
 	if ( plugin_basename( updatronix_PLUGIN_FILE ) === $file ) {
 		$extra_links = array(
 			sprintf(
+				// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 				'<a href="%s" target="_blank" rel="noopener noreferrer" aria-label="%s">%s</a>',
 				esc_url( 'https://wordpress.org/plugins/updatronix/#developers' ),
-				esc_attr__( 'View Updatronix changelog on WordPress.org (opens in a new tab)', 'updatronix' ),
+				esc_attr__(
+					'View Updatronix changelog on WordPress.org (opens in a new tab)',
+					'updatronix'
+				),
 				esc_html__( 'Changelog', 'updatronix' )
 			),
 			sprintf(
+				// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 				'<a href="%s" target="_blank" rel="noopener noreferrer" aria-label="%s">%s</a>',
 				esc_url( 'https://holdmywp.com/en/plugins/updatronix/' ),
-				esc_attr__( 'Read the Updatronix documentation (opens in a new tab)', 'updatronix' ),
+				esc_attr__(
+					'Read the Updatronix documentation (opens in a new tab)',
+					'updatronix'
+				),
 				esc_html__( 'Docs', 'updatronix' )
 			),
 			sprintf(
+				// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 				'<a href="%s" target="_blank" rel="noopener noreferrer" aria-label="%s">%s</a>',
 				esc_url( 'https://buymeacoffee.com/quentinld' ),
-				esc_attr__( 'Support Updatronix development (opens in a new tab)', 'updatronix' ),
+				esc_attr__(
+					'Support Updatronix development (opens in a new tab)',
+					'updatronix'
+				),
 				esc_html__( 'Support', 'updatronix' ) . ' ☕'
 			),
 		);

@@ -26,7 +26,13 @@ final class ExternalLogTest extends WP_UnitTestCase {
 		}
 
 		updatronix_save_settings_array(
-			array_merge( UPDATRONIX_SETTINGS_DEFAULTS, array( 'logging_enabled' => true ) )
+			array_merge(
+				UPDATRONIX_SETTINGS_DEFAULTS,
+				array(
+					'logging_enabled' =>
+								true,
+				)
+			)
 		);
 	}
 
@@ -67,8 +73,14 @@ final class ExternalLogTest extends WP_UnitTestCase {
 		self::assertSame( 'update', $log->action_type );
 		self::assertSame( 'upload', $log->performed_as );
 		self::assertSame( 'alpha/alpha.php', $log->item_slug );
-		self::assertStringContainsString( 'External source: ftp.', (string) $log->message );
-		self::assertStringContainsString( 'Uploaded with the deployment script.', (string) $log->message );
+		self::assertStringContainsString(
+			'External source: ftp.',
+			(string) $log->message
+		);
+		self::assertStringContainsString(
+			'Uploaded with the deployment script.',
+			(string) $log->message
+		);
 	}
 
 	/**
@@ -110,7 +122,10 @@ final class ExternalLogTest extends WP_UnitTestCase {
 		self::assertSame( 2, (int) $log->attempt );
 		self::assertSame( 1, (int) $log->network );
 		self::assertSame( 'upload', $log->performed_as );
-		self::assertStringContainsString( 'External source: ssh.', (string) $log->message );
+		self::assertStringContainsString(
+			'External source: ssh.',
+			(string) $log->message
+		);
 
 		$context = Updatronix_Security::decode_context( (string) $log->context );
 		self::assertSame( 'ssh', $context['source'] );
@@ -131,7 +146,11 @@ final class ExternalLogTest extends WP_UnitTestCase {
 		);
 
 		self::assertWPError( $result );
-		self::assertSame( 'updatronix_external_log_source', $result->get_error_code() );
+		self::assertSame(
+			'updatronix_external_log_source',
+			$result->get_error_code(
+			)
+		);
 	}
 
 	/**

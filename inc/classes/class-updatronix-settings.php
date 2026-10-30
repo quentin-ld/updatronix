@@ -32,9 +32,12 @@ final class Updatronix_Settings {
 	/**
 	 * Register REST routes for logs and settings.
 	 *
-	 * Mutating routes (POST, PUT, PATCH, DELETE) require an authenticated user with
-	 * {@see UPDATRONIX_CAP_MANAGE}. For cookie-based admin sessions, send the REST nonce in the
-	 * `X-WP-Nonce` header (WordPress core validates it; `apiFetch` adds it automatically).
+	 * Mutating routes (POST, PUT, PATCH, DELETE) require an authenticated user
+	 * with
+	 * {@see UPDATRONIX_CAP_MANAGE}. For cookie-based admin sessions, send the REST
+	 * nonce in the
+	 * `X-WP-Nonce` header (WordPress core validates it; `apiFetch` adds it
+	 * automatically).
 	 *
 	 * @return void
 	 */
@@ -68,7 +71,15 @@ final class Updatronix_Settings {
 					),
 					'status'                  => array(
 						'type' => 'string',
-						'enum' => array( '', 'success', 'error', 'cancelled', 'delayed', 'info', 'warning' ),
+						'enum' => array(
+							'',
+							'success',
+							'error',
+							'cancelled',
+							'delayed',
+							'info',
+							'warning',
+						),
 					),
 					'action_type'             => array(
 						'type' => 'string',
@@ -119,7 +130,7 @@ final class Updatronix_Settings {
 					'filters'                 => array(
 						'required'          => false,
 						'validate_callback' => static function ( $value ): bool {
-							// The feed sends a JSON string in the query string; a
+							// The feed sends a JSON string in the query string; a.
 							// JSON body may carry a real array.
 							return is_string( $value ) || is_array( $value );
 						},
@@ -236,12 +247,18 @@ final class Updatronix_Settings {
 									'properties' => array(
 										'recurrence' => array(
 											'type' => 'string',
-											'enum' => array( '', 'hourly', 'twicedaily', 'daily', 'weekly' ),
+											'enum' => array(
+												'',
+												'hourly',
+												'twicedaily',
+												'daily',
+												'weekly',
+											),
 										),
 										'time'       => array(
 											'type'    => 'string',
 											// Every minute is selectable; the picker stores HH:MM.
-											// An empty value is the server default on a fresh
+											// An empty value is the server default on a fresh.
 											// install and must round-trip on the first save.
 											'pattern' => '^(([01][0-9]|2[0-3]):[0-5][0-9])?$',
 										),
@@ -417,7 +434,10 @@ final class Updatronix_Settings {
 			'/health/diagnostics',
 			array(
 				'methods'             => \WP_REST_Server::READABLE,
-				'callback'            => array( self::class, 'rest_get_health_diagnostics' ),
+				'callback'            => array(
+					self::class,
+					'rest_get_health_diagnostics',
+				),
 				'permission_callback' => array( self::class, 'rest_can_manage_logs' ),
 			)
 		);
@@ -429,7 +449,7 @@ final class Updatronix_Settings {
 	 * @param \WP_REST_Request $request Request.
 	 * @return WP_REST_Response
 	 */
-	public static function rest_get_settings( \WP_REST_Request $request ): WP_REST_Response { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found -- REST callback signature; param required by WP.
+	public static function rest_get_settings( \WP_REST_Request $request ): WP_REST_Response { // phpcs:ignore Generic.Files.LineLength, Generic.CodeAnalysis.UnusedFunctionParameter.Found -- REST callback signature; param required by WP.
 		$options = updatronix_get_settings();
 
 		return new WP_REST_Response(
@@ -443,12 +463,13 @@ final class Updatronix_Settings {
 	}
 
 	/**
-	 * Verify the current user can manage Updatronix ({@see UPDATRONIX_CAP_MANAGE}).
+	 * Verify the current user can manage Updatronix ({@see
+	 * UPDATRONIX_CAP_MANAGE}).
 	 *
 	 * @param \WP_REST_Request $request Request.
 	 * @return bool
 	 */
-	public static function rest_can_manage_logs( \WP_REST_Request $request ): bool { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found -- REST permission callback signature; param required by WP.
+	public static function rest_can_manage_logs( \WP_REST_Request $request ): bool { // phpcs:ignore Generic.Files.LineLength, Generic.CodeAnalysis.UnusedFunctionParameter.Found -- REST permission callback signature; param required by WP.
 		return Updatronix_Security::user_can_manage_logs();
 	}
 
@@ -458,7 +479,9 @@ final class Updatronix_Settings {
 	 * @param \WP_REST_Request $request Request.
 	 * @return WP_REST_Response
 	 */
-	public static function rest_get_logs( \WP_REST_Request $request ): WP_REST_Response {
+	public static function rest_get_logs(
+		\WP_REST_Request $request
+	): WP_REST_Response {
 		$args = array(
 			'per_page' => $request->get_param( 'per_page' ),
 			'page'     => $request->get_param( 'page' ),
@@ -467,7 +490,21 @@ final class Updatronix_Settings {
 			'site_id'  => self::resolve_site_id( $request ),
 		);
 
-		$string_params = array( 'log_type', 'status', 'performed_as', 'action_type', 'reason_code', 'decision_state', 'origin', 'pass_id', 'chain_id', 'created_at_after', 'created_at_before', 'next_eligible_at_after', 'next_eligible_at_before' );
+		$string_params = array(
+			'log_type',
+			'status',
+			'performed_as',
+			'action_type',
+			'reason_code',
+			'decision_state',
+			'origin',
+			'pass_id',
+			'chain_id',
+			'created_at_after',
+			'created_at_before',
+			'next_eligible_at_after',
+			'next_eligible_at_before',
+		);
 
 		foreach ( $string_params as $param ) {
 			$value = $request->get_param( $param );
@@ -494,7 +531,12 @@ final class Updatronix_Settings {
 			$filters = is_array( $decoded ) ? $decoded : array();
 		}
 		if ( is_array( $filters ) && array() !== $filters ) {
-			$args = array_merge( $args, Updatronix_Log_Query::parse_filters( $filters ) );
+			$args = array_merge(
+				$args,
+				Updatronix_Log_Query::parse_filters(
+					$filters
+				)
+			);
 		}
 
 		$search = $request->get_param( 'search' );
@@ -535,15 +577,21 @@ final class Updatronix_Settings {
 	 * @param \WP_REST_Request $request Request.
 	 * @return WP_REST_Response
 	 */
-	public static function rest_get_log( \WP_REST_Request $request ): WP_REST_Response {
+	public static function rest_get_log(
+		\WP_REST_Request $request
+	): WP_REST_Response {
 		$id  = absint( (string) $request->get_param( 'id' ) );
 		$log = Updatronix_Logger::get_log( $id, true );
 
 		$scope = self::resolve_site_id( $request );
-		if ( ! (bool) $log || ( $scope > 0 && (int) ( $log->site_id ?? 0 ) !== $scope ) ) {
+		if ( ! (bool) $log || ( $scope > 0 && (int) (
+			$log->site_id ?? 0 ) !== $scope ) ) {
 			return new WP_REST_Response(
 				array(
-					'message' => __( 'The requested log entry could not be found.', 'updatronix' ),
+					'message' => __(
+						'The requested log entry could not be found.',
+						'updatronix'
+					),
 				),
 				404
 			);
@@ -576,7 +624,8 @@ final class Updatronix_Settings {
 		$log->changelog     = self::get_log_changelog( $log );
 
 		// Decoded, already redacted when stored; details only.
-		$log->decision_context = Updatronix_Security::decode_context( (string) ( $log->context ?? '' ) );
+		$log->decision_context =
+			Updatronix_Security::decode_context( (string) ( $log->context ?? '' ) );
 		$log->policy_detail    = self::build_policy_detail( $log->decision_context );
 
 		return $log;
@@ -589,35 +638,58 @@ final class Updatronix_Settings {
 	 * @return string Empty when there is nothing to say.
 	 */
 	private static function build_policy_detail( array $context ): string {
-		if ( isset( $context['policy_message'] ) && is_string( $context['policy_message'] ) && '' !== $context['policy_message'] ) {
+		if ( isset( $context['policy_message'] ) && is_string(
+			$context['policy_message']
+		)
+			&& '' !== $context['policy_message'] ) {
 			return $context['policy_message'];
 		}
 
 		$parts = array();
 
 		if ( isset( $context['required_php'], $context['installed_php'] ) ) {
-			/* translators: 1: required PHP version, 2: installed PHP version */
-			$parts[] = sprintf( __( 'PHP %1$s required (installed %2$s)', 'updatronix' ), (string) $context['required_php'], (string) $context['installed_php'] );
+			$parts[] = sprintf(
+				/* translators: 1: required PHP version, 2: installed PHP version */
+				__( 'PHP %1$s required (installed %2$s)', 'updatronix' ),
+				(string) $context['required_php'],
+				(string) $context['installed_php']
+			);
 		}
 
 		if ( isset( $context['required_wp'], $context['installed_wp'] ) ) {
-			/* translators: 1: required WordPress version, 2: installed WordPress version */
-			$parts[] = sprintf( __( 'WordPress %1$s required (installed %2$s)', 'updatronix' ), (string) $context['required_wp'], (string) $context['installed_wp'] );
+			$parts[] = sprintf(
+				/* translators: 1: required WordPress version, 2: installed WordPress version */
+				__( 'WordPress %1$s required (installed %2$s)', 'updatronix' ),
+				(string) $context['required_wp'],
+				(string) $context['installed_wp']
+			);
 		}
 
-		if ( isset( $context['manager'] ) && is_string( $context['manager'] ) && '' !== $context['manager'] ) {
-			/* translators: %s: version-control manager name (Git, Composer, …) */
-			$parts[] = sprintf( __( 'Managed by %s', 'updatronix' ), $context['manager'] );
+		if ( isset( $context['manager'] ) && is_string( $context['manager'] )
+			&& '' !== $context['manager'] ) {
+			$parts[] = sprintf(
+				/* translators: %s: version-control manager name (Git, Composer, …) */
+				__( 'Managed by %s', 'updatronix' ),
+				$context['manager']
+			);
 		}
 
 		if ( isset( $context['queue_position'], $context['queue_total'] ) ) {
-			/* translators: 1: position in the queue, 2: total items in the queue */
-			$parts[] = sprintf( __( 'Queue position %1$d of %2$d', 'updatronix' ), (int) $context['queue_position'], (int) $context['queue_total'] );
+			$parts[] = sprintf(
+				/* translators: 1: position in the queue, 2: total items in the queue */
+				__( 'Queue position %1$d of %2$d', 'updatronix' ),
+				(int) $context['queue_position'],
+				(int) $context['queue_total']
+			);
 		}
 
-		if ( isset( $context['chain_name'] ) && is_string( $context['chain_name'] ) && '' !== $context['chain_name'] ) {
-			/* translators: %s: Flow chain name */
-			$parts[] = sprintf( __( 'Chain: %s', 'updatronix' ), $context['chain_name'] );
+		if ( isset( $context['chain_name'] ) && is_string( $context['chain_name'] )
+			&& '' !== $context['chain_name'] ) {
+			$parts[] = sprintf(
+				/* translators: %s: Flow chain name */
+				__( 'Chain: %s', 'updatronix' ),
+				$context['chain_name']
+			);
 		}
 
 		return implode( ' · ', $parts );
@@ -636,7 +708,8 @@ final class Updatronix_Settings {
 		$before   = (string) ( $log->version_before ?? '' );
 		$after    = (string) ( $log->version_after ?? '' );
 
-		if ( 'translation' === $log_type && '' !== (string) ( $log->summary_text ?? '' ) ) {
+		if ( 'translation' === $log_type && '' !== (string) (
+			$log->summary_text ?? '' ) ) {
 			return (string) $log->summary_text;
 		}
 
@@ -645,6 +718,7 @@ final class Updatronix_Settings {
 
 		if ( '' !== $before && '' !== $after && $before !== $after ) {
 			return sprintf(
+				// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 				/* translators: 1: action, 2: item name, 3: previous version, 4: new version */
 				__( '%1$s %2$s from %3$s to %4$s.', 'updatronix' ),
 				$action,
@@ -748,7 +822,8 @@ final class Updatronix_Settings {
 		$type = (string) ( $log->log_type ?? '' );
 		$slug = (string) ( $log->item_slug ?? '' );
 
-		if ( ! in_array( $type, array( 'plugin', 'theme' ), true ) || '' === $slug || defined( 'WP_TESTS_DIR' ) ) {
+		if ( ! in_array( $type, array( 'plugin', 'theme' ), true ) || '' === $slug
+			|| defined( 'WP_TESTS_DIR' ) ) {
 			return array();
 		}
 
@@ -772,7 +847,7 @@ final class Updatronix_Settings {
 				$html = (string) $info->sections['changelog'];
 			}
 		} else {
-			// `themes_api()` lives in theme.php; theme-install.php alone does
+			// `themes_api()` lives in theme.php; theme-install.php alone does.
 			// not define it, and the REST log-details request never loads it.
 			require_once ABSPATH . 'wp-admin/includes/theme.php';
 			require_once ABSPATH . 'wp-admin/includes/theme-install.php';
@@ -789,7 +864,11 @@ final class Updatronix_Settings {
 		}
 
 		$lines = self::parse_changelog_html( $html );
-		set_transient( $cache_key, $lines, array() === $lines ? HOUR_IN_SECONDS : 12 * HOUR_IN_SECONDS );
+		set_transient(
+			$cache_key,
+			$lines,
+			array() === $lines ? HOUR_IN_SECONDS : 12 * HOUR_IN_SECONDS
+		);
 
 		return $lines;
 	}
@@ -807,7 +886,13 @@ final class Updatronix_Settings {
 
 		$html  = preg_replace( '/<(h[1-6]|li|p|br)[^>]*>/i', "\n", $html );
 		$text  = wp_strip_all_tags( (string) $html );
-		$text  = html_entity_decode( $text, ENT_QUOTES | ENT_HTML5, get_bloginfo( 'charset' ) );
+		$text  = html_entity_decode(
+			$text,
+			ENT_QUOTES | ENT_HTML5,
+			get_bloginfo(
+				'charset'
+			)
+		);
 		$lines = preg_split( '/\R+/', $text );
 		$lines = array_values(
 			array_filter(
@@ -823,7 +908,8 @@ final class Updatronix_Settings {
 	 * Add performed_by_display and user_edit_link to a log object for the UI.
 	 *
 	 * @param \stdClass $log Log row object from get_logs().
-	 * @return \stdClass Same object with performed_by_display and user_edit_link added.
+	 * @return \stdClass Same object with performed_by_display and user_edit_link
+	 * added.
 	 */
 	public static function enrich_log_for_display( \stdClass $log ): \stdClass {
 		$user_id      = (int) ( $log->user_id ?? 0 );
@@ -834,9 +920,16 @@ final class Updatronix_Settings {
 			$log->user_edit_link       = '';
 		} else {
 			$user = get_userdata( $user_id );
-			/* translators: %d: WordPress user ID when display name is not available */
-			$log->performed_by_display = (bool) $user ? $user->display_name : sprintf( __( 'User #%d', 'updatronix' ), $user_id );
-			$log->user_edit_link       = (bool) get_edit_user_link( $user_id ) ? get_edit_user_link( $user_id ) : '';
+			$log->performed_by_display = (bool) $user ? $user->display_name : sprintf(
+				/* translators: %d: WordPress user ID when display name is not available */
+				__(
+					'User #%d',
+					'updatronix'
+				),
+				$user_id
+			);
+			$log->user_edit_link       =
+				(bool) get_edit_user_link( $user_id ) ? get_edit_user_link( $user_id ) : '';
 		}
 
 		$performed_as = $log->performed_as ?? 'manual';
@@ -859,7 +952,10 @@ final class Updatronix_Settings {
 			'prevented'          => __( 'Prevented', 'updatronix' ),
 			'incompatible'       => __( 'Incompatible', 'updatronix' ),
 			'disabled'           => __( 'Disabled', 'updatronix' ),
-			'safe_mode_disabled' => __( 'Auto-updates disabled by Safe Mode', 'updatronix' ),
+			'safe_mode_disabled' => __(
+				'Auto-updates disabled by Safe Mode',
+				'updatronix'
+			),
 		);
 		$log->action_type_display = $action_labels[ $action_type ] ?? $action_type;
 
@@ -875,7 +971,8 @@ final class Updatronix_Settings {
 		$log->summary_text = self::build_summary_text( $log );
 		$log->logo         = self::get_log_logo( $log );
 		if ( ! isset( $log->detail_available ) ) {
-			$log->detail_available = (bool) ( $log->message ?? null ) || (bool) ( $log->trace ?? null );
+			$log->detail_available = (bool) ( $log->message ?? null ) || (bool) (
+				$log->trace ?? null );
 		} else {
 			$log->detail_available = (bool) $log->detail_available;
 		}
@@ -904,12 +1001,20 @@ final class Updatronix_Settings {
 		$stage          = (string) ( $log->decision_stage ?? '' );
 
 		$log->decision_state        = $decision_state;
-		$log->decision_state_label  = Updatronix_Log_Taxonomy::state_label( $decision_state );
-		$log->decision_state_intent = Updatronix_Log_Taxonomy::state_intent( $decision_state );
+		$log->decision_state_label  = Updatronix_Log_Taxonomy::state_label(
+			$decision_state
+		);
+		$log->decision_state_intent = Updatronix_Log_Taxonomy::state_intent(
+			$decision_state
+		);
 		$log->reason_code           = $reason_code;
-		$log->reason_label          = Updatronix_Log_Taxonomy::reason_label( $reason_code );
+		$log->reason_label          = Updatronix_Log_Taxonomy::reason_label(
+			$reason_code
+		);
 		$log->origin                = $origin;
-		$log->origin_label          = Updatronix_Log_Taxonomy::origin_label( $origin );
+		$log->origin_label          = Updatronix_Log_Taxonomy::origin_label(
+			$origin
+		);
 		$log->decision_stage        = $stage;
 		$log->stage_label           = Updatronix_Log_Taxonomy::stage_label( $stage );
 		$log->is_legacy             = '' === $reason_code && '' === $decision_state;
@@ -919,7 +1024,8 @@ final class Updatronix_Settings {
 		$log->attempt               = (int) ( $log->attempt ?? 0 );
 
 		$log->next_eligible_at_display = '';
-		if ( isset( $log->next_eligible_at ) && '' !== (string) $log->next_eligible_at ) {
+		if ( isset( $log->next_eligible_at )
+			&& '' !== (string) $log->next_eligible_at ) {
 			$utc = strtotime( (string) $log->next_eligible_at . ' UTC' );
 
 			if ( false !== $utc ) {
@@ -975,17 +1081,24 @@ final class Updatronix_Settings {
 			foreach ( array_keys( get_plugins() ) as $file ) {
 				$dir = dirname( $file );
 
-				if ( ! in_array( $slug, array( $dir, basename( $file, '.php' ), $file ), true ) ) {
+				if ( ! in_array(
+					$slug,
+					array( $dir, basename( $file, '.php' ), $file ),
+					true
+				) ) {
 					continue;
 				}
 
 				$updates = get_site_transient( 'update_plugins' );
-				$icons   = ( is_object( $updates ) && isset( $updates->response[ $file ]->icons ) )
+				$icons   = ( is_object( $updates ) && isset(
+					$updates->response[ $file ]->icons
+				) )
 					? (array) $updates->response[ $file ]->icons
 					: array();
 
 				foreach ( array( '2x', '1x', 'svg' ) as $size ) {
-					if ( isset( $icons[ $size ] ) && is_string( $icons[ $size ] ) && '' !== $icons[ $size ] ) {
+					if ( isset( $icons[ $size ] ) && is_string( $icons[ $size ] )
+						&& '' !== $icons[ $size ] ) {
 						return esc_url_raw( $icons[ $size ] );
 					}
 				}
@@ -1024,7 +1137,8 @@ final class Updatronix_Settings {
 		$version_after  = (string) ( $log->version_after ?? '' );
 		$item_name      = (string) ( $log->item_name ?? '' );
 
-		if ( 'translation' === ( $log->log_type ?? '' ) && ( '' === $version_before || $version_before === $version_after ) ) {
+		if ( 'translation' === ( $log->log_type ?? '' ) && ( '' === $version_before
+			|| $version_before === $version_after ) ) {
 			if ( '' !== $version_after ) {
 				return sprintf(
 					/* translators: 1: item name, 2: version number */
@@ -1073,18 +1187,37 @@ final class Updatronix_Settings {
 	 * @param \WP_REST_Request $request Request.
 	 * @return WP_REST_Response
 	 */
-	public static function rest_delete_log( \WP_REST_Request $request ): WP_REST_Response {
+	public static function rest_delete_log(
+		\WP_REST_Request $request
+	): WP_REST_Response {
 		$id    = (int) $request->get_param( 'id' );
 		$log   = Updatronix_Logger::get_log( $id, false );
 		$scope = self::resolve_site_id( $request );
-		if ( ! (bool) $log || ( $scope > 0 && (int) ( $log->site_id ?? 0 ) !== $scope ) ) {
-			return new WP_REST_Response( array( 'message' => __( 'The requested log entry could not be found.', 'updatronix' ) ), 404 );
+		if ( ! (bool) $log || ( $scope > 0 && (int) (
+			$log->site_id ?? 0 ) !== $scope ) ) {
+			return new WP_REST_Response(
+				array(
+					'message' =>
+					__( 'The requested log entry could not be found.', 'updatronix' ),
+				),
+				404
+			);
 		}
 
 		$deleted = Updatronix_Logger::delete_log( $id );
 
 		if ( ! $deleted ) {
-			return new WP_REST_Response( array( 'message' => __( 'The log entry could not be deleted. Try again or check your database connection.', 'updatronix' ) ), 500 );
+			return new WP_REST_Response(
+				array(
+					'message' =>
+					__(
+						// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+						'The log entry could not be deleted. Try again or check your database connection.',
+						'updatronix'
+					),
+				),
+				500
+			);
 		}
 
 		return new WP_REST_Response( array( 'deleted' => true ), 200 );
@@ -1096,9 +1229,11 @@ final class Updatronix_Settings {
 	 * @param \WP_REST_Request $request Request.
 	 * @return WP_REST_Response
 	 */
-	public static function rest_cleanup_logs( \WP_REST_Request $request ): WP_REST_Response { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found -- REST callback signature; param required by WP.
+	public static function rest_cleanup_logs( \WP_REST_Request $request ): WP_REST_Response { // phpcs:ignore Generic.Files.LineLength, Generic.CodeAnalysis.UnusedFunctionParameter.Found -- REST callback signature; param required by WP.
 		$settings = updatronix_get_settings();
-		$deleted  = Updatronix_Logger::delete_older_than( $settings['retention_days'] );
+		$deleted  = Updatronix_Logger::delete_older_than(
+			$settings['retention_days']
+		);
 
 		return new WP_REST_Response( array( 'deleted' => $deleted ), 200 );
 	}
@@ -1109,7 +1244,7 @@ final class Updatronix_Settings {
 	 * @param \WP_REST_Request $request Request.
 	 * @return WP_REST_Response
 	 */
-	public static function rest_delete_all_logs( \WP_REST_Request $request ): WP_REST_Response { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found -- REST callback signature; param required by WP.
+	public static function rest_delete_all_logs( \WP_REST_Request $request ): WP_REST_Response { // phpcs:ignore Generic.Files.LineLength, Generic.CodeAnalysis.UnusedFunctionParameter.Found -- REST callback signature; param required by WP.
 		$deleted = Updatronix_Logger::delete_all_logs();
 
 		return new WP_REST_Response( array( 'deleted' => $deleted ), 200 );
@@ -1121,44 +1256,80 @@ final class Updatronix_Settings {
 	 * @param \WP_REST_Request $request Request.
 	 * @return WP_REST_Response
 	 */
-	public static function rest_update_settings( \WP_REST_Request $request ): WP_REST_Response {
+	public static function rest_update_settings(
+		\WP_REST_Request $request
+	): WP_REST_Response {
 		$current = updatronix_get_settings();
 
 		$requested_delete_data = $request->has_param( 'delete_data_on_uninstall' )
 			? (bool) $request->get_param( 'delete_data_on_uninstall' )
 			: null;
 
-		// Turning on the irreversible uninstall wipe needs the site-management
+		// Turning on the irreversible uninstall wipe needs the site-management.
 		// capability, not only the Updatronix capability.
-		if ( true === $requested_delete_data && ! current_user_can( 'manage_options' ) ) {
+		if ( true === $requested_delete_data && ! current_user_can(
+			'manage_options'
+		) ) {
 			return new WP_REST_Response(
 				array(
 					'code'    => 'updatronix_forbidden',
-					'message' => __( 'You do not have permission to change this setting.', 'updatronix' ),
+					'message' => __(
+						'You do not have permission to change this setting.',
+						'updatronix'
+					),
 					'data'    => array( 'status' => 403 ),
 				),
 				403
 			);
 		}
 
-		$schedule_in_request = $request->has_param( 'schedule' ) && is_array( $request->get_param( 'schedule' ) );
+		$schedule_in_request = $request->has_param( 'schedule' )
+			&& is_array( $request->get_param( 'schedule' ) );
 
 		$next = array(
-			'logging_enabled'          => $request->has_param( 'logging_enabled' ) ? (bool) $request->get_param( 'logging_enabled' ) : $current['logging_enabled'],
-			'retention_days'           => $request->has_param( 'retention_days' ) ? max( 1, min( 365, (int) $request->get_param( 'retention_days' ) ) ) : $current['retention_days'],
+			'logging_enabled'          =>
+				// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+				$request->has_param( 'logging_enabled' ) ? (bool) $request->get_param(
+					'logging_enabled'
+				) : $current['logging_enabled'],
+			'retention_days'           => $request->has_param( 'retention_days' ) ? max(
+				1,
+				min(
+					365,
+					(int) $request->get_param( 'retention_days' )
+				)
+			) : $current['retention_days'],
 			'notifications_mode'       => $request->has_param( 'notifications_mode' )
-				? updatronix_sanitize_notifications_mode( $request->get_param( 'notifications_mode' ) )
+				? updatronix_sanitize_notifications_mode(
+					$request->get_param(
+						'notifications_mode'
+					)
+				)
 				: $current['notifications_mode'],
-			'notify_enabled'           => $request->has_param( 'notify_enabled' ) ? (bool) $request->get_param( 'notify_enabled' ) : $current['notify_enabled'],
-			'notify_emails'            => $request->has_param( 'notify_emails' ) ? updatronix_sanitize_emails( $request->get_param( 'notify_emails' ) ) : $current['notify_emails'],
-			'notify_on'                => $request->has_param( 'notify_on' ) && is_array( $request->get_param( 'notify_on' ) )
+			'notify_enabled'           =>
+				// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+				$request->has_param( 'notify_enabled' ) ? (bool) $request->get_param(
+					'notify_enabled'
+				) : $current['notify_enabled'],
+			'notify_emails'            =>
+				// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+				$request->has_param( 'notify_emails' ) ? updatronix_sanitize_emails(
+					$request->get_param( 'notify_emails' )
+				) : $current['notify_emails'],
+			'notify_on'                => $request->has_param( 'notify_on' )
+				&& is_array( $request->get_param( 'notify_on' ) )
 				? updatronix_normalize_notify_on( $request->get_param( 'notify_on' ) )
 				: $current['notify_on'],
 			'auto_update_translations' => $current['auto_update_translations'],
 			'dismissed_constants'      => $current['dismissed_constants'],
-			'delete_data_on_uninstall' => null !== $requested_delete_data ? $requested_delete_data : $current['delete_data_on_uninstall'],
+			'delete_data_on_uninstall' =>
+				// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+				null !== $requested_delete_data ? $requested_delete_data : $current['delete_data_on_uninstall'],
 			'schedule'                 => $schedule_in_request
-				? updatronix_merge_partial_schedule_into( (array) $request->get_param( 'schedule' ), $current['schedule'] )
+				? updatronix_merge_partial_schedule_into(
+					(array) $request->get_param( 'schedule' ),
+					$current['schedule']
+				)
 				: $current['schedule'],
 		);
 		updatronix_save_settings_array( $next );
@@ -1178,33 +1349,45 @@ final class Updatronix_Settings {
 	 * @return array<string, mixed>
 	 */
 	private static function schedule_meta_response_payload(): array {
-		return updatronix_decorate_schedule_meta_for_display( Updatronix_Cron::get_schedule_rest_meta() );
+		// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+		return updatronix_decorate_schedule_meta_for_display(
+			Updatronix_Cron::get_schedule_rest_meta()
+		);
 	}
 
 	/**
-	 * REST: Get all auto-update data (constants, core, plugins, themes, translations).
+	 * REST: Get all auto-update data (constants, core, plugins, themes,
+	 * translations).
 	 *
 	 * @param \WP_REST_Request $request Request.
 	 * @return WP_REST_Response
 	 */
-	public static function rest_get_auto_updates( \WP_REST_Request $request ): WP_REST_Response { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found -- REST callback signature; param required by WP.
+	public static function rest_get_auto_updates( \WP_REST_Request $request ): WP_REST_Response { // phpcs:ignore Generic.Files.LineLength, Generic.CodeAnalysis.UnusedFunctionParameter.Found -- REST callback signature; param required by WP.
 		return new WP_REST_Response( Updatronix_AutoUpdates::get_data(), 200 );
 	}
 
 	/**
 	 * Check whether global auto-update kill switches are active.
 	 *
-	 * Returns a WP_REST_Response with 403 status when {@see AUTOMATIC_UPDATER_DISABLED}
+	 * Returns a WP_REST_Response with 403 status when {@see
+	 * AUTOMATIC_UPDATER_DISABLED}
 	 * or {@see DISALLOW_FILE_MODS} is set to true in wp-config. Returns null when
 	 * both constants are not active, allowing the caller to proceed.
 	 *
-	 * @return WP_REST_Response|null Null when no kill switch is active, otherwise a 403 response.
+	 * @return WP_REST_Response|null Null when no kill switch is active, otherwise
+	 * a 403 response.
 	 */
 	private static function auto_update_globally_locked(): ?WP_REST_Response {
 		if ( defined( 'AUTOMATIC_UPDATER_DISABLED' ) && AUTOMATIC_UPDATER_DISABLED ) {
 			return new WP_REST_Response(
 				array(
-					'message' => __( 'Automatic updates are disabled on this site via the AUTOMATIC_UPDATER_DISABLED constant in your wp-config.php file.', 'updatronix' ),
+					'message' =>
+						// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+						__(
+							// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+							'Automatic updates are disabled on this site via the AUTOMATIC_UPDATER_DISABLED constant in your wp-config.php file.',
+							'updatronix'
+						),
 				),
 				403
 			);
@@ -1213,7 +1396,13 @@ final class Updatronix_Settings {
 		if ( ! wp_is_file_mod_allowed( 'automatic_updater' ) ) {
 			return new WP_REST_Response(
 				array(
-					'message' => __( 'File modifications are not allowed on this site via the DISALLOW_FILE_MODS constant in your wp-config.php file.', 'updatronix' ),
+					'message' =>
+						// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+						__(
+							// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+							'File modifications are not allowed on this site via the DISALLOW_FILE_MODS constant in your wp-config.php file.',
+							'updatronix'
+						),
 				),
 				403
 			);
@@ -1228,7 +1417,9 @@ final class Updatronix_Settings {
 	 * @param \WP_REST_Request $request Request.
 	 * @return WP_REST_Response
 	 */
-	public static function rest_set_core_mode( \WP_REST_Request $request ): WP_REST_Response {
+	public static function rest_set_core_mode(
+		\WP_REST_Request $request
+	): WP_REST_Response {
 		$lock_check = self::auto_update_globally_locked();
 		if ( null !== $lock_check ) {
 			return $lock_check;
@@ -1240,7 +1431,13 @@ final class Updatronix_Settings {
 		if ( ! $ok ) {
 			return new WP_REST_Response(
 				array(
-					'message' => __( 'The core auto-update setting is controlled by a constant in your wp-config.php file and cannot be changed here.', 'updatronix' ),
+					'message' =>
+						// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+						__(
+							// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+							'The core auto-update setting is controlled by a constant in your wp-config.php file and cannot be changed here.',
+							'updatronix'
+						),
 				),
 				403
 			);
@@ -1255,7 +1452,9 @@ final class Updatronix_Settings {
 	 * @param \WP_REST_Request $request Request.
 	 * @return WP_REST_Response
 	 */
-	public static function rest_toggle_plugin( \WP_REST_Request $request ): WP_REST_Response {
+	public static function rest_toggle_plugin(
+		\WP_REST_Request $request
+	): WP_REST_Response {
 		$lock_check = self::auto_update_globally_locked();
 		if ( null !== $lock_check ) {
 			return $lock_check;
@@ -1264,13 +1463,32 @@ final class Updatronix_Settings {
 		$plugin = sanitize_text_field( $request->get_param( 'plugin' ) );
 		$enable = (bool) $request->get_param( 'enable' );
 
-		$can_toggle = apply_filters( 'updatronix_auto_update_can_toggle', true, 'plugin', $plugin, $enable );
+		$can_toggle = apply_filters(
+			'updatronix_auto_update_can_toggle',
+			true,
+			'plugin',
+			$plugin,
+			$enable
+		);
 		if ( is_wp_error( $can_toggle ) ) {
-			return new WP_REST_Response( array( 'message' => $can_toggle->get_error_message() ), 403 );
+			return new WP_REST_Response(
+				array(
+					'message' =>
+					$can_toggle->get_error_message(),
+				),
+				403
+			);
 		}
 		if ( false === $can_toggle ) {
 			return new WP_REST_Response(
-				array( 'message' => __( 'This item is managed by an external update manager and cannot be toggled here.', 'updatronix' ) ),
+				array(
+					'message' =>
+						__(
+							// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+							'This item is managed by an external update manager and cannot be toggled here.',
+							'updatronix'
+						),
+				),
 				403
 			);
 		}
@@ -1280,7 +1498,10 @@ final class Updatronix_Settings {
 		if ( ! $ok ) {
 			return new WP_REST_Response(
 				array(
-					'message' => __( 'This plugin was not found on your site. It may have been removed.', 'updatronix' ),
+					'message' => __(
+						'This plugin was not found on your site. It may have been removed.',
+						'updatronix'
+					),
 				),
 				404
 			);
@@ -1295,7 +1516,9 @@ final class Updatronix_Settings {
 	 * @param \WP_REST_Request $request Request.
 	 * @return WP_REST_Response
 	 */
-	public static function rest_toggle_theme( \WP_REST_Request $request ): WP_REST_Response {
+	public static function rest_toggle_theme(
+		\WP_REST_Request $request
+	): WP_REST_Response {
 		$lock_check = self::auto_update_globally_locked();
 		if ( null !== $lock_check ) {
 			return $lock_check;
@@ -1304,13 +1527,32 @@ final class Updatronix_Settings {
 		$stylesheet = sanitize_text_field( $request->get_param( 'stylesheet' ) );
 		$enable     = (bool) $request->get_param( 'enable' );
 
-		$can_toggle = apply_filters( 'updatronix_auto_update_can_toggle', true, 'theme', $stylesheet, $enable );
+		$can_toggle = apply_filters(
+			'updatronix_auto_update_can_toggle',
+			true,
+			'theme',
+			$stylesheet,
+			$enable
+		);
 		if ( is_wp_error( $can_toggle ) ) {
-			return new WP_REST_Response( array( 'message' => $can_toggle->get_error_message() ), 403 );
+			return new WP_REST_Response(
+				array(
+					'message' =>
+					$can_toggle->get_error_message(),
+				),
+				403
+			);
 		}
 		if ( false === $can_toggle ) {
 			return new WP_REST_Response(
-				array( 'message' => __( 'This item is managed by an external update manager and cannot be toggled here.', 'updatronix' ) ),
+				array(
+					'message' =>
+					__(
+						// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+						'This item is managed by an external update manager and cannot be toggled here.',
+						'updatronix'
+					),
+				),
 				403
 			);
 		}
@@ -1320,7 +1562,10 @@ final class Updatronix_Settings {
 		if ( ! $ok ) {
 			return new WP_REST_Response(
 				array(
-					'message' => __( 'This theme was not found on your site. It may have been removed.', 'updatronix' ),
+					'message' => __(
+						'This theme was not found on your site. It may have been removed.',
+						'updatronix'
+					),
 				),
 				404
 			);
@@ -1335,7 +1580,9 @@ final class Updatronix_Settings {
 	 * @param \WP_REST_Request $request Request.
 	 * @return WP_REST_Response
 	 */
-	public static function rest_toggle_translation( \WP_REST_Request $request ): WP_REST_Response {
+	public static function rest_toggle_translation(
+		\WP_REST_Request $request
+	): WP_REST_Response {
 		$lock_check = self::auto_update_globally_locked();
 		if ( null !== $lock_check ) {
 			return $lock_check;
@@ -1356,14 +1603,19 @@ final class Updatronix_Settings {
 	 * @param \WP_REST_Request $request Request.
 	 * @return WP_REST_Response
 	 */
-	public static function rest_dismiss_constant( \WP_REST_Request $request ): WP_REST_Response {
+	public static function rest_dismiss_constant(
+		\WP_REST_Request $request
+	): WP_REST_Response {
 		$constant = sanitize_text_field( $request->get_param( 'constant' ) );
 		$ok       = Updatronix_AutoUpdates::dismiss_constant( $constant );
 
 		if ( ! $ok ) {
 			return new WP_REST_Response(
 				array(
-					'message' => __( 'That constant is not recognised by Updatronix.', 'updatronix' ),
+					'message' => __(
+						'That constant is not recognised by Updatronix.',
+						'updatronix'
+					),
 				),
 				400
 			);
@@ -1427,12 +1679,20 @@ final class Updatronix_Settings {
 	 * @param \WP_REST_Request $request Request.
 	 * @return WP_REST_Response
 	 */
-	public static function rest_retry_health( \WP_REST_Request $request ): WP_REST_Response {
-		$result = Updatronix_Health::queue_retry( (int) $request->get_param( 'log_id' ) );
+	public static function rest_retry_health(
+		\WP_REST_Request $request
+	): WP_REST_Response {
+		$result = Updatronix_Health::queue_retry(
+			(int) $request->get_param(
+				'log_id'
+			)
+		);
 
 		if ( is_wp_error( $result ) ) {
 			$data   = $result->get_error_data();
-			$status = is_array( $data ) && isset( $data['status'] ) ? (int) $data['status'] : 400;
+			$status = is_array( $data ) && isset(
+				$data['status']
+			) ? (int) $data['status'] : 400;
 
 			return new WP_REST_Response(
 				array(
@@ -1458,9 +1718,12 @@ final class Updatronix_Settings {
 	/**
 	 * Resolve the allowed site scope for log routes.
 	 *
-	 * Returns a concrete blog ID to scope to, or `0` (network-global sentinel) to mean
-	 * "all originating sites". On Multisite these routes are reachable only by Super Admins
-	 * (see {@see Updatronix_Security::user_can_manage_logs()}), so the default is the
+	 * Returns a concrete blog ID to scope to, or `0` (network-global sentinel) to
+	 * mean
+	 * "all originating sites". On Multisite these routes are reachable only by
+	 * Super Admins
+	 * (see {@see Updatronix_Security::user_can_manage_logs()}), so the default is
+	 * the
 	 * network-global view; an explicit `site_id` narrows it to a single subsite.
 	 *
 	 * @param \WP_REST_Request $request Request.
@@ -1469,12 +1732,15 @@ final class Updatronix_Settings {
 	private static function resolve_site_id( \WP_REST_Request $request ): int {
 		$current_site_id = (int) get_current_blog_id();
 		// @infection-ignore-all.
-		$requested_site_id = absint( (string) $request->get_param( 'site_id' ) ); // counterfactual: equivalent — `absint()` is `abs( (int) $value )`, so the `(string)` cast in front of it is idempotent for the string and int shapes the parameter accepts.
+		$requested_site_id = absint( (string) $request->get_param( 'site_id' ) );
+// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+		// counterfactual: equivalent — `absint()` is `abs( (int) $value )`, so the `(string)` cast in front of it is idempotent for the string and int shapes the parameter accepts.
 
 		if ( ! is_multisite() ) {
 			return $current_site_id;
 		}
 
+		// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 		// Defensive: callers are super-admin-gated, but never widen scope for anyone else.
 		if ( ! is_super_admin() ) {
 			return $current_site_id;

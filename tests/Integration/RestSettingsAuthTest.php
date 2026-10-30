@@ -8,7 +8,8 @@
 declare(strict_types=1);
 
 /**
- * Verify REST API authentication and authorization for the settings and logs routes.
+ * Verify REST API authentication and authorization for the settings and logs
+ * routes.
  *
  * @coversNothing
  */
@@ -36,7 +37,12 @@ final class RestSettingsAuthTest extends WP_UnitTestCase {
 	 * @return int New user ID.
 	 */
 	private function create_admin(): int {
-		$user_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		$user_id = self::factory()->user->create(
+			array(
+				'role' =>
+				'administrator',
+			)
+		);
 		if ( is_multisite() && function_exists( 'grant_super_admin' ) ) {
 			grant_super_admin( $user_id );
 		}
@@ -67,8 +73,10 @@ final class RestSettingsAuthTest extends WP_UnitTestCase {
 	/**
 	 * Simulate cookie-based REST authentication for a given HTTP method.
 	 *
-	 * WordPress only enforces the REST CSRF nonce when cookie authentication is in use
-	 * (`$GLOBALS['wp_rest_auth_cookie'] === true`). Simulate that for mutation tests.
+	 * WordPress only enforces the REST CSRF nonce when cookie authentication is in
+	 * use
+	 * (`$GLOBALS['wp_rest_auth_cookie'] === true`). Simulate that for mutation
+	 * tests.
 	 *
 	 * @see rest_cookie_check_errors()
 	 *
@@ -76,7 +84,8 @@ final class RestSettingsAuthTest extends WP_UnitTestCase {
 	 * @return void
 	 */
 	private function begin_rest_cookie_auth_simulation( string $method ): void {
-		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- Test fixture simulates a cookie-authenticated REST request.
+		// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+		// phpcs:ignore Generic.Files.LineLength, WordPress.Security.ValidatedSanitizedInput -- Test fixture simulates a cookie-authenticated REST request.
 		$this->rest_test_server_backup['REQUEST_METHOD'] = $_SERVER['REQUEST_METHOD'] ?? null;
 		$_SERVER['REQUEST_METHOD']                       = $method;
 	}
@@ -90,7 +99,8 @@ final class RestSettingsAuthTest extends WP_UnitTestCase {
 	private function set_rest_nonce_header( ?string $nonce ): void {
 		$key = 'HTTP_X_WP_NONCE';
 		if ( ! array_key_exists( $key, $this->rest_test_server_backup ) ) {
-			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- Test fixture simulates the X-WP-Nonce header.
+			// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+			// phpcs:ignore Generic.Files.LineLength, WordPress.Security.ValidatedSanitizedInput -- Test fixture simulates the X-WP-Nonce header.
 			$this->rest_test_server_backup[ $key ] = $_SERVER[ $key ] ?? null;
 		}
 		if ( null === $nonce ) {
@@ -104,7 +114,8 @@ final class RestSettingsAuthTest extends WP_UnitTestCase {
 	 * Dispatch a REST request after explicitly running cookie authentication.
 	 *
 	 * `rest_do_request()` dispatches without `WP_REST_Server::serve_request()`, so
-	 * `check_authentication()` (cookie + `X-WP-Nonce`) is skipped unless called explicitly.
+	 * `check_authentication()` (cookie + `X-WP-Nonce`) is skipped unless called
+	 * explicitly.
 	 *
 	 * @param WP_REST_Request $request REST request to dispatch.
 	 * @return WP_REST_Response|WP_Error WP_Error only when authentication failed.
@@ -129,7 +140,12 @@ final class RestSettingsAuthTest extends WP_UnitTestCase {
 		$request  = new WP_REST_Request( 'GET', '/updatronix/v1/settings' );
 		$response = rest_do_request( $request );
 
-		self::assertSame( 401, $response->get_status(), 'Anonymous user must not read settings (rest_authorization_required_code() returns 401 when unauthenticated).' );
+		self::assertSame(
+			401,
+			$response->get_status(),
+			// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+			'Anonymous user must not read settings (rest_authorization_required_code() returns 401 when unauthenticated).'
+		);
 	}
 
 	/**
@@ -161,14 +177,21 @@ final class RestSettingsAuthTest extends WP_UnitTestCase {
 	 * @param string $role Role to test.
 	 * @return void
 	 */
-	public function test_get_settings_returns_403_for_user_without_manage_cap( string $role ): void {
+	public function test_get_settings_returns_403_for_user_without_manage_cap(
+		string $role
+	): void {
 		$user_id = self::factory()->user->create( array( 'role' => $role ) );
 		wp_set_current_user( $user_id );
 
 		$request  = new WP_REST_Request( 'GET', '/updatronix/v1/settings' );
 		$response = rest_do_request( $request );
 
-		self::assertSame( 403, $response->get_status(), 'User without ' . UPDATRONIX_CAP_MANAGE . ' must not read settings.' );
+		self::assertSame(
+			403,
+			$response->get_status(),
+			'User without ' . UPDATRONIX_CAP_MANAGE
+			. ' must not read settings.'
+		);
 	}
 
 	/**
@@ -179,14 +202,21 @@ final class RestSettingsAuthTest extends WP_UnitTestCase {
 	 * @param string $role Role to test.
 	 * @return void
 	 */
-	public function test_get_logs_returns_403_for_user_without_manage_cap( string $role ): void {
+	public function test_get_logs_returns_403_for_user_without_manage_cap(
+		string $role
+	): void {
 		$user_id = self::factory()->user->create( array( 'role' => $role ) );
 		wp_set_current_user( $user_id );
 
 		$request  = new WP_REST_Request( 'GET', '/updatronix/v1/logs' );
 		$response = rest_do_request( $request );
 
-		self::assertSame( 403, $response->get_status(), 'User without ' . UPDATRONIX_CAP_MANAGE . ' must not read logs.' );
+		self::assertSame(
+			403,
+			$response->get_status(),
+			'User without ' . UPDATRONIX_CAP_MANAGE
+			. ' must not read logs.'
+		);
 	}
 
 	/**
@@ -224,13 +254,16 @@ final class RestSettingsAuthTest extends WP_UnitTestCase {
 		self::assertArrayHasKey( 'options', $data );
 		self::assertTrue(
 			updatronix_get_settings()['logging_enabled'],
+			// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 			'The POSTed logging_enabled=true must be persisted (a 200 with no side effect would mask a regression).'
 		);
 	}
 
 	/**
-	 * Under simulated cookie auth, a mutating request without `X-WP-Nonce` clears the session
-	 * (see {@see rest_cookie_check_errors()}); the route then rejects the request (typically 401).
+	 * Under simulated cookie auth, a mutating request without `X-WP-Nonce` clears
+	 * the session
+	 * (see {@see rest_cookie_check_errors()}); the route then rejects the request
+	 * (typically 401).
 	 */
 	public function test_post_settings_with_cookie_auth_and_missing_nonce_is_rejected(): void {
 		$user_id                        = $this->create_admin();
@@ -239,15 +272,28 @@ final class RestSettingsAuthTest extends WP_UnitTestCase {
 		$this->set_rest_nonce_header( null );
 
 		$auth = rest_get_server()->check_authentication();
-		self::assertNotWPError( $auth, 'Missing nonce should not yield a WP_Error from check_authentication().' );
-		self::assertSame( 0, get_current_user_id(), 'Cookie auth without nonce clears the current user (see rest_cookie_check_errors()).' );
+		self::assertNotWPError(
+			$auth,
+			'Missing nonce should not yield a WP_Error from check_authentication().'
+		);
+		self::assertSame(
+			0,
+			get_current_user_id(),
+			// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+			'Cookie auth without nonce clears the current user (see rest_cookie_check_errors()).'
+		);
 
 		$request = new WP_REST_Request( 'POST', '/updatronix/v1/settings' );
 		$request->set_param( 'logging_enabled', false );
 
 		$response = rest_do_request( $request );
 
-		self::assertSame( 401, $response->get_status(), 'Mutating REST request with cookie auth but no nonce logs the user out and must be rejected with 401 (unauthenticated).' );
+		self::assertSame(
+			401,
+			$response->get_status(),
+			// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+			'Mutating REST request with cookie auth but no nonce logs the user out and must be rejected with 401 (unauthenticated).'
+		);
 	}
 
 	/**

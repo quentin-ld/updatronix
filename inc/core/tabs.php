@@ -1,8 +1,10 @@
 <?php
 /**
- * Admin tab management: centralized tab definitions, filtering, sorting, and active-tab resolution.
+ * Admin tab management: centralized tab definitions, filtering, sorting, and
+ * active-tab resolution.
  *
- * Both `updatronix/inc/admin/menu.php` and `updatronix/inc/admin/enqueue.php` use these
+ * Both `updatronix/inc/admin/menu.php` and `updatronix/inc/admin/enqueue.php`
+ * use these
  * functions instead of duplicating the default-tab array and filter logic.
  *
  * @package updatronix
@@ -19,12 +21,14 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Each tab is an array with keys:
  *   - slug     (string) Unique tab identifier.
  *   - label    (string) Translatable display label.
- *   - icon     (string) Reserved metadata. Currently unused by the React UI; kept for future use.
+ * - icon (string) Reserved metadata. Currently unused by the React UI; kept for
+ * future use.
  *   - priority (int)    Sort order (optional, default 10).
  *
  * @since 1.1.1
  *
- * @return array<string, array{slug: string, label: string, icon: string, priority?: int}>
+ * @return array<string, array{slug: string, label: string, icon: string,
+ * priority?: int}>
  */
 function updatronix_default_admin_tabs(): array {
 	return array(
@@ -62,11 +66,13 @@ function updatronix_default_admin_tabs(): array {
  * Each tab array should include:
  *   - slug     (string) Unique tab identifier.
  *   - label    (string) Translatable display label.
- *   - icon     (string) Reserved metadata. Currently unused by the React UI; kept for future use.
+ * - icon (string) Reserved metadata. Currently unused by the React UI; kept for
+ * future use.
  *
  * @since 1.1.1
  *
- * @return array<string, array{slug: string, label: string, icon: string, priority?: int}>
+ * @return array<string, array{slug: string, label: string, icon: string,
+ * priority?: int}>
  */
 function updatronix_get_admin_tabs(): array {
 	/**
@@ -77,9 +83,14 @@ function updatronix_get_admin_tabs(): array {
 	 *
 	 * @since 1.1.1
 	 *
-	 * @param array<string, array{slug: string, label: string, icon: string, priority?: int}> $tabs Default tab definitions.
+	 * @param array<string, array{slug: string, label: string, icon: string,
+	 * priority?: int}> $tabs Default tab definitions.
 	 */
-	$tabs = apply_filters( 'updatronix_admin_tabs', updatronix_default_admin_tabs() );
+	$tabs = apply_filters(
+		'updatronix_admin_tabs',
+		updatronix_default_admin_tabs(
+		)
+	);
 
 	uasort(
 		$tabs,
@@ -95,18 +106,20 @@ function updatronix_get_admin_tabs(): array {
 }
 
 /**
- * Resolve the active tab slug from the query string, falling back to the first registered tab.
+ * Resolve the active tab slug from the query string, falling back to the first
+ * registered tab.
  *
  * @since 1.1.1
  *
- * @param array<string, array{slug: string, label: string, icon: string, priority?: int}> $tabs Tab definitions (from updatronix_get_admin_tabs()).
+ * @param array<string, array<string, string|int>> $tabs Tab definitions.
  * @return string Active tab slug.
  */
 function updatronix_get_active_tab( array $tabs ): string {
-	// Read-only admin tab switch: reads the query string directly (equivalent to
-	// filter_input( INPUT_GET, 'tab', FILTER_UNSAFE_RAW )) so the branch stays
+	// Read-only admin tab switch: reads the query string directly (equivalent to.
+	// filter_input( INPUT_GET, 'tab', FILTER_UNSAFE_RAW )) so the branch stays.
 	// exerciseable in unit tests instead of a frozen request-time input stream.
-	// phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput -- Display-only tab param; sanitize_key() below.
+	// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+	// phpcs:ignore Generic.Files.LineLength, WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput -- Display-only tab param; sanitize_key() below.
 	$tab_raw = isset( $_GET['tab'] ) && is_string( $_GET['tab'] ) ? wp_unslash( $_GET['tab'] ) : null;
 	if ( is_string( $tab_raw ) && '' !== $tab_raw ) {
 		$requested_tab = sanitize_key( $tab_raw );

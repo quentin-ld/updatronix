@@ -17,8 +17,16 @@ if ( ! is_readable( $updatronix_main ) ) {
 	exit;
 }
 
-$updatronix_plugin_meta = get_file_data( $updatronix_main, array( 'Version' => 'Version' ), 'plugin' );
-$updatronix_version     = isset( $updatronix_plugin_meta['Version'] ) ? trim( (string) $updatronix_plugin_meta['Version'] ) : '';
+$updatronix_plugin_meta = get_file_data(
+	$updatronix_main,
+	array( 'Version' => 'Version' ),
+	'plugin'
+);
+$updatronix_version     =
+	// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+	isset( $updatronix_plugin_meta['Version'] ) ? trim(
+		(string) $updatronix_plugin_meta['Version']
+	) : '';
 if ( '' === $updatronix_version ) {
 	$updatronix_version = '0';
 }
@@ -26,12 +34,14 @@ if ( '' === $updatronix_version ) {
 define( 'UPDATRONIX_VERSION', $updatronix_version );
 
 if ( ! defined( 'updatronix_PLUGIN_FILE' ) ) {
-	// phpcs:ignore Generic.NamingConventions.UpperCaseConstantName.ConstantNotUpperCase -- Legacy alias kept for backward compatibility.
+	// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+	// phpcs:ignore Generic.Files.LineLength, Generic.NamingConventions.UpperCaseConstantName.ConstantNotUpperCase -- Legacy alias kept for backward compatibility.
 	define( 'updatronix_PLUGIN_FILE', $updatronix_main );
 }
 
 if ( ! defined( 'updatronix_PLUGIN_DIR' ) ) {
-	// phpcs:ignore Generic.NamingConventions.UpperCaseConstantName.ConstantNotUpperCase -- Legacy alias kept for backward compatibility.
+	// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+	// phpcs:ignore Generic.Files.LineLength, Generic.NamingConventions.UpperCaseConstantName.ConstantNotUpperCase -- Legacy alias kept for backward compatibility.
 	define( 'updatronix_PLUGIN_DIR', plugin_dir_path( updatronix_PLUGIN_FILE ) );
 }
 

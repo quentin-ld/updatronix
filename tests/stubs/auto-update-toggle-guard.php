@@ -76,7 +76,7 @@ if ( ! function_exists( 'wp_is_file_mod_allowed' ) ) {
 	 * @param string $context Context.
 	 * @return bool
 	 */
-	function wp_is_file_mod_allowed( string $context ): bool { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter
+	function wp_is_file_mod_allowed( string $context ): bool { // phpcs:ignore Generic.Files.LineLength, Generic.CodeAnalysis.UnusedFunctionParameter
 		return true;
 	}
 }
@@ -93,7 +93,7 @@ if ( ! class_exists( 'Updatronix_AutoUpdates' ) ) {
 		 * @param bool   $enable Enable.
 		 * @return bool
 		 */
-		public static function toggle_plugin( string $plugin, bool $enable ): bool { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter
+		public static function toggle_plugin( string $plugin, bool $enable ): bool { // phpcs:ignore Generic.Files.LineLength, Generic.CodeAnalysis.UnusedFunctionParameter
 			return true;
 		}
 
@@ -104,7 +104,7 @@ if ( ! class_exists( 'Updatronix_AutoUpdates' ) ) {
 		 * @param bool   $enable     Enable.
 		 * @return bool
 		 */
-		public static function toggle_theme( string $stylesheet, bool $enable ): bool { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter
+		public static function toggle_theme( string $stylesheet, bool $enable ): bool { // phpcs:ignore Generic.Files.LineLength, Generic.CodeAnalysis.UnusedFunctionParameter
 			return true;
 		}
 

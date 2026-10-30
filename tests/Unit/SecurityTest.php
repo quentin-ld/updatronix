@@ -10,7 +10,8 @@ declare(strict_types=1);
 use PHPUnit\Framework\TestCase;
 
 /**
- * Test redact_sensitive_text, sanitize_message, sanitize_trace, and related helpers.
+ * Test redact_sensitive_text, sanitize_message, sanitize_trace, and related
+ * helpers.
  *
  * Five mutants of `sanitize_version` and the redaction helpers survive
  * `bin/harness mutation`, and all five are equivalent: removing a `(bool)` cast
@@ -21,7 +22,8 @@ use PHPUnit\Framework\TestCase;
  * @covers \Updatronix_Security
  */
 final class SecurityTest extends TestCase {
-	// --- redact_sensitive_text (via sanitize_trace which does not html_entity_decode) ---
+	// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+	// --- redact_sensitive_text (via sanitize_trace which does not html_entity_decode) ---.
 
 	/**
 	 * Token query parameters are redacted.
@@ -48,12 +50,19 @@ final class SecurityTest extends TestCase {
 	 * @param string $input    Raw trace input.
 	 * @param string $expected Expected redacted fragment.
 	 */
-	public function test_redact_sensitive_text_redacts_tokens( string $input, string $expected ): void {
-		$this->assertStringContainsString( $expected, Updatronix_Security::sanitize_trace( $input ) );
+	public function test_redact_sensitive_text_redacts_tokens(
+		string $input,
+		string $expected
+	): void {
+		$this->assertStringContainsString(
+			$expected,
+			Updatronix_Security::sanitize_trace( $input )
+		);
 	}
 
 	/**
-	 * ?author= and ?authorization= must NOT be redacted (auth false-positive regression guard).
+	 * ?author= and ?authorization= must NOT be redacted (auth false-positive
+	 * regression guard).
 	 *
 	 * @return array<string, array{string}>
 	 */
@@ -73,7 +82,9 @@ final class SecurityTest extends TestCase {
 	 *
 	 * @param string $input Raw trace input.
 	 */
-	public function test_redact_sensitive_text_does_not_redact_auth_substrings( string $input ): void {
+	public function test_redact_sensitive_text_does_not_redact_auth_substrings(
+		string $input
+	): void {
 		$result = Updatronix_Security::sanitize_trace( $input );
 		$this->assertStringNotContainsString( '[redacted]', $result );
 	}
@@ -97,7 +108,10 @@ final class SecurityTest extends TestCase {
 			$result = Updatronix_Security::sanitize_trace( '?token=super-secret' );
 
 			self::assertStringNotContainsString( 'super-secret', $result );
-			self::assertStringContainsString( '[redacted: log text could not be safely redacted]', $result );
+			self::assertStringContainsString(
+				'[redacted: log text could not be safely redacted]',
+				$result
+			);
 		} finally {
 			if ( false !== $previous ) {
 				// phpcs:ignore WordPress.PHP.IniSet.Risky -- Restore the test setting.
@@ -129,7 +143,9 @@ final class SecurityTest extends TestCase {
 	 *
 	 * @param string $input Raw trace input.
 	 */
-	public function test_redact_sensitive_text_redacts_prefixed_secret_names( string $input ): void {
+	public function test_redact_sensitive_text_redacts_prefixed_secret_names(
+		string $input
+	): void {
 		$result = Updatronix_Security::sanitize_trace( $input );
 		$this->assertStringContainsString( '[redacted]', $result );
 		$this->assertStringNotContainsString( 'abc123', $result );
@@ -139,16 +155,20 @@ final class SecurityTest extends TestCase {
 	 * Bearer tokens are redacted.
 	 */
 	public function test_redact_sensitive_text_redacts_bearer_tokens(): void {
-		$result = Updatronix_Security::sanitize_trace( 'Authorization: Bearer abc.def.ghi' );
+		$result = Updatronix_Security::sanitize_trace(
+			'Authorization: Bearer abc.def.ghi'
+		);
 		$this->assertStringContainsString( 'Bearer [redacted]', $result );
 		$this->assertStringNotContainsString( 'abc.def.ghi', $result );
 	}
 
 	/**
-	 * Paths under ABSPATH/WP_PLUGIN_DIR/WP_CONTENT_DIR are replaced with basename + [redacted].
+	 * Paths under ABSPATH/WP_PLUGIN_DIR/WP_CONTENT_DIR are replaced with basename
+	 * + [redacted].
 	 *
 	 * Inputs and expectations are derived from the bootstrap constants (ABSPATH,
-	 * WP_PLUGIN_DIR, WP_CONTENT_DIR) rather than hardcoded, so a change to the test
+	 * WP_PLUGIN_DIR, WP_CONTENT_DIR) rather than hardcoded, so a change to the
+	 * test
 	 * root path does not silently break the redaction guard.
 	 *
 	 * @return array<string, array{string, string}>
@@ -160,8 +180,15 @@ final class SecurityTest extends TestCase {
 		return array(
 			'abspath-root'   => array( $web . '/index.php (42)', $red . ' (42)' ),
 			'abspath-nested' => array( $web . '/wp-admin/admin.php', $red ),
-			'plugin-dir'     => array( untrailingslashit( WP_PLUGIN_DIR ) . '/akismet/akismet.php', $red ),
-			'content-dir'    => array( untrailingslashit( WP_CONTENT_DIR ) . '/themes/twentytwentyfour/style.css', $red ),
+			'plugin-dir'     => array(
+				untrailingslashit( WP_PLUGIN_DIR ) . '/akismet/akismet.php',
+				$red,
+			),
+			'content-dir'    => array(
+				untrailingslashit( WP_CONTENT_DIR )
+										. '/themes/twentytwentyfour/style.css',
+				$red,
+			),
 		);
 	}
 
@@ -173,7 +200,10 @@ final class SecurityTest extends TestCase {
 	 * @param string $input    Raw trace input.
 	 * @param string $expected Expected redacted fragment.
 	 */
-	public function test_redact_sensitive_text_redacts_paths( string $input, string $expected ): void {
+	public function test_redact_sensitive_text_redacts_paths(
+		string $input,
+		string $expected
+	): void {
 		$result = Updatronix_Security::sanitize_trace( $input );
 		$this->assertStringContainsString( $expected, $result );
 	}
@@ -187,7 +217,7 @@ final class SecurityTest extends TestCase {
 		$this->assertStringNotContainsString( untrailingslashit( ABSPATH ), $result );
 	}
 
-	// --- sanitize_message (includes html_entity_decode before redaction) ---
+	// --- sanitize_message (includes html_entity_decode before redaction) ---.
 
 	/**
 	 * HTML entity bypass: encoded = must be decoded before redaction.
@@ -246,13 +276,15 @@ final class SecurityTest extends TestCase {
 	 * Encoded markup is decoded before tags are stripped, so no tag survives.
 	 */
 	public function test_sanitize_message_strips_encoded_markup(): void {
-		$result = Updatronix_Security::sanitize_message( '&lt;img src=x onerror=alert(1)&gt;' );
+		$result = Updatronix_Security::sanitize_message(
+			'&lt;img src=x onerror=alert(1)&gt;'
+		);
 
 		$this->assertStringNotContainsString( '<', $result );
 		$this->assertStringNotContainsString( '>', $result );
 	}
 
-	// --- sanitize_trace ---
+	// --- sanitize_trace ---.
 
 	/**
 	 * Trace is truncated to max length.
@@ -284,7 +316,7 @@ final class SecurityTest extends TestCase {
 		$this->assertSame( '', Updatronix_Security::sanitize_trace( '' ) );
 	}
 
-	// --- sanitize_message edge cases ---
+	// --- sanitize_message edge cases ---.
 
 	/**
 	 * Empty input returns empty string.
@@ -316,7 +348,7 @@ final class SecurityTest extends TestCase {
 		$this->assertSame( 65535 * 2, strlen( $result ) );
 	}
 
-	// --- sanitize_log_type ---
+	// --- sanitize_log_type ---.
 
 	/**
 	 * Allowed log types pass through unchanged.
@@ -347,18 +379,33 @@ final class SecurityTest extends TestCase {
 	 * Uppercase input is normalised by sanitize_key before the allowlist check.
 	 */
 	public function test_sanitize_log_type_normalises_case(): void {
-		$this->assertSame( 'plugin', Updatronix_Security::sanitize_log_type( 'PLUGIN' ) );
+		$this->assertSame(
+			'plugin',
+			Updatronix_Security::sanitize_log_type(
+				'PLUGIN'
+			)
+		);
 	}
 
 	/**
 	 * Unknown log types fall back to 'plugin'.
 	 */
 	public function test_sanitize_log_type_falls_back_for_unknown(): void {
-		$this->assertSame( 'plugin', Updatronix_Security::sanitize_log_type( 'evil' ) );
-		$this->assertSame( 'plugin', Updatronix_Security::sanitize_log_type( 'plugin()' ) );
+		$this->assertSame(
+			'plugin',
+			Updatronix_Security::sanitize_log_type(
+				'evil'
+			)
+		);
+		$this->assertSame(
+			'plugin',
+			Updatronix_Security::sanitize_log_type(
+				'plugin()'
+			)
+		);
 	}
 
-	// --- sanitize_action_type ---
+	// --- sanitize_action_type ---.
 
 	/**
 	 * Allowed action types pass through unchanged.
@@ -367,8 +414,15 @@ final class SecurityTest extends TestCase {
 	 *
 	 * @param string $value Raw value.
 	 */
-	public function test_sanitize_action_type_accepts_allowed( string $value ): void {
-		$this->assertSame( $value, Updatronix_Security::sanitize_action_type( $value ) );
+	public function test_sanitize_action_type_accepts_allowed(
+		string $value
+	): void {
+		$this->assertSame(
+			$value,
+			Updatronix_Security::sanitize_action_type(
+				$value
+			)
+		);
 	}
 
 	/**
@@ -395,11 +449,21 @@ final class SecurityTest extends TestCase {
 	 * Unknown action types fall back to 'update'.
 	 */
 	public function test_sanitize_action_type_falls_back_for_unknown(): void {
-		$this->assertSame( 'update', Updatronix_Security::sanitize_action_type( 'delete *' ) );
-		$this->assertSame( 'update', Updatronix_Security::sanitize_action_type( '' ) );
+		$this->assertSame(
+			'update',
+			Updatronix_Security::sanitize_action_type(
+				'delete *'
+			)
+		);
+		$this->assertSame(
+			'update',
+			Updatronix_Security::sanitize_action_type(
+				''
+			)
+		);
 	}
 
-	// --- sanitize_status ---
+	// --- sanitize_status ---.
 
 	/**
 	 * Allowed statuses pass through unchanged.
@@ -432,10 +496,15 @@ final class SecurityTest extends TestCase {
 	 * Unknown statuses fall back to 'success'.
 	 */
 	public function test_sanitize_status_falls_back_for_unknown(): void {
-		$this->assertSame( 'success', Updatronix_Security::sanitize_status( 'hacked' ) );
+		$this->assertSame(
+			'success',
+			Updatronix_Security::sanitize_status(
+				'hacked'
+			)
+		);
 	}
 
-	// --- sanitize_performed_as ---
+	// --- sanitize_performed_as ---.
 
 	/**
 	 * Allowed performed_as values pass through unchanged.
@@ -444,8 +513,15 @@ final class SecurityTest extends TestCase {
 	 *
 	 * @param string $value Raw value.
 	 */
-	public function test_sanitize_performed_as_accepts_allowed( string $value ): void {
-		$this->assertSame( $value, Updatronix_Security::sanitize_performed_as( $value ) );
+	public function test_sanitize_performed_as_accepts_allowed(
+		string $value
+	): void {
+		$this->assertSame(
+			$value,
+			Updatronix_Security::sanitize_performed_as(
+				$value
+			)
+		);
 	}
 
 	/**
@@ -465,10 +541,15 @@ final class SecurityTest extends TestCase {
 	 * Unknown performed_as values fall back to 'manual'.
 	 */
 	public function test_sanitize_performed_as_falls_back_for_unknown(): void {
-		$this->assertSame( 'manual', Updatronix_Security::sanitize_performed_as( 'cron' ) );
+		$this->assertSame(
+			'manual',
+			Updatronix_Security::sanitize_performed_as(
+				'cron'
+			)
+		);
 	}
 
-	// --- sanitize_update_context ---
+	// --- sanitize_update_context ---.
 
 	/**
 	 * Bulk, single, and empty update contexts pass through unchanged.
@@ -477,8 +558,15 @@ final class SecurityTest extends TestCase {
 	 *
 	 * @param string $value Raw value.
 	 */
-	public function test_sanitize_update_context_accepts_allowed( string $value ): void {
-		$this->assertSame( $value, Updatronix_Security::sanitize_update_context( $value ) );
+	public function test_sanitize_update_context_accepts_allowed(
+		string $value
+	): void {
+		$this->assertSame(
+			$value,
+			Updatronix_Security::sanitize_update_context(
+				$value
+			)
+		);
 	}
 
 	/**
@@ -498,16 +586,26 @@ final class SecurityTest extends TestCase {
 	 * Unknown update contexts fall back to an empty string.
 	 */
 	public function test_sanitize_update_context_falls_back_for_unknown(): void {
-		$this->assertSame( '', Updatronix_Security::sanitize_update_context( 'both' ) );
+		$this->assertSame(
+			'',
+			Updatronix_Security::sanitize_update_context(
+				'both'
+			)
+		);
 	}
 
-	// --- sanitize_string ---
+	// --- sanitize_string ---.
 
 	/**
 	 * Control characters are stripped, though internal whitespace is preserved.
 	 */
 	public function test_sanitize_string_strips_control_characters(): void {
-		$this->assertSame( 'hi there', Updatronix_Security::sanitize_string( "\x00hi\x1f there" ) );
+		$this->assertSame(
+			'hi there',
+			Updatronix_Security::sanitize_string(
+				"\x00hi\x1f there"
+			)
+		);
 	}
 
 	/**
@@ -552,13 +650,18 @@ final class SecurityTest extends TestCase {
 		$this->assertSame( 200, strlen( $result ) );
 	}
 
-	// --- sanitize_version ---
+	// --- sanitize_version ---.
 
 	/**
 	 * Valid version strings are preserved.
 	 */
 	public function test_sanitize_version_preserves_valid(): void {
-		$this->assertSame( '1.2.3-beta.4', Updatronix_Security::sanitize_version( '1.2.3-beta.4' ) );
+		$this->assertSame(
+			'1.2.3-beta.4',
+			Updatronix_Security::sanitize_version(
+				'1.2.3-beta.4'
+			)
+		);
 	}
 
 	/**
@@ -567,14 +670,24 @@ final class SecurityTest extends TestCase {
 	 * only shape that tells a boolean guard apart from a numeric one.
 	 */
 	public function test_sanitize_version_keeps_a_version_that_starts_with_a_letter(): void {
-		$this->assertSame( 'v1.2.3', Updatronix_Security::sanitize_version( 'v1.2.3' ) );
+		$this->assertSame(
+			'v1.2.3',
+			Updatronix_Security::sanitize_version(
+				'v1.2.3'
+			)
+		);
 	}
 
 	/**
 	 * Illegal characters are stripped from version strings.
 	 */
 	public function test_sanitize_version_strips_illegal_characters(): void {
-		$this->assertSame( '1.2.3x', Updatronix_Security::sanitize_version( '1.2.3 x;' ) );
+		$this->assertSame(
+			'1.2.3x',
+			Updatronix_Security::sanitize_version(
+				'1.2.3 x;'
+			)
+		);
 	}
 
 	/**
@@ -590,10 +703,20 @@ final class SecurityTest extends TestCase {
 	 * Oversized version strings are truncated to 64 characters.
 	 */
 	public function test_sanitize_version_truncates_to_64(): void {
-		$this->assertSame( 64, mb_strlen( Updatronix_Security::sanitize_version( str_repeat( '1', 100 ) ) ) );
+		$this->assertSame(
+			64,
+			mb_strlen(
+				Updatronix_Security::sanitize_version(
+					str_repeat(
+						'1',
+						100
+					)
+				)
+			)
+		);
 	}
 
-	// --- user_can_manage_logs ---
+	// --- user_can_manage_logs ---.
 
 	/**
 	 * Restores the capability globals after permission assertions.
@@ -662,7 +785,10 @@ final class SecurityTest extends TestCase {
 	 * @return void
 	 */
 	public function test_redact_sensitive_text_redacts_a_site_path(): void {
-		$traced = Updatronix_Security::sanitize_trace( 'PHP Warning: fopen(/tmp/some-dir/file.php): failed' );
+		$traced =
+			Updatronix_Security::sanitize_trace(
+				'PHP Warning: fopen(/tmp/some-dir/file.php): failed'
+			);
 
 		$this->assertStringNotContainsString( '/tmp/some-dir/file.php', $traced );
 	}

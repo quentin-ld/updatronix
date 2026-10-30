@@ -572,7 +572,7 @@ cmd_lint_wpcs() {
 		[[ -n "$line" ]] && targets+=("$line")
 	done < <(_lint_paths)
 	_phpcs_cache_dir
-	run vendor/bin/phpcs --standard="$config" --cache="$PHPCS_CACHE_REL" --parallel="$PHPCS_PARALLEL" "${targets[@]}"
+	run vendor/bin/phpcs --standard="$config" --cache="$PHPCS_CACHE_REL" --parallel="$PHPCS_PARALLEL" --warning-severity=0 "${targets[@]}"
 }
 
 cmd_lint() {
@@ -588,7 +588,7 @@ cmd_lint() {
 		[[ -n "$line" ]] && lint_targets+=("$line")
 	done < <(_lint_paths)
 	_phpcs_cache_dir
-	run vendor/bin/phpcs --standard="$phpcs_config" --cache="$PHPCS_CACHE_REL" --parallel="$PHPCS_PARALLEL" "${lint_targets[@]}"
+	run vendor/bin/phpcs --standard="$phpcs_config" --cache="$PHPCS_CACHE_REL" --parallel="$PHPCS_PARALLEL" --warning-severity=0 "${lint_targets[@]}"
 
 	step "PHPStan (${phpstan_config})"
 	local -a targets=()

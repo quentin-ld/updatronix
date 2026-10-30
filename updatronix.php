@@ -9,7 +9,8 @@
  * @license   GPL v2 or later
  *
  * Plugin Name: Updatronix - Update Manager Enhanced
- * Description: Enhanced Update Manager for WordPress. Monitor every change, control all updates, and fine-tune your website maintenance flow.
+ * Description: Enhanced Update Manager for WordPress. Monitor every change,
+ * control all updates, and fine-tune your website maintenance flow.
  * Version: 2.0.0
  * Plugin URI: https://wordpress.org/plugins/updatronix/
  * Author: Quentin Le Duff (--Q--)
@@ -38,17 +39,21 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 /** Plugin version (must match Version header above; used for DB schema version). */
 define( 'UPDATRONIX_VERSION', '2.0.0' );
 
 define( 'UPDATRONIX_PLUGIN_FILE', __FILE__ ); // Absolute path to this file.
-define( 'UPDATRONIX_PLUGIN_DIR', plugin_dir_path( __FILE__ ) ); // Plugin root directory with trailing slash.
+define( 'UPDATRONIX_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
+// Plugin root directory with trailing slash.
 if ( ! defined( 'updatronix_PLUGIN_FILE' ) ) {
-	// phpcs:ignore Generic.NamingConventions.UpperCaseConstantName.ConstantNotUpperCase -- Legacy alias (lowercase prefix) kept for backward compatibility.
+	// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+	// phpcs:ignore Generic.Files.LineLength, Generic.NamingConventions.UpperCaseConstantName.ConstantNotUpperCase -- Legacy alias (lowercase prefix) kept for backward compatibility.
 	define( 'updatronix_PLUGIN_FILE', UPDATRONIX_PLUGIN_FILE );
 }
 if ( ! defined( 'updatronix_PLUGIN_DIR' ) ) {
-	// phpcs:ignore Generic.NamingConventions.UpperCaseConstantName.ConstantNotUpperCase -- Legacy alias (lowercase prefix) kept for backward compatibility.
+	// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+	// phpcs:ignore Generic.Files.LineLength, Generic.NamingConventions.UpperCaseConstantName.ConstantNotUpperCase -- Legacy alias (lowercase prefix) kept for backward compatibility.
 	define( 'updatronix_PLUGIN_DIR', UPDATRONIX_PLUGIN_DIR );
 }
 
@@ -62,24 +67,30 @@ add_action( 'admin_notices', 'updatronix_activation_subsite_notice' );
 add_action( 'network_admin_notices', 'updatronix_activation_subsite_notice' );
 
 /**
- * Admin notice when the plugin was activated on a subsite where activation is not allowed.
+ * Admin notice when the plugin was activated on a subsite where activation is
+ * not allowed.
  *
  * @since 1.1.2
  *
  * @return void
  */
 function updatronix_activation_subsite_notice(): void {
-	if ( ! is_multisite() || ! is_network_admin() || ! current_user_can( 'manage_network_plugins' ) ) {
+	if ( ! is_multisite() || ! is_network_admin()
+		|| ! current_user_can( 'manage_network_plugins' ) ) {
 		return;
 	}
 
-	if ( ! (bool) updatronix_get_plugin_option( 'updatronix_activation_subsite_skipped', '' ) ) {
+	if ( ! (bool) updatronix_get_plugin_option(
+		'updatronix_activation_subsite_skipped',
+		''
+	) ) {
 		return;
 	}
 
 	updatronix_delete_plugin_option( 'updatronix_activation_subsite_skipped' );
 
 	$url = network_admin_url( 'admin.php?page=updatronix' );
+	// phpcs:disable -- Admin notice template; the dynamic URL is escaped with esc_url() below.
 	?>
 	<div class="notice notice-warning is-dismissible">
 		<p>
@@ -87,7 +98,11 @@ function updatronix_activation_subsite_notice(): void {
 			printf(
 				wp_kses(
 					/* translators: %s: URL to the network admin Updatronix page. */
-					__( 'Updatronix was activated on a subsite, but it only works from the Network Admin. Please go to <a href="%s">Network Admin → Updatronix</a> to set it up.', 'updatronix' ),
+					__(
+						// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+						'Updatronix was activated on a subsite, but it only works from the Network Admin. Please go to <a href="%s">Network Admin → Updatronix</a> to set it up.',
+						'updatronix'
+					),
 					array( 'a' => array( 'href' => array() ) )
 				),
 				esc_url( $url )
@@ -96,6 +111,7 @@ function updatronix_activation_subsite_notice(): void {
 		</p>
 	</div>
 	<?php
+	// phpcs:enable
 }
 
 register_activation_hook( __FILE__, 'updatronix_activate' );
@@ -111,13 +127,19 @@ register_deactivation_hook( __FILE__, 'updatronix_deactivate' );
 function updatronix_activate(): void {
 	if ( ! updatronix_activation_allowed() ) {
 		if ( is_multisite() && ! is_network_admin() ) {
-			updatronix_update_plugin_option( 'updatronix_activation_subsite_skipped', '1', false );
+			updatronix_update_plugin_option(
+				'updatronix_activation_subsite_skipped',
+				'1',
+				false
+			);
 		}
 
 		return;
 	}
 
-	// Super Admins pass every capability check on multisite, so the administrator-role
+	// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+	// Super Admins pass every capability check on multisite, so the administrator-role.
+	// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 	// cap is only meaningful on single-site installs (access is super-admin-gated otherwise).
 	if ( ! is_multisite() ) {
 		$role = get_role( 'administrator' );

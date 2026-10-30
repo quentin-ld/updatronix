@@ -10,7 +10,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Token-bucket style limits for export starts (requests without a continuation cursor).
+ * Token-bucket style limits for export starts (requests without a continuation
+ * cursor).
  *
  * @since 1.1.0
  */
@@ -18,7 +19,8 @@ final class Updatronix_Export_Rate_Limiter {
 	/**
 	 * Upper bound applied to filtered per-window limits.
 	 *
-	 * Keeps the cap finite (security floor: every limit is a bounded integer) while
+	 * Keeps the cap finite (security floor: every limit is a bounded integer)
+	 * while
 	 * leaving generous headroom for agencies that script bulk exports.
 	 *
 	 * @since 1.1.0
@@ -32,7 +34,8 @@ final class Updatronix_Export_Rate_Limiter {
 	 *
 	 * @param int $site_id Site blog ID.
 	 * @param int $user_id User ID.
-	 * @return true|\WP_Error True when allowed; WP_Error rate_limited when exhausted.
+	 * @return true|\WP_Error True when allowed; WP_Error rate_limited when
+	 * exhausted.
 	 */
 	public static function consume( int $site_id, int $user_id ): bool|\WP_Error {
 		$site_id = max( 1, $site_id );
@@ -55,7 +58,15 @@ final class Updatronix_Export_Rate_Limiter {
 		 * @param int $user_id User ID requesting the export.
 		 * @param int $site_id Site blog ID.
 		 */
-		$per_minute = self::clamp_limit( (int) apply_filters( 'updatronix_export_rate_limit_per_minute', Updatronix_Export::RATE_LIMIT_PER_MINUTE, $user_id, $site_id ) );
+		$per_minute =
+			self::clamp_limit(
+				(int) apply_filters(
+					'updatronix_export_rate_limit_per_minute',
+					Updatronix_Export::RATE_LIMIT_PER_MINUTE,
+					$user_id,
+					$site_id
+				)
+			);
 
 		/**
 		 * Filters the export starts allowed per rolling hour, per user and site.
@@ -70,7 +81,14 @@ final class Updatronix_Export_Rate_Limiter {
 		 * @param int $user_id User ID requesting the export.
 		 * @param int $site_id Site blog ID.
 		 */
-		$per_hour = self::clamp_limit( (int) apply_filters( 'updatronix_export_rate_limit_per_hour', Updatronix_Export::RATE_LIMIT_PER_HOUR, $user_id, $site_id ) );
+		$per_hour = self::clamp_limit(
+			(int) apply_filters(
+				'updatronix_export_rate_limit_per_hour',
+				Updatronix_Export::RATE_LIMIT_PER_HOUR,
+				$user_id,
+				$site_id
+			)
+		);
 
 		$key_min  = sprintf( 'updatronix_export_rl_min_%d_%d', $site_id, $user_id );
 		$key_hour = sprintf( 'updatronix_export_rl_hour_%d_%d', $site_id, $user_id );
@@ -91,7 +109,8 @@ final class Updatronix_Export_Rate_Limiter {
 	/**
 	 * Whether the limiter should be skipped for this user and site.
 	 *
-	 * Resolves a bypass capability via the `updatronix_export_rate_limit_bypass_cap`
+	 * Resolves a bypass capability via the
+	 * `updatronix_export_rate_limit_bypass_cap`
 	 * filter. The filter returns a capability slug (empty by default, so nobody
 	 * bypasses); when non-empty and the user holds that capability, the limiter is
 	 * skipped. This lets an agency grant a trusted service or admin account
@@ -113,11 +132,17 @@ final class Updatronix_Export_Rate_Limiter {
 		 *
 		 * @since 1.1.0
 		 *
-		 * @param string $capability Capability slug, or '' to disable the bypass (default '').
+		 * @param string $capability Capability slug, or '' to disable the bypass
+		 * (default '').
 		 * @param int    $user_id    User ID requesting the export.
 		 * @param int    $site_id    Site blog ID.
 		 */
-		$capability = (string) apply_filters( 'updatronix_export_rate_limit_bypass_cap', '', $user_id, $site_id );
+		$capability = (string) apply_filters(
+			'updatronix_export_rate_limit_bypass_cap',
+			'',
+			$user_id,
+			$site_id
+		);
 
 		if ( '' === $capability ) {
 			return false;
@@ -146,7 +171,11 @@ final class Updatronix_Export_Rate_Limiter {
 	 * @param int    $max    Maximum count allowed after increment.
 	 * @return true|\WP_Error
 	 */
-	private static function incr_window( string $key, int $ttl, int $max ): bool|\WP_Error {
+	private static function incr_window(
+		string $key,
+		int $ttl,
+		int $max
+	): bool|\WP_Error {
 		$group = 'transient_updatronix_export_rl';
 
 		if ( wp_using_ext_object_cache() ) {
@@ -194,7 +223,8 @@ final class Updatronix_Export_Rate_Limiter {
 			return;
 		}
 
-        // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- gated diagnostic only.
+        // phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+        // phpcs:ignore Generic.Files.LineLength, WordPress.PHP.DevelopmentFunctions.error_log_error_log -- gated diagnostic only.
 		error_log( sprintf( '[updatronix] export rate_limited window=%s', $key ) );
 	}
 }

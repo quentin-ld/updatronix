@@ -23,9 +23,11 @@ final class Updatronix_Export_Transient_Manager {
 	public const POINTER_META_KEY = 'updatronix_export_last_key';
 
 	/**
-	 * Canonical export transient-key shape produced by {@see self::generate_key()}.
+	 * Canonical export transient-key shape produced by {@see
+	 * self::generate_key()}.
 	 *
-	 * Single source of truth shared with {@see Updatronix_Export_Cursor::verify()} so the
+	 * Single source of truth shared with {@see Updatronix_Export_Cursor::verify()}
+	 * so the
 	 * key format is validated identically wherever a key crosses a trust boundary.
 	 *
 	 * @var string
@@ -39,7 +41,8 @@ final class Updatronix_Export_Transient_Manager {
 	 *
 	 * @param int $site_id Blog ID.
 	 * @param int $user_id User ID.
-	 * @return string Key matching `/^updatronix_log_export_\d+_\d+_[a-f0-9]{32}$/`.
+	 * @return string Key matching
+	 * `/^updatronix_log_export_\d+_\d+_[a-f0-9]{32}$/`.
 	 */
 	public static function generate_key( int $site_id, int $user_id ): string {
 		return sprintf(
@@ -57,10 +60,15 @@ final class Updatronix_Export_Transient_Manager {
 	 *
 	 * @param int                  $user_id User owning the export.
 	 * @param string               $new_key New transient key ({@see self::generate_key()}).
-	 * @param array<string, mixed> $payload Serializable payload (TTL {@see Updatronix_Export::TRANSIENT_TTL}).
+	 * @param array<string, mixed> $payload Serializable payload (TTL {@see
+	 * Updatronix_Export::TRANSIENT_TTL}).
 	 * @return true|\WP_Error
 	 */
-	public static function replace( int $user_id, string $new_key, array $payload ): bool|\WP_Error {
+	public static function replace(
+		int $user_id,
+		string $new_key,
+		array $payload
+	): bool|\WP_Error {
 		if ( $user_id <= 0 ) {
 			return new WP_Error( 'internal', '', array( 'status' => 500 ) );
 		}
@@ -69,20 +77,24 @@ final class Updatronix_Export_Transient_Manager {
 			return new WP_Error( 'internal', '', array( 'status' => 500 ) );
 		}
 
-		// Read the prior key BEFORE writing the new one — the meta pointer
+		// Read the prior key BEFORE writing the new one — the meta pointer.
 		// is about to be overwritten.
 		$prior = get_user_meta( $user_id, self::POINTER_META_KEY, true );
 		$prior = is_string( $prior ) ? $prior : '';
 
 		// Write the new transient first, then delete the old one.
-		// This eliminates the orphan window where a crash between the operations
-		// would lose both transients. The old transient still has its TTL and will
+		// This eliminates the orphan window where a crash between the operations.
+		// would lose both transients. The old transient still has its TTL and will.
 		// expire naturally if the delete fails.
-		if ( ! updatronix_set_plugin_transient( $new_key, $payload, Updatronix_Export::TRANSIENT_TTL ) ) {
+		if ( ! updatronix_set_plugin_transient(
+			$new_key,
+			$payload,
+			Updatronix_Export::TRANSIENT_TTL
+		) ) {
 			return new WP_Error( 'internal', '', array( 'status' => 500 ) );
 		}
 
-		// Continuation chunks reuse the same transient key, and update_user_meta()
+		// Continuation chunks reuse the same transient key, and update_user_meta().
 		// returns false when the stored value is unchanged. Treat that as a success:
 		// the pointer already names the transient we just wrote.
 		if ( $prior !== $new_key ) {
@@ -94,12 +106,15 @@ final class Updatronix_Export_Transient_Manager {
 			}
 		}
 
-		// Best-effort cleanup of the prior transient. The old one expires
+		// Best-effort cleanup of the prior transient. The old one expires.
 		// naturally via TTL if this delete fails.
-		if ( '' !== $prior && 1 === preg_match( self::KEY_PATTERN, $prior ) && $prior !== $new_key ) {
+		if ( '' !== $prior && 1 === preg_match( self::KEY_PATTERN, $prior )
+			&& $prior !== $new_key ) {
 			$deleted = updatronix_delete_plugin_transient( $prior );
 			if ( ! $deleted && defined( 'WP_DEBUG_LOG' ) && WP_DEBUG_LOG ) {
-                // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- gated diagnostic only.
+                // phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+                // phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+                // phpcs:ignore Generic.Files.LineLength, WordPress.PHP.DevelopmentFunctions.error_log_error_log -- gated diagnostic only.
 				error_log( '[updatronix] export transient delete prior returned false' );
 			}
 		}

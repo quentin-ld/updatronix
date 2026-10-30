@@ -21,11 +21,13 @@ final class Updatronix_Uninstall {
 	 * @return void
 	 */
 	public static function run(): void {
-		// On Multisite, only a network administrator (or WP-CLI) may destroy
-		// network-scoped data. A subsite administrator can reach delete_plugins()
-		// from the subsite Plugins screen; uninstall.php runs before the files are
+		// On Multisite, only a network administrator (or WP-CLI) may destroy.
+		// network-scoped data. A subsite administrator can reach delete_plugins().
+		// from the subsite Plugins screen; uninstall.php runs before the files are.
 		// removed, so without this guard that request would wipe the network log.
-		if ( is_multisite() && ! is_network_admin() && ! ( defined( 'WP_CLI' ) && WP_CLI ) && is_admin() ) {
+		if ( is_multisite() && ! is_network_admin() && ! ( defined( 'WP_CLI' )
+			&& WP_CLI )
+			&& is_admin() ) {
 			return;
 		}
 
@@ -84,12 +86,16 @@ final class Updatronix_Uninstall {
 				}
 				switch_to_blog( $blog_id );
 				try {
-					require_once updatronix_PLUGIN_DIR . 'inc/classes/class-updatronix-cron.php';
+					require_once updatronix_PLUGIN_DIR
+						. 'inc/classes/class-updatronix-cron.php';
 					Updatronix_Cron::unschedule();
-					require_once updatronix_PLUGIN_DIR . 'inc/classes/class-updatronix-database.php';
+					require_once updatronix_PLUGIN_DIR
+						. 'inc/classes/class-updatronix-database.php';
 					global $wpdb;
 					$table = $wpdb->prefix . Updatronix_Database::TABLE_LOGS;
-                    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange -- Legacy subsite cleanup after network-only upgrade.
+                    // phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+                    // phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+                    // phpcs:ignore Generic.Files.LineLength, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange -- Legacy subsite cleanup after network-only upgrade.
 					$wpdb->query( $wpdb->prepare( 'DROP TABLE IF EXISTS %i', $table ) );
 					foreach ( self::legacy_blog_option_keys() as $key ) {
 						delete_option( $key );
@@ -116,7 +122,8 @@ final class Updatronix_Uninstall {
 	}
 
 	/**
-	 * Unschedule cron, clear plugin transients, drop log table, delete plugin options.
+	 * Unschedule cron, clear plugin transients, drop log table, delete plugin
+	 * options.
 	 *
 	 * @return void
 	 */
@@ -125,7 +132,8 @@ final class Updatronix_Uninstall {
 		Updatronix_Cron::unschedule();
 		Updatronix_Cron::delete_plugin_transients();
 
-		require_once updatronix_PLUGIN_DIR . 'inc/classes/class-updatronix-database.php';
+		require_once updatronix_PLUGIN_DIR
+			. 'inc/classes/class-updatronix-database.php';
 		Updatronix_Database::drop_table();
 
 		$role = get_role( 'administrator' );
@@ -139,7 +147,8 @@ final class Updatronix_Uninstall {
 	}
 
 	/**
-	 * Return all plugin option keys removed on uninstall (main site / network store).
+	 * Return all plugin option keys removed on uninstall (main site / network
+	 * store).
 	 *
 	 * @return list<string>
 	 */
@@ -148,15 +157,19 @@ final class Updatronix_Uninstall {
 	}
 
 	/**
-	 * Plugin-owned option keys (blog options on single-site; site options on Multisite).
+	 * Plugin-owned option keys (blog options on single-site; site options on
+	 * Multisite).
 	 *
 	 * @return list<string>
 	 */
 	private static function legacy_blog_option_keys(): array {
 		require_once updatronix_PLUGIN_DIR . 'inc/settings/options.php';
-		require_once updatronix_PLUGIN_DIR . 'inc/classes/class-updatronix-updatelogstate.php';
-		require_once updatronix_PLUGIN_DIR . 'inc/classes/class-updatronix-update-logger.php';
-		require_once updatronix_PLUGIN_DIR . 'inc/classes/class-updatronix-autoupdatedelay.php';
+		require_once updatronix_PLUGIN_DIR
+			. 'inc/classes/class-updatronix-updatelogstate.php';
+		require_once updatronix_PLUGIN_DIR
+			. 'inc/classes/class-updatronix-update-logger.php';
+		require_once updatronix_PLUGIN_DIR
+			. 'inc/classes/class-updatronix-autoupdatedelay.php';
 
 		return array_merge(
 			array(

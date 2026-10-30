@@ -1,11 +1,15 @@
 <?php
 /**
- * Unit tests for the visibility contract of Updatronix_AutoUpdateDelay hook callbacks.
+ * Unit tests for the visibility contract of Updatronix_AutoUpdateDelay hook
+ * callbacks.
  *
- * WordPress invokes registered filter/action callbacks with call_user_func_array()
- * from the global scope. A private method used as a hook callback therefore throws
+ * WordPress invokes registered filter/action callbacks with
+ * call_user_func_array()
+ * from the global scope. A private method used as a hook callback therefore
+ * throws
  * a TypeError at runtime, which aborts the wp-cron auto-update pass. This suite
- * guards the public-visibility contract for all four auto_update_{$type} callbacks.
+ * guards the public-visibility contract for all four auto_update_{$type}
+ * callbacks.
  *
  * @package updatronix
  */
@@ -42,7 +46,10 @@ final class AutoUpdateDelayFilterVisibilityTest extends TestCase {
 	 * @param string $method Registered hook callback method name.
 	 */
 	public function test_hook_callback_is_public_callback( string $method ): void {
-		$reflection = new \ReflectionMethod( Updatronix_AutoUpdateDelay::class, $method );
+		$reflection = new \ReflectionMethod(
+			Updatronix_AutoUpdateDelay::class,
+			$method
+		);
 		self::assertTrue(
 			$reflection->isPublic(),
 			sprintf( '%s must be public to be a WordPress hook callback.', $method )
@@ -50,17 +57,23 @@ final class AutoUpdateDelayFilterVisibilityTest extends TestCase {
 	}
 
 	/**
-	 * Each callback must resolve as callable from the global scope (the WP invocation path).
+	 * Each callback must resolve as callable from the global scope (the WP
+	 * invocation path).
 	 *
 	 * @dataProvider provide_hook_callbacks
 	 *
 	 * @param string $method Registered hook callback method name.
 	 */
-	public function test_hook_callback_is_callable_from_global_scope( string $method ): void {
+	public function test_hook_callback_is_callable_from_global_scope(
+		string $method
+	): void {
 		$callable = array( Updatronix_AutoUpdateDelay::class, $method );
 		self::assertTrue(
 			is_callable( $callable ),
-			sprintf( '%s must be callable via call_user_func_array() from the global scope.', $method )
+			sprintf(
+				'%s must be callable via call_user_func_array() from the global scope.',
+				$method
+			)
 		);
 	}
 }

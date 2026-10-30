@@ -53,24 +53,35 @@ final class Updatronix_Export_Request_Schema {
 			return new WP_Error( 'view_invalid', '', array( 'status' => 400 ) );
 		}
 
-		$merge  = isset( $params['merge'] ) ? self::sanitize_request_boolean( $params['merge'] ) : true;
+		$merge  =
+			isset( $params['merge'] ) ? self::sanitize_request_boolean(
+				$params['merge']
+			) : true;
 		$format = isset( $params['format'] ) && is_string( $params['format'] )
 			? sanitize_key( $params['format'] )
 			: 'txt';
 		if ( ! in_array( $format, updatronix_get_server_export_formats(), true ) ) {
 			return new WP_Error( 'view_invalid', '', array( 'status' => 400 ) );
 		}
-		// `columns` is optional: a missing or non-array value falls back to the
+		// `columns` is optional: a missing or non-array value falls back to the.
+		// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 		// server-side defaults applied in Updatronix_Export_Body_Builder::normalize_export_columns().
-		$columns_in = isset( $params['columns'] ) && is_array( $params['columns'] ) ? $params['columns'] : array();
+		$columns_in = isset( $params['columns'] )
+			&& is_array( $params['columns'] ) ? $params['columns'] : array();
 
-		$columns = Updatronix_Export_Body_Builder::normalize_export_columns( $columns_in );
+		$columns = Updatronix_Export_Body_Builder::normalize_export_columns(
+			$columns_in
+		);
 
-		$site_requested = isset( $view['site_id'] ) ? absint( (string) $view['site_id'] ) : 0;
+		$site_requested = isset( $view['site_id'] ) ? absint(
+			(string) $view['site_id']
+		) : 0;
 		$site_id        = self::resolve_site_id_for_export( $site_requested );
 
 		// On multisite, verify the requested site_id refers to an existing site.
-		if ( $site_id > 0 && is_multisite() && false === get_blog_details( $site_id ) ) {
+		if ( $site_id > 0 && is_multisite() && false === get_blog_details(
+			$site_id
+		) ) {
 			return new WP_Error( 'view_invalid', '', array( 'status' => 400 ) );
 		}
 
@@ -85,7 +96,9 @@ final class Updatronix_Export_Request_Schema {
 		$sort_field     = 'date';
 		$sort_direction = 'desc';
 		if ( isset( $view['sort'] ) && is_array( $view['sort'] ) ) {
-			if ( isset( $view['sort']['field'] ) && is_string( $view['sort']['field'] ) ) {
+			if ( isset( $view['sort']['field'] ) && is_string(
+				$view['sort']['field']
+			) ) {
 				$sf = sanitize_key( $view['sort']['field'] );
 				if ( in_array( $sf, Updatronix_Export::SORT_FIELDS, true ) ) {
 					$sort_field = $sf;
@@ -93,7 +106,9 @@ final class Updatronix_Export_Request_Schema {
 					return new WP_Error( 'view_invalid', '', array( 'status' => 400 ) );
 				}
 			}
-			if ( isset( $view['sort']['direction'] ) && is_string( $view['sort']['direction'] ) ) {
+			if ( isset( $view['sort']['direction'] ) && is_string(
+				$view['sort']['direction']
+			) ) {
 				$sd = strtolower( sanitize_key( $view['sort']['direction'] ) );
 				if ( ! in_array( $sd, Updatronix_Export::SORT_DIRECTIONS, true ) ) {
 					return new WP_Error( 'view_invalid', '', array( 'status' => 400 ) );
@@ -182,22 +197,30 @@ final class Updatronix_Export_Request_Schema {
 	}
 
 	/**
-	 * Map DataViews `page` / `perPage` to SQL OFFSET + hard row cap for the export session.
+	 * Map DataViews `page` / `perPage` to SQL OFFSET + hard row cap for the export
+	 * session.
 	 *
 	 * Omits slice limits when neither `perPage` nor `per_page` appears in `view`
-	 * (export all matched rows subject to MAX_ROWS_TOTAL), preserving legacy payloads.
+	 * (export all matched rows subject to MAX_ROWS_TOTAL), preserving legacy
+	 * payloads.
 	 *
 	 * @param array<string, mixed> $view View object from POST JSON.
-	 * @return array{page:int, per_page:int|null, slice_sql_offset:int, slice_max_rows:int}|\WP_Error
+	 * @return array{page:int, per_page:int|null, slice_sql_offset:int,
+	 * slice_max_rows:int}|\WP_Error
 	 */
-	private static function parse_dataviews_pagination_slice( array $view ): array|\WP_Error {
+	private static function parse_dataviews_pagination_slice(
+		array $view
+	): array|\WP_Error {
 		$page = isset( $view['page'] ) ? absint( (string) $view['page'] ) : 1;
 		if ( $page < 1 ) {
 			$page = 1;
 		}
 
 		$has_explicit_per_page =
-			array_key_exists( 'perPage', $view ) || array_key_exists( 'per_page', $view );
+			array_key_exists( 'perPage', $view ) || array_key_exists(
+				'per_page',
+				$view
+			);
 
 		if ( ! $has_explicit_per_page ) {
 			return array(
@@ -208,7 +231,10 @@ final class Updatronix_Export_Request_Schema {
 			);
 		}
 
-		$raw = array_key_exists( 'perPage', $view ) ? $view['perPage'] : ( $view['per_page'] ?? null );
+		$raw = array_key_exists(
+			'perPage',
+			$view
+		) ? $view['perPage'] : ( $view['per_page'] ?? null );
 		if ( ! is_scalar( $raw ) || is_bool( $raw ) ) {
 			return new WP_Error( 'view_invalid', '', array( 'status' => 400 ) );
 		}
@@ -218,9 +244,18 @@ final class Updatronix_Export_Request_Schema {
 			return new WP_Error( 'view_invalid', '', array( 'status' => 400 ) );
 		}
 
-		$per_clamped = min( Updatronix_Export::MAX_ROWS_TOTAL, max( 1, $per_requested ) );
+		$per_clamped = min(
+			Updatronix_Export::MAX_ROWS_TOTAL,
+			max(
+				1,
+				$per_requested
+			)
+		);
 		// Offset paging past MAX_ROWS_TOTAL never returns rows — keep SQL sane.
-		$slice_sql_offset = min( Updatronix_Export::MAX_ROWS_TOTAL, ( $page - 1 ) * $per_clamped );
+		$slice_sql_offset = min(
+			Updatronix_Export::MAX_ROWS_TOTAL,
+			( $page - 1 ) * $per_clamped
+		);
 
 		return array(
 			'page'             => $page,
@@ -239,8 +274,11 @@ final class Updatronix_Export_Request_Schema {
 	 * @return int Blog ID used for cursor verification and queries.
 	 */
 	public static function resolve_site_id_from_params( array $params ): int {
-		$view      = isset( $params['view'] ) && is_array( $params['view'] ) ? $params['view'] : array();
-		$requested = isset( $view['site_id'] ) ? absint( (string) $view['site_id'] ) : 0;
+		$view      = isset( $params['view'] )
+			&& is_array( $params['view'] ) ? $params['view'] : array();
+		$requested = isset( $view['site_id'] ) ? absint(
+			(string) $view['site_id']
+		) : 0;
 
 		return self::resolve_site_id_for_export( $requested );
 	}
@@ -248,8 +286,10 @@ final class Updatronix_Export_Request_Schema {
 	/**
 	 * Resolve multisite export scope (mirror Settings::resolve_site_id semantics).
 	 *
-	 * Returns a concrete blog ID, or `0` (network-global sentinel) for "all originating sites".
-	 * The export route is super-admin-gated on Multisite, so the default is the network-global
+	 * Returns a concrete blog ID, or `0` (network-global sentinel) for "all
+	 * originating sites".
+	 * The export route is super-admin-gated on Multisite, so the default is the
+	 * network-global
 	 * scope; an explicit `site_id` narrows it to a single subsite.
 	 *
 	 * @since 1.1.0
@@ -262,6 +302,7 @@ final class Updatronix_Export_Request_Schema {
 		if ( ! is_multisite() ) {
 			return $current;
 		}
+		// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 		// Defensive: callers are super-admin-gated, but never widen scope for anyone else.
 		if ( ! is_super_admin() ) {
 			return $current;
@@ -280,46 +321,100 @@ final class Updatronix_Export_Request_Schema {
 	 * @return array<string, mixed>|null
 	 */
 	private static function parse_filter_item( array $f ): ?array {
-		// DataViews sends camelCase field/operator tokens (e.g. actionType, isAny). Do NOT use
-		// sanitize_key() here: it lowercases the token, so camelCase names no longer match the
-		// FILTER_FIELDS / *_OPERATORS allowlists and the filter is silently dropped. Strip to safe
+		// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+		// DataViews sends camelCase field/operator tokens (e.g. actionType, isAny). Do NOT use.
+		// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+		// sanitize_key() here: it lowercases the token, so camelCase names no longer match the.
+		// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+		// FILTER_FIELDS / *_OPERATORS allowlists and the filter is silently dropped. Strip to safe.
+		// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 		// characters while preserving case; the allowlist checks below remain the security boundary.
 		$field    = isset( $f['field'] ) ? self::sanitize_token( $f['field'] ) : '';
-		$operator = isset( $f['operator'] ) ? self::sanitize_token( $f['operator'] ) : '';
+		$operator = isset( $f['operator'] ) ? self::sanitize_token(
+			$f['operator']
+		) : '';
 
 		if ( ! in_array( $field, Updatronix_Export::FILTER_FIELDS, true ) ) {
 			return null;
 		}
 
 		return match ( $field ) {
-			'category' => self::parse_categorical_filter( 'log_type', $operator, $f['value'] ?? null ),
-			'actionType' => self::parse_categorical_filter( 'action_type', $operator, $f['value'] ?? null ),
-			'status' => self::parse_categorical_filter( 'status', $operator, $f['value'] ?? null ),
-			'triggeredBy' => self::parse_categorical_filter( 'performed_as', $operator, $f['value'] ?? null ),
-			'runType' => self::parse_run_context_filter( $operator, $f['value'] ?? null ),
+			'category' => self::parse_categorical_filter(
+				'log_type',
+				$operator,
+				$f['value'] ?? null
+			),
+			'actionType' => self::parse_categorical_filter(
+				'action_type',
+				$operator,
+				$f['value'] ?? null
+			),
+			'status' => self::parse_categorical_filter(
+				'status',
+				$operator,
+				$f['value'] ?? null
+			),
+			'triggeredBy' => self::parse_categorical_filter(
+				'performed_as',
+				$operator,
+				$f['value'] ?? null
+			),
+			'runType' => self::parse_run_context_filter(
+				$operator,
+				$f['value'] ?? null
+			),
 			'user' => self::parse_user_filter( $operator, $f['value'] ?? null ),
 			'date' => self::parse_date_filter( $operator, $f['value'] ?? null ),
-			'reason' => self::parse_categorical_filter( 'reason_code', $operator, $f['value'] ?? null ),
-			'state' => self::parse_categorical_filter( 'decision_state', $operator, $f['value'] ?? null ),
-			'origin' => self::parse_categorical_filter( 'origin', $operator, $f['value'] ?? null ),
-			'pass' => self::parse_categorical_filter( 'pass_id', $operator, $f['value'] ?? null ),
-			'chain' => self::parse_categorical_filter( 'chain_id', $operator, $f['value'] ?? null ),
-			'nextEligible' => self::parse_date_filter( $operator, $f['value'] ?? null, 'next_eligible_at' ),
+			'reason' => self::parse_categorical_filter(
+				'reason_code',
+				$operator,
+				$f['value'] ?? null
+			),
+			'state' => self::parse_categorical_filter(
+				'decision_state',
+				$operator,
+				$f['value'] ?? null
+			),
+			'origin' => self::parse_categorical_filter(
+				'origin',
+				$operator,
+				$f['value'] ?? null
+			),
+			'pass' => self::parse_categorical_filter(
+				'pass_id',
+				$operator,
+				$f['value'] ?? null
+			),
+			'chain' => self::parse_categorical_filter(
+				'chain_id',
+				$operator,
+				$f['value'] ?? null
+			),
+			'nextEligible' => self::parse_date_filter(
+				$operator,
+				$f['value'] ?? null,
+				'next_eligible_at'
+			),
 		};
 	}
 
 	/**
 	 * Reconcile a categorical operator with its value shape (`is`⇄`isAny`).
 	 *
-	 * A scalar `isAny` collapses to `is`, and a list `is` promotes to `isAny`, so the
-	 * downstream clause type matches the value the UI actually sent. Operators outside
+	 * A scalar `isAny` collapses to `is`, and a list `is` promotes to `isAny`, so
+	 * the
+	 * downstream clause type matches the value the UI actually sent. Operators
+	 * outside
 	 * the swap pair are returned unchanged.
 	 *
 	 * @param string $operator Raw operator token.
 	 * @param mixed  $value    Filter value (scalar or list).
 	 * @return string Reconciled operator.
 	 */
-	private static function normalize_categorical_operator( string $operator, mixed $value ): string {
+	private static function normalize_categorical_operator(
+		string $operator,
+		mixed $value
+	): string {
 		if ( 'is' === $operator && is_array( $value ) ) {
 			return 'isAny';
 		}
@@ -333,8 +428,10 @@ final class Updatronix_Export_Request_Schema {
 	/**
 	 * Map a validated categorical operator to its DB clause type.
 	 *
-	 * @param string $operator Operator already confirmed in {@see Updatronix_Export::CATEGORICAL_OPERATORS}.
-	 * @return string Clause type (`eq`, `neq`, `in`, `not_in`); empty for an unknown operator.
+	 * @param string $operator Operator already confirmed in {@see
+	 * Updatronix_Export::CATEGORICAL_OPERATORS}.
+	 * @return string Clause type (`eq`, `neq`, `in`, `not_in`); empty for an
+	 * unknown operator.
 	 */
 	private static function filter_type_for_operator( string $operator ): string {
 		return match ( $operator ) {
@@ -354,23 +451,45 @@ final class Updatronix_Export_Request_Schema {
 	 * @param mixed  $value    Scalar or list from UI.
 	 * @return array<string, mixed>|null
 	 */
-	private static function parse_categorical_filter( string $column, string $operator, mixed $value ): ?array {
+	private static function parse_categorical_filter(
+		string $column,
+		string $operator,
+		mixed $value
+	): ?array {
 		$operator = self::normalize_categorical_operator( $operator, $value );
 
-		if ( ! in_array( $operator, Updatronix_Export::CATEGORICAL_OPERATORS, true ) ) {
+		if ( ! in_array(
+			$operator,
+			Updatronix_Export::CATEGORICAL_OPERATORS,
+			true
+		) ) {
 			return null;
 		}
 
 		$san = match ( $column ) {
-			'log_type' => static fn ( $v ): string => Updatronix_Security::sanitize_log_type( (string) $v ),
-			'action_type' => static fn ( $v ): string => Updatronix_Security::sanitize_action_type( (string) $v ),
-			'status' => static fn ( $v ): string => Updatronix_Security::sanitize_status( (string) $v ),
-			'performed_as' => static fn ( $v ): string => Updatronix_Security::sanitize_performed_as( (string) $v ),
-			'reason_code' => static fn ( $v ): string => Updatronix_Security::sanitize_reason_code( (string) $v ),
-			'decision_state' => static fn ( $v ): string => Updatronix_Security::sanitize_decision_state( (string) $v ),
-			'origin' => static fn ( $v ): string => Updatronix_Security::sanitize_origin( (string) $v ),
-			'pass_id' => static fn ( $v ): string => Updatronix_Log_Event::normalize_pass_id( (string) $v ),
-			'chain_id' => static fn ( $v ): string => Updatronix_Security::sanitize_string( (string) $v, 64 ),
+			'log_type' => static fn ( $v ): string =>
+				Updatronix_Security::sanitize_log_type( (string) $v ),
+			'action_type' => static fn ( $v ): string =>
+				Updatronix_Security::sanitize_action_type( (string) $v ),
+			'status' => static fn ( $v ): string => Updatronix_Security::sanitize_status(
+				(string) $v
+			),
+			'performed_as' => static fn ( $v ): string =>
+				Updatronix_Security::sanitize_performed_as( (string) $v ),
+			'reason_code' => static fn ( $v ): string =>
+				Updatronix_Security::sanitize_reason_code( (string) $v ),
+			'decision_state' => static fn ( $v ): string =>
+				Updatronix_Security::sanitize_decision_state( (string) $v ),
+			'origin' => static fn ( $v ): string => Updatronix_Security::sanitize_origin(
+				(string) $v
+			),
+			'pass_id' => static fn ( $v ): string =>
+				Updatronix_Log_Event::normalize_pass_id( (string) $v ),
+			'chain_id' => static fn ( $v ): string =>
+				Updatronix_Security::sanitize_string(
+					(string) $v,
+					64
+				),
 			default => static fn ( $v ): string => sanitize_text_field( (string) $v ),
 		};
 
@@ -382,7 +501,15 @@ final class Updatronix_Export_Request_Schema {
 			foreach ( $raw as $item ) {
 				$values[] = $san( $item );
 			}
-			$values = array_values( array_unique( array_filter( $values, static fn ( $x ): bool => '' !== $x ) ) );
+			$values = array_values(
+				array_unique(
+					array_filter(
+						$values,
+						static fn ( $x ): bool =>
+						'' !== $x
+					)
+				)
+			);
 		}
 
 		if ( array() === $values ) {
@@ -400,13 +527,21 @@ final class Updatronix_Export_Request_Schema {
 	 * Parse a run-context filter into a clause descriptor.
 	 *
 	 * @param string $operator Operator.
-	 * @param mixed  $value    Raw filter value (canonical bulk/single keys when normalised client-side).
+	 * @param mixed  $value Raw filter value (canonical bulk/single keys when
+	 *  normalised client-side).
 	 * @return array<string, mixed>|null
 	 */
-	private static function parse_run_context_filter( string $operator, mixed $value ): ?array {
+	private static function parse_run_context_filter(
+		string $operator,
+		mixed $value
+	): ?array {
 		$operator = self::normalize_categorical_operator( $operator, $value );
 
-		if ( ! in_array( $operator, Updatronix_Export::CATEGORICAL_OPERATORS, true ) ) {
+		if ( ! in_array(
+			$operator,
+			Updatronix_Export::CATEGORICAL_OPERATORS,
+			true
+		) ) {
 			return null;
 		}
 
@@ -447,13 +582,17 @@ final class Updatronix_Export_Request_Schema {
 	}
 
 	/**
-	 * User dimension: canonical `system` token or numeric user ID (see final checklist §3.8).
+	 * User dimension: canonical `system` token or numeric user ID (see final
+	 * checklist §3.8).
 	 *
 	 * @param string $operator Operator.
 	 * @param mixed  $value  Raw filter value (`system` or positive integer).
 	 * @return array<string, mixed>|null
 	 */
-	private static function parse_user_filter( string $operator, mixed $value ): ?array {
+	private static function parse_user_filter(
+		string $operator,
+		mixed $value
+	): ?array {
 		if ( ! in_array( $operator, array( 'is', 'isNot' ), true ) ) {
 			return null;
 		}
@@ -489,7 +628,11 @@ final class Updatronix_Export_Request_Schema {
 	 * @param string $column   Column to compare (created_at or next_eligible_at).
 	 * @return array<string, mixed>|null
 	 */
-	private static function parse_date_filter( string $operator, mixed $value, string $column = 'created_at' ): ?array {
+	private static function parse_date_filter(
+		string $operator,
+		mixed $value,
+		string $column = 'created_at'
+	): ?array {
 		if ( ! in_array( $operator, Updatronix_Export::DATE_OPERATORS, true ) ) {
 			return null;
 		}
@@ -502,8 +645,17 @@ final class Updatronix_Export_Request_Schema {
 				if ( ! is_array( $value ) ) {
 					return null;
 				}
-				$start = self::parse_iso_datetime( isset( $value['start'] ) ? (string) $value['start'] : '' );
-				$end   = self::parse_iso_datetime( isset( $value['end'] ) ? (string) $value['end'] : '' );
+				$start =
+					self::parse_iso_datetime(
+						isset(
+							$value['start']
+						) ? (string) $value['start'] : ''
+					);
+				$end   = self::parse_iso_datetime(
+					isset(
+						$value['end']
+					) ? (string) $value['end'] : ''
+				);
 				if ( null === $start || null === $end || $start > $end ) {
 					return null;
 				}
@@ -521,8 +673,14 @@ final class Updatronix_Export_Request_Schema {
 					return null;
 				}
 				$num  = isset( $value['value'] ) ? absint( (string) $value['value'] ) : 0;
-				$unit = isset( $value['unit'] ) ? sanitize_key( (string) $value['unit'] ) : 'day';
-				if ( $num < 1 || $num > 3650 || ! in_array( $unit, array( 'day', 'week', 'month', 'year' ), true ) ) {
+				$unit = isset( $value['unit'] ) ? sanitize_key(
+					(string) $value['unit']
+				) : 'day';
+				if ( $num < 1 || $num > 3650 || ! in_array(
+					$unit,
+					array( 'day', 'week', 'month', 'year' ),
+					true
+				) ) {
 					return null;
 				}
 				$now = new \DateTimeImmutable( 'now', wp_timezone() );
@@ -588,18 +746,25 @@ final class Updatronix_Export_Request_Schema {
 	}
 
 	/**
-	 * Parse ISO 8601 datetime into immutable UTC-normalised instance clamped to sane range.
+	 * Parse ISO 8601 datetime into immutable UTC-normalised instance clamped to
+	 * sane range.
 	 *
 	 * @param string $iso Raw ISO string from DataViews.
 	 * @return \DateTimeImmutable|null
 	 */
-	private static function parse_iso_datetime( string $iso ): ?\DateTimeImmutable {
+	private static function parse_iso_datetime(
+		string $iso
+	): ?\DateTimeImmutable {
 		$iso = trim( $iso );
 		if ( '' === $iso ) {
 			return null;
 		}
 
-		$dt = \DateTimeImmutable::createFromFormat( \DateTimeInterface::ATOM, $iso, new \DateTimeZone( 'UTC' ) );
+		$dt = \DateTimeImmutable::createFromFormat(
+			\DateTimeInterface::ATOM,
+			$iso,
+			new \DateTimeZone( 'UTC' )
+		);
 		if ( ! $dt instanceof \DateTimeImmutable ) {
 			return null;
 		}
@@ -616,9 +781,12 @@ final class Updatronix_Export_Request_Schema {
 	/**
 	 * Sanitize a DataViews field/operator token while preserving camelCase.
 	 *
-	 * Unlike {@see sanitize_key()}, this keeps the original letter case so camelCase
-	 * identifiers (e.g. `actionType`, `isAny`, `beforeInc`) still match their allowlists.
-	 * Only ASCII letters, digits, underscores, and dashes survive; everything else is dropped.
+	 * Unlike {@see sanitize_key()}, this keeps the original letter case so
+	 * camelCase
+	 * identifiers (e.g. `actionType`, `isAny`, `beforeInc`) still match their
+	 * allowlists.
+	 * Only ASCII letters, digits, underscores, and dashes survive; everything else
+	 * is dropped.
 	 *
 	 * @param mixed $value Raw token from the request.
 	 * @return string Sanitized token (may be empty).

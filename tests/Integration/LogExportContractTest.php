@@ -22,24 +22,39 @@ final class LogExportContractTest extends WP_UnitTestCase {
 	protected function setUp(): void {
 		parent::setUp();
 
-		require_once UPDATRONIX_PLUGIN_DIR . 'inc/classes/class-updatronix-database.php';
-		require_once UPDATRONIX_PLUGIN_DIR . 'inc/classes/class-updatronix-log-taxonomy.php';
-		require_once UPDATRONIX_PLUGIN_DIR . 'inc/classes/class-updatronix-log-event.php';
-		require_once UPDATRONIX_PLUGIN_DIR . 'inc/classes/class-updatronix-log-query.php';
-		require_once UPDATRONIX_PLUGIN_DIR . 'inc/classes/class-updatronix-security.php';
-		require_once UPDATRONIX_PLUGIN_DIR . 'inc/classes/class-updatronix-logger.php';
+		require_once UPDATRONIX_PLUGIN_DIR
+			. 'inc/classes/class-updatronix-database.php';
+		require_once UPDATRONIX_PLUGIN_DIR
+			. 'inc/classes/class-updatronix-log-taxonomy.php';
+		require_once UPDATRONIX_PLUGIN_DIR
+			. 'inc/classes/class-updatronix-log-event.php';
+		require_once UPDATRONIX_PLUGIN_DIR
+			. 'inc/classes/class-updatronix-log-query.php';
+		require_once UPDATRONIX_PLUGIN_DIR
+			. 'inc/classes/class-updatronix-security.php';
+		require_once UPDATRONIX_PLUGIN_DIR
+			. 'inc/classes/class-updatronix-logger.php';
 		require_once dirname( __DIR__ ) . '/Support/LogEventFactory.php';
 
 		Updatronix_Database::create_table();
 		$this->delete_all_rows();
 
-		$user_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		$user_id = self::factory()->user->create(
+			array(
+				'role' =>
+				'administrator',
+			)
+		);
 		if ( is_multisite() && function_exists( 'grant_super_admin' ) ) {
 			grant_super_admin( $user_id );
 		}
 		wp_set_current_user( $user_id );
 
-		foreach ( array( LogEventFactory::native_automatic_success(), LogEventFactory::shield_wp_block(), LogEventFactory::flow_waiting() ) as $event ) {
+		foreach ( array(
+			LogEventFactory::native_automatic_success(),
+			LogEventFactory::shield_wp_block(),
+			LogEventFactory::flow_waiting(),
+		) as $event ) {
 			Updatronix_Logger::log_event( $event );
 		}
 	}
@@ -61,17 +76,48 @@ final class LogExportContractTest extends WP_UnitTestCase {
 	 * @return void
 	 */
 	public function test_allowlists_are_additive(): void {
-		foreach ( array( 'category', 'actionType', 'status', 'triggeredBy', 'runType', 'user', 'date' ) as $token ) {
+		foreach ( array(
+			'category',
+			'actionType',
+			'status',
+			'triggeredBy',
+			'runType',
+			'user',
+			'date',
+		) as $token ) {
 			self::assertContains( $token, Updatronix_Export::FILTER_FIELDS );
 		}
-		foreach ( array( 'reason', 'state', 'origin', 'pass', 'chain', 'nextEligible' ) as $token ) {
+		foreach ( array(
+			'reason',
+			'state',
+			'origin',
+			'pass',
+			'chain',
+			'nextEligible',
+		) as $token ) {
 			self::assertContains( $token, Updatronix_Export::FILTER_FIELDS );
 		}
 
-		foreach ( array( 'table_heading', 'action_type', 'run_context', 'user', 'status', 'category' ) as $column ) {
+		foreach ( array(
+			'table_heading',
+			'action_type',
+			'run_context',
+			'user',
+			'status',
+			'category',
+		) as $column ) {
 			self::assertContains( $column, Updatronix_Export::COLUMN_KEYS );
 		}
-		foreach ( array( 'reason', 'state', 'origin', 'pass', 'chain', 'next_eligible', 'decision_context', 'retained' ) as $column ) {
+		foreach ( array(
+			'reason',
+			'state',
+			'origin',
+			'pass',
+			'chain',
+			'next_eligible',
+			'decision_context',
+			'retained',
+		) as $column ) {
 			self::assertContains( $column, Updatronix_Export::COLUMN_KEYS );
 		}
 	}
@@ -188,17 +234,48 @@ final class LogExportContractTest extends WP_UnitTestCase {
 
 		self::assertCount( 1, $rows );
 
-		$rendered = Updatronix_Export_Body_Builder::render( $rows, false, Updatronix_Export_Body_Builder::default_export_columns(), '', 100000, 'json' );
-		$lines    = array_values( array_filter( explode( "\n", trim( (string) $rendered['body'] ) ) ) );
+		$rendered = Updatronix_Export_Body_Builder::render(
+			$rows,
+			false,
+			Updatronix_Export_Body_Builder::default_export_columns(),
+			'',
+			100000,
+			'json'
+		);
+		$lines    = array_values(
+			array_filter(
+				explode(
+					"\n",
+					trim( (string) $rendered['body'] )
+				)
+			)
+		);
 		self::assertNotEmpty( $lines );
 
 		$payload = json_decode( (string) $lines[0], true );
 		self::assertIsArray( $payload );
 
-		foreach ( array( 'element', 'version', 'date', 'action', 'context', 'user', 'status', 'category' ) as $old ) {
+		foreach ( array(
+			'element',
+			'version',
+			'date',
+			'action',
+			'context',
+			'user',
+			'status',
+			'category',
+		) as $old ) {
 			self::assertArrayHasKey( $old, $payload, 'Old field removed: ' . $old );
 		}
-		foreach ( array( 'reason', 'state', 'origin', 'pass', 'chain', 'next_eligible', 'retained' ) as $new ) {
+		foreach ( array(
+			'reason',
+			'state',
+			'origin',
+			'pass',
+			'chain',
+			'next_eligible',
+			'retained',
+		) as $new ) {
 			self::assertArrayHasKey( $new, $payload, 'New field missing: ' . $new );
 		}
 
@@ -218,7 +295,14 @@ final class LogExportContractTest extends WP_UnitTestCase {
 		$rows = Updatronix_Logger::get_logs( array( 'per_page' => 50 ), true );
 		self::assertCount( 3, $rows );
 
-		$rendered = Updatronix_Export_Body_Builder::render( $rows, false, Updatronix_Export_Body_Builder::default_export_columns(), '', 200000, 'json' );
+		$rendered = Updatronix_Export_Body_Builder::render(
+			$rows,
+			false,
+			Updatronix_Export_Body_Builder::default_export_columns(),
+			'',
+			200000,
+			'json'
+		);
 		$body     = (string) $rendered['body'];
 
 		self::assertSame( 1, substr_count( $body, '"status":"Success"' ) );
@@ -238,7 +322,11 @@ final class LogExportContractTest extends WP_UnitTestCase {
 		$request->set_body( (string) wp_json_encode( $payload ) );
 
 		$response = rest_do_request( $request );
-		self::assertSame( 200, $response->get_status(), (string) wp_json_encode( $response->get_data() ) );
+		self::assertSame(
+			200,
+			$response->get_status(),
+			(string) wp_json_encode( $response->get_data() )
+		);
 
 		$data = $response->get_data();
 		self::assertIsArray( $data );

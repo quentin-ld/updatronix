@@ -10,29 +10,44 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Cache group for merged split-bundle i18n inline scripts (object cache when available).
+ * Cache group for merged split-bundle i18n inline scripts (object cache when
+ * available).
  */
 const UPDATRONIX_I18N_CACHE_GROUP = 'updatronix_i18n';
 
 /**
- * Load Jed JSON for every script translation file so async webpack chunks receive strings.
+ * Load Jed JSON for every script translation file so async webpack chunks
+ * receive strings.
  *
- * WordPress maps one JSON file per script URL hash; split bundles share wp.i18n but only the
- * main entry was registered. Language packs ship one JSON per source path — we merge them all
- * into the main handle before the bundle runs (same pattern as core's print_translations()).
+ * WordPress maps one JSON file per script URL hash; split bundles share wp.i18n
+ * but only the
+ * main entry was registered. Language packs ship one JSON per source path — we
+ * merge them all
+ * into the main handle before the bundle runs (same pattern as core's
+ * print_translations()).
  *
  * @param string $handle         Enqueued script handle.
  * @param string $domain         Text domain.
- * @param string $languages_dir  Plugin languages directory (contains .pot / local JSON).
+ * @param string $languages_dir Plugin languages directory (contains .pot /
+ * local JSON).
  * @return void
  */
-function updatronix_enqueue_script_translations_split_bundle( string $handle, string $domain, string $languages_dir ): void {
+function updatronix_enqueue_script_translations_split_bundle(
+	string $handle,
+	string $domain,
+	string $languages_dir
+): void {
 	$locale    = determine_locale();
 	$cache_key = 'split_' . md5( $locale . '|' . UPDATRONIX_VERSION );
 
 	$cached = wp_cache_get( $cache_key, UPDATRONIX_I18N_CACHE_GROUP );
 	if ( updatronix_i18n_split_bundle_cache_is_valid( $cached ) ) {
-		updatronix_i18n_apply_split_bundle_cache( $handle, $domain, $languages_dir, $cached );
+		updatronix_i18n_apply_split_bundle_cache(
+			$handle,
+			$domain,
+			$languages_dir,
+			$cached
+		);
 
 		return;
 	}
@@ -61,7 +76,12 @@ function updatronix_enqueue_script_translations_split_bundle( string $handle, st
 
 	if ( array() === $file_list ) {
 		wp_set_script_translations( $handle, $domain, $languages_dir );
-		updatronix_i18n_store_split_bundle_cache( $cache_key, array(), array(), true );
+		updatronix_i18n_store_split_bundle_cache(
+			$cache_key,
+			array(),
+			array(),
+			true
+		);
 
 		return;
 	}
@@ -70,14 +90,16 @@ function updatronix_enqueue_script_translations_split_bundle( string $handle, st
 	$inlines  = array();
 
 	foreach ( $file_list as $file ) {
-		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Local read of a translation JSON file; not a remote fetch.
+		// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+		// phpcs:ignore Generic.Files.LineLength, WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Local read of a translation JSON file; not a remote fetch.
 		$raw = file_get_contents( $file );
 		if ( false === $raw ) {
 			continue;
 		}
 
 		$data = json_decode( $raw, true );
-		if ( ! is_array( $data ) || ! isset( $data['locale_data'] ) || ! is_array( $data['locale_data'] ) ) {
+		if ( ! is_array( $data ) || ! isset( $data['locale_data'] )
+			|| ! is_array( $data['locale_data'] ) ) {
 			continue;
 		}
 
@@ -86,7 +108,8 @@ function updatronix_enqueue_script_translations_split_bundle( string $handle, st
 			continue;
 		}
 
-        // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- filemtime after is_readable check; suppress stat noise on race.
+        // phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+        // phpcs:ignore Generic.Files.LineLength, WordPress.PHP.NoSilencedErrors.Discouraged -- filemtime after is_readable check; suppress stat noise on race.
 		$mtime = @filemtime( $file );
 		if ( false === $mtime ) {
 			continue;
@@ -99,11 +122,15 @@ function updatronix_enqueue_script_translations_split_bundle( string $handle, st
 
 		$inlines[] = sprintf(
 			'( function( domain, translations ) {
-	var localeData = translations.locale_data[ domain ] || translations.locale_data.messages;
+	var localeData = translations.locale_data[ domain ] || translations.locale_data
+		.messages;
 	localeData[""].domain = domain;
 	wp.i18n.setLocaleData( localeData, domain );
 } )( %s, %s );',
-			wp_json_encode( $domain, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT ),
+			wp_json_encode(
+				$domain,
+				JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT
+			),
 			$encoded
 		);
 	}
@@ -114,23 +141,39 @@ function updatronix_enqueue_script_translations_split_bundle( string $handle, st
 
 	$wp_scripts = wp_scripts();
 	if ( isset( $wp_scripts->registered[ $handle ] ) ) {
-		$wp_scripts->registered[ $handle ]->set_translations( $domain, $languages_dir );
+		$wp_scripts->registered[ $handle ]->set_translations(
+			$domain,
+			$languages_dir
+		);
 	}
 
-	updatronix_i18n_store_split_bundle_cache( $cache_key, $manifest, $inlines, false );
+	updatronix_i18n_store_split_bundle_cache(
+		$cache_key,
+		$manifest,
+		$inlines,
+		false
+	);
 }
 
 /**
- * Check whether cached split-bundle data is still valid (paths exist, mtimes unchanged).
+ * Check whether cached split-bundle data is still valid (paths exist, mtimes
+ * unchanged).
  *
- * New JSON files dropped in without a plugin version bump are not detected until cache
- * invalidation (e.g. version change or object cache flush); same as relying on UPDATRONIX_VERSION.
+ * New JSON files dropped in without a plugin version bump are not detected
+ * until cache
+ * invalidation (e.g. version change or object cache flush); same as relying on
+ * UPDATRONIX_VERSION.
  *
  * @param mixed $cached Value from wp_cache_get.
  * @return bool True if the cache is valid and usable.
  */
 function updatronix_i18n_split_bundle_cache_is_valid( $cached ): bool {
-	if ( ! is_array( $cached ) || ! isset( $cached['manifest'], $cached['inlines'], $cached['glob_empty'] ) || ! is_array( $cached['manifest'] ) || ! is_array( $cached['inlines'] ) || ! is_bool( $cached['glob_empty'] ) ) {
+	if ( ! is_array( $cached ) || ! isset(
+		$cached['manifest'],
+		$cached['inlines'],
+		$cached['glob_empty']
+	) || ! is_array( $cached['manifest'] )
+		|| ! is_array( $cached['inlines'] ) || ! is_bool( $cached['glob_empty'] ) ) {
 		return false;
 	}
 
@@ -139,13 +182,15 @@ function updatronix_i18n_split_bundle_cache_is_valid( $cached ): bool {
 	}
 
 	foreach ( $cached['manifest'] as $entry ) {
-		if ( ! is_array( $entry ) || ! isset( $entry['path'], $entry['mtime'] ) || ! is_string( $entry['path'] ) || ! is_numeric( $entry['mtime'] ) ) {
+		if ( ! is_array( $entry ) || ! isset( $entry['path'], $entry['mtime'] )
+			|| ! is_string( $entry['path'] ) || ! is_numeric( $entry['mtime'] ) ) {
 			return false;
 		}
 		if ( ! is_readable( $entry['path'] ) ) {
 			return false;
 		}
-        // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- Same race-condition guard as caller; suppress stat noise.
+        // phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+        // phpcs:ignore Generic.Files.LineLength, WordPress.PHP.NoSilencedErrors.Discouraged -- Same race-condition guard as caller; suppress stat noise.
 		$current = @filemtime( $entry['path'] );
 		if ( false === $current || (int) $entry['mtime'] !== $current ) {
 			return false;
@@ -164,7 +209,12 @@ function updatronix_i18n_split_bundle_cache_is_valid( $cached ): bool {
  * @param array<string, mixed> $cached         Cached payload with inlines.
  * @return void
  */
-function updatronix_i18n_apply_split_bundle_cache( string $handle, string $domain, string $languages_dir, array $cached ): void {
+function updatronix_i18n_apply_split_bundle_cache(
+	string $handle,
+	string $domain,
+	string $languages_dir,
+	array $cached
+): void {
 	if ( true === $cached['glob_empty'] ) {
 		wp_set_script_translations( $handle, $domain, $languages_dir );
 
@@ -179,7 +229,10 @@ function updatronix_i18n_apply_split_bundle_cache( string $handle, string $domai
 
 	$wp_scripts = wp_scripts();
 	if ( isset( $wp_scripts->registered[ $handle ] ) ) {
-		$wp_scripts->registered[ $handle ]->set_translations( $domain, $languages_dir );
+		$wp_scripts->registered[ $handle ]->set_translations(
+			$domain,
+			$languages_dir
+		);
 	}
 }
 
@@ -187,12 +240,18 @@ function updatronix_i18n_apply_split_bundle_cache( string $handle, string $domai
  * Store split-bundle cache (long TTL; entries revalidated by file mtime).
  *
  * @param string             $cache_key Cache key (without group).
- * @param array<int, mixed>  $manifest  Path + mtime entries for known JSON files.
+ * @param array<int, mixed>  $manifest Path + mtime entries for known JSON files.
  * @param array<int, string> $inlines   Inline script bodies in order.
- * @param bool               $glob_empty True when no JSON files matched glob (vs. matches that failed to parse).
+ * @param bool               $glob_empty True when no JSON files matched glob (vs. matches
+ *               that failed to parse).
  * @return void
  */
-function updatronix_i18n_store_split_bundle_cache( string $cache_key, array $manifest, array $inlines, bool $glob_empty ): void {
+function updatronix_i18n_store_split_bundle_cache(
+	string $cache_key,
+	array $manifest,
+	array $inlines,
+	bool $glob_empty
+): void {
 	wp_cache_set(
 		$cache_key,
 		array(
@@ -237,10 +296,18 @@ function updatronix_admin_enqueue_scripts( string $admin_page ): void {
 			$class   = 'notice notice-warning is-dismissible';
 			$message = sprintf(
 				/* translators: %s: `npm run build` command */
-				__( 'Updatronix: The admin interface is not available because the JavaScript bundle is missing. Please run %s from the plugin directory.', 'updatronix' ),
+				__(
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					'Updatronix: The admin interface is not available because the JavaScript bundle is missing. Please run %s from the plugin directory.',
+					'updatronix'
+				),
 				'<code>npm run build</code>'
 			);
-			printf( '<div class="%s"><p><strong>Updatronix</strong>: %s</p></div>', esc_attr( $class ), wp_kses_post( $message ) );
+			printf(
+				'<div class="%s"><p><strong>Updatronix</strong>: %s</p></div>',
+				esc_attr( $class ),
+				wp_kses_post( $message )
+			);
 		};
 		if ( is_multisite() ) {
 			add_action( 'network_admin_notices', $notice_callback );
@@ -252,7 +319,8 @@ function updatronix_admin_enqueue_scripts( string $admin_page ): void {
 	}
 
 	$asset = include $asset_file;
-	if ( ! is_array( $asset ) || ! (bool) ( $asset['dependencies'] ?? null ) || ! (bool) ( $asset['version'] ?? null ) ) {
+	if ( ! is_array( $asset ) || ! (bool) ( $asset['dependencies'] ?? null )
+		|| ! (bool) ( $asset['version'] ?? null ) ) {
 		return;
 	}
 
@@ -264,7 +332,11 @@ function updatronix_admin_enqueue_scripts( string $admin_page ): void {
 		true
 	);
 
-	updatronix_enqueue_script_translations_split_bundle( 'updatronix-scripts', 'updatronix', updatronix_PLUGIN_DIR . 'languages' );
+	updatronix_enqueue_script_translations_split_bundle(
+		'updatronix-scripts',
+		'updatronix',
+		updatronix_PLUGIN_DIR . 'languages'
+	);
 
 	$style_file    = updatronix_PLUGIN_DIR . 'assets/build/index.css';
 	$style_mtime   = is_readable( $style_file ) ? filemtime( $style_file ) : false;
@@ -339,7 +411,10 @@ function updatronix_localize_settings( string $admin_page ): void {
 	$options     = updatronix_get_settings();
 	$tabs        = updatronix_get_admin_tabs();
 	$active_tab  = updatronix_get_active_tab( $tabs );
-	$logo_url    = plugins_url( 'assets/img/logo-60x60.png', updatronix_PLUGIN_FILE );
+	$logo_url    = plugins_url(
+		'assets/img/logo-60x60.png',
+		updatronix_PLUGIN_FILE
+	);
 	$brand       = updatronix_get_admin_brand();
 	$brand_color = sanitize_hex_color( (string) ( $brand['color'] ?? '' ) );
 	$menu_color  = sanitize_hex_color( (string) ( $brand['menuColor'] ?? '' ) );
@@ -369,7 +444,10 @@ function updatronix_localize_settings( string $admin_page ): void {
 			'namespace'              => 'updatronix/v1',
 			'nonce'                  => wp_create_nonce( 'wp_rest' ),
 			'options'                => $options,
-			'schedule_meta'          => updatronix_decorate_schedule_meta_for_display( Updatronix_Cron::get_schedule_rest_meta() ),
+			'schedule_meta'          =>
+				updatronix_decorate_schedule_meta_for_display(
+					Updatronix_Cron::get_schedule_rest_meta()
+				),
 			'constants'              => Updatronix_AutoUpdates::get_constants(),
 			'tabs'                   => $tabs,
 			'activeTab'              => $active_tab,
@@ -377,10 +455,17 @@ function updatronix_localize_settings( string $admin_page ): void {
 			'logoUrl'                => $logo_url,
 			'brand'                  => $brand,
 			'isPro'                  => defined( 'UPDATRONIX_PRO_VERSION' ),
-			'licenseActive'          => (bool) apply_filters( 'updatronix_license_active', false ),
-			'canManagePro'           => (bool) apply_filters( 'updatronix_can_manage_pro', false ),
+			'licenseActive'          => (bool) apply_filters(
+				'updatronix_license_active',
+				false
+			),
+			'canManagePro'           => (bool) apply_filters(
+				'updatronix_can_manage_pro',
+				false
+			),
 			'exportFormats'          => updatronix_get_export_formats(),
 			'logTaxonomy'            => Updatronix_Log_Taxonomy::client_payload(),
+			// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 			// Global window property populated by Pro's admin JS for the panel registry; Free reads it via ProTabPanel.
 			'proPanelRegistryGlobal' => 'updatronixProPanelRegistry',
 		)

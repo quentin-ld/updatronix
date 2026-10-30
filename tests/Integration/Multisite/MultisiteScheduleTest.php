@@ -102,7 +102,10 @@ final class MultisiteScheduleTest extends WP_UnitTestCase {
 		switch_to_blog( $this->subsite );
 		$this->reset_caches();
 
-		self::assertFalse( wp_next_scheduled( 'wp_version_check' ), 'The subsite has no local event.' );
+		self::assertFalse(
+			wp_next_scheduled( 'wp_version_check' ),
+			'The subsite has no local event.'
+		);
 		self::assertTrue( Updatronix_Schedule_Context::is_subsite() );
 		self::assertFalse( Updatronix_Schedule_Context::has_local_schedule() );
 		self::assertSame( $main_event, Updatronix_Schedule_Context::next_check() );
@@ -126,8 +129,16 @@ final class MultisiteScheduleTest extends WP_UnitTestCase {
 		self::assertSame( Updatronix_Schedule_State::STATE_NETWORK, $item['state'] );
 		self::assertNull( $item['eligible_at'] );
 		self::assertNull( $item['execution_at'] );
-		self::assertStringContainsString( 'network update schedule', $item['display'] );
-		self::assertStringNotContainsString( 'not scheduled', strtolower( $item['display'] ) );
+		self::assertStringContainsString(
+			'network update schedule',
+			$item['display']
+		);
+		self::assertStringNotContainsString(
+			'not scheduled',
+			strtolower(
+				$item['display']
+			)
+		);
 	}
 
 	/**
@@ -149,7 +160,10 @@ final class MultisiteScheduleTest extends WP_UnitTestCase {
 		restore_current_blog();
 
 		self::assertStringContainsString( 'network update schedule', $html );
-		self::assertStringNotContainsString( 'Automatic update scheduled in 3 hours.', $html );
+		self::assertStringNotContainsString(
+			'Automatic update scheduled in 3 hours.',
+			$html
+		);
 	}
 
 	/**
@@ -167,10 +181,17 @@ final class MultisiteScheduleTest extends WP_UnitTestCase {
 
 		self::assertFalse( Updatronix_Schedule_Context::is_subsite() );
 		self::assertSame( $main_event, Updatronix_Schedule_Context::next_check() );
-		self::assertSame( 'daily', updatronix_get_network_schedule()['update_check']['recurrence'] );
+		self::assertSame(
+			'daily',
+			updatronix_get_network_schedule(
+			)['update_check']['recurrence']
+		);
 
 		$item = Updatronix_Schedule_Context::get_item( 'plugin', $plugin );
-		self::assertNotSame( Updatronix_Schedule_State::STATE_NETWORK, $item['state'] );
+		self::assertNotSame(
+			Updatronix_Schedule_State::STATE_NETWORK,
+			$item['state']
+		);
 
 		restore_current_blog();
 	}

@@ -36,7 +36,7 @@ final class ScheduleStateIntegrationTest extends WP_UnitTestCase {
 		ScheduleFixtures::capture();
 		ScheduleFixtures::set_schedule( 'daily', '01:00', true, 2 );
 		ScheduleFixtures::clear_offers();
-		// The WordPress test library defines DISABLE_WP_CRON; a healthy host
+		// The WordPress test library defines DISABLE_WP_CRON; a healthy host.
 		// does not, and the other states are the point of this suite.
 		add_filter( 'updatronix_schedule_cron_disabled', '__return_false' );
 		$this->reset_schedule_caches();
@@ -117,10 +117,11 @@ final class ScheduleStateIntegrationTest extends WP_UnitTestCase {
 	private function count_logs(): int {
 		global $wpdb;
 
-		return (int) $wpdb->get_var( 'SELECT COUNT(*) FROM ' . Updatronix_Database::get_table_name() ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared -- Test-only count on the plugin's own table.
+		// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+		return (int) $wpdb->get_var( 'SELECT COUNT(*) FROM ' . Updatronix_Database::get_table_name() ); // phpcs:ignore Generic.Files.LineLength, WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared -- Test-only count on the plugin's own table.
 	}
 
-	// --- Context and map --------------------------------------------------
+	// --- Context and map --------------------------------------------------.
 
 	/**
 	 * The map is capped, reports truncation, and is built once per request.
@@ -155,7 +156,13 @@ final class ScheduleStateIntegrationTest extends WP_UnitTestCase {
 
 		ScheduleFixtures::set_plugin_offer( $plugin, $before, '99.0.0' );
 		$this->reset_schedule_caches();
-		self::assertSame( 'pending', Updatronix_Schedule_Context::offer_state( 'plugin', $plugin ) );
+		self::assertSame(
+			'pending',
+			Updatronix_Schedule_Context::offer_state(
+				'plugin',
+				$plugin
+			)
+		);
 
 		ScheduleFixtures::set_plugin_offer(
 			$plugin,
@@ -164,16 +171,34 @@ final class ScheduleStateIntegrationTest extends WP_UnitTestCase {
 			array( 'last_checked' => time() - 7 * HOUR_IN_SECONDS )
 		);
 		$this->reset_schedule_caches();
-		self::assertSame( 'stale', Updatronix_Schedule_Context::offer_state( 'plugin', $plugin ) );
+		self::assertSame(
+			'stale',
+			Updatronix_Schedule_Context::offer_state(
+				'plugin',
+				$plugin
+			)
+		);
 
 		ScheduleFixtures::set_plugin_offer( $plugin, $before, '99.0.0' );
 		ScheduleFixtures::clear_offers();
 		$this->reset_schedule_caches();
-		self::assertSame( 'none', Updatronix_Schedule_Context::offer_state( 'plugin', $plugin ) );
+		self::assertSame(
+			'none',
+			Updatronix_Schedule_Context::offer_state(
+				'plugin',
+				$plugin
+			)
+		);
 
 		delete_site_transient( 'update_plugins' );
 		$this->reset_schedule_caches();
-		self::assertSame( 'unknown', Updatronix_Schedule_Context::offer_state( 'plugin', $plugin ) );
+		self::assertSame(
+			'unknown',
+			Updatronix_Schedule_Context::offer_state(
+				'plugin',
+				$plugin
+			)
+		);
 	}
 
 	/**
@@ -190,14 +215,26 @@ final class ScheduleStateIntegrationTest extends WP_UnitTestCase {
 			array( 'last_checked' => time() - 2 * HOUR_IN_SECONDS )
 		);
 		$this->reset_schedule_caches();
-		self::assertSame( 'pending', Updatronix_Schedule_Context::offer_state( 'plugin', $plugin ) );
+		self::assertSame(
+			'pending',
+			Updatronix_Schedule_Context::offer_state(
+				'plugin',
+				$plugin
+			)
+		);
 
 		$filter = static function (): int {
 			return HOUR_IN_SECONDS;
 		};
 		add_filter( 'updatronix_schedule_offer_ttl', $filter );
 		$this->reset_schedule_caches();
-		self::assertSame( 'stale', Updatronix_Schedule_Context::offer_state( 'plugin', $plugin ) );
+		self::assertSame(
+			'stale',
+			Updatronix_Schedule_Context::offer_state(
+				'plugin',
+				$plugin
+			)
+		);
 		remove_filter( 'updatronix_schedule_offer_ttl', $filter );
 	}
 
@@ -208,13 +245,24 @@ final class ScheduleStateIntegrationTest extends WP_UnitTestCase {
 	 */
 	public function test_held_item_state(): void {
 		$plugin = $this->installed_plugin();
-		ScheduleFixtures::set_plugin_offer( $plugin, $this->installed_version( $plugin ), '99.0.0' );
+		ScheduleFixtures::set_plugin_offer(
+			$plugin,
+			$this->installed_version(
+				$plugin
+			),
+			'99.0.0'
+		);
 		$this->enable_plugin_auto_update( $plugin );
 		ScheduleFixtures::set_next_check( time() + 6 * HOUR_IN_SECONDS, 'daily' );
 		update_site_option(
 			'updatronix_auto_update_delay_ledger',
 			(string) wp_json_encode(
-				array( Updatronix_AutoUpdateDelay::ledger_hash( 'plugin', get_site_transient( 'update_plugins' )->response[ $plugin ] ) => time() - HOUR_IN_SECONDS )
+				array(
+					Updatronix_AutoUpdateDelay::ledger_hash(
+						'plugin',
+						get_site_transient( 'update_plugins' )->response[ $plugin ]
+					) => time() - HOUR_IN_SECONDS,
+				)
 			)
 		);
 		$this->reset_schedule_caches();
@@ -234,14 +282,31 @@ final class ScheduleStateIntegrationTest extends WP_UnitTestCase {
 	 */
 	public function test_auto_update_off_state(): void {
 		$plugin = $this->installed_plugin();
-		ScheduleFixtures::set_plugin_offer( $plugin, $this->installed_version( $plugin ), '99.0.0' );
-		update_site_option( 'auto_update_plugins', array_values( array_diff( (array) get_site_option( 'auto_update_plugins', array() ), array( $plugin ) ) ) );
+		ScheduleFixtures::set_plugin_offer(
+			$plugin,
+			$this->installed_version(
+				$plugin
+			),
+			'99.0.0'
+		);
+		update_site_option(
+			'auto_update_plugins',
+			array_values(
+				array_diff(
+					(array) get_site_option( 'auto_update_plugins', array() ),
+					array( $plugin )
+				)
+			)
+		);
 		ScheduleFixtures::set_next_check( time() + HOUR_IN_SECONDS, 'daily' );
 		$this->reset_schedule_caches();
 
 		$item = Updatronix_Schedule_Context::get_item( 'plugin', $plugin );
 
-		self::assertSame( Updatronix_Schedule_State::STATE_NOT_MANAGED, $item['state'] );
+		self::assertSame(
+			Updatronix_Schedule_State::STATE_NOT_MANAGED,
+			$item['state']
+		);
 	}
 
 	/**
@@ -251,7 +316,13 @@ final class ScheduleStateIntegrationTest extends WP_UnitTestCase {
 	 */
 	public function test_pro_facts_stub_blocks_the_item(): void {
 		$plugin = $this->installed_plugin();
-		ScheduleFixtures::set_plugin_offer( $plugin, $this->installed_version( $plugin ), '99.0.0' );
+		ScheduleFixtures::set_plugin_offer(
+			$plugin,
+			$this->installed_version(
+				$plugin
+			),
+			'99.0.0'
+		);
 		ScheduleFixtures::set_next_check( time() + HOUR_IN_SECONDS, 'daily' );
 		ScheduleFixtures::stub_pro_facts(
 			array(
@@ -278,10 +349,25 @@ final class ScheduleStateIntegrationTest extends WP_UnitTestCase {
 	 */
 	public function test_missing_facts_are_unknown_when_the_filter_is_active(): void {
 		$plugin = $this->installed_plugin();
-		ScheduleFixtures::set_plugin_offer( $plugin, $this->installed_version( $plugin ), '99.0.0' );
+		ScheduleFixtures::set_plugin_offer(
+			$plugin,
+			$this->installed_version(
+				$plugin
+			),
+			'99.0.0'
+		);
 		ScheduleFixtures::set_next_check( time() + HOUR_IN_SECONDS, 'daily' );
 		$this->enable_plugin_auto_update( $plugin );
-		ScheduleFixtures::stub_pro_facts( array( 'lock' => array( 'state' => 'none' ) ), 20, false );
+		ScheduleFixtures::stub_pro_facts(
+			array(
+				'lock' => array(
+					'state' =>
+					'none',
+				),
+			),
+			20,
+			false
+		);
 		$this->reset_schedule_caches();
 
 		$item = Updatronix_Schedule_Context::get_item( 'plugin', $plugin );
@@ -297,7 +383,13 @@ final class ScheduleStateIntegrationTest extends WP_UnitTestCase {
 	 */
 	public function test_locked_fact_wins(): void {
 		$plugin = $this->installed_plugin();
-		ScheduleFixtures::set_plugin_offer( $plugin, $this->installed_version( $plugin ), '99.0.0' );
+		ScheduleFixtures::set_plugin_offer(
+			$plugin,
+			$this->installed_version(
+				$plugin
+			),
+			'99.0.0'
+		);
 		ScheduleFixtures::set_next_check( time() + HOUR_IN_SECONDS, 'daily' );
 		ScheduleFixtures::stub_pro_facts(
 			array(
@@ -315,7 +407,10 @@ final class ScheduleStateIntegrationTest extends WP_UnitTestCase {
 		$item = Updatronix_Schedule_Context::get_item( 'plugin', $plugin );
 
 		self::assertSame( Updatronix_Schedule_State::STATE_LOCKED, $item['state'] );
-		self::assertSame( 'Managed via Git. Update through your manager.', $item['display'] );
+		self::assertSame(
+			'Managed via Git. Update through your manager.',
+			$item['display']
+		);
 	}
 
 	/**
@@ -325,11 +420,20 @@ final class ScheduleStateIntegrationTest extends WP_UnitTestCase {
 	 */
 	public function test_render_has_no_side_effects(): void {
 		$plugin = $this->installed_plugin();
-		ScheduleFixtures::set_plugin_offer( $plugin, $this->installed_version( $plugin ), '99.0.0' );
+		ScheduleFixtures::set_plugin_offer(
+			$plugin,
+			$this->installed_version(
+				$plugin
+			),
+			'99.0.0'
+		);
 		ScheduleFixtures::set_next_check( time() + HOUR_IN_SECONDS, 'daily' );
 		$this->reset_schedule_caches();
 
-		$ledger_before   = get_site_option( 'updatronix_auto_update_delay_ledger', null );
+		$ledger_before   = get_site_option(
+			'updatronix_auto_update_delay_ledger',
+			null
+		);
 		$schedule_before = get_site_option( 'updatronix_network_schedule', null );
 		$logs_before     = $this->count_logs();
 
@@ -350,8 +454,20 @@ final class ScheduleStateIntegrationTest extends WP_UnitTestCase {
 
 		remove_filter( 'pre_http_request', $http );
 
-		self::assertSame( $ledger_before, get_site_option( 'updatronix_auto_update_delay_ledger', null ) );
-		self::assertSame( $schedule_before, get_site_option( 'updatronix_network_schedule', null ) );
+		self::assertSame(
+			$ledger_before,
+			get_site_option(
+				'updatronix_auto_update_delay_ledger',
+				null
+			)
+		);
+		self::assertSame(
+			$schedule_before,
+			get_site_option(
+				'updatronix_network_schedule',
+				null
+			)
+		);
 		self::assertSame( $logs_before, $this->count_logs() );
 	}
 
@@ -363,7 +479,9 @@ final class ScheduleStateIntegrationTest extends WP_UnitTestCase {
 	public function test_two_hundred_item_map_budget(): void {
 		$plugins_dir = WP_PLUGIN_DIR;
 		if ( ! is_writable( $plugins_dir ) ) {
-			self::markTestSkipped( 'The plugin directory is not writable in this environment.' );
+			self::markTestSkipped(
+				'The plugin directory is not writable in this environment.'
+			);
 		}
 
 		for ( $i = 0; $i < 200; $i++ ) {
@@ -371,7 +489,8 @@ final class ScheduleStateIntegrationTest extends WP_UnitTestCase {
 			if ( ! wp_mkdir_p( $dir ) ) {
 				self::markTestSkipped( 'The plugin directory could not be created.' );
 			}
-			file_put_contents( // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Local test fixture.
+			// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+			file_put_contents( // phpcs:ignore Generic.Files.LineLength, WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Local test fixture.
 				$dir . '/plugin.php',
 				"<?php\n/**\n * Plugin Name: Perf " . $i . "\n * Version: 1.0.0\n */\n"
 			);
@@ -387,8 +506,16 @@ final class ScheduleStateIntegrationTest extends WP_UnitTestCase {
 		$queries = (int) $wpdb->num_queries - $before;
 
 		self::assertGreaterThanOrEqual( 200, count( $map['items'] ) );
-		self::assertLessThan( 5.0, $elapsed, 'The 200-item map must stay within the test budget.' );
-		self::assertLessThan( 100, $queries, 'The map must not issue a query per item.' );
+		self::assertLessThan(
+			5.0,
+			$elapsed,
+			'The 200-item map must stay within the test budget.'
+		);
+		self::assertLessThan(
+			100,
+			$queries,
+			'The map must not issue a query per item.'
+		);
 	}
 
 	/**
@@ -433,7 +560,7 @@ final class ScheduleStateIntegrationTest extends WP_UnitTestCase {
 		self::assertGreaterThan( time(), $second );
 	}
 
-	// --- REST round-trip --------------------------------------------------
+	// --- REST round-trip --------------------------------------------------.
 
 	/**
 	 * Saves the Schedule through REST and reloads it.
@@ -472,9 +599,15 @@ final class ScheduleStateIntegrationTest extends WP_UnitTestCase {
 			)
 		);
 
-		self::assertSame( 365, $data['options']['schedule']['delay_updates']['delay_value'] );
+		self::assertSame(
+			365,
+			$data['options']['schedule']['delay_updates']['delay_value']
+		);
 		self::assertTrue( $data['options']['schedule']['delay_updates']['enabled'] );
-		self::assertSame( '02:17', $data['options']['schedule']['update_check']['time'] );
+		self::assertSame(
+			'02:17',
+			$data['options']['schedule']['update_check']['time']
+		);
 
 		$reloaded = updatronix_get_network_schedule();
 		self::assertSame( 365, $reloaded['delay_updates']['delay_value'] );
@@ -488,7 +621,10 @@ final class ScheduleStateIntegrationTest extends WP_UnitTestCase {
 				),
 			)
 		);
-		self::assertSame( 0, $off['options']['schedule']['delay_updates']['delay_value'] );
+		self::assertSame(
+			0,
+			$off['options']['schedule']['delay_updates']['delay_value']
+		);
 		self::assertFalse( $off['options']['schedule']['delay_updates']['enabled'] );
 
 		$disabled = $this->save_schedule_via_rest(
@@ -499,8 +635,13 @@ final class ScheduleStateIntegrationTest extends WP_UnitTestCase {
 				),
 			)
 		);
-		self::assertSame( 0, $disabled['options']['schedule']['delay_updates']['delay_value'] );
-		self::assertFalse( $disabled['options']['schedule']['delay_updates']['enabled'] );
+		self::assertSame(
+			0,
+			$disabled['options']['schedule']['delay_updates']['delay_value']
+		);
+		self::assertFalse(
+			$disabled['options']['schedule']['delay_updates']['enabled']
+		);
 	}
 
 	/**
@@ -523,7 +664,10 @@ final class ScheduleStateIntegrationTest extends WP_UnitTestCase {
 		);
 
 		self::assertSame( '', $data['options']['schedule']['update_check']['time'] );
-		self::assertSame( 3, $data['options']['schedule']['delay_updates']['delay_value'] );
+		self::assertSame(
+			3,
+			$data['options']['schedule']['delay_updates']['delay_value']
+		);
 	}
 
 	/**
@@ -543,7 +687,7 @@ final class ScheduleStateIntegrationTest extends WP_UnitTestCase {
 		self::assertSame( 400, $response->get_status() );
 	}
 
-	// --- Core offers ------------------------------------------------------
+	// --- Core offers ------------------------------------------------------.
 
 	/**
 	 * Core minor vs major vs no offer.
@@ -563,37 +707,66 @@ final class ScheduleStateIntegrationTest extends WP_UnitTestCase {
 		ScheduleFixtures::set_core_offer( $installed, $minor );
 		$this->reset_schedule_caches();
 
-		$item = Updatronix_Schedule_Context::get_item( 'core', Updatronix_Item_State::CORE_ID );
-		self::assertSame( Updatronix_Schedule_State::STATE_NOT_OBSERVED, $item['state'], 'A held core offer with no ledger row is not observed.' );
+		$item = Updatronix_Schedule_Context::get_item(
+			'core',
+			Updatronix_Item_State::CORE_ID
+		);
+		self::assertSame(
+			Updatronix_Schedule_State::STATE_NOT_OBSERVED,
+			$item['state'],
+			'A held core offer with no ledger row is not observed.'
+		);
 		self::assertSame( 'minor', $item['core_kind'] );
 
 		$offer = get_site_transient( 'update_core' )->updates[0];
 		ScheduleFixtures::seed_ledger(
-			array( Updatronix_AutoUpdateDelay::ledger_hash( 'core', $offer ) => time() - HOUR_IN_SECONDS )
+			array(
+				Updatronix_AutoUpdateDelay::ledger_hash( 'core', $offer ) =>
+								time() - HOUR_IN_SECONDS,
+			)
 		);
 		$this->reset_schedule_caches();
-		$held = Updatronix_Schedule_Context::get_item( 'core', Updatronix_Item_State::CORE_ID );
+		$held = Updatronix_Schedule_Context::get_item(
+			'core',
+			Updatronix_Item_State::CORE_ID
+		);
 		self::assertSame( Updatronix_Schedule_State::STATE_HELD, $held['state'] );
 
 		ScheduleFixtures::set_core_offer( $installed, $major );
 		$this->reset_schedule_caches();
-		$major_item = Updatronix_Schedule_Context::get_item( 'core', Updatronix_Item_State::CORE_ID );
-		self::assertSame( Updatronix_Schedule_State::STATE_NOT_MANAGED, $major_item['state'], 'Major auto-updates are unset.' );
+		$major_item = Updatronix_Schedule_Context::get_item(
+			'core',
+			Updatronix_Item_State::CORE_ID
+		);
+		self::assertSame(
+			Updatronix_Schedule_State::STATE_NOT_MANAGED,
+			$major_item['state'],
+			'Major auto-updates are unset.'
+		);
 		self::assertSame( 'major', $major_item['core_kind'] );
 
 		update_site_option( 'auto_update_core_major', 'enabled' );
 		$this->reset_schedule_caches();
-		$major_on = Updatronix_Schedule_Context::get_item( 'core', Updatronix_Item_State::CORE_ID );
-		self::assertNotSame( Updatronix_Schedule_State::STATE_NOT_MANAGED, $major_on['state'] );
+		$major_on = Updatronix_Schedule_Context::get_item(
+			'core',
+			Updatronix_Item_State::CORE_ID
+		);
+		self::assertNotSame(
+			Updatronix_Schedule_State::STATE_NOT_MANAGED,
+			$major_on['state']
+		);
 
 		ScheduleFixtures::clear_offers();
 		$this->reset_schedule_caches();
-		$none = Updatronix_Schedule_Context::get_item( 'core', Updatronix_Item_State::CORE_ID );
+		$none = Updatronix_Schedule_Context::get_item(
+			'core',
+			Updatronix_Item_State::CORE_ID
+		);
 		self::assertSame( Updatronix_Schedule_State::STATE_NO_OFFER, $none['state'] );
 		self::assertSame( 'No automatic core update pending.', $none['display'] );
 	}
 
-	// --- Ledger peek ------------------------------------------------------
+	// --- Ledger peek ------------------------------------------------------.
 
 	/**
 	 * The peek hashes plugins, themes, core, and translations like the gate.
@@ -611,9 +784,18 @@ final class ScheduleStateIntegrationTest extends WP_UnitTestCase {
 			'version'  => '2026',
 		);
 
-		self::assertSame( hash( 'sha256', 'plugin|a/a.php|2.0' ), Updatronix_AutoUpdateDelay::ledger_hash( 'plugin', $plugin ) );
-		self::assertSame( hash( 'sha256', 'theme|a-theme|2.0' ), Updatronix_AutoUpdateDelay::ledger_hash( 'theme', $theme ) );
-		self::assertSame( hash( 'sha256', 'core|6.9|6.9' ), Updatronix_AutoUpdateDelay::ledger_hash( 'core', $core ) );
+		self::assertSame(
+			hash( 'sha256', 'plugin|a/a.php|2.0' ),
+			Updatronix_AutoUpdateDelay::ledger_hash( 'plugin', $plugin )
+		);
+		self::assertSame(
+			hash( 'sha256', 'theme|a-theme|2.0' ),
+			Updatronix_AutoUpdateDelay::ledger_hash( 'theme', $theme )
+		);
+		self::assertSame(
+			hash( 'sha256', 'core|6.9|6.9' ),
+			Updatronix_AutoUpdateDelay::ledger_hash( 'core', $core )
+		);
 		self::assertSame(
 			hash( 'sha256', 'translation|plugin|a/a.php|fr_FR|2026' ),
 			Updatronix_AutoUpdateDelay::ledger_hash( 'translation', $trans )
@@ -634,17 +816,36 @@ final class ScheduleStateIntegrationTest extends WP_UnitTestCase {
 		Updatronix_AutoUpdateDelay::reset_cache();
 		$before = get_site_option( 'updatronix_auto_update_delay_ledger', '' );
 
-		self::assertSame( $now - 3600, Updatronix_AutoUpdateDelay::peek_first_seen( 'plugin', $offer ) );
-		self::assertSame( $before, get_site_option( 'updatronix_auto_update_delay_ledger', '' ), 'The peek must not write the ledger.' );
+		self::assertSame(
+			$now - 3600,
+			Updatronix_AutoUpdateDelay::peek_first_seen(
+				'plugin',
+				$offer
+			)
+		);
+		self::assertSame(
+			$before,
+			get_site_option( 'updatronix_auto_update_delay_ledger', '' ),
+			'The peek must not write the ledger.'
+		);
 		self::assertSame( 0, $this->count_logs(), 'The peek must not log.' );
 
 		ScheduleFixtures::seed_ledger( array( $hash => $now + 3600 ) );
 		Updatronix_AutoUpdateDelay::reset_cache();
-		self::assertNull( Updatronix_AutoUpdateDelay::peek_first_seen( 'plugin', $offer ), 'A row more than 300 seconds in the future is ignored.' );
+		self::assertNull(
+			Updatronix_AutoUpdateDelay::peek_first_seen( 'plugin', $offer ),
+			'A row more than 300 seconds in the future is ignored.'
+		);
 
 		ScheduleFixtures::seed_ledger( array( $hash => $now - 60 ) );
 		Updatronix_AutoUpdateDelay::reset_cache();
-		self::assertNull( Updatronix_AutoUpdateDelay::peek_first_seen( 'plugin', ScheduleFixtures::plugin_offer( 'a/a.php', '1.0', '3.0' ) ), 'An old-target row is ignored.' );
+		self::assertNull(
+			Updatronix_AutoUpdateDelay::peek_first_seen(
+				'plugin',
+				ScheduleFixtures::plugin_offer( 'a/a.php', '1.0', '3.0' )
+			),
+			'An old-target row is ignored.'
+		);
 	}
 
 	/**
@@ -654,11 +855,23 @@ final class ScheduleStateIntegrationTest extends WP_UnitTestCase {
 	 */
 	public function test_peek_is_null_when_the_hold_is_off(): void {
 		$offer = ScheduleFixtures::plugin_offer( 'a/a.php', '1.0', '2.0' );
-		ScheduleFixtures::seed_ledger( array( Updatronix_AutoUpdateDelay::ledger_hash( 'plugin', $offer ) => time() - 60 ) );
+		ScheduleFixtures::seed_ledger(
+			array(
+				Updatronix_AutoUpdateDelay::ledger_hash(
+					'plugin',
+					$offer
+				) => time() - 60,
+			)
+		);
 		ScheduleFixtures::set_schedule( 'daily', '01:00', false, 0 );
 		Updatronix_AutoUpdateDelay::reset_cache();
 
-		self::assertNull( Updatronix_AutoUpdateDelay::peek_first_seen( 'plugin', $offer ) );
+		self::assertNull(
+			Updatronix_AutoUpdateDelay::peek_first_seen(
+				'plugin',
+				$offer
+			)
+		);
 	}
 
 	/**
@@ -667,10 +880,16 @@ final class ScheduleStateIntegrationTest extends WP_UnitTestCase {
 	 * @return void
 	 */
 	public function test_observe_offer_is_idempotent(): void {
-		// A real installed plugin: a missing file is treated as a Site Health
+		// A real installed plugin: a missing file is treated as a Site Health.
 		// mock and must be excluded from the ledger.
 		$file  = $this->installed_plugin();
-		$offer = ScheduleFixtures::plugin_offer( $file, $this->installed_version( $file ), '99.0.0' );
+		$offer = ScheduleFixtures::plugin_offer(
+			$file,
+			$this->installed_version(
+				$file
+			),
+			'99.0.0'
+		);
 		$logs  = $this->count_logs();
 		Updatronix_AutoUpdateDelay::reset_cache();
 
@@ -678,10 +897,24 @@ final class ScheduleStateIntegrationTest extends WP_UnitTestCase {
 		$second = Updatronix_AutoUpdateDelay::observe_offer( 'plugin', $offer );
 
 		self::assertNotNull( $first );
-		self::assertSame( $first, $second, 'A second observation must not move first_seen.' );
-		self::assertSame( $logs, $this->count_logs(), 'observe_offer() must not log.' );
+		self::assertSame(
+			$first,
+			$second,
+			'A second observation must not move first_seen.'
+		);
+		self::assertSame(
+			$logs,
+			$this->count_logs(),
+			'observe_offer() must not log.'
+		);
 
-		$ledger = json_decode( (string) get_site_option( 'updatronix_auto_update_delay_ledger', '{}' ), true );
+		$ledger = json_decode(
+			(string) get_site_option(
+				'updatronix_auto_update_delay_ledger',
+				'{}'
+			),
+			true
+		);
 		self::assertIsArray( $ledger );
 		self::assertCount( 1, $ledger );
 	}
@@ -695,10 +928,15 @@ final class ScheduleStateIntegrationTest extends WP_UnitTestCase {
 		ScheduleFixtures::set_schedule( 'daily', '01:00', false, 0 );
 		Updatronix_AutoUpdateDelay::reset_cache();
 
-		self::assertNull( Updatronix_AutoUpdateDelay::observe_offer( 'plugin', ScheduleFixtures::plugin_offer( 'a/a.php', '1.0', '2.0' ) ) );
+		self::assertNull(
+			Updatronix_AutoUpdateDelay::observe_offer(
+				'plugin',
+				ScheduleFixtures::plugin_offer( 'a/a.php', '1.0', '2.0' )
+			)
+		);
 	}
 
-	// --- Delayed row time source -----------------------------------------
+	// --- Delayed row time source -----------------------------------------.
 
 	/**
 	 * The delayed row's next_eligible_at equals the calculator's eligible_at.
@@ -707,18 +945,30 @@ final class ScheduleStateIntegrationTest extends WP_UnitTestCase {
 	 */
 	public function test_delayed_row_matches_the_calculator(): void {
 		$plugin = $this->installed_plugin();
-		ScheduleFixtures::set_plugin_offer( $plugin, $this->installed_version( $plugin ), '99.0.0' );
+		ScheduleFixtures::set_plugin_offer(
+			$plugin,
+			$this->installed_version(
+				$plugin
+			),
+			'99.0.0'
+		);
 		$this->enable_plugin_auto_update( $plugin );
 		ScheduleFixtures::set_next_check( time() + 6 * HOUR_IN_SECONDS, 'daily' );
 		ScheduleFixtures::seed_ledger( array() );
 		$this->reset_schedule_caches();
 
 		$offer = get_site_transient( 'update_plugins' )->response[ $plugin ];
-		self::assertFalse( Updatronix_AutoUpdateDelay::filter_plugin( true, $offer ) );
+		self::assertFalse(
+			Updatronix_AutoUpdateDelay::filter_plugin(
+				true,
+				$offer
+			)
+		);
 
 		global $wpdb;
 		$row = $wpdb->get_row(
-			'SELECT reason_code, decision_state, next_eligible_at, message FROM ' . Updatronix_Database::get_table_name() . ' ORDER BY id DESC LIMIT 1', // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared -- Test-only read on the plugin's own table.
+			// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+			'SELECT reason_code, decision_state, next_eligible_at, message FROM ' . Updatronix_Database::get_table_name() . ' ORDER BY id DESC LIMIT 1', // phpcs:ignore Generic.Files.LineLength, WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared -- Test-only read on the plugin's own table.
 			ARRAY_A
 		);
 
@@ -729,7 +979,10 @@ final class ScheduleStateIntegrationTest extends WP_UnitTestCase {
 		$this->reset_schedule_caches();
 		$item = Updatronix_Schedule_Context::get_item( 'plugin', $plugin );
 
-		self::assertSame( gmdate( 'Y-m-d H:i:s', (int) $item['eligible_at'] ), (string) $row['next_eligible_at'] );
+		self::assertSame(
+			gmdate( 'Y-m-d H:i:s', (int) $item['eligible_at'] ),
+			(string) $row['next_eligible_at']
+		);
 	}
 
 	/**
@@ -739,17 +992,27 @@ final class ScheduleStateIntegrationTest extends WP_UnitTestCase {
 	 */
 	public function test_delayed_row_uses_the_hold_end_when_the_check_is_overdue(): void {
 		$plugin = $this->installed_plugin();
-		ScheduleFixtures::set_plugin_offer( $plugin, $this->installed_version( $plugin ), '99.0.0' );
+		ScheduleFixtures::set_plugin_offer(
+			$plugin,
+			$this->installed_version(
+				$plugin
+			),
+			'99.0.0'
+		);
 		$this->enable_plugin_auto_update( $plugin );
 		ScheduleFixtures::set_next_check( time() - HOUR_IN_SECONDS, 'daily' );
 		ScheduleFixtures::seed_ledger( array() );
 		$this->reset_schedule_caches();
 
 		$start = time();
-		Updatronix_AutoUpdateDelay::filter_plugin( true, get_site_transient( 'update_plugins' )->response[ $plugin ] );
+		Updatronix_AutoUpdateDelay::filter_plugin(
+			true,
+			get_site_transient( 'update_plugins' )->response[ $plugin ]
+		);
 
 		global $wpdb;
-		$next = (string) $wpdb->get_var( 'SELECT next_eligible_at FROM ' . Updatronix_Database::get_table_name() . ' ORDER BY id DESC LIMIT 1' ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared -- Test-only read on the plugin's own table.
+		// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+		$next = (string) $wpdb->get_var( 'SELECT next_eligible_at FROM ' . Updatronix_Database::get_table_name() . ' ORDER BY id DESC LIMIT 1' ); // phpcs:ignore Generic.Files.LineLength, WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared -- Test-only read on the plugin's own table.
 
 		$expected = $start + 2 * DAY_IN_SECONDS;
 		self::assertGreaterThanOrEqual( $expected - 2, strtotime( $next . ' UTC' ) );
@@ -777,7 +1040,14 @@ final class ScheduleStateIntegrationTest extends WP_UnitTestCase {
 	private function enable_plugin_auto_update( string $file ): void {
 		$enabled   = (array) get_site_option( 'auto_update_plugins', array() );
 		$enabled[] = $file;
-		update_site_option( 'auto_update_plugins', array_values( array_unique( $enabled ) ) );
+		update_site_option(
+			'auto_update_plugins',
+			array_values(
+				array_unique(
+					$enabled
+				)
+			)
+		);
 	}
 
 	/**
@@ -789,10 +1059,12 @@ final class ScheduleStateIntegrationTest extends WP_UnitTestCase {
 	private function remove_directory( string $dir ): void {
 		$file = $dir . '/plugin.php';
 		if ( is_file( $file ) ) {
-			unlink( $file ); // phpcs:ignore WordPress.WP.AlternativeFunctions.unlink_unlink -- Local test fixture.
+			// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+			unlink( $file ); // phpcs:ignore Generic.Files.LineLength, WordPress.WP.AlternativeFunctions.unlink_unlink -- Local test fixture.
 		}
 		if ( is_dir( $dir ) ) {
-			rmdir( $dir ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_rmdir -- Local test fixture.
+			// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+			rmdir( $dir ); // phpcs:ignore Generic.Files.LineLength, WordPress.WP.AlternativeFunctions.file_system_operations_rmdir -- Local test fixture.
 		}
 	}
 }

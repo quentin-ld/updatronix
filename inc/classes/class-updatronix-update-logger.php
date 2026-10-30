@@ -25,21 +25,105 @@ final class Updatronix_Update_Logger {
 	 */
 	public static function register(): void {
 		add_action( 'pre_auto_update', array( self::class, 'pre_auto_update' ) );
-		add_action( 'upgrader_process_complete', array( self::class, 'on_upgrader_process_complete' ), 10, 2 );
-		add_action( 'automatic_updates_complete', array( self::class, 'log_automatic_updates' ), 10, 1 );
-		add_filter( 'upgrader_pre_install', array( self::class, 'store_core_version_before' ), 5, 2 );
-		add_filter( 'upgrader_source_selection', array( self::class, 'reject_plugin_package_without_plugin_file' ), 5, 4 );
-		add_filter( 'upgrader_package_options', array( self::class, 'initialize_pending_logs' ), 10, 1 );
-		add_filter( 'upgrader_source_selection', array( self::class, 'store_plugin_version_before_upload_overwrite' ), 20, 4 );
-		add_filter( 'upgrader_source_selection', array( self::class, 'store_theme_version_before_upload_overwrite' ), 20, 4 );
-		add_filter( 'upgrader_pre_download', array( self::class, 'init_core_feedback_on_download' ), 5, 3 );
-		add_filter( 'upgrader_pre_download', array( self::class, 'start_bulk_post_flush_buffer' ), 10, 3 );
-        // phpcs:ignore plugin_updater_detected, update_modification_detected -- Update logger (logs updates only); we only add version_before to the transient for audit logging. We do not implement a plugin updater or alter what gets updated.
-		add_filter( 'set_site_transient_update_plugins', array( self::class, 'capture_plugin_versions_before' ), 10, 1 );
-		add_filter( 'set_site_transient_update_themes', array( self::class, 'capture_theme_versions_before' ), 10, 1 );
+		add_action(
+			'upgrader_process_complete',
+			array( self::class, 'on_upgrader_process_complete' ),
+			10,
+			2
+		);
+		add_action(
+			'automatic_updates_complete',
+			array( self::class, 'log_automatic_updates' ),
+			10,
+			1
+		);
+		add_filter(
+			'upgrader_pre_install',
+			array(
+				self::class,
+				'store_core_version_before',
+			),
+			5,
+			2
+		);
+		add_filter(
+			'upgrader_source_selection',
+			array(
+				self::class,
+				'reject_plugin_package_without_plugin_file',
+			),
+			5,
+			4
+		);
+		add_filter(
+			'upgrader_package_options',
+			array( self::class, 'initialize_pending_logs' ),
+			10,
+			1
+		);
+		add_filter(
+			'upgrader_source_selection',
+			array(
+				self::class,
+				'store_plugin_version_before_upload_overwrite',
+			),
+			20,
+			4
+		);
+		add_filter(
+			'upgrader_source_selection',
+			array(
+				self::class,
+				'store_theme_version_before_upload_overwrite',
+			),
+			20,
+			4
+		);
+		add_filter(
+			'upgrader_pre_download',
+			array( self::class, 'init_core_feedback_on_download' ),
+			5,
+			3
+		);
+		add_filter(
+			'upgrader_pre_download',
+			array( self::class, 'start_bulk_post_flush_buffer' ),
+			10,
+			3
+		);
+        // phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+        // phpcs:ignore Generic.Files.LineLength, plugin_updater_detected, update_modification_detected -- Update logger (logs updates only); we only add version_before to the transient for audit logging. We do not implement a plugin updater or alter what gets updated.
+		add_filter(
+			'set_site_transient_update_plugins',
+			array(
+				self::class,
+				'capture_plugin_versions_before',
+			),
+			10,
+			1
+		);
+		add_filter(
+			'set_site_transient_update_themes',
+			array(
+				self::class,
+				'capture_theme_versions_before',
+			),
+			10,
+			1
+		);
 		register_shutdown_function( array( self::class, 'shutdown_cleanup' ) );
-		add_action( 'delete_plugin', array( self::class, 'log_plugin_uninstall' ), 10, 1 );
-		add_action( 'delete_theme', array( self::class, 'log_theme_uninstall' ), 10, 1 );
+		add_action(
+			'delete_plugin',
+			array( self::class, 'log_plugin_uninstall' ),
+			10,
+			1
+		);
+		add_action(
+			'delete_theme',
+			array( self::class, 'log_theme_uninstall' ),
+			10,
+			1
+		);
 	}
 
 	/**
@@ -50,7 +134,8 @@ final class Updatronix_Update_Logger {
 	private static bool $auto_update = false;
 
 	/**
-	 * Items already logged by upgrader_process_complete (to avoid duplicate logging
+	 * Items already logged by upgrader_process_complete (to avoid duplicate
+	 * logging
 	 * when automatic_updates_complete fires afterwards). Keyed by "{type}:{item}".
 	 *
 	 * @var array<string, true>
@@ -81,7 +166,11 @@ final class Updatronix_Update_Logger {
 	 * @param string $context Optional locale or extra context.
 	 * @return string
 	 */
-	private static function build_event_key( string $log_type, string $slug, string $context = '' ): string {
+	private static function build_event_key(
+		string $log_type,
+		string $slug,
+		string $context = ''
+	): string {
 		return Updatronix_UpdateLogState::build_event_key(
 			$log_type,
 			$slug,
@@ -98,7 +187,11 @@ final class Updatronix_Update_Logger {
 	 * @param array<string, mixed> $data Pending log data.
 	 * @return void
 	 */
-	private static function register_pending_log( string $log_type, string $key, array $data ): void {
+	private static function register_pending_log(
+		string $log_type,
+		string $key,
+		array $data
+	): void {
 		if ( ! isset( self::$pending_logs[ $log_type ] ) ) {
 			self::$pending_logs[ $log_type ] = array();
 		}
@@ -113,7 +206,11 @@ final class Updatronix_Update_Logger {
 		);
 		$data     = array_merge( $defaults, $data );
 		if ( '' === $data['event_key'] ) {
-			$data['event_key'] = self::build_event_key( $log_type, (string) $data['slug'], (string) $data['locale'] );
+			$data['event_key'] = self::build_event_key(
+				$log_type,
+				(string) $data['slug'],
+				(string) $data['locale']
+			);
 		}
 
 		self::$pending_logs[ $log_type ][ $key ] = $data;
@@ -140,7 +237,10 @@ final class Updatronix_Update_Logger {
 	 * @param string $key In-memory item key.
 	 * @return string
 	 */
-	private static function get_pending_event_key( string $log_type, string $key ): string {
+	private static function get_pending_event_key(
+		string $log_type,
+		string $key
+	): string {
 		return isset( self::$pending_logs[ $log_type ][ $key ]['event_key'] )
 			? (string) self::$pending_logs[ $log_type ][ $key ]['event_key']
 			: '';
@@ -154,17 +254,24 @@ final class Updatronix_Update_Logger {
 	 * @param string $key In-memory item key.
 	 * @return void
 	 */
-	private static function finalize_pending_log( string $event_key, string $log_type = '', string $key = '' ): void {
+	private static function finalize_pending_log(
+		string $event_key,
+		string $log_type = '',
+		string $key = ''
+	): void {
 		if ( '' !== $event_key ) {
 			Updatronix_UpdateLogState::mark_finalized( $event_key );
 		}
-		if ( '' !== $log_type && '' !== $key && isset( self::$pending_logs[ $log_type ][ $key ] ) ) {
+		if ( '' !== $log_type && '' !== $key && isset(
+			self::$pending_logs[ $log_type ][ $key ]
+		) ) {
 			unset( self::$pending_logs[ $log_type ][ $key ] );
 		}
 	}
 
 	/**
-	 * Determine whether fallback logging should skip this event because it was already finalized.
+	 * Determine whether fallback logging should skip this event because it was
+	 * already finalized.
 	 *
 	 * @param string $event_key Event key.
 	 * @return bool
@@ -197,11 +304,14 @@ final class Updatronix_Update_Logger {
 	/**
 	 * Initialize pending log data before update runs (for shutdown fallback).
 	 *
-	 * Uses callback OB when skin flushes output (Bulk_*_Skin::flush_output, or show_message
-	 * in translation flow). Plugin/theme bulk: is_multi + Bulk_Upgrader_Skin. Translation:
+	 * Uses callback OB when skin flushes output (Bulk_*_Skin::flush_output, or
+	 * show_message
+	 * in translation flow). Plugin/theme bulk: is_multi + Bulk_Upgrader_Skin.
+	 * Translation:
 	 * Language_Pack_Upgrader_Skin uses show_message (flushes). Core updates use
 	 * update_feedback filter only; no OB here. PHP forbids ob_start() inside an OB
-	 * handler, so the callback only appends and clears the flag; the next run() will
+	 * handler, so the callback only appends and clears the flag; the next run()
+	 * will
 	 * start a new OB.
 	 *
 	 * @param array<string, mixed> $options Package options with hook_extra.
@@ -211,10 +321,15 @@ final class Updatronix_Update_Logger {
 		$hook_extra         = $options['hook_extra'] ?? array();
 		$action             = $hook_extra['action'] ?? '';
 		$type               = $hook_extra['type'] ?? '';
-		$has_plugin         = isset( $hook_extra['plugin'] ) && is_string( $hook_extra['plugin'] );
-		$has_theme          = isset( $hook_extra['theme'] ) && is_string( $hook_extra['theme'] );
+		$has_plugin         = isset( $hook_extra['plugin'] ) && is_string(
+			$hook_extra['plugin']
+		);
+		$has_theme          = isset( $hook_extra['theme'] ) && is_string(
+			$hook_extra['theme']
+		);
 		$has_translation    = isset( $hook_extra['language_update'] );
-		$is_plugin_or_theme = 'plugin' === $type || 'theme' === $type || $has_plugin || $has_theme;
+		$is_plugin_or_theme = 'plugin' === $type || 'theme' === $type || $has_plugin
+			|| $has_theme;
 		$is_translation     = $has_translation;
 		$needs_feedback_ob  = $is_plugin_or_theme || $is_translation;
 
@@ -223,7 +338,8 @@ final class Updatronix_Update_Logger {
 			self::start_feedback_buffer( $is_multi || $is_translation );
 		}
 
-		if ( 'update' !== $action && ! $has_plugin && ! $has_theme && ! $has_translation ) {
+		if ( 'update' !== $action && ! $has_plugin && ! $has_theme
+			&& ! $has_translation ) {
 			return $options;
 		}
 
@@ -236,32 +352,62 @@ final class Updatronix_Update_Logger {
 					'plugin',
 					$file,
 					array(
-						'name'           => isset( $plugins[ $file ]['Name'] ) ? (string) $plugins[ $file ]['Name'] : $file,
+						'name'           =>
+							isset(
+								// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+								$plugins[ $file ]['Name']
+							) ? (string) $plugins[ $file ]['Name'] : $file,
 						'slug'           => dirname( $file ) === '.' ? $file : dirname( $file ),
-						'version_before' => isset( $plugins[ $file ]['Version'] ) ? (string) $plugins[ $file ]['Version'] : '',
-						'version_after'  => isset( $current->response[ $file ]->new_version ) ? (string) $current->response[ $file ]->new_version : '',
+						'version_before' =>
+							isset(
+								// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+								$plugins[ $file ]['Version']
+							) ? (string) $plugins[ $file ]['Version'] : '',
+						'version_after'  =>
+							// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+							isset(
+								// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+								$current->response[ $file ]->new_version
+							) ? (string) $current->response[ $file ]->new_version : '',
 					)
 				);
 			}
 		} elseif ( $has_theme ) {
 			$slug           = $hook_extra['theme'];
 			$current        = get_site_transient( 'update_themes' );
-			$theme_response = is_object( $current ) && isset( $current->response[ $slug ] ) ? $current->response[ $slug ] : null;
+			$theme_response = is_object( $current )
+				&& isset(
+					$current->response[ $slug ]
+				) ? $current->response[ $slug ] : null;
 			if ( is_array( $theme_response ) ) {
 				$themes         = wp_get_themes();
-				$version_before = isset( $themes[ $slug ] ) ? (string) $themes[ $slug ]->get( 'Version' ) : '';
+				$version_before =
+					isset( $themes[ $slug ] ) ? (string) $themes[ $slug ]->get(
+						'Version'
+					) : '';
 				self::register_pending_log(
 					'theme',
 					$slug,
 					array(
-						'name'           => isset( $themes[ $slug ] ) ? (string) $themes[ $slug ]->get( 'Name' ) : $slug,
+						'name'           =>
+							isset( $themes[ $slug ] ) ? (string) $themes[ $slug ]->get(
+								'Name'
+							) : $slug,
 						'slug'           => $slug,
 						'version_before' => $version_before,
-						'version_after'  => isset( $theme_response['new_version'] ) ? (string) $theme_response['new_version'] : '',
+						'version_after'  =>
+							isset(
+								// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+								$theme_response['new_version']
+							) ? (string) $theme_response['new_version'] : '',
 					)
 				);
 			}
-		} elseif ( isset( $hook_extra['language_update_type'], $hook_extra['language_update'] ) && is_object( $hook_extra['language_update'] ) ) {
+		} elseif ( isset(
+			$hook_extra['language_update_type'],
+			$hook_extra['language_update']
+		)
+			&& is_object( $hook_extra['language_update'] ) ) {
 			$lu       = $hook_extra['language_update'];
 			$lang     = isset( $lu->language ) ? (string) $lu->language : '';
 			$ver_from = isset( $lu->version ) ? (string) $lu->version : '';
@@ -273,7 +419,9 @@ final class Updatronix_Update_Logger {
 				$ver_to  = '';
 				if ( is_object( $current ) && (bool) ( $current->translations ?? null ) ) {
 					foreach ( $current->translations as $t ) {
-						if ( isset( $t['language'] ) && $t['language'] === $lang && isset( $t['version'] ) ) {
+						if ( isset( $t['language'] ) && $t['language'] === $lang && isset(
+							$t['version']
+						) ) {
 							$ver_to = (string) $t['version'];
 							break;
 						}
@@ -296,7 +444,9 @@ final class Updatronix_Update_Logger {
 					$current = get_site_transient( 'update_plugins' );
 					if ( is_object( $current ) && (bool) ( $current->translations ?? null ) ) {
 						foreach ( $current->translations as $t ) {
-							if ( isset( $t['slug'] ) && $t['slug'] === $slug && isset( $t['version'] ) ) {
+							if ( isset( $t['slug'] ) && $t['slug'] === $slug && isset(
+								$t['version']
+							) ) {
 								$ver_to = (string) $t['version'];
 								break;
 							}
@@ -307,7 +457,9 @@ final class Updatronix_Update_Logger {
 					$current = get_site_transient( 'update_themes' );
 					if ( is_object( $current ) && (bool) ( $current->translations ?? null ) ) {
 						foreach ( $current->translations as $t ) {
-							if ( isset( $t['slug'] ) && $t['slug'] === $slug && isset( $t['version'] ) ) {
+							if ( isset( $t['slug'] ) && $t['slug'] === $slug && isset(
+								$t['version']
+							) ) {
 								$ver_to = (string) $t['version'];
 								break;
 							}
@@ -343,7 +495,8 @@ final class Updatronix_Update_Logger {
 	}
 
 	/**
-	 * Flush any pending updates not logged during normal processing (e.g. after a fatal error).
+	 * Flush any pending updates not logged during normal processing (e.g. after a
+	 * fatal error).
 	 *
 	 * @return void
 	 */
@@ -351,7 +504,7 @@ final class Updatronix_Update_Logger {
 		if ( ! (bool) self::$pending_logs ) {
 			return;
 		}
-		if ( ! updatronix_get_settings()['logging_enabled'] ) {
+		if ( ! (bool) updatronix_get_settings()['logging_enabled'] ) {
 			return;
 		}
 		if ( ! Updatronix_Database::table_exists() ) {
@@ -361,8 +514,8 @@ final class Updatronix_Update_Logger {
 		$performed_as = self::$auto_update ? 'automatic' : 'manual';
 
 		// Core first: the disk decides, never the absence of a finalize event.
-		// The engine calls WP_Automatic_Updater::update(), so
-		// `automatic_updates_complete` does not fire; a completed core update
+		// The engine calls WP_Automatic_Updater::update(), so.
+		// `automatic_updates_complete` does not fire; a completed core update.
 		// must not be flushed as "may not have completed".
 		if ( isset( self::$pending_logs['core']['core'] ) ) {
 			self::finalize_pending_core_log_auto();
@@ -398,12 +551,19 @@ final class Updatronix_Update_Logger {
 						'version_before' => $version_before,
 						'target_version' => $version_after,
 						'status'         => 'error',
-						'message'        => __( 'This update may not have completed. It was logged when the process ended unexpectedly.', 'updatronix' ),
+						'message'        =>
+							// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+							__(
+								// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+								'This update may not have completed. It was logged when the process ended unexpectedly.',
+								'updatronix'
+							),
 						'trace'          => $trace,
 						'performed_as'   => $performed_as,
 						'reason_code'    => 'update_failed',
 						'decision_state' => 'failed',
-						'origin'         => 'automatic' === $performed_as ? 'automatic' : 'manual',
+						'origin'         =>
+							'automatic' === $performed_as ? 'automatic' : 'manual',
 						'decision_stage' => 'finalize',
 					)
 				);
@@ -431,12 +591,16 @@ final class Updatronix_Update_Logger {
 	 * @param array<string, mixed> $result  Optional engine result (e.g. `error`).
 	 * @return void
 	 */
-	public static function finalize_pending_core_log( bool $success, array $result = array() ): void {
+	public static function finalize_pending_core_log(
+		bool $success,
+		array $result = array()
+	): void {
 		if ( ! isset( self::$pending_logs['core']['core'] ) ) {
 			return;
 		}
 
-		if ( ! updatronix_get_settings()['logging_enabled'] || ! Updatronix_Database::table_exists() ) {
+		if ( ! (bool) updatronix_get_settings()['logging_enabled']
+			|| ! Updatronix_Database::table_exists() ) {
 			return;
 		}
 
@@ -444,12 +608,15 @@ final class Updatronix_Update_Logger {
 		$event_key = (string) ( $pending['event_key'] ?? '' );
 		$target    = (string) ( $pending['version_after'] ?? '' );
 		$installed = self::get_installed_core_version_from_disk();
-		$completed = $success || ( '' !== $target && '' !== $installed && $installed === $target );
+		$completed = $success || ( '' !== $target && '' !== $installed
+			&& $installed === $target );
 		$after     = '' !== $installed ? $installed : $target;
 		$before    = (string) ( $pending['version_before'] ?? '' );
 
 		$context = array();
-		if ( ! $completed && isset( $result['error'] ) && is_string( $result['error'] ) ) {
+		if ( ! $completed && isset( $result['error'] ) && is_string(
+			$result['error']
+		) ) {
 			$context['last_error'] = $result['error'];
 		}
 
@@ -469,7 +636,12 @@ final class Updatronix_Update_Logger {
 						__( 'Core update to WordPress %s', 'updatronix' ),
 						$after
 					)
-					: __( 'This update may not have completed. It was logged when the process ended unexpectedly.', 'updatronix' ),
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					: __(
+						// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+						'This update may not have completed. It was logged when the process ended unexpectedly.',
+						'updatronix'
+					),
 				'trace'          => Updatronix_ErrorHandler::capture_trace(),
 				'performed_as'   => 'automatic',
 				'reason_code'    => $completed ? 'updated' : 'update_failed',
@@ -498,17 +670,22 @@ final class Updatronix_Update_Logger {
 		$target    = (string) ( $pending['version_after'] ?? '' );
 		$installed = self::get_installed_core_version_from_disk();
 
-		self::finalize_pending_core_log( '' !== $target && '' !== $installed && $installed === $target );
+		self::finalize_pending_core_log(
+			'' !== $target && '' !== $installed
+			&& $installed === $target
+		);
 	}
 
 	/**
-	 * Log automatic updates when automatic_updates_complete fires (in case upgrader_process_complete did not).
+	 * Log automatic updates when automatic_updates_complete fires (in case
+	 * upgrader_process_complete did not).
 	 *
-	 * @param array<string, mixed> $update_results Results keyed by type (core, plugin, theme, translation); values are arrays of result objects.
+	 * @param array<string, mixed> $update_results Results keyed by type (core,
+	 * plugin, theme, translation); values are arrays of result objects.
 	 * @return void
 	 */
 	public static function log_automatic_updates( array $update_results ): void {
-		if ( ! updatronix_get_settings()['logging_enabled'] ) {
+		if ( ! (bool) updatronix_get_settings()['logging_enabled'] ) {
 			return;
 		}
 		$trace        = Updatronix_ErrorHandler::capture_trace();
@@ -567,45 +744,80 @@ final class Updatronix_Update_Logger {
 							$version_after  = $p['version_after'];
 							$event_key      = (string) ( $p['event_key'] ?? $event_key );
 						} else {
-							$name          = isset( $all_themes[ $slug ] ) ? (string) $all_themes[ $slug ]->get( 'Name' ) : $slug;
-							$version_after = isset( $all_themes[ $slug ] ) ? (string) $all_themes[ $slug ]->get( 'Version' ) : '';
+							$name          =
+								isset( $all_themes[ $slug ] ) ? (string) $all_themes[ $slug ]->get(
+									'Name'
+								) : $slug;
+							$version_after =
+								isset( $all_themes[ $slug ] ) ? (string) $all_themes[ $slug ]->get(
+									'Version'
+								) : '';
 							$event_key     = self::build_event_key( 'theme', $slug );
 						}
-					} elseif ( 'translation' === $type && isset( $item->slug, $item->language ) ) {
+					} elseif ( 'translation' === $type && isset(
+						$item->slug,
+						$item->language
+					) ) {
 						$slug            = $item->slug . '_' . $item->language;
-						$translation_key = isset( self::$pending_logs['translation'][ 'core_' . $item->language ] )
+						$translation_key = isset(
+							self::$pending_logs['translation'][ 'core_'
+							. $item->language ]
+						)
 							? 'core_' . $item->language
 							: $slug;
-						$event_key       = self::get_pending_event_key( 'translation', $translation_key );
-						if ( isset( self::$already_logged[ 'translation:' . $translation_key ] ) ) {
-							self::finalize_pending_log( $event_key, 'translation', $translation_key );
+						$event_key       = self::get_pending_event_key(
+							'translation',
+							$translation_key
+						);
+						if ( isset(
+							self::$already_logged[ 'translation:'
+							. $translation_key ]
+						) ) {
+							self::finalize_pending_log(
+								$event_key,
+								'translation',
+								$translation_key
+							);
 							continue;
 						}
 						if ( isset( self::$pending_logs['translation'][ $translation_key ] ) ) {
+							// phpcs:ignore Generic.Files.LineLength -- Long array access.
 							$p              = self::$pending_logs['translation'][ $translation_key ];
 							$name           = $p['name'];
 							$version_before = $p['version_before'];
 							$version_after  = $p['version_after'];
-							$event_key      = (string) ( $p['event_key'] ?? $event_key );
+							$event_key      = (string) (
+								$p['event_key'] ?? $event_key
+							);
 						} else {
 							$name          = $item->slug . ' (' . $item->language . ')';
 							$version_after = $item->version ?? '';
-							$event_key     = self::build_event_key( 'translation', (string) $item->slug, (string) $item->language );
+							$event_key     = self::build_event_key(
+								'translation',
+								(string) $item->slug,
+								(string) $item->language
+							);
 						}
 					} elseif ( 'core' === $type ) {
 						$event_key = self::get_pending_event_key( 'core', 'core' );
-						if ( isset( self::$already_logged['core:wordpress'] ) || self::should_skip_event( $event_key ) ) {
+						if ( isset( self::$already_logged['core:wordpress'] )
+							|| self::should_skip_event( $event_key ) ) {
 							self::finalize_pending_log( $event_key, 'core', 'core' );
 							continue;
 						}
 						$name = 'WordPress';
+						// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 						// Align with manual core logs (`log_core_update`) so `item_slug` is never empty.
 						$slug = 'core';
 						if ( isset( self::$pending_logs['core']['core'] ) ) {
 							$pending_core = self::$pending_logs['core']['core'];
 							$event_key    = (string) ( $pending_core['event_key'] ?? $event_key );
 						}
-						$resolved       = self::resolve_core_versions_for_activity_log( true, $result, $item );
+						$resolved       = self::resolve_core_versions_for_activity_log(
+							true,
+							$result,
+							$item
+						);
 						$version_before = $resolved['version_before'];
 						$version_after  = $resolved['version_after'];
 						$action_type    = $resolved['action_type'];
@@ -618,19 +830,25 @@ final class Updatronix_Update_Logger {
 				if ( isset( $result->result ) && is_wp_error( $result->result ) ) {
 					$status = 'error';
 				}
-				$messages = isset( $result->messages ) && is_array( $result->messages ) ? $result->messages : array();
-				$notes    = Updatronix_Automatic_Update_Result_Notes::merge_skin_messages_with_wp_result(
-					$messages,
-					$result->result ?? null
-				);
+				$messages = isset( $result->messages )
+					&& is_array( $result->messages ) ? $result->messages : array();
+				$notes    =
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					Updatronix_Automatic_Update_Result_Notes::merge_skin_messages_with_wp_result(
+						$messages,
+						$result->result ?? null
+					);
 
 				if ( 'plugin' === $type && is_object( $item ) && isset( $item->plugin ) ) {
 					$file   = (string) $item->plugin;
 					$path   = WP_PLUGIN_DIR . '/' . $file;
 					$actual = ( file_exists( $path ) && function_exists( 'get_plugin_data' ) )
-						? (string) ( get_plugin_data( $path, false, false )['Version'] ?? '' ) // counterfactual: equivalent false -> true — markup/translate flags do not affect Version.
+						? (string) ( get_plugin_data( $path, false, false )['Version'] ?? '' )
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					// counterfactual: equivalent false -> true — markup/translate flags do not affect Version.
 						: '';
-					if ( '' === $actual || ( '' !== $target_version && $actual !== $target_version ) ) {
+					if ( '' === $actual || ( '' !== $target_version
+						&& $actual !== $target_version ) ) {
 						$status        = 'error';
 						$version_after = $actual;
 					}
@@ -639,7 +857,8 @@ final class Updatronix_Update_Logger {
 				if ( 'theme' === $type && '' !== $slug ) {
 					$theme  = wp_get_theme( $slug );
 					$actual = $theme->exists() ? (string) $theme->get( 'Version' ) : '';
-					if ( '' === $actual || ( '' !== $target_version && $actual !== $target_version ) ) {
+					if ( '' === $actual || ( '' !== $target_version
+						&& $actual !== $target_version ) ) {
 						$status        = 'error';
 						$version_after = $actual;
 					}
@@ -659,7 +878,10 @@ final class Updatronix_Update_Logger {
 						'trace'          => $trace,
 						'performed_as'   => $performed_as,
 						'update_context' => '',
-						'reason_code'    => 'error' === $status ? 'update_failed' : self::reason_for_action( $action_type ),
+						'reason_code'    =>
+							'error' === $status ? 'update_failed' : self::reason_for_action(
+								$action_type
+							),
 						'decision_state' => 'error' === $status ? 'failed' : 'done',
 						'origin'         => 'automatic',
 						'decision_stage' => 'execute',
@@ -671,12 +893,22 @@ final class Updatronix_Update_Logger {
 					self::$core_feedback    = array();
 					self::$core_package_url = '';
 					self::finalize_pending_log( $event_key, 'core', 'core' );
-				} elseif ( 'plugin' === $type && is_object( $item ) && isset( $item->plugin ) ) {
+				} elseif ( 'plugin' === $type && is_object( $item ) && isset(
+					$item->plugin
+				) ) {
 					self::finalize_pending_log( $event_key, 'plugin', $item->plugin );
-				} elseif ( 'theme' === $type && is_object( $item ) && isset( $item->theme ) ) {
+				} elseif ( 'theme' === $type && is_object( $item ) && isset(
+					$item->theme
+				) ) {
 					self::finalize_pending_log( $event_key, 'theme', $item->theme );
-				} elseif ( 'translation' === $type && is_object( $item ) && isset( $item->slug, $item->language ) ) {
-					$translation_key = isset( self::$pending_logs['translation'][ 'core_' . $item->language ] )
+				} elseif ( 'translation' === $type && is_object( $item ) && isset(
+					$item->slug,
+					$item->language
+				) ) {
+					$translation_key = isset(
+						self::$pending_logs['translation'][ 'core_'
+						. $item->language ]
+					)
 						? 'core_' . $item->language
 						: $item->slug . '_' . $item->language;
 					self::finalize_pending_log( $event_key, 'translation', $translation_key );
@@ -698,21 +930,24 @@ final class Updatronix_Update_Logger {
 	 *
 	 * @var string
 	 */
-	private const OPTION_PLUGIN_VERSIONS_BEFORE = 'updatronix_plugin_versions_before';
+	private const OPTION_PLUGIN_VERSIONS_BEFORE =
+		'updatronix_plugin_versions_before';
 
 	/**
 	 * Option key for plugin versions keyed by main file basename.
 	 *
 	 * @var string
 	 */
-	private const OPTION_PLUGIN_VERSIONS_BEFORE_BY_MAINFILE = 'updatronix_plugin_versions_before_by_mainfile';
+	private const OPTION_PLUGIN_VERSIONS_BEFORE_BY_MAINFILE =
+		'updatronix_plugin_versions_before_by_mainfile';
 
 	/**
 	 * Option key for storing theme versions before an update.
 	 *
 	 * @var string
 	 */
-	private const OPTION_THEME_VERSIONS_BEFORE = 'updatronix_theme_versions_before';
+	private const OPTION_THEME_VERSIONS_BEFORE =
+		'updatronix_theme_versions_before';
 
 	/**
 	 * Option keys used for pre-update snapshots; removed on plugin uninstall.
@@ -743,7 +978,8 @@ final class Updatronix_Update_Logger {
 	private static string $core_package_url = '';
 
 	/**
-	 * Whether an output buffer is active to capture WordPress feedback (plugin/theme manual flow).
+	 * Whether an output buffer is active to capture WordPress feedback
+	 * (plugin/theme manual flow).
 	 *
 	 * @var bool
 	 */
@@ -764,28 +1000,32 @@ final class Updatronix_Update_Logger {
 	private static bool $feedback_ob_uses_callback = false;
 
 	/**
-	 * Captured feedback from WordPress show_message() during the last run (plugin/theme).
+	 * Captured feedback from WordPress show_message() during the last run
+	 * (plugin/theme).
 	 *
 	 * @var string
 	 */
 	private static string $captured_feedback = '';
 
 	/**
-	 * Accumulated output from bulk upgrade runs (bulk skin flushes the OB per item; captured via callback).
+	 * Accumulated output from bulk upgrade runs (bulk skin flushes the OB per
+	 * item; captured via callback).
 	 *
 	 * @var string
 	 */
 	private static string $captured_bulk_feedback = '';
 
 	/**
-	 * Set by bulk OB callback when skin flushed so a new buffer starts in upgrader_pre_download.
+	 * Set by bulk OB callback when skin flushed so a new buffer starts in
+	 * upgrader_pre_download.
 	 *
 	 * @var bool
 	 */
 	private static bool $bulk_flush_happened = false;
 
 	/**
-	 * True when an OB started in upgrader_pre_download to capture post-flush feedback (Downloading…, etc.).
+	 * True when an OB started in upgrader_pre_download to capture post-flush
+	 * feedback (Downloading…, etc.).
 	 *
 	 * @var bool
 	 */
@@ -808,7 +1048,8 @@ final class Updatronix_Update_Logger {
 	/**
 	 * Start the plugin-owned feedback buffer and record its stack level.
 	 *
-	 * @param bool $use_callback Whether the bulk/translation callback should be used.
+	 * @param bool $use_callback Whether the bulk/translation callback should be
+	 * used.
 	 * @return void
 	 */
 	private static function start_feedback_buffer( bool $use_callback ): void {
@@ -922,7 +1163,8 @@ final class Updatronix_Update_Logger {
 	/**
 	 * Close the post-flush buffer if this class still owns the active top buffer.
 	 *
-	 * @return string Empty string; callback-based output is accumulated in bulk feedback state.
+	 * @return string Empty string; callback-based output is accumulated in bulk
+	 * feedback state.
 	 */
 	private static function close_post_flush_buffer(): string {
 		if ( ! self::$post_flush_ob_started ) {
@@ -968,7 +1210,8 @@ final class Updatronix_Update_Logger {
 	}
 
 	/**
-	 * Best-effort cleanup for plugin-owned output buffers when the request cannot continue.
+	 * Best-effort cleanup for plugin-owned output buffers when the request cannot
+	 * continue.
 	 *
 	 * @return void
 	 */
@@ -981,38 +1224,71 @@ final class Updatronix_Update_Logger {
 	}
 
 	/**
-	 * Store current core/plugin/theme versions before upgrade runs. For core, also hook update_feedback to collect process.
+	 * Store current core/plugin/theme versions before upgrade runs. For core, also
+	 * hook update_feedback to collect process.
 	 *
-	 * @param bool|\WP_Error       $result     Whether the install was successful, or a WP_Error (filter pass-through).
+	 * @param bool|\WP_Error       $result Whether the install was successful, or a
+	 *       WP_Error (filter pass-through).
 	 * @param array<string, mixed> $hook_extra Extra args (type, plugin, theme).
 	 * @return bool|\WP_Error
 	 */
-	public static function store_core_version_before( bool|\WP_Error $result, array $hook_extra = array() ): bool|\WP_Error {
+	public static function store_core_version_before(
+		bool|\WP_Error $result,
+		array $hook_extra = array()
+	): bool|\WP_Error {
 		$type = $hook_extra['type'] ?? '';
-		if ( 'core' === $type && '' === updatronix_get_plugin_option( self::OPTION_CORE_VERSION_BEFORE, '' ) ) {
-			updatronix_update_plugin_option( self::OPTION_CORE_VERSION_BEFORE, get_bloginfo( 'version' ) );
+		if ( 'core' === $type
+			&& '' === updatronix_get_plugin_option(
+				self::OPTION_CORE_VERSION_BEFORE,
+				''
+			) ) {
+			updatronix_update_plugin_option(
+				self::OPTION_CORE_VERSION_BEFORE,
+				get_bloginfo( 'version' )
+			);
 		}
-		if ( (bool) ( $hook_extra['plugin'] ?? null ) && is_string( $hook_extra['plugin'] ) ) {
+		if ( (bool) ( $hook_extra['plugin'] ?? null ) && is_string(
+			$hook_extra['plugin']
+		) ) {
 			$file = $hook_extra['plugin'];
 			if ( ! function_exists( 'get_plugins' ) ) {
 				require_once ABSPATH . 'wp-admin/includes/plugin.php';
 			}
 			$all     = get_plugins();
-			$version = isset( $all[ $file ]['Version'] ) ? (string) $all[ $file ]['Version'] : '';
+			$version = isset(
+				$all[ $file ]['Version']
+			) ? (string) $all[ $file ]['Version'] : '';
 			if ( '' !== $version ) {
-				$stored          = (array) updatronix_get_plugin_option( self::OPTION_PLUGIN_VERSIONS_BEFORE, array() );
+				$stored          =
+					(array) updatronix_get_plugin_option(
+						self::OPTION_PLUGIN_VERSIONS_BEFORE,
+						array()
+					);
 				$stored[ $file ] = $version;
-				updatronix_update_plugin_option( self::OPTION_PLUGIN_VERSIONS_BEFORE, $stored );
+				updatronix_update_plugin_option(
+					self::OPTION_PLUGIN_VERSIONS_BEFORE,
+					$stored
+				);
 			}
 		}
-		if ( (bool) ( $hook_extra['theme'] ?? null ) && is_string( $hook_extra['theme'] ) ) {
+		if ( (bool) ( $hook_extra['theme'] ?? null ) && is_string(
+			$hook_extra['theme']
+		) ) {
 			$slug    = $hook_extra['theme'];
 			$themes  = wp_get_themes();
-			$version = isset( $themes[ $slug ] ) ? (string) $themes[ $slug ]->get( 'Version' ) : '';
+			$version = isset( $themes[ $slug ] ) ? (string) $themes[ $slug ]->get(
+				'Version'
+			) : '';
 			if ( '' !== $version ) {
-				$stored          = (array) updatronix_get_plugin_option( self::OPTION_THEME_VERSIONS_BEFORE, array() );
+				$stored          = (array) updatronix_get_plugin_option(
+					self::OPTION_THEME_VERSIONS_BEFORE,
+					array()
+				);
 				$stored[ $slug ] = $version;
-				updatronix_update_plugin_option( self::OPTION_THEME_VERSIONS_BEFORE, $stored );
+				updatronix_update_plugin_option(
+					self::OPTION_THEME_VERSIONS_BEFORE,
+					$stored
+				);
 			}
 		}
 
@@ -1020,16 +1296,23 @@ final class Updatronix_Update_Logger {
 	}
 
 	/**
-	 * After bulk skin flushes output (before() → flush_output), start a new buffer so we capture the real log
-	 * (Downloading…, Unpacking…, Installing…, success, etc.) in download_package / install_package.
+	 * After bulk skin flushes output (before() → flush_output), start a new buffer
+	 * so we capture the real log
+	 * (Downloading…, Unpacking…, Installing…, success, etc.) in download_package /
+	 * install_package.
 	 *
 	 * @param bool|\WP_Error $reply    Whether to short-circuit.
 	 * @param string         $package  Package URL.
 	 * @param \WP_Upgrader   $upgrader Upgrader instance.
 	 * @return bool|\WP_Error Unchanged.
 	 */
-	public static function start_bulk_post_flush_buffer( bool|\WP_Error $reply, string $package, \WP_Upgrader $upgrader ): bool|\WP_Error {
-		if ( self::$bulk_flush_happened && $upgrader->skin instanceof \Bulk_Upgrader_Skin ) {
+	public static function start_bulk_post_flush_buffer(
+		bool|\WP_Error $reply,
+		string $package,
+		\WP_Upgrader $upgrader
+	): bool|\WP_Error {
+		if ( self::$bulk_flush_happened
+			&& $upgrader->skin instanceof \Bulk_Upgrader_Skin ) {
 			self::$bulk_flush_happened = false;
 			self::start_post_flush_buffer();
 		}
@@ -1038,31 +1321,49 @@ final class Updatronix_Update_Logger {
 	}
 
 	/**
-	 * When core package is about to download, start collecting update_feedback (EUM-style; catches manual core update flow).
+	 * When core package is about to download, start collecting update_feedback
+	 * (EUM-style; catches manual core update flow).
 	 *
 	 * @param bool|\WP_Error $reply    Whether to short-circuit.
 	 * @param string         $package  Package URL.
 	 * @param \WP_Upgrader   $upgrader Upgrader instance.
 	 * @return bool|\WP_Error Unchanged.
 	 */
-	public static function init_core_feedback_on_download( bool|\WP_Error $reply, string $package, \WP_Upgrader $upgrader ): bool|\WP_Error {
+	public static function init_core_feedback_on_download(
+		bool|\WP_Error $reply,
+		string $package,
+		\WP_Upgrader $upgrader
+	): bool|\WP_Error {
 		if ( ! $upgrader instanceof \Core_Upgrader ) {
 			return $reply;
 		}
 		$current_version = get_bloginfo( 'version' );
-		// Only set version_before on the first step of a (possibly multi-step) core update,
+		// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+		// Only set version_before on the first step of a (possibly multi-step) core update,.
+		// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 		// so automatic partial+full updates log as "6.9.1 → 6.9.2" instead of "Reinstall 6.9.2".
-		if ( '' === updatronix_get_plugin_option( self::OPTION_CORE_VERSION_BEFORE, '' ) ) {
-			updatronix_update_plugin_option( self::OPTION_CORE_VERSION_BEFORE, $current_version );
+		if ( '' === updatronix_get_plugin_option(
+			self::OPTION_CORE_VERSION_BEFORE,
+			''
+		) ) {
+			updatronix_update_plugin_option(
+				self::OPTION_CORE_VERSION_BEFORE,
+				$current_version
+			);
 		}
-		$version_before         = updatronix_get_plugin_option( self::OPTION_CORE_VERSION_BEFORE, $current_version );
+		$version_before         = updatronix_get_plugin_option(
+			self::OPTION_CORE_VERSION_BEFORE,
+			$current_version
+		);
 		self::$core_feedback    = array();
 		self::$core_package_url = $package;
 		$version_after          = '';
 		$current                = get_site_transient( 'update_core' );
 		if ( is_object( $current ) && (bool) ( $current->updates ?? null ) ) {
 			foreach ( $current->updates as $u ) {
-				$packages = is_array( $u->packages ?? null ) ? $u->packages : (array) ( $u->packages ?? array() );
+				$packages =
+					is_array( $u->packages ?? null ) ? $u->packages : (array) (
+						$u->packages ?? array() );
 				if ( array() !== $packages && in_array( $package, $packages, true ) ) {
 					$version_after = (string) ( $u->current ?? '' );
 					break;
@@ -1079,7 +1380,12 @@ final class Updatronix_Update_Logger {
 				'version_after'  => $version_after,
 			)
 		);
-		add_filter( 'update_feedback', array( self::class, 'collect_core_feedback' ), 1, 1 );
+		add_filter(
+			'update_feedback',
+			array( self::class, 'collect_core_feedback' ),
+			1,
+			1
+		);
 
 		return $reply;
 	}
@@ -1092,7 +1398,13 @@ final class Updatronix_Update_Logger {
 	 */
 	public static function collect_core_feedback( mixed $feedback ): mixed {
 		if ( is_string( $feedback ) && '' !== $feedback ) {
-			self::$core_feedback[] = wp_strip_all_tags( str_replace( '&#8230;', '…', $feedback ) );
+			self::$core_feedback[] = wp_strip_all_tags(
+				str_replace(
+					'&#8230;',
+					'…',
+					$feedback
+				)
+			);
 		}
 
 		return $feedback;
@@ -1105,7 +1417,8 @@ final class Updatronix_Update_Logger {
 	 * @return mixed
 	 */
 	public static function capture_plugin_versions_before( mixed $value ): mixed {
-		if ( ! is_object( $value ) || ! isset( $value->response ) || ! is_array( $value->response ) ) {
+		if ( ! is_object( $value ) || ! isset( $value->response )
+			|| ! is_array( $value->response ) ) {
 			return $value;
 		}
 
@@ -1137,13 +1450,16 @@ final class Updatronix_Update_Logger {
 	 * @return mixed
 	 */
 	public static function capture_theme_versions_before( mixed $value ): mixed {
-		if ( ! is_object( $value ) || ! isset( $value->response ) || ! is_array( $value->response ) ) {
+		if ( ! is_object( $value ) || ! isset( $value->response )
+			|| ! is_array( $value->response ) ) {
 			return $value;
 		}
 
 		$themes = wp_get_themes();
 		foreach ( array_keys( $value->response ) as $slug ) {
-			if ( isset( $themes[ $slug ] ) && (bool) $themes[ $slug ]->get( 'Version' ) ) {
+			if ( isset( $themes[ $slug ] ) && (bool) $themes[ $slug ]->get(
+				'Version'
+			) ) {
 				$version = (string) $themes[ $slug ]->get( 'Version' );
 				if ( ! isset( $value->response[ $slug ]['version_before'] ) ) {
 					$value->response[ $slug ]['version_before'] = $version;
@@ -1163,13 +1479,20 @@ final class Updatronix_Update_Logger {
 	 * upgrader before `clear_destination()` runs, so the installed version is
 	 * kept and the failure is reported truthfully.
 	 *
-	 * @param string|\WP_Error     $source        Path to the unpacked package source (or WP_Error).
+	 * @param string|\WP_Error     $source Path to the unpacked package source (or
+	 *     WP_Error).
 	 * @param string               $remote_source Remote source (unused).
 	 * @param \WP_Upgrader         $upgrader      Upgrader instance.
 	 * @param array<string, mixed> $hook_extra    hook_extra from the upgrader run.
-	 * @return string|\WP_Error Unchanged source path or an error that aborts the install.
+	 * @return string|\WP_Error Unchanged source path or an error that aborts the
+	 * install.
 	 */
-	public static function reject_plugin_package_without_plugin_file( string|\WP_Error $source, string $remote_source, \WP_Upgrader $upgrader, array $hook_extra ): string|\WP_Error {
+	public static function reject_plugin_package_without_plugin_file(
+		string|\WP_Error $source,
+		string $remote_source,
+		\WP_Upgrader $upgrader,
+		array $hook_extra
+	): string|\WP_Error {
 		if ( ! is_string( $source ) || '' === $source ) {
 			return $source;
 		}
@@ -1185,31 +1508,41 @@ final class Updatronix_Update_Logger {
 		}
 		foreach ( $files as $file ) {
 			$data = get_file_data( $file, array( 'Name' => 'Plugin Name' ) );
-			if ( ! empty( $data['Name'] ) ) {
+			if ( isset( $data['Name'] ) && '' !== $data['Name'] ) {
 				return $source;
 			}
 		}
 		return new \WP_Error(
 			'updatronix_plugin_package_without_plugin_file',
+			// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 			'The update package does not contain a plugin file. The installed version was kept.'
 		);
 	}
 
 	/**
-	 * Store current plugin version before upload overwrite (update.php?action=upload-plugin, Replace).
-	 * Ensures version_before is available when upgrader_process_complete runs so we can log update/downgrade.
+	 * Store current plugin version before upload overwrite
+	 * (update.php?action=upload-plugin, Replace).
+	 * Ensures version_before is available when upgrader_process_complete runs so
+	 * we can log update/downgrade.
 	 *
-	 * @param string|\WP_Error     $source        Path to the unpacked package source (or WP_Error).
+	 * @param string|\WP_Error     $source Path to the unpacked package source (or
+	 *     WP_Error).
 	 * @param string               $remote_source Remote source (unused).
 	 * @param \WP_Upgrader         $upgrader      Upgrader instance.
 	 * @param array<string, mixed> $hook_extra    hook_extra from the upgrader run.
 	 * @return string|\WP_Error Unchanged source path or error.
 	 */
-	public static function store_plugin_version_before_upload_overwrite( string|\WP_Error $source, string $remote_source, \WP_Upgrader $upgrader, array $hook_extra ): string|\WP_Error {
+	public static function store_plugin_version_before_upload_overwrite(
+		string|\WP_Error $source,
+		string $remote_source,
+		\WP_Upgrader $upgrader,
+		array $hook_extra
+	): string|\WP_Error {
 		if ( ! is_string( $source ) || '' === $source ) {
 			return $source;
 		}
-		if ( ( $hook_extra['type'] ?? '' ) !== 'plugin' || ( $hook_extra['action'] ?? '' ) !== 'install' ) {
+		if ( ( $hook_extra['type'] ?? '' ) !== 'plugin'
+			|| ( $hook_extra['action'] ?? '' ) !== 'install' ) {
 			return $source;
 		}
 		if ( ! $upgrader instanceof \Plugin_Upgrader ) {
@@ -1231,11 +1564,17 @@ final class Updatronix_Update_Logger {
 			$plugins     = get_plugins( '/' . $slug );
 			$plugin_file = array_key_first( $plugins );
 			if ( null !== $plugin_file && '' !== $plugin_file ) {
-				$version = isset( $plugins[ $plugin_file ]['Version'] ) ? (string) $plugins[ $plugin_file ]['Version'] : '';
+				$version =
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					isset(
+						// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+						$plugins[ $plugin_file ]['Version']
+					) ? (string) $plugins[ $plugin_file ]['Version'] : '';
 			}
 		}
 
-		if ( ( null === $plugin_file || '' === $plugin_file || '' === $version ) && (bool) ( $upgrader->new_plugin_data['Name'] ?? null ) ) {
+		if ( ( null === $plugin_file || '' === $plugin_file || '' === $version )
+			&& (bool) ( $upgrader->new_plugin_data['Name'] ?? null ) ) {
 			$uploaded_name = (string) $upgrader->new_plugin_data['Name'];
 			$all           = get_plugins();
 			foreach ( $all as $file => $data ) {
@@ -1248,31 +1587,53 @@ final class Updatronix_Update_Logger {
 		}
 
 		if ( null !== $plugin_file && '' !== $plugin_file && '' !== $version ) {
-			$stored                 = (array) updatronix_get_plugin_option( self::OPTION_PLUGIN_VERSIONS_BEFORE, array() );
+			$stored                 =
+				(array) updatronix_get_plugin_option(
+					self::OPTION_PLUGIN_VERSIONS_BEFORE,
+					array()
+				);
 			$stored[ $plugin_file ] = $version;
-			updatronix_update_plugin_option( self::OPTION_PLUGIN_VERSIONS_BEFORE, $stored );
-			$by_mainfile                                      = (array) updatronix_get_plugin_option( self::OPTION_PLUGIN_VERSIONS_BEFORE_BY_MAINFILE, array() );
+			updatronix_update_plugin_option(
+				self::OPTION_PLUGIN_VERSIONS_BEFORE,
+				$stored
+			);
+			$by_mainfile                                      =
+				(array) updatronix_get_plugin_option(
+					self::OPTION_PLUGIN_VERSIONS_BEFORE_BY_MAINFILE,
+					array()
+				);
 			$by_mainfile[ basename( (string) $plugin_file ) ] = $version;
-			updatronix_update_plugin_option( self::OPTION_PLUGIN_VERSIONS_BEFORE_BY_MAINFILE, $by_mainfile );
+			updatronix_update_plugin_option(
+				self::OPTION_PLUGIN_VERSIONS_BEFORE_BY_MAINFILE,
+				$by_mainfile
+			);
 		}
 
 		return $source;
 	}
 
 	/**
-	 * Store current theme version before upload overwrite (update.php?action=upload-theme, Replace).
+	 * Store current theme version before upload overwrite
+	 * (update.php?action=upload-theme, Replace).
 	 *
-	 * @param string|\WP_Error     $source        Path to the unpacked package source (or WP_Error).
+	 * @param string|\WP_Error     $source Path to the unpacked package source (or
+	 *     WP_Error).
 	 * @param string               $remote_source Remote source (unused).
 	 * @param \WP_Upgrader         $upgrader      Upgrader instance.
 	 * @param array<string, mixed> $hook_extra    hook_extra from the upgrader run.
 	 * @return string|\WP_Error Unchanged source path or error.
 	 */
-	public static function store_theme_version_before_upload_overwrite( string|\WP_Error $source, string $remote_source, \WP_Upgrader $upgrader, array $hook_extra ): string|\WP_Error {
+	public static function store_theme_version_before_upload_overwrite(
+		string|\WP_Error $source,
+		string $remote_source,
+		\WP_Upgrader $upgrader,
+		array $hook_extra
+	): string|\WP_Error {
 		if ( ! is_string( $source ) || '' === $source ) {
 			return $source;
 		}
-		if ( ( $hook_extra['type'] ?? '' ) !== 'theme' || ( $hook_extra['action'] ?? '' ) !== 'install' ) {
+		if ( ( $hook_extra['type'] ?? '' ) !== 'theme'
+			|| ( $hook_extra['action'] ?? '' ) !== 'install' ) {
 			return $source;
 		}
 		if ( ! $upgrader instanceof \Theme_Upgrader ) {
@@ -1296,7 +1657,8 @@ final class Updatronix_Update_Logger {
 			}
 		}
 
-		if ( ( null === $theme_slug || '' === $version ) && (bool) ( $upgrader->new_theme_data['Name'] ?? null ) ) {
+		if ( ( null === $theme_slug || '' === $version )
+			&& (bool) ( $upgrader->new_theme_data['Name'] ?? null ) ) {
 			$uploaded_name = (string) $upgrader->new_theme_data['Name'];
 			$themes        = wp_get_themes();
 			foreach ( $themes as $s => $t ) {
@@ -1309,9 +1671,16 @@ final class Updatronix_Update_Logger {
 		}
 
 		if ( null !== $theme_slug && '' !== $version ) {
-			$stored                = (array) updatronix_get_plugin_option( self::OPTION_THEME_VERSIONS_BEFORE, array() );
+			$stored                =
+				(array) updatronix_get_plugin_option(
+					self::OPTION_THEME_VERSIONS_BEFORE,
+					array()
+				);
 			$stored[ $theme_slug ] = $version;
-			updatronix_update_plugin_option( self::OPTION_THEME_VERSIONS_BEFORE, $stored );
+			updatronix_update_plugin_option(
+				self::OPTION_THEME_VERSIONS_BEFORE,
+				$stored
+			);
 		}
 
 		return $source;
@@ -1324,10 +1693,14 @@ final class Updatronix_Update_Logger {
 	 * @param array<string, mixed> $options  Array of item type, action, etc.
 	 * @return void
 	 */
-	public static function on_upgrader_process_complete( WP_Upgrader $upgrader, array $options ): void {
+	public static function on_upgrader_process_complete(
+		WP_Upgrader $upgrader,
+		array $options
+	): void {
 		$type                    = $options['type'] ?? '';
 		$action                  = $options['action'] ?? '';
-		$should_capture_feedback = 'plugin' === $type || 'theme' === $type || 'translation' === $type;
+		$should_capture_feedback = 'plugin' === $type || 'theme' === $type
+			|| 'translation' === $type;
 		$buffer                  = '';
 
 		if ( $should_capture_feedback ) {
@@ -1338,9 +1711,10 @@ final class Updatronix_Update_Logger {
 
 		self::$captured_feedback = '';
 
-		$should_replay_feedback = '' !== $buffer && ! ( $upgrader->skin instanceof \Bulk_Upgrader_Skin );
+		$should_replay_feedback = '' !== $buffer
+			&& ! ( $upgrader->skin instanceof \Bulk_Upgrader_Skin );
 
-		if ( ! updatronix_get_settings()['logging_enabled'] ) {
+		if ( ! (bool) updatronix_get_settings()['logging_enabled'] ) {
 			if ( $should_replay_feedback ) {
 				echo wp_kses_post( $buffer );
 			}
@@ -1355,14 +1729,18 @@ final class Updatronix_Update_Logger {
 
 			return;
 		}
-		if ( $upgrader instanceof \Plugin_Upgrader && is_wp_error( $upgrader->result ) ) {
+		if ( $upgrader instanceof \Plugin_Upgrader && is_wp_error(
+			$upgrader->result
+		) ) {
 			if ( $should_replay_feedback ) {
 				echo wp_kses_post( $buffer );
 			}
 
 			return;
 		}
-		if ( $upgrader instanceof \Theme_Upgrader && is_wp_error( $upgrader->result ) ) {
+		if ( $upgrader instanceof \Theme_Upgrader && is_wp_error(
+			$upgrader->result
+		) ) {
 			if ( $should_replay_feedback ) {
 				echo wp_kses_post( $buffer );
 			}
@@ -1379,12 +1757,15 @@ final class Updatronix_Update_Logger {
 			}
 		}
 
-		$skin_message    = Updatronix_ErrorHandler::get_skin_process_message( $upgrader );
+		$skin_message    = Updatronix_ErrorHandler::get_skin_process_message(
+			$upgrader
+		);
 		$process_message = $skin_message;
 		if ( '' !== self::$captured_feedback ) {
 			$ob_message              = self::$captured_feedback;
 			self::$captured_feedback = '';
-			$process_message         = '' !== $process_message ? $process_message . "\n" . $ob_message : $ob_message;
+			$process_message         = '' !== $process_message ? $process_message . "\n"
+				. $ob_message : $ob_message;
 		}
 		if ( '' === $process_message && 'core' !== $type && 'install' === $action ) {
 			$process_message = __( 'Installed from an uploaded file.', 'updatronix' );
@@ -1392,13 +1773,18 @@ final class Updatronix_Update_Logger {
 
 		$trace          = Updatronix_ErrorHandler::capture_trace();
 		$performed_as   = self::get_current_performed_as();
-		$update_context = ( ( 'plugin' === $type || 'theme' === $type ) && $upgrader->skin instanceof \Bulk_Upgrader_Skin ) ? 'bulk' : ( ( 'plugin' === $type || 'theme' === $type ) ? 'single' : '' );
+		$update_context = ( ( 'plugin' === $type || 'theme' === $type )
+			// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+			&& $upgrader->skin instanceof \Bulk_Upgrader_Skin ) ? 'bulk' : ( ( 'plugin' === $type
+			|| 'theme' === $type ) ? 'single' : '' );
 
 		if ( 'core' === $type && 'update' === $action ) {
 			if ( 'automatic' === $performed_as ) {
 				if ( isset( self::$pending_logs['core']['core'] ) ) {
-					$pending_after                                       = (string) ( self::$pending_logs['core']['core']['version_after'] ?? '' );
-					self::$pending_logs['core']['core']['version_after'] = self::resolve_core_version_after_for_log( $pending_after );
+					$pending_after                                       =
+						(string) ( self::$pending_logs['core']['core']['version_after'] ?? '' );
+					self::$pending_logs['core']['core']['version_after'] =
+						self::resolve_core_version_after_for_log( $pending_after );
 					self::$pending_logs['core']['core']['message']       = $process_message;
 					Updatronix_UpdateLogState::store_pending(
 						(string) self::$pending_logs['core']['core']['event_key'],
@@ -1410,7 +1796,13 @@ final class Updatronix_Update_Logger {
 			}
 
 			$event_key = self::get_pending_event_key( 'core', 'core' );
-			self::log_core_update( $upgrader, $process_message, $trace, $performed_as, $event_key );
+			self::log_core_update(
+				$upgrader,
+				$process_message,
+				$trace,
+				$performed_as,
+				$event_key
+			);
 			self::$already_logged['core:wordpress'] = true;
 			self::finalize_pending_log( $event_key, 'core', 'core' );
 
@@ -1420,22 +1812,54 @@ final class Updatronix_Update_Logger {
 		if ( 'plugin' === $type ) {
 			$plugins = isset( $options['plugins'] ) && is_array( $options['plugins'] )
 				? $options['plugins']
-				: ( isset( $options['plugin'] ) && is_string( $options['plugin'] ) ? array( $options['plugin'] ) : array() );
+				: ( isset( $options['plugin'] )
+					&& is_string( $options['plugin'] ) ? array( $options['plugin'] ) : array() );
 
-			if ( ! (bool) $plugins && 'install' === $action && $upgrader instanceof \Plugin_Upgrader ) {
+			if ( ! (bool) $plugins && 'install' === $action
+				&& $upgrader instanceof \Plugin_Upgrader ) {
 				$plugin_file = $upgrader->plugin_info();
 				if ( is_string( $plugin_file ) && '' !== $plugin_file ) {
-					$stored              = (array) updatronix_get_plugin_option( self::OPTION_PLUGIN_VERSIONS_BEFORE, array() );
-					$by_mainfile         = (array) updatronix_get_plugin_option( self::OPTION_PLUGIN_VERSIONS_BEFORE_BY_MAINFILE, array() );
-					$has_version_before  = isset( $stored[ $plugin_file ] ) || isset( $by_mainfile[ basename( $plugin_file ) ] );
+					$stored              =
+						(array) updatronix_get_plugin_option(
+							self::OPTION_PLUGIN_VERSIONS_BEFORE,
+							array()
+						);
+					$by_mainfile         =
+						(array) updatronix_get_plugin_option(
+							self::OPTION_PLUGIN_VERSIONS_BEFORE_BY_MAINFILE,
+							array()
+						);
+					$has_version_before  = isset( $stored[ $plugin_file ] )
+						|| isset( $by_mainfile[ basename( $plugin_file ) ] );
 					$log_action          = $has_version_before ? 'update' : 'install';
 					$plugin_performed_as = $has_version_before ? 'upload' : $performed_as;
-					self::log_plugin_update( $plugin_file, $log_action, $upgrader, $process_message, $trace, $plugin_performed_as, $update_context, self::get_pending_event_key( 'plugin', $plugin_file ) );
+					self::log_plugin_update(
+						$plugin_file,
+						$log_action,
+						$upgrader,
+						$process_message,
+						$trace,
+						$plugin_performed_as,
+						$update_context,
+						self::get_pending_event_key(
+							'plugin',
+							$plugin_file
+						)
+					);
 					self::$already_logged[ 'plugin:' . $plugin_file ] = true;
 				}
 			} else {
 				foreach ( $plugins as $plugin_file ) {
-					self::log_plugin_update( $plugin_file, $action, $upgrader, $process_message, $trace, $performed_as, $update_context, self::get_pending_event_key( 'plugin', $plugin_file ) );
+					self::log_plugin_update(
+						$plugin_file,
+						$action,
+						$upgrader,
+						$process_message,
+						$trace,
+						$performed_as,
+						$update_context,
+						self::get_pending_event_key( 'plugin', $plugin_file )
+					);
 					self::$already_logged[ 'plugin:' . $plugin_file ] = true;
 				}
 			}
@@ -1444,34 +1868,67 @@ final class Updatronix_Update_Logger {
 		if ( 'theme' === $type ) {
 			$themes = isset( $options['themes'] ) && is_array( $options['themes'] )
 				? $options['themes']
-				: ( isset( $options['theme'] ) && is_string( $options['theme'] ) ? array( $options['theme'] ) : array() );
+				: ( isset( $options['theme'] )
+					&& is_string( $options['theme'] ) ? array( $options['theme'] ) : array() );
 
-			if ( ! (bool) $themes && 'install' === $action && $upgrader instanceof \Theme_Upgrader ) {
+			if ( ! (bool) $themes && 'install' === $action
+				&& $upgrader instanceof \Theme_Upgrader ) {
 				$theme_info = $upgrader->theme_info();
 				if ( (bool) $theme_info ) {
 					$theme_slug = $theme_info->get_stylesheet();
 					if ( '' !== $theme_slug ) {
-						$stored             = (array) updatronix_get_plugin_option( self::OPTION_THEME_VERSIONS_BEFORE, array() );
-						$log_action         = isset( $stored[ $theme_slug ] ) ? 'update' : 'install';
-						$theme_performed_as = isset( $stored[ $theme_slug ] ) ? 'upload' : $performed_as;
-						self::log_theme_update( $theme_slug, $log_action, $upgrader, $process_message, $trace, $theme_performed_as, $update_context, self::get_pending_event_key( 'theme', $theme_slug ) );
+						$stored             =
+							(array) updatronix_get_plugin_option(
+								self::OPTION_THEME_VERSIONS_BEFORE,
+								array()
+							);
+						$log_action         = isset(
+							$stored[ $theme_slug ]
+						) ? 'update' : 'install';
+						$theme_performed_as = isset(
+							$stored[ $theme_slug ]
+						) ? 'upload' : $performed_as;
+						self::log_theme_update(
+							$theme_slug,
+							$log_action,
+							$upgrader,
+							$process_message,
+							$trace,
+							$theme_performed_as,
+							$update_context,
+							self::get_pending_event_key(
+								'theme',
+								$theme_slug
+							)
+						);
 						self::$already_logged[ 'theme:' . $theme_slug ] = true;
 					}
 				}
 			} else {
 				foreach ( $themes as $theme_slug ) {
-					self::log_theme_update( $theme_slug, $action, $upgrader, $process_message, $trace, $performed_as, $update_context, self::get_pending_event_key( 'theme', $theme_slug ) );
+					self::log_theme_update(
+						$theme_slug,
+						$action,
+						$upgrader,
+						$process_message,
+						$trace,
+						$performed_as,
+						$update_context,
+						self::get_pending_event_key( 'theme', $theme_slug )
+					);
 					self::$already_logged[ 'theme:' . $theme_slug ] = true;
 				}
 			}
 		}
 
-		if ( 'translation' === $type && (bool) ( $options['translations'] ?? null ) && is_array( $options['translations'] ) ) {
+		if ( 'translation' === $type && (bool) ( $options['translations'] ?? null )
+			&& is_array( $options['translations'] ) ) {
 			foreach ( $options['translations'] as $trans ) {
 				$t_type         = $trans['type'] ?? '';
 				$t_slug         = $trans['slug'] ?? '';
 				$t_lang         = $trans['language'] ?? '';
-				$key            = 'core' === $t_type ? 'core_' . $t_lang : $t_slug . '_' . $t_lang;
+				$key            = 'core' === $t_type ? 'core_' . $t_lang : $t_slug . '_'
+					. $t_lang;
 				$name           = 'Unknown';
 				$slug           = (bool) $t_slug ? $t_slug : $t_lang;
 				$version_before = '';
@@ -1489,16 +1946,27 @@ final class Updatronix_Update_Logger {
 					} elseif ( 'plugin' === $t_type && function_exists( 'get_plugins' ) ) {
 						$all = get_plugins();
 						foreach ( $all as $file => $data ) {
-							if ( dirname( $file ) === $t_slug || strpos( $file, $t_slug . '/' ) === 0 ) {
+							if ( dirname( $file ) === $t_slug || strpos(
+								$file,
+								$t_slug
+								. '/'
+							) === 0 ) {
 								$name = ( $data['Name'] ?? $t_slug ) . ' (' . $t_lang . ')';
 								break;
 							}
 						}
 					} else {
 						$themes = wp_get_themes();
-						$name   = ( isset( $themes[ $t_slug ] ) ? $themes[ $t_slug ]->get( 'Name' ) : $t_slug ) . ' (' . $t_lang . ')';
+						$name   = ( isset( $themes[ $t_slug ] ) ? $themes[ $t_slug ]->get(
+							'Name'
+						) : $t_slug )
+							. ' (' . $t_lang . ')';
 					}
-					$event_key = self::build_event_key( 'translation', $slug, (string) $t_lang );
+					$event_key = self::build_event_key(
+						'translation',
+						$slug,
+						(string) $t_lang
+					);
 				}
 				if ( self::should_skip_event( $event_key ) ) {
 					self::finalize_pending_log( $event_key, 'translation', $key );
@@ -1520,7 +1988,8 @@ final class Updatronix_Update_Logger {
 						'update_context' => '',
 						'reason_code'    => 'updated',
 						'decision_state' => 'done',
-						'origin'         => 'automatic' === $performed_as ? 'automatic' : 'manual',
+						'origin'         =>
+							'automatic' === $performed_as ? 'automatic' : 'manual',
 						'decision_stage' => 'execute',
 					)
 				);
@@ -1531,12 +2000,14 @@ final class Updatronix_Update_Logger {
 	}
 
 	/**
-	 * Read $wp_version from wp-includes/version.php without relying on the in-memory global.
+	 * Read $wp_version from wp-includes/version.php without relying on the
+	 * in-memory global.
 	 *
 	 * After Core_Upgrader finishes, the file on disk matches the new release, but
 	 * get_bloginfo('version') still returns the $wp_version loaded at bootstrap.
 	 *
-	 * @return string Version string, or empty if the file is missing or not parseable.
+	 * @return string Version string, or empty if the file is missing or not
+	 * parseable.
 	 */
 	private static function get_installed_core_version_from_disk(): string {
 		if ( ! defined( 'ABSPATH' ) || ! defined( 'WPINC' ) ) {
@@ -1546,22 +2017,28 @@ final class Updatronix_Update_Logger {
 		if ( ! is_readable( $path ) ) {
 			return '';
 		}
-		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Local read of the on-disk WP version file; not a remote fetch.
+		// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+		// phpcs:ignore Generic.Files.LineLength, WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Local read of the on-disk WP version file; not a remote fetch.
 		$contents = file_get_contents( $path );
 		if ( false === $contents || '' === $contents ) {
 			return '';
 		}
 
+		// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 		return Updatronix_Core_Update_Log_Versions::parse_wp_version_from_file_contents( $contents );
 	}
 
 	/**
-	 * Resolved post-update core version: on-disk install first, then transient target, then get_bloginfo().
+	 * Resolved post-update core version: on-disk install first, then transient
+	 * target, then get_bloginfo().
 	 *
-	 * @param string $pending_target_version Target from update_core at download time (may be empty).
+	 * @param string $pending_target_version Target from update_core at download
+	 * time (may be empty).
 	 * @return string
 	 */
-	private static function resolve_core_version_after_for_log( string $pending_target_version = '' ): string {
+	private static function resolve_core_version_after_for_log(
+		string $pending_target_version = ''
+	): string {
 		return Updatronix_Core_Update_Log_Versions::resolve_core_version_after_triple(
 			self::get_installed_core_version_from_disk(),
 			$pending_target_version,
@@ -1570,40 +2047,68 @@ final class Updatronix_Update_Logger {
 	}
 
 	/**
-	 * Resolve core version_before, version_after, and action_type for the activity log.
+	 * Resolve core version_before, version_after, and action_type for the activity
+	 * log.
 	 *
-	 * Manual completion (`upgrader_process_complete` → `log_core_update`) and automatic
-	 * completion (`automatic_updates_complete`) share this entry point so the two paths stay aligned.
+	 * Manual completion (`upgrader_process_complete` → `log_core_update`) and
+	 * automatic
+	 * completion (`automatic_updates_complete`) share this entry point so the two
+	 * paths stay aligned.
 	 *
-	 * @param bool        $automatic_completion True when building values from `log_automatic_updates` (WP result objects).
-	 * @param object|null $result               Automatic update result object (automatic path only).
-	 * @param object|null $item                 Update offer item from `$result->item` (automatic path only).
-	 * @return array{version_before: string, version_after: string, action_type: string}
+	 * @param bool        $automatic_completion True when building values from
+	 *        `log_automatic_updates` (WP result objects).
+	 * @param object|null $result Automatic update result object (automatic path
+	 * only).
+	 * @param object|null $item Update offer item from `$result->item` (automatic
+	 * path only).
+	 * @return array<string, string>
 	 */
-	private static function resolve_core_versions_for_activity_log( bool $automatic_completion, ?object $result = null, ?object $item = null ): array {
+	private static function resolve_core_versions_for_activity_log(
+		bool $automatic_completion,
+		?object $result = null,
+		?object $item = null
+	): array {
 		if ( ! $automatic_completion ) {
 			$pending_after = '';
 			if ( isset( self::$pending_logs['core']['core']['version_after'] ) ) {
-				$pending_after = (string) self::$pending_logs['core']['core']['version_after'];
+				$pending_after =
+					(string) self::$pending_logs['core']['core']['version_after'];
 			}
-			$version_before = (string) updatronix_get_plugin_option( self::OPTION_CORE_VERSION_BEFORE, '' );
+			$version_before = (string) updatronix_get_plugin_option(
+				self::OPTION_CORE_VERSION_BEFORE,
+				''
+			);
 			$version_after  = self::resolve_core_version_after_for_log( $pending_after );
 
 			return array(
 				'version_before' => $version_before,
 				'version_after'  => $version_after,
-				'action_type'    => Updatronix_Core_Update_Log_Versions::resolve_action_type( $version_before, $version_after, 'update' ),
+				'action_type'    =>
+					Updatronix_Core_Update_Log_Versions::resolve_action_type(
+						$version_before,
+						$version_after,
+						'update'
+					),
 			);
 		}
 
-		$version_before = (string) updatronix_get_plugin_option( self::OPTION_CORE_VERSION_BEFORE, '' );
+		$version_before = (string) updatronix_get_plugin_option(
+			self::OPTION_CORE_VERSION_BEFORE,
+			''
+		);
 		$version_after  = (string) get_bloginfo( 'version' );
 		if ( isset( self::$pending_logs['core']['core'] ) ) {
 			$pending_core   = self::$pending_logs['core']['core'];
-			$version_before = (string) ( $pending_core['version_before'] ?? $version_before );
-			$version_after  = (string) ( (bool) $pending_core['version_after'] ? $pending_core['version_after'] : $version_after );
+			$version_before = (string) (
+				$pending_core['version_before'] ?? $version_before );
+			$version_after  =
+				// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+				(string) (
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					(bool) $pending_core['version_after'] ? $pending_core['version_after'] : $version_after );
 		}
-		$core_success = null !== $result && isset( $result->result ) && ! is_wp_error( $result->result );
+		$core_success = null !== $result && isset( $result->result )
+			&& ! is_wp_error( $result->result );
 		if ( $core_success && is_object( $item ) ) {
 			if ( is_string( $result->result ) && '' !== $result->result ) {
 				$version_after = $result->result;
@@ -1618,7 +2123,8 @@ final class Updatronix_Update_Logger {
 					$version_after = $offer_after;
 				}
 			}
-			if ( '' === $version_before && isset( $item->partial_version ) && '' !== $item->partial_version ) {
+			if ( '' === $version_before && isset( $item->partial_version )
+				&& '' !== $item->partial_version ) {
 				$version_before = (string) $item->partial_version;
 			}
 		}
@@ -1632,7 +2138,12 @@ final class Updatronix_Update_Logger {
 		return array(
 			'version_before' => $version_before,
 			'version_after'  => $version_after,
-			'action_type'    => Updatronix_Core_Update_Log_Versions::resolve_action_type( $version_before, $version_after, 'update' ),
+			'action_type'    =>
+				Updatronix_Core_Update_Log_Versions::resolve_action_type(
+					$version_before,
+					$version_after,
+					'update'
+				),
 		);
 	}
 
@@ -1646,8 +2157,21 @@ final class Updatronix_Update_Logger {
 	 * @param string      $event_key       Canonical event key for deduplication.
 	 * @return void
 	 */
-	private static function log_core_update( WP_Upgrader $upgrader, string $process_message = '', string $trace = '', string $performed_as = 'manual', string $event_key = '' ): void {
-		remove_filter( 'update_feedback', array( self::class, 'collect_core_feedback' ), 1 );
+	private static function log_core_update(
+		WP_Upgrader $upgrader,
+		string $process_message = '',
+		string $trace = '',
+		string $performed_as = 'manual',
+		string $event_key = ''
+	): void {
+		remove_filter(
+			'update_feedback',
+			array(
+				self::class,
+				'collect_core_feedback',
+			),
+			1
+		);
 		if ( '' === $event_key ) {
 			$event_key = self::build_event_key( 'core', 'core' );
 		}
@@ -1694,14 +2218,17 @@ final class Updatronix_Update_Logger {
 				'trace'          => $trace,
 				'performed_as'   => $performed_as,
 				'update_context' => '',
-				'reason_code'    => 'same_version' === $action_type ? 'already_installed' : 'updated',
+				'reason_code'    =>
+					'same_version' === $action_type ? 'already_installed' : 'updated',
 				'decision_state' => 'done',
 				'origin'         => 'automatic' === $performed_as ? 'automatic' : 'manual',
 				'decision_stage' => 'execute',
 			)
 		);
 
-		// Defer cleanup so a second core update step in the same request (e.g. partial then full)
+		// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+		// Defer cleanup so a second core update step in the same request (e.g. partial then full).
+		// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 		// still sees the original version_before and logs "Update" instead of "Reinstall".
 		self::schedule_core_version_before_cleanup();
 		self::$core_feedback    = array();
@@ -1710,7 +2237,8 @@ final class Updatronix_Update_Logger {
 
 	/**
 	 * Schedule deletion of OPTION_CORE_VERSION_BEFORE at end of request.
-	 * Ensures multi-step automatic core updates (e.g. partial + full) use the same version_before.
+	 * Ensures multi-step automatic core updates (e.g. partial + full) use the same
+	 * version_before.
 	 *
 	 * @return void
 	 */
@@ -1727,9 +2255,11 @@ final class Updatronix_Update_Logger {
 	}
 
 	/**
-	 * Convert WordPress feedback HTML (from show_message) to plain text for logging.
+	 * Convert WordPress feedback HTML (from show_message) to plain text for
+	 * logging.
 	 *
-	 * @param string $html Output captured from show_message() (e.g. "<p>Unpacking…</p>\n").
+	 * @param string $html Output captured from show_message() (e.g.
+	 * "<p>Unpacking…</p>\n").
 	 * @return string Plain text, one message per line.
 	 */
 	private static function feedback_html_to_plain( string $html ): string {
@@ -1738,7 +2268,10 @@ final class Updatronix_Update_Logger {
 		$text      = html_entity_decode( $text, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
 		$collapsed = preg_replace( '/\s*\n\s*/', "\n", $text );
 		$text      = is_string( $collapsed ) ? $collapsed : $text;
-		$lines     = array_filter( array_map( 'trim', explode( "\n", $text ) ), static fn ( string $line ): bool => '' !== $line );
+		$lines     = array_filter(
+			array_map( 'trim', explode( "\n", $text ) ),
+			static fn ( string $line ): bool => '' !== $line
+		);
 		$lines     = array_filter(
 			$lines,
 			function ( string $line ): bool {
@@ -1768,15 +2301,24 @@ final class Updatronix_Update_Logger {
 	}
 
 	/**
-	 * Format note like the WordPress update process screen: title, blank line, then one step per line (EUM-style).
+	 * Format note like the WordPress update process screen: title, blank line,
+	 * then one step per line (EUM-style).
 	 *
-	 * @param string        $title     First line (e.g. "Update to WordPress 6.9.1").
+	 * @param string        $title First line (e.g. "Update to WordPress 6.9.1").
 	 * @param array<string> $steps    Collected step messages.
-	 * @param string        $fallback  Optional extra lines (e.g. from skin get_upgrade_messages).
+	 * @param string        $fallback Optional extra lines (e.g. from skin
+	 *        get_upgrade_messages).
 	 * @return string
 	 */
-	private static function format_note_like_wp_screen( string $title, array $steps, string $fallback = '' ): string {
-		$lines = array_filter( array_merge( array( $title ), $steps ), static fn ( string $line ): bool => '' !== $line );
+	private static function format_note_like_wp_screen(
+		string $title,
+		array $steps,
+		string $fallback = ''
+	): string {
+		$lines = array_filter(
+			array_merge( array( $title ), $steps ),
+			static fn ( string $line ): bool => '' !== $line
+		);
 		if ( '' !== $fallback ) {
 			$lines[] = '';
 			$lines[] = trim( $fallback );
@@ -1798,14 +2340,39 @@ final class Updatronix_Update_Logger {
 	 * @param string      $event_key       Canonical event key for deduplication.
 	 * @return void
 	 */
-	private static function log_plugin_update( string $plugin_file, string $action, WP_Upgrader $upgrader, string $process_message = '', string $trace = '', string $performed_as = 'manual', string $update_context = '', string $event_key = '' ): void {
+	private static function log_plugin_update(
+		string $plugin_file,
+		string $action,
+		WP_Upgrader $upgrader,
+		string $process_message = '',
+		string $trace = '',
+		string $performed_as = 'manual',
+		string $update_context = '',
+		string $event_key = ''
+	): void {
 		if ( '' === $event_key ) {
-			$event_key = self::build_event_key( 'plugin', dirname( $plugin_file ) === '.' ? $plugin_file : dirname( $plugin_file ) );
+			$event_key = self::build_event_key(
+				'plugin',
+				dirname( $plugin_file ) === '.' ? $plugin_file : dirname( $plugin_file )
+			);
 		}
-		$stored         = (array) updatronix_get_plugin_option( self::OPTION_PLUGIN_VERSIONS_BEFORE, array() );
-		$by_mainfile    = (array) updatronix_get_plugin_option( self::OPTION_PLUGIN_VERSIONS_BEFORE_BY_MAINFILE, array() );
-		$version_before = isset( $stored[ $plugin_file ] ) ? (string) $stored[ $plugin_file ] : '';
-		if ( '' === $version_before && isset( $by_mainfile[ basename( $plugin_file ) ] ) ) {
+		$stored         = (array) updatronix_get_plugin_option(
+			self::OPTION_PLUGIN_VERSIONS_BEFORE,
+			array()
+		);
+		$by_mainfile    =
+			(array) updatronix_get_plugin_option(
+				self::OPTION_PLUGIN_VERSIONS_BEFORE_BY_MAINFILE,
+				array()
+			);
+		$version_before = isset(
+			$stored[ $plugin_file ]
+		) ? (string) $stored[ $plugin_file ] : '';
+		if ( '' === $version_before && isset(
+			$by_mainfile[ basename(
+				$plugin_file
+			) ]
+		) ) {
 			$version_before = (string) $by_mainfile[ basename( $plugin_file ) ];
 		}
 		$path = WP_PLUGIN_DIR . '/' . $plugin_file;
@@ -1841,9 +2408,15 @@ final class Updatronix_Update_Logger {
 			$slug = $plugin_file;
 		}
 
-		$action_type = 'install' === $action ? 'install' : Updatronix_Core_Update_Log_Versions::resolve_action_type( $version_before, $version_after, 'update' );
+		$action_type =
+			// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+			'install' === $action ? 'install' : Updatronix_Core_Update_Log_Versions::resolve_action_type( $version_before, $version_after, 'update' );
 
-		$title   = self::format_plugin_log_title( $action_type, $name, $version_after );
+		$title   = self::format_plugin_log_title(
+			$action_type,
+			$name,
+			$version_after
+		);
 		$message = self::format_plugin_log_message( $title, $process_message );
 
 		Updatronix_Logger::log_event(
@@ -1870,18 +2443,26 @@ final class Updatronix_Update_Logger {
 		unset( $stored[ $plugin_file ] );
 		unset( $by_mainfile[ basename( $plugin_file ) ] );
 		self::finalize_pending_log( $event_key, 'plugin', $plugin_file );
-		updatronix_update_plugin_option( self::OPTION_PLUGIN_VERSIONS_BEFORE, $stored );
-		updatronix_update_plugin_option( self::OPTION_PLUGIN_VERSIONS_BEFORE_BY_MAINFILE, $by_mainfile );
+		updatronix_update_plugin_option(
+			self::OPTION_PLUGIN_VERSIONS_BEFORE,
+			$stored
+		);
+		updatronix_update_plugin_option(
+			self::OPTION_PLUGIN_VERSIONS_BEFORE_BY_MAINFILE,
+			$by_mainfile
+		);
 	}
 
 	/**
-	 * Log plugin uninstall/deletion (runs on delete_plugin before the plugin directory is removed).
+	 * Log plugin uninstall/deletion (runs on delete_plugin before the plugin
+	 * directory is removed).
 	 *
-	 * @param string $plugin_file Plugin file path relative to wp-content/plugins (e.g. "akismet/akismet.php").
+	 * @param string $plugin_file Plugin file path relative to wp-content/plugins
+	 * (e.g. "akismet/akismet.php").
 	 * @return void
 	 */
 	public static function log_plugin_uninstall( string $plugin_file ): void {
-		if ( ! updatronix_get_settings()['logging_enabled'] ) {
+		if ( ! (bool) updatronix_get_settings()['logging_enabled'] ) {
 			return;
 		}
 		if ( ! Updatronix_Database::table_exists() ) {
@@ -1926,13 +2507,14 @@ final class Updatronix_Update_Logger {
 	}
 
 	/**
-	 * Log theme uninstall/deletion (runs on delete_theme before the theme directory is removed).
+	 * Log theme uninstall/deletion (runs on delete_theme before the theme
+	 * directory is removed).
 	 *
 	 * @param string $stylesheet Theme stylesheet (slug), e.g. "twentytwentyfour".
 	 * @return void
 	 */
 	public static function log_theme_uninstall( string $stylesheet ): void {
-		if ( ! updatronix_get_settings()['logging_enabled'] ) {
+		if ( ! (bool) updatronix_get_settings()['logging_enabled'] ) {
 			return;
 		}
 		if ( ! Updatronix_Database::table_exists() ) {
@@ -1944,8 +2526,14 @@ final class Updatronix_Update_Logger {
 		$themes         = wp_get_themes();
 		if ( isset( $themes[ $stylesheet ] ) ) {
 			$theme          = $themes[ $stylesheet ];
-			$name           = (string) ( (bool) $theme->get( 'Name' ) ? $theme->get( 'Name' ) : $stylesheet );
-			$version_before = (string) ( (bool) $theme->get( 'Version' ) ? $theme->get( 'Version' ) : '' );
+			$name           =
+				(string) ( (bool) $theme->get( 'Name' ) ? $theme->get(
+					'Name'
+				) : $stylesheet );
+			$version_before =
+				(string) ( (bool) $theme->get( 'Version' ) ? $theme->get(
+					'Version'
+				) : '' );
 		}
 
 		$title = self::format_plugin_log_title( 'uninstall', $name, $version_before );
@@ -1973,41 +2561,72 @@ final class Updatronix_Update_Logger {
 	/**
 	 * Format plugin log title by action type.
 	 *
-	 * @param string $action_type   install, update, downgrade, same_version, uninstall.
+	 * @param string $action_type install, update, downgrade, same_version,
+	 * uninstall.
 	 * @param string $name          Plugin name.
-	 * @param string $version_after Version after update (or version before for uninstall).
+	 * @param string $version_after Version after update (or version before for
+	 * uninstall).
 	 * @return string
 	 */
-	private static function format_plugin_log_title( string $action_type, string $name, string $version_after ): string {
+	private static function format_plugin_log_title(
+		string $action_type,
+		string $name,
+		string $version_after
+	): string {
 		if ( 'install' === $action_type ) {
-			/* translators: 1: item name (plugin or theme), 2: version number */
-			return sprintf( __( 'Installed %1$s %2$s', 'updatronix' ), $name, (bool) $version_after ? $version_after : '' );
+			return sprintf(
+				/* translators: 1: item name (plugin or theme), 2: version number */
+				__( 'Installed %1$s %2$s', 'updatronix' ),
+				$name,
+				(bool) $version_after ? $version_after : ''
+			);
 		}
 		if ( 'uninstall' === $action_type ) {
-			/* translators: 1: item name (plugin or theme), 2: version number */
-			return sprintf( __( 'Uninstalled %1$s %2$s', 'updatronix' ), $name, (bool) $version_after ? $version_after : '' );
+			return sprintf(
+				/* translators: 1: item name (plugin or theme), 2: version number */
+				__( 'Uninstalled %1$s %2$s', 'updatronix' ),
+				$name,
+				(bool) $version_after ? $version_after : ''
+			);
 		}
 		if ( 'downgrade' === $action_type ) {
-			/* translators: 1: item name (plugin or theme), 2: version number */
-			return sprintf( __( 'Rolled back %1$s to %2$s', 'updatronix' ), $name, (bool) $version_after ? $version_after : '' );
+			return sprintf(
+				/* translators: 1: item name (plugin or theme), 2: version number */
+				__( 'Rolled back %1$s to %2$s', 'updatronix' ),
+				$name,
+				(bool) $version_after ? $version_after : ''
+			);
 		}
 		if ( 'same_version' === $action_type ) {
-			/* translators: 1: item name (plugin or theme), 2: version number */
-			return sprintf( __( 'Reinstalled %1$s %2$s (same version)', 'updatronix' ), $name, (bool) $version_after ? $version_after : '' );
+			return sprintf(
+				/* translators: 1: item name (plugin or theme), 2: version number */
+				__( 'Reinstalled %1$s %2$s (same version)', 'updatronix' ),
+				$name,
+				(bool) $version_after ? $version_after : ''
+			);
 		}
 
-		/* translators: 1: item name (plugin or theme), 2: version number */
-		return sprintf( __( 'Updated %1$s to %2$s', 'updatronix' ), $name, (bool) $version_after ? $version_after : '' );
+		return sprintf(
+			/* translators: 1: item name (plugin or theme), 2: version number */
+			__( 'Updated %1$s to %2$s', 'updatronix' ),
+			$name,
+			(bool) $version_after ? $version_after : ''
+		);
 	}
 
 	/**
-	 * Format plugin log message: title plus process message from WordPress (captured or skin).
+	 * Format plugin log message: title plus process message from WordPress
+	 * (captured or skin).
 	 *
 	 * @param string $title           First line (e.g. "Downgrade to X Y").
-	 * @param string $process_message Message from WordPress (output buffer or skin get_upgrade_messages).
+	 * @param string $process_message Message from WordPress (output buffer or skin
+	 * get_upgrade_messages).
 	 * @return string
 	 */
-	private static function format_plugin_log_message( string $title, string $process_message ): string {
+	private static function format_plugin_log_message(
+		string $title,
+		string $process_message
+	): string {
 		if ( '' === $process_message ) {
 			return $title;
 		}
@@ -2028,25 +2647,53 @@ final class Updatronix_Update_Logger {
 	 * @param string      $event_key       Canonical event key for deduplication.
 	 * @return void
 	 */
-	private static function log_theme_update( string $theme_slug, string $action, WP_Upgrader $upgrader, string $process_message = '', string $trace = '', string $performed_as = 'manual', string $update_context = '', string $event_key = '' ): void {
+	private static function log_theme_update(
+		string $theme_slug,
+		string $action,
+		WP_Upgrader $upgrader,
+		string $process_message = '',
+		string $trace = '',
+		string $performed_as = 'manual',
+		string $update_context = '',
+		string $event_key = ''
+	): void {
 		if ( '' === $event_key ) {
 			$event_key = self::build_event_key( 'theme', $theme_slug );
 		}
-		$stored         = (array) updatronix_get_plugin_option( self::OPTION_THEME_VERSIONS_BEFORE, array() );
-		$version_before = isset( $stored[ $theme_slug ] ) ? (string) $stored[ $theme_slug ] : '';
+		$stored         = (array) updatronix_get_plugin_option(
+			self::OPTION_THEME_VERSIONS_BEFORE,
+			array()
+		);
+		$version_before = isset(
+			$stored[ $theme_slug ]
+		) ? (string) $stored[ $theme_slug ] : '';
 		$themes         = wp_get_themes();
 		$theme          = $themes[ $theme_slug ] ?? null;
 		$name           = $theme_slug;
 		$version_after  = '';
 		if ( null !== $theme ) {
-			$name          = (bool) $theme->get( 'Name' ) ? $theme->get( 'Name' ) : $theme_slug;
-			$version_after = (bool) $theme->get( 'Version' ) ? $theme->get( 'Version' ) : '';
+			$name          = (bool) $theme->get( 'Name' ) ? $theme->get(
+				'Name'
+			) : $theme_slug;
+			$version_after = (bool) $theme->get( 'Version' ) ? $theme->get(
+				'Version'
+			) : '';
 		}
 
-		$action_type = 'install' === $action ? 'install' : Updatronix_Core_Update_Log_Versions::resolve_action_type( $version_before, $version_after, 'update' );
+		$action_type =
+			// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+			'install' === $action ? 'install' : Updatronix_Core_Update_Log_Versions::resolve_action_type( $version_before, $version_after, 'update' );
 
-		$title   = self::format_plugin_log_title( $action_type, $name, $version_after );
-		$message = self::format_note_like_wp_screen( $title, array(), $process_message );
+		$title   = self::format_plugin_log_title(
+			$action_type,
+			$name,
+			$version_after
+		);
+		$message = self::format_note_like_wp_screen(
+			$title,
+			array(),
+			$process_message
+		);
 
 		Updatronix_Logger::log_event(
 			array(
@@ -2071,7 +2718,10 @@ final class Updatronix_Update_Logger {
 
 		unset( $stored[ $theme_slug ] );
 		self::finalize_pending_log( $event_key, 'theme', $theme_slug );
-		updatronix_update_plugin_option( self::OPTION_THEME_VERSIONS_BEFORE, $stored );
+		updatronix_update_plugin_option(
+			self::OPTION_THEME_VERSIONS_BEFORE,
+			$stored
+		);
 	}
 
 	/**

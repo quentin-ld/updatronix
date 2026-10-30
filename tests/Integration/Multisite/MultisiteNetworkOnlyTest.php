@@ -1,6 +1,7 @@
 <?php
 /**
- * Multisite network-only policy tests (Super Admin / network storage / subsite no-op).
+ * Multisite network-only policy tests (Super Admin / network storage / subsite
+ * no-op).
  *
  * Run with:
  *
@@ -56,7 +57,10 @@ final class MultisiteNetworkOnlyTest extends WP_UnitTestCase {
 		$subsite_id = self::factory()->blog->create();
 		switch_to_blog( $subsite_id );
 		try {
-			self::assertFalse( updatronix_should_load(), 'Subsite context must not load Updatronix runtime.' );
+			self::assertFalse(
+				updatronix_should_load(),
+				'Subsite context must not load Updatronix runtime.'
+			);
 		} finally {
 			restore_current_blog();
 		}
@@ -68,13 +72,20 @@ final class MultisiteNetworkOnlyTest extends WP_UnitTestCase {
 	 * @return void
 	 */
 	public function test_network_settings_use_site_option_across_subsites(): void {
-		if ( ! function_exists( 'wpmu_create_blog' ) || ! function_exists( 'grant_super_admin' ) ) {
+		if ( ! function_exists( 'wpmu_create_blog' ) || ! function_exists(
+			'grant_super_admin'
+		) ) {
 			self::markTestSkipped( 'Multisite helpers unavailable.' );
 		}
 
 		$subsite_a   = self::factory()->blog->create();
 		$subsite_b   = self::factory()->blog->create();
-		$super_admin = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		$super_admin = self::factory()->user->create(
+			array(
+				'role' =>
+				'administrator',
+			)
+		);
 		grant_super_admin( $super_admin );
 
 		switch_to_blog( $subsite_a );
@@ -89,7 +100,11 @@ final class MultisiteNetworkOnlyTest extends WP_UnitTestCase {
 
 		switch_to_blog( $subsite_b );
 		try {
-			self::assertSame( 'network@example.com', updatronix_get_settings()['notify_emails'] );
+			self::assertSame(
+				'network@example.com',
+				updatronix_get_settings(
+				)['notify_emails']
+			);
 		} finally {
 			restore_current_blog();
 		}
@@ -101,12 +116,19 @@ final class MultisiteNetworkOnlyTest extends WP_UnitTestCase {
 	 * @return void
 	 */
 	public function test_super_admin_schedule_write_persists_network_wide(): void {
-		if ( ! function_exists( 'wpmu_create_blog' ) || ! function_exists( 'grant_super_admin' ) ) {
+		if ( ! function_exists( 'wpmu_create_blog' ) || ! function_exists(
+			'grant_super_admin'
+		) ) {
 			self::markTestSkipped( 'Multisite helpers unavailable.' );
 		}
 
 		$subsite     = self::factory()->blog->create();
-		$super_admin = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		$super_admin = self::factory()->user->create(
+			array(
+				'role' =>
+				'administrator',
+			)
+		);
 		grant_super_admin( $super_admin );
 		wp_set_current_user( $super_admin );
 
@@ -133,7 +155,10 @@ final class MultisiteNetworkOnlyTest extends WP_UnitTestCase {
 
 		switch_to_blog( $subsite );
 		try {
-			self::assertSame( 'weekly', updatronix_get_settings()['schedule']['update_check']['recurrence'] );
+			self::assertSame(
+				'weekly',
+				updatronix_get_settings()['schedule']['update_check']['recurrence']
+			);
 		} finally {
 			restore_current_blog();
 		}
@@ -145,7 +170,9 @@ final class MultisiteNetworkOnlyTest extends WP_UnitTestCase {
 	 * @return void
 	 */
 	public function test_network_admin_log_list_spans_all_originating_sites(): void {
-		if ( ! function_exists( 'wpmu_create_blog' ) || ! function_exists( 'grant_super_admin' ) ) {
+		if ( ! function_exists( 'wpmu_create_blog' ) || ! function_exists(
+			'grant_super_admin'
+		) ) {
 			self::markTestSkipped( 'Multisite helpers unavailable.' );
 		}
 		if ( ! Updatronix_Database::table_exists() ) {
@@ -153,14 +180,35 @@ final class MultisiteNetworkOnlyTest extends WP_UnitTestCase {
 		}
 
 		$subsite     = self::factory()->blog->create();
-		$super_admin = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		$super_admin = self::factory()->user->create(
+			array(
+				'role' =>
+				'administrator',
+			)
+		);
 		grant_super_admin( $super_admin );
 		wp_set_current_user( $super_admin );
 
-		Updatronix_Logger::log( 'plugin', 'update', 'Main Origin Plugin', 'main-origin', '1.0', '1.1', 'success' );
+		Updatronix_Logger::log(
+			'plugin',
+			'update',
+			'Main Origin Plugin',
+			'main-origin',
+			'1.0',
+			'1.1',
+			'success'
+		);
 		switch_to_blog( $subsite );
 		try {
-			Updatronix_Logger::log( 'plugin', 'update', 'Subsite Origin Plugin', 'subsite-origin', '1.0', '1.1', 'success' );
+			Updatronix_Logger::log(
+				'plugin',
+				'update',
+				'Subsite Origin Plugin',
+				'subsite-origin',
+				'1.0',
+				'1.1',
+				'success'
+			);
 		} finally {
 			restore_current_blog();
 		}
@@ -175,8 +223,16 @@ final class MultisiteNetworkOnlyTest extends WP_UnitTestCase {
 			static fn ( object $row ): string => (string) ( $row->item_name ?? '' ),
 			$data['logs']
 		);
-		self::assertContains( 'Main Origin Plugin', $names, 'Default network-admin list must include main-site rows.' );
-		self::assertContains( 'Subsite Origin Plugin', $names, 'Default network-admin list must include subsite-origin rows.' );
+		self::assertContains(
+			'Main Origin Plugin',
+			$names,
+			'Default network-admin list must include main-site rows.'
+		);
+		self::assertContains(
+			'Subsite Origin Plugin',
+			$names,
+			'Default network-admin list must include subsite-origin rows.'
+		);
 	}
 
 	/**
@@ -185,7 +241,9 @@ final class MultisiteNetworkOnlyTest extends WP_UnitTestCase {
 	 * @return void
 	 */
 	public function test_explicit_site_id_narrows_network_log_list(): void {
-		if ( ! function_exists( 'wpmu_create_blog' ) || ! function_exists( 'grant_super_admin' ) ) {
+		if ( ! function_exists( 'wpmu_create_blog' ) || ! function_exists(
+			'grant_super_admin'
+		) ) {
 			self::markTestSkipped( 'Multisite helpers unavailable.' );
 		}
 		if ( ! Updatronix_Database::table_exists() ) {
@@ -193,14 +251,35 @@ final class MultisiteNetworkOnlyTest extends WP_UnitTestCase {
 		}
 
 		$subsite     = self::factory()->blog->create();
-		$super_admin = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		$super_admin = self::factory()->user->create(
+			array(
+				'role' =>
+				'administrator',
+			)
+		);
 		grant_super_admin( $super_admin );
 		wp_set_current_user( $super_admin );
 
-		Updatronix_Logger::log( 'plugin', 'update', 'Main Only Plugin', 'main-only', '1.0', '1.1', 'success' );
+		Updatronix_Logger::log(
+			'plugin',
+			'update',
+			'Main Only Plugin',
+			'main-only',
+			'1.0',
+			'1.1',
+			'success'
+		);
 		switch_to_blog( $subsite );
 		try {
-			Updatronix_Logger::log( 'plugin', 'update', 'Subsite Only Plugin', 'subsite-only', '1.0', '1.1', 'success' );
+			Updatronix_Logger::log(
+				'plugin',
+				'update',
+				'Subsite Only Plugin',
+				'subsite-only',
+				'1.0',
+				'1.1',
+				'success'
+			);
 		} finally {
 			restore_current_blog();
 		}
@@ -216,7 +295,11 @@ final class MultisiteNetworkOnlyTest extends WP_UnitTestCase {
 			$data['logs']
 		);
 		self::assertContains( 'Subsite Only Plugin', $names );
-		self::assertNotContains( 'Main Only Plugin', $names, 'Explicit site_id must scope to the requested subsite.' );
+		self::assertNotContains(
+			'Main Only Plugin',
+			$names,
+			'Explicit site_id must scope to the requested subsite.'
+		);
 	}
 
 	/**
@@ -232,22 +315,57 @@ final class MultisiteNetworkOnlyTest extends WP_UnitTestCase {
 		$foreign_site_id = 987654;
 		switch_to_blog( get_main_site_id() );
 		try {
-			Updatronix_Logger::log( 'plugin', 'update', 'Doomed Site Plugin', 'doomed', '1.0', '1.1', 'success' );
+			Updatronix_Logger::log(
+				'plugin',
+				'update',
+				'Doomed Site Plugin',
+				'doomed',
+				'1.0',
+				'1.1',
+				'success'
+			);
 		} finally {
 			restore_current_blog();
 		}
+		// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 		// Stamp a row with the foreign site_id directly so we can assert per-site deletion.
 		global $wpdb;
 		$table = Updatronix_Database::get_table_name();
+		// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery -- Direct fixture write, no cache semantics.
-		$wpdb->update( $table, array( 'site_id' => $foreign_site_id ), array( 'item_slug' => 'doomed' ), array( '%d' ), array( '%s' ) );
+		$wpdb->update(
+			$table,
+			array( 'site_id' => $foreign_site_id ),
+			array(
+				'item_slug' =>
+				'doomed',
+			),
+			array( '%d' ),
+			array( '%s' )
+		);
 		// phpcs:enable WordPress.DB.DirectDatabaseQuery
 
-		self::assertSame( 1, Updatronix_Logger::get_logs_count( array( 'site_id' => $foreign_site_id ) ) );
+		self::assertSame(
+			1,
+			Updatronix_Logger::get_logs_count(
+				array(
+					'site_id' =>
+					$foreign_site_id,
+				)
+			)
+		);
 
 		Updatronix_Logger::delete_logs_for_site( $foreign_site_id );
 
-		self::assertSame( 0, Updatronix_Logger::get_logs_count( array( 'site_id' => $foreign_site_id ) ) );
+		self::assertSame(
+			0,
+			Updatronix_Logger::get_logs_count(
+				array(
+					'site_id' =>
+					$foreign_site_id,
+				)
+			)
+		);
 	}
 
 	/**
@@ -268,13 +386,25 @@ final class MultisiteNetworkOnlyTest extends WP_UnitTestCase {
 				),
 			)
 		);
-		self::assertNotSame( '', get_site_option( UPDATRONIX_OPTION_NETWORK_SCHEDULE, '' ) );
+		self::assertNotSame(
+			'',
+			get_site_option(
+				UPDATRONIX_OPTION_NETWORK_SCHEDULE,
+				''
+			)
+		);
 		updatronix_save_settings_array( array( 'delete_data_on_uninstall' => true ) );
 
-		require_once updatronix_PLUGIN_DIR . 'inc/classes/class-updatronix-uninstall.php';
+		require_once updatronix_PLUGIN_DIR
+			. 'inc/classes/class-updatronix-uninstall.php';
 		Updatronix_Uninstall::run();
 
-		self::assertFalse( get_site_option( UPDATRONIX_OPTION_NETWORK_SCHEDULE, false ) );
+		self::assertFalse(
+			get_site_option(
+				UPDATRONIX_OPTION_NETWORK_SCHEDULE,
+				false
+			)
+		);
 	}
 
 	/**
@@ -295,9 +425,15 @@ final class MultisiteNetworkOnlyTest extends WP_UnitTestCase {
 				),
 			)
 		);
-		updatronix_save_settings_array( array( 'delete_data_on_uninstall' => false ) );
+		updatronix_save_settings_array(
+			array(
+				'delete_data_on_uninstall' =>
+				false,
+			)
+		);
 
-		require_once updatronix_PLUGIN_DIR . 'inc/classes/class-updatronix-uninstall.php';
+		require_once updatronix_PLUGIN_DIR
+			. 'inc/classes/class-updatronix-uninstall.php';
 		Updatronix_Uninstall::run();
 
 		self::assertNotFalse(

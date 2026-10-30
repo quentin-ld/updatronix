@@ -6,7 +6,8 @@
  *
  * ## Why this exists
  *
- * Infection mutates code, and it is blind to comments. So a change that rewrites
+ * Infection mutates code, and it is blind to comments. So a change that
+ * rewrites
  * a docblock, reflows a comment, or restates a `@return` while the function
  * underneath does not move passes every gate the fleet has. The owner named it
  * as its own requirement: comments must not mutate when
@@ -81,8 +82,13 @@ if ( '' === $root ) {
 }
 chdir( $root );
 
-if ( null === harness_run( 'git rev-parse --verify --quiet ' . escapeshellarg( $base ) ) ) {
+if ( null === harness_run(
+	'git rev-parse --verify --quiet ' . escapeshellarg(
+		$base
+	)
+) ) {
 	if ( ! $quiet ) {
+		// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 		echo "prose-drift: no base at {$base}; nothing to compare. Fine on the first commit.\n";
 	}
 
@@ -112,12 +118,12 @@ foreach ( explode( "\n", $diff ) as $line ) {
 	if ( '' === $current_file ) {
 		continue;
 	}
-	// Only added lines. A removal is the other half of the same edit and would
+	// Only added lines. A removal is the other half of the same edit and would.
 	// double the count.
 	if ( str_starts_with( $line, '+' ) && ! str_starts_with( $line, '+++' ) ) {
 		$content = substr( $line, 1 );
 
-		// Classify with the tokenizer. A fragment has no surrounding context, so
+		// Classify with the tokenizer. A fragment has no surrounding context, so.
 		// wrap it in the smallest thing that tokenizes the same way.
 		$tokens   = token_get_all( "<?php\n" . $content );
 		$is_prose = true;
@@ -125,16 +131,29 @@ foreach ( explode( "\n", $diff ) as $line ) {
 			if ( ! is_array( $token ) ) {
 				continue;
 			}
-			if ( in_array( $token[0], array( T_COMMENT, T_DOC_COMMENT, T_WHITESPACE, T_OPEN_TAG ), true ) ) {
+			if ( in_array(
+				$token[0],
+				array(
+					T_COMMENT,
+					T_DOC_COMMENT,
+					T_WHITESPACE,
+					T_OPEN_TAG,
+				),
+				true
+			) ) {
 				continue;
 			}
 			$is_prose = false;
 			break;
 		}
-		// A line that tokenizes to nothing but punctuation is a brace or a
+		// A line that tokenizes to nothing but punctuation is a brace or a.
 		// semicolon: scaffolding, not a statement.
 		$significant = trim( $content );
-		if ( in_array( $significant, array( '', '{', '}', ');', '],', '),' ), true ) ) {
+		if ( in_array(
+			$significant,
+			array( '', '{', '}', ');', '],', '),' ),
+			true
+		) ) {
 			$is_prose = true;
 		}
 
@@ -160,7 +179,9 @@ if ( 0 === $prose_total ) {
 }
 
 if ( 0 === $code_total ) {
+	// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 	echo "prose-drift: this diff changes {$prose_total} comment line(s) and no code.\n";
+	// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 	echo "  Not a failure. Worth a look: was the prose wrong, or was it reflowed?\n";
 	foreach ( $prose as $file => $count ) {
 		echo "    {$file}: {$count} line(s)\n";
@@ -169,4 +190,5 @@ if ( 0 === $code_total ) {
 	return;
 }
 
+// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 echo "prose-drift: {$code_total} code line(s) and {$prose_total} comment line(s).\n";

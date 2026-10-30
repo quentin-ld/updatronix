@@ -1,6 +1,7 @@
 <?php
 /**
- * Plain-text notes for automatic update results: skin messages plus WP_Error from `result`
+ * Plain-text notes for automatic update results: skin messages plus WP_Error
+ * from `result`
  *
  * @package updatronix
  */
@@ -14,13 +15,17 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 final class Updatronix_Automatic_Update_Result_Notes {
 	/**
-	 * Combine Automatic_Upgrader_Skin messages with `$result->result` when it is a WP_Error.
+	 * Combine Automatic_Upgrader_Skin messages with `$result->result` when it is a
+	 * WP_Error.
 	 *
 	 * @param array<int, mixed> $messages  Result object's `messages` array.
 	 * @param mixed             $wp_result Result object's `result` property.
 	 * @return string Plain text for activity log notes.
 	 */
-	public static function merge_skin_messages_with_wp_result( array $messages, mixed $wp_result ): string {
+	public static function merge_skin_messages_with_wp_result(
+		array $messages,
+		mixed $wp_result
+	): string {
 		$lines = array();
 		foreach ( $messages as $m ) {
 			if ( is_string( $m ) && '' !== $m ) {

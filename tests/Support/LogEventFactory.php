@@ -78,7 +78,8 @@ final class LogEventFactory {
 			'version_before' => '1.0.0',
 			'version_after'  => '1.1.0',
 			'status'         => 'delayed',
-			'message'        => 'Update deferred; eligible no earlier than 30 October 2026 13h01.',
+			'message'        =>
+				'Update deferred; eligible no earlier than 30 October 2026 13h01.',
 			'performed_as'   => 'automatic',
 			'update_context' => 'single',
 			'event_key'      => 'udly|fixture-held',
@@ -203,7 +204,8 @@ final class LogEventFactory {
 			'version_before' => '1.0.0',
 			'target_version' => '2.0.0',
 			'status'         => 'warning',
-			'message'        => 'Update Shield blocked the update: WordPress 6.6 is required.',
+			'message'        =>
+				'Update Shield blocked the update: WordPress 6.6 is required.',
 			'performed_as'   => 'automatic',
 			'update_context' => 'single',
 			'reason_code'    => 'shield_incompatible_wp',
@@ -406,7 +408,16 @@ final class LogEventFactory {
 	 * @return array<int, array<string, mixed>>
 	 */
 	public static function export_rows( int $count = 10000 ): array {
-		$states  = array( 'done', 'blocked', 'waiting', 'delayed', 'skipped', 'failed', 'canceled', 'info' );
+		$states  = array(
+			'done',
+			'blocked',
+			'waiting',
+			'delayed',
+			'skipped',
+			'failed',
+			'canceled',
+			'info',
+		);
 		$reasons = array(
 			'done'     => 'updated',
 			'blocked'  => 'shield_incompatible_php',

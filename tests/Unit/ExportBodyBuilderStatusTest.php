@@ -27,7 +27,10 @@ final class ExportBodyBuilderStatusTest extends TestCase {
 	 * @return int
 	 */
 	private function status_rank( string $status ): int {
-		$reflection = new \ReflectionMethod( Updatronix_Export_Body_Builder::class, 'status_rank' );
+		$reflection = new \ReflectionMethod(
+			Updatronix_Export_Body_Builder::class,
+			'status_rank'
+		);
 		$reflection->setAccessible( true );
 
 		return $reflection->invoke( null, $status );
@@ -40,7 +43,10 @@ final class ExportBodyBuilderStatusTest extends TestCase {
 	 * @return string
 	 */
 	private function status_label( string $status ): string {
-		$reflection = new \ReflectionMethod( Updatronix_Export_Body_Builder::class, 'status_label' );
+		$reflection = new \ReflectionMethod(
+			Updatronix_Export_Body_Builder::class,
+			'status_label'
+		);
 		$reflection->setAccessible( true );
 
 		return $reflection->invoke( null, $status );
@@ -51,7 +57,12 @@ final class ExportBodyBuilderStatusTest extends TestCase {
 	 */
 	public function test_status_rank_parity_delayed_matches_cancelled(): void {
 		self::assertSame( 1, $this->status_rank( 'delayed' ) );
-		self::assertSame( $this->status_rank( 'cancelled' ), $this->status_rank( 'delayed' ) );
+		self::assertSame(
+			$this->status_rank( 'cancelled' ),
+			$this->status_rank(
+				'delayed'
+			)
+		);
 	}
 
 	/**
@@ -69,7 +80,8 @@ final class ExportBodyBuilderStatusTest extends TestCase {
 	}
 
 	/**
-	 * Delayed exports as the localized "Delayed" label, not the "Success" fallback.
+	 * Delayed exports as the localized "Delayed" label, not the "Success"
+	 * fallback.
 	 */
 	public function test_status_label_delayed_renders_delayed(): void {
 		self::assertSame( 'Delayed', $this->status_label( 'delayed' ) );

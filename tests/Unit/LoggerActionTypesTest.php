@@ -30,7 +30,8 @@ final class LoggerActionTypesTest extends TestCase {
 	protected function setUp(): void {
 		parent::setUp();
 
-		require_once dirname( __DIR__, 2 ) . '/inc/classes/class-updatronix-security.php';
+		require_once dirname( __DIR__, 2 )
+			. '/inc/classes/class-updatronix-security.php';
 	}
 
 	/**
@@ -53,8 +54,16 @@ final class LoggerActionTypesTest extends TestCase {
 	 * @return void
 	 */
 	public function test_unknown_action_type_falls_back_to_update(): void {
-		self::assertSame( 'update', Updatronix_Security::sanitize_action_type( 'auto_update_reenabled' ) );
-		self::assertSame( 'prevented', Updatronix_Security::sanitize_action_type( 'prevented' ) );
+		self::assertSame(
+			'update',
+			Updatronix_Security::sanitize_action_type( 'auto_update_reenabled' )
+		);
+		self::assertSame(
+			'prevented',
+			Updatronix_Security::sanitize_action_type(
+				'prevented'
+			)
+		);
 	}
 
 	/**
@@ -74,7 +83,10 @@ final class LoggerActionTypesTest extends TestCase {
 
 		self::assertContains( 'auto_update_reenabled', $allowed );
 		self::assertContains( 'prevented', $allowed );
-		self::assertSame( 'auto_update_reenabled', Updatronix_Security::sanitize_action_type( 'auto_update_reenabled' ) );
+		self::assertSame(
+			'auto_update_reenabled',
+			Updatronix_Security::sanitize_action_type( 'auto_update_reenabled' )
+		);
 	}
 
 	/**
@@ -95,6 +107,15 @@ final class LoggerActionTypesTest extends TestCase {
 		$allowed = Updatronix_Security::get_allowed_action_types();
 
 		self::assertContains( 'autoupdatereenabled', $allowed );
-		self::assertSame( 1, count( array_keys( $allowed, 'autoupdatereenabled', true ) ) );
+		self::assertSame(
+			1,
+			count(
+				array_keys(
+					$allowed,
+					'autoupdatereenabled',
+					true
+				)
+			)
+		);
 	}
 }

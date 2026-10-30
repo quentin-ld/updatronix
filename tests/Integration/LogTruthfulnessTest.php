@@ -24,12 +24,18 @@ final class LogTruthfulnessTest extends WP_UnitTestCase {
 	protected function setUp(): void {
 		parent::setUp();
 
-		require_once UPDATRONIX_PLUGIN_DIR . 'inc/classes/class-updatronix-database.php';
-		require_once UPDATRONIX_PLUGIN_DIR . 'inc/classes/class-updatronix-log-taxonomy.php';
-		require_once UPDATRONIX_PLUGIN_DIR . 'inc/classes/class-updatronix-log-event.php';
-		require_once UPDATRONIX_PLUGIN_DIR . 'inc/classes/class-updatronix-log-query.php';
-		require_once UPDATRONIX_PLUGIN_DIR . 'inc/classes/class-updatronix-security.php';
-		require_once UPDATRONIX_PLUGIN_DIR . 'inc/classes/class-updatronix-logger.php';
+		require_once UPDATRONIX_PLUGIN_DIR
+			. 'inc/classes/class-updatronix-database.php';
+		require_once UPDATRONIX_PLUGIN_DIR
+			. 'inc/classes/class-updatronix-log-taxonomy.php';
+		require_once UPDATRONIX_PLUGIN_DIR
+			. 'inc/classes/class-updatronix-log-event.php';
+		require_once UPDATRONIX_PLUGIN_DIR
+			. 'inc/classes/class-updatronix-log-query.php';
+		require_once UPDATRONIX_PLUGIN_DIR
+			. 'inc/classes/class-updatronix-security.php';
+		require_once UPDATRONIX_PLUGIN_DIR
+			. 'inc/classes/class-updatronix-logger.php';
 		require_once dirname( __DIR__ ) . '/Support/LogEventFactory.php';
 
 		Updatronix_Database::create_table();
@@ -176,7 +182,12 @@ final class LogTruthfulnessTest extends WP_UnitTestCase {
 
 		self::assertIsInt( $id );
 
-		$log = Updatronix_Settings::enrich_log_for_display( Updatronix_Logger::get_log( (int) $id, true ) );
+		$log = Updatronix_Settings::enrich_log_for_display(
+			Updatronix_Logger::get_log(
+				(int) $id,
+				true
+			)
+		);
 
 		self::assertTrue( $log->is_legacy );
 		self::assertSame( 'Legacy — reason not recorded', $log->reason_label );
@@ -195,13 +206,22 @@ final class LogTruthfulnessTest extends WP_UnitTestCase {
 			'target_version' => '9.9.9',
 		);
 
-		self::assertFalse( $this->assert_log_state( $screen, array( 'decision_state' => 'blocked' ) ) );
+		self::assertFalse(
+			$this->assert_log_state(
+				$screen,
+				array(
+					'decision_state' =>
+					'blocked',
+				)
+			)
+		);
 	}
 
 	/**
 	 * Assert the latest row for a screen state matches the expected facts.
 	 *
-	 * @param array<string, mixed> $screen   Screen identity (site, type, item, target).
+	 * @param array<string, mixed> $screen Screen identity (site, type, item,
+	 * target).
 	 * @param array<string, mixed> $expected Expected column values.
 	 * @return bool True when the row exists and every field matches.
 	 */

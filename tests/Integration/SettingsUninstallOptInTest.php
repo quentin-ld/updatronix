@@ -44,9 +44,13 @@ final class SettingsUninstallOptInTest extends WP_UnitTestCase {
 	 * @return void
 	 */
 	public function test_opt_in_persists_and_controls_uninstall_cleanup(): void {
-		require_once UPDATRONIX_PLUGIN_DIR . 'inc/classes/class-updatronix-uninstall.php';
+		require_once UPDATRONIX_PLUGIN_DIR
+			. 'inc/classes/class-updatronix-uninstall.php';
 
-		$method = new ReflectionMethod( 'Updatronix_Uninstall', 'should_delete_data' );
+		$method = new ReflectionMethod(
+			'Updatronix_Uninstall',
+			'should_delete_data'
+		);
 		$method->setAccessible( true );
 
 		$settings = updatronix_get_settings();
@@ -82,7 +86,12 @@ final class SettingsUninstallOptInTest extends WP_UnitTestCase {
 	 * @return void
 	 */
 	public function test_rest_route_persists_opt_in(): void {
-		$admin_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		$admin_id = self::factory()->user->create(
+			array(
+				'role' =>
+				'administrator',
+			)
+		);
 		if ( is_multisite() && function_exists( 'grant_super_admin' ) ) {
 			// The settings route is Super Admin only on Multisite.
 			grant_super_admin( $admin_id );

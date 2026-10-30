@@ -2,8 +2,10 @@
 /**
  * Shared Site Health mock detection for auto-update filters.
  *
- * Synthetic offers injected by {@see WP_Site_Health::detect_plugin_theme_auto_update_issues()}
- * must bypass delay and safe-mode gates so that the Site Health screen does not report
+ * Synthetic offers injected by {@see
+ * WP_Site_Health::detect_plugin_theme_auto_update_issues()}
+ * must bypass delay and safe-mode gates so that the Site Health screen does not
+ * report
  * false "auto-updates disabled" warnings.
  *
  * @package updatronix
@@ -28,7 +30,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @param string $type Update type: 'plugin', 'theme', 'core', or 'translation'.
  * @param object $item The update item object from the filter.
- * @return bool True when the offer is a synthetic Site Health mock or references a missing file.
+ * @return bool True when the offer is a synthetic Site Health mock or
+ * references a missing file.
  */
 function updatronix_is_site_health_mock( string $type, object $item ): bool {
 	if ( 'plugin' === $type ) {

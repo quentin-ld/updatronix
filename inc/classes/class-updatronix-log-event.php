@@ -87,7 +87,9 @@ final class Updatronix_Log_Event {
 			&& self::text( $previous->predecessor ?? '' ) === $event['predecessor']
 			&& self::text( $previous->target_version ?? '' ) === $event['target_version']
 			&& (int) ( $previous->attempt ?? 0 ) === (int) $event['attempt']
-			&& self::text( $previous->next_eligible_at ?? '' ) === $event['next_eligible_at'];
+			&& self::text(
+				$previous->next_eligible_at ?? ''
+			) === $event['next_eligible_at'];
 	}
 
 	/**
@@ -102,19 +104,37 @@ final class Updatronix_Log_Event {
 	 */
 	public static function normalize_identity( array $event ): array {
 		$event['site_id']          = (int) ( $event['site_id'] ?? 0 );
-		$event['origin']           = sanitize_key( (string) ( $event['origin'] ?? '' ) );
-		$event['pass_id']          = self::normalize_pass_id( (string) ( $event['pass_id'] ?? '' ) );
-		$event['request_id']       = self::normalize_request_id( (string) ( $event['request_id'] ?? '' ) );
-		$event['log_type']         = sanitize_key( (string) ( $event['log_type'] ?? '' ) );
+		$event['origin']           = sanitize_key(
+			(string) (
+			$event['origin'] ?? '' )
+		);
+		$event['pass_id']          = self::normalize_pass_id(
+			(string) (
+			$event['pass_id'] ?? '' )
+		);
+		$event['request_id']       =
+			self::normalize_request_id( (string) ( $event['request_id'] ?? '' ) );
+		$event['log_type']         = sanitize_key(
+			(string) (
+			$event['log_type'] ?? '' )
+		);
 		$event['item_slug']        = (string) ( $event['item_slug'] ?? '' );
 		$event['target_version']   = (string) ( $event['target_version'] ?? '' );
 		$event['reason_code']      = (string) ( $event['reason_code'] ?? '' );
-		$event['decision_state']   = sanitize_key( (string) ( $event['decision_state'] ?? '' ) );
-		$event['decision_stage']   = sanitize_key( (string) ( $event['decision_stage'] ?? '' ) );
+		$event['decision_state']   = sanitize_key(
+			(string) (
+			$event['decision_state'] ?? '' )
+		);
+		$event['decision_stage']   = sanitize_key(
+			(string) (
+			$event['decision_stage'] ?? '' )
+		);
 		$event['predecessor']      = self::text( $event['predecessor'] ?? '' );
 		$event['attempt']          = max( 0, (int) ( $event['attempt'] ?? 0 ) );
 		$event['network']          = (int) ( $event['network'] ?? 0 ) > 0 ? 1 : 0;
-		$event['next_eligible_at'] = self::normalize_utc( $event['next_eligible_at'] ?? '' );
+		$event['next_eligible_at'] = self::normalize_utc(
+			$event['next_eligible_at'] ?? ''
+		);
 		$event['transition']       = self::text( $event['transition'] ?? '' );
 
 		return $event;
@@ -135,7 +155,8 @@ final class Updatronix_Log_Event {
 			return sanitize_key( (string) $event['transition'] );
 		}
 
-		if ( isset( $event['decision_state'] ) && '' !== (string) $event['decision_state'] ) {
+		if ( isset( $event['decision_state'] )
+			&& '' !== (string) $event['decision_state'] ) {
 			return sanitize_key( (string) $event['decision_state'] );
 		}
 
@@ -165,7 +186,13 @@ final class Updatronix_Log_Event {
 	 * @return string
 	 */
 	public static function normalize_request_id( string $request_id ): string {
-		$request_id = strtolower( preg_replace( '/[^a-zA-Z0-9_-]/', '', $request_id ) ?? '' );
+		$request_id = strtolower(
+			preg_replace(
+				'/[^a-zA-Z0-9_-]/',
+				'',
+				$request_id
+			) ?? ''
+		);
 
 		return substr( $request_id, 0, 64 );
 	}
@@ -182,7 +209,11 @@ final class Updatronix_Log_Event {
 	 */
 	public static function normalize_utc( mixed $value ): string {
 		if ( $value instanceof \DateTimeInterface ) {
-			$utc = \DateTimeImmutable::createFromInterface( $value )->setTimezone( new \DateTimeZone( 'UTC' ) );
+			$utc =
+				// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+				\DateTimeImmutable::createFromInterface( $value )->setTimezone(
+					new \DateTimeZone( 'UTC' )
+				);
 
 			return $utc->format( 'Y-m-d H:i:s' );
 		}

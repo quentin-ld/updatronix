@@ -23,7 +23,8 @@ final class LogEventKeyTest extends TestCase {
 	protected function setUp(): void {
 		parent::setUp();
 
-		require_once dirname( __DIR__, 2 ) . '/inc/classes/class-updatronix-log-event.php';
+		require_once dirname( __DIR__, 2 )
+			. '/inc/classes/class-updatronix-log-event.php';
 	}
 
 	/**
@@ -66,7 +67,15 @@ final class LogEventKeyTest extends TestCase {
 		$key   = Updatronix_Log_Event::key( $event );
 
 		self::assertSame( $key, Updatronix_Log_Event::key( $event ) );
-		self::assertSame( $key, Updatronix_Log_Event::key( array_reverse( $event, true ) ) );
+		self::assertSame(
+			$key,
+			Updatronix_Log_Event::key(
+				array_reverse(
+					$event,
+					true
+				)
+			)
+		);
 		self::assertMatchesRegularExpression( '/^v2\|[a-f0-9]{64}$/', $key );
 		self::assertLessThanOrEqual( 191, strlen( $key ) );
 	}
@@ -83,7 +92,10 @@ final class LogEventKeyTest extends TestCase {
 			'pass'          => array( 'pass_id' => '0a1b2c3d4e5f60718293a4b5c6d7e8f9' ),
 			'reason'        => array( 'reason_code' => 'update_failed' ),
 			'attempt'       => array( 'attempt' => 2 ),
-			'predecessor'   => array( 'predecessor' => 'plugin:fixture/predecessor.php' ),
+			'predecessor'   => array(
+				'predecessor' =>
+						'plugin:fixture/predecessor.php',
+			),
 			'stage'         => array( 'decision_stage' => 'finalize' ),
 			'network'       => array( 'network' => 1 ),
 			'next eligible' => array( 'next_eligible_at' => '2026-11-03 02:00:00' ),
@@ -95,7 +107,15 @@ final class LogEventKeyTest extends TestCase {
 		);
 
 		foreach ( $changes as $label => $override ) {
-			self::assertNotSame( $base, Updatronix_Log_Event::key( $this->event( $override ) ), $label );
+			self::assertNotSame(
+				$base,
+				Updatronix_Log_Event::key(
+					$this->event(
+						$override
+					)
+				),
+				$label
+			);
 		}
 	}
 
@@ -161,8 +181,18 @@ final class LogEventKeyTest extends TestCase {
 			'transition'     => 'updated',
 		);
 
-		self::assertSame( 'blocked', Updatronix_Log_Event::transition( $from_state ) );
-		self::assertSame( 'warning', Updatronix_Log_Event::transition( $from_status ) );
+		self::assertSame(
+			'blocked',
+			Updatronix_Log_Event::transition(
+				$from_state
+			)
+		);
+		self::assertSame(
+			'warning',
+			Updatronix_Log_Event::transition(
+				$from_status
+			)
+		);
 		self::assertSame( 'updated', Updatronix_Log_Event::transition( $explicit ) );
 	}
 
@@ -191,21 +221,80 @@ final class LogEventKeyTest extends TestCase {
 			)
 		);
 
-		self::assertTrue( Updatronix_Log_Event::is_same_state( $previous, $waiting ) );
 		self::assertTrue(
 			Updatronix_Log_Event::is_same_state(
 				$previous,
-				array_merge( $waiting, array( 'pass_id' => '0a1b2c3d4e5f60718293a4b5c6d7e8f9' ) )
+				$waiting
+			)
+		);
+		self::assertTrue(
+			Updatronix_Log_Event::is_same_state(
+				$previous,
+				array_merge(
+					$waiting,
+					array(
+						'pass_id' =>
+											'0a1b2c3d4e5f60718293a4b5c6d7e8f9',
+					)
+				)
 			),
 			'A later pass with the same state must compare equal.'
 		);
 
-		self::assertFalse( Updatronix_Log_Event::is_same_state( $previous, array_merge( $waiting, array( 'reason_code' => 'queue_waiting_turn' ) ) ) );
-		self::assertFalse( Updatronix_Log_Event::is_same_state( $previous, array_merge( $waiting, array( 'decision_state' => 'done' ) ) ) );
-		self::assertFalse( Updatronix_Log_Event::is_same_state( $previous, array_merge( $waiting, array( 'target_version' => '2.1.0' ) ) ) );
-		self::assertFalse( Updatronix_Log_Event::is_same_state( $previous, array_merge( $waiting, array( 'attempt' => 1 ) ) ) );
-		self::assertFalse( Updatronix_Log_Event::is_same_state( $previous, array_merge( $waiting, array( 'next_eligible_at' => '' ) ) ) );
-		self::assertFalse( Updatronix_Log_Event::is_same_state( $previous, array_merge( $waiting, array( 'predecessor' => '' ) ) ) );
+		self::assertFalse(
+			Updatronix_Log_Event::is_same_state(
+				$previous,
+				array_merge(
+					$waiting,
+					array( 'reason_code' => 'queue_waiting_turn' )
+				)
+			)
+		);
+		self::assertFalse(
+			Updatronix_Log_Event::is_same_state(
+				$previous,
+				array_merge(
+					$waiting,
+					array( 'decision_state' => 'done' )
+				)
+			)
+		);
+		self::assertFalse(
+			Updatronix_Log_Event::is_same_state(
+				$previous,
+				array_merge(
+					$waiting,
+					array( 'target_version' => '2.1.0' )
+				)
+			)
+		);
+		self::assertFalse(
+			Updatronix_Log_Event::is_same_state(
+				$previous,
+				array_merge(
+					$waiting,
+					array( 'attempt' => 1 )
+				)
+			)
+		);
+		self::assertFalse(
+			Updatronix_Log_Event::is_same_state(
+				$previous,
+				array_merge(
+					$waiting,
+					array( 'next_eligible_at' => '' )
+				)
+			)
+		);
+		self::assertFalse(
+			Updatronix_Log_Event::is_same_state(
+				$previous,
+				array_merge(
+					$waiting,
+					array( 'predecessor' => '' )
+				)
+			)
+		);
 	}
 
 	/**
@@ -234,14 +323,41 @@ final class LogEventKeyTest extends TestCase {
 	 * @return void
 	 */
 	public function test_identity_normalization(): void {
-		self::assertSame( '8f3c0d9a4b6e4c2a9f1d3e5b7a9c0d1e', Updatronix_Log_Event::normalize_pass_id( '8F3C0D9A-4B6E-4C2A-9F1D-3E5B7A9C0D1E' ) );
-		self::assertSame( str_repeat( 'a', 32 ), Updatronix_Log_Event::normalize_pass_id( str_repeat( 'A', 40 ) ) );
+		self::assertSame(
+			'8f3c0d9a4b6e4c2a9f1d3e5b7a9c0d1e',
+			Updatronix_Log_Event::normalize_pass_id(
+				'8F3C0D9A-4B6E-4C2A-9F1D-3E5B7A9C0D1E'
+			)
+		);
+		self::assertSame(
+			str_repeat( 'a', 32 ),
+			Updatronix_Log_Event::normalize_pass_id( str_repeat( 'A', 40 ) )
+		);
 		self::assertSame( '', Updatronix_Log_Event::normalize_pass_id( 'not-hex' ) );
-		self::assertSame( 'req-2026_10', Updatronix_Log_Event::normalize_request_id( 'REQ-2026_10!!' ) );
+		self::assertSame(
+			'req-2026_10',
+			Updatronix_Log_Event::normalize_request_id( 'REQ-2026_10!!' )
+		);
 
-		self::assertSame( '2026-11-03 02:00:00', Updatronix_Log_Event::normalize_utc( '2026-11-03 02:00:00' ) );
-		self::assertSame( '2026-11-03 02:00:00', Updatronix_Log_Event::normalize_utc( 1793671200 ) );
-		self::assertSame( '2026-11-03 02:00:00', Updatronix_Log_Event::normalize_utc( new \DateTimeImmutable( '2026-11-03 03:00:00', new \DateTimeZone( 'Europe/Paris' ) ) ) );
+		self::assertSame(
+			'2026-11-03 02:00:00',
+			Updatronix_Log_Event::normalize_utc( '2026-11-03 02:00:00' )
+		);
+		self::assertSame(
+			'2026-11-03 02:00:00',
+			Updatronix_Log_Event::normalize_utc(
+				1793671200
+			)
+		);
+		self::assertSame(
+			'2026-11-03 02:00:00',
+			Updatronix_Log_Event::normalize_utc(
+				new \DateTimeImmutable(
+					'2026-11-03 03:00:00',
+					new \DateTimeZone( 'Europe/Paris' )
+				)
+			)
+		);
 		self::assertSame( '', Updatronix_Log_Event::normalize_utc( '' ) );
 		self::assertSame( '', Updatronix_Log_Event::normalize_utc( 'not a date' ) );
 		self::assertSame( '', Updatronix_Log_Event::normalize_utc( 0 ) );
@@ -253,8 +369,22 @@ final class LogEventKeyTest extends TestCase {
 	 * @return void
 	 */
 	public function test_timestamp_and_datetime_share_a_key(): void {
-		$from_string = Updatronix_Log_Event::key( $this->event( array( 'next_eligible_at' => '2026-11-03 02:00:00' ) ) );
-		$from_stamp  = Updatronix_Log_Event::key( $this->event( array( 'next_eligible_at' => 1793671200 ) ) );
+		$from_string = Updatronix_Log_Event::key(
+			$this->event(
+				array(
+					'next_eligible_at' =>
+					'2026-11-03 02:00:00',
+				)
+			)
+		);
+		$from_stamp  = Updatronix_Log_Event::key(
+			$this->event(
+				array(
+					'next_eligible_at' =>
+					1793671200,
+				)
+			)
+		);
 
 		self::assertSame( $from_string, $from_stamp );
 	}

@@ -23,7 +23,8 @@ final class AutoUpdateToggleGuardTest extends TestCase {
 	protected function setUp(): void {
 		parent::setUp();
 
-		require_once dirname( __DIR__, 2 ) . '/inc/classes/class-updatronix-settings.php';
+		require_once dirname( __DIR__, 2 )
+			. '/inc/classes/class-updatronix-settings.php';
 
 		$GLOBALS['_updatronix_filters'] = array();
 	}
@@ -47,7 +48,10 @@ final class AutoUpdateToggleGuardTest extends TestCase {
 	public function test_plugin_toggle_returns_403_for_a_wp_error(): void {
 		add_filter(
 			'updatronix_auto_update_can_toggle',
-			static fn (): WP_Error => new WP_Error( 'updatronix_version_locked', 'Managed via Git.' ),
+			static fn (): WP_Error => new WP_Error(
+				'updatronix_version_locked',
+				'Managed via Git.'
+			),
 			10,
 			1
 		);
@@ -68,7 +72,11 @@ final class AutoUpdateToggleGuardTest extends TestCase {
 	 * @return void
 	 */
 	public function test_theme_toggle_returns_403_for_false(): void {
-		add_filter( 'updatronix_auto_update_can_toggle', static fn (): bool => false );
+		add_filter(
+			'updatronix_auto_update_can_toggle',
+			static fn (): bool =>
+			false
+		);
 
 		$request = new WP_REST_Request();
 		$request->set_param( 'stylesheet', 'acme' );
@@ -77,7 +85,10 @@ final class AutoUpdateToggleGuardTest extends TestCase {
 		$response = Updatronix_Settings::rest_toggle_theme( $request );
 
 		self::assertSame( 403, $response->get_status() );
-		self::assertStringContainsString( 'external update manager', $response->get_data()['message'] );
+		self::assertStringContainsString(
+			'external update manager',
+			$response->get_data()['message']
+		);
 	}
 
 	/**

@@ -46,7 +46,7 @@ final class Updatronix_Schedule_Context {
 	/**
 	 * Built maps keyed by surface.
 	 *
-	 * @var array<string, array{items: array<string, array<string, mixed>>, total: int, truncated: bool}>
+	 * @var array<string, array<string, mixed>>
 	 */
 	private static array $maps = array();
 
@@ -78,8 +78,20 @@ final class Updatronix_Schedule_Context {
 	 * @return void
 	 */
 	public static function register(): void {
-		add_action( 'updatronix_after_save_network_schedule', array( self::class, 'reset_all_caches' ) );
-		add_action( 'updatronix_before_update_check', array( self::class, 'reset_all_caches' ) );
+		add_action(
+			'updatronix_after_save_network_schedule',
+			array(
+				self::class,
+				'reset_all_caches',
+			)
+		);
+		add_action(
+			'updatronix_before_update_check',
+			array(
+				self::class,
+				'reset_all_caches',
+			)
+		);
 	}
 
 	/**
@@ -129,7 +141,11 @@ final class Updatronix_Schedule_Context {
 
 		self::$next_check_loaded = true;
 
-		if ( function_exists( 'is_multisite' ) && is_multisite() && function_exists( 'get_main_site_id' ) && function_exists( 'switch_to_blog' ) && function_exists( 'restore_current_blog' ) ) {
+		if ( function_exists( 'is_multisite' ) && is_multisite()
+			&& function_exists( 'get_main_site_id' ) && function_exists(
+				'switch_to_blog'
+			)
+			&& function_exists( 'restore_current_blog' ) ) {
 			$main = (int) get_main_site_id();
 			switch_to_blog( $main );
 			try {
@@ -250,7 +266,8 @@ final class Updatronix_Schedule_Context {
 	 * @since 1.3.0
 	 * @param string $type Item type.
 	 * @param string $id   Item id.
-	 * @return array{lock: array<string, mixed>, policy: array<string, mixed>, flow: array<string, mixed>, queue: array<string, mixed>}
+	 * @return array{lock: array<string, mixed>, policy: array<string, mixed>,
+	 * flow: array<string, mixed>, queue: array<string, mixed>}
 	 */
 	public static function pro_facts( string $type, string $id ): array {
 		$facts = array(
@@ -278,7 +295,8 @@ final class Updatronix_Schedule_Context {
 
 		$out = array();
 		foreach ( array( 'lock', 'policy', 'flow', 'queue' ) as $name ) {
-			$value        = isset( $filtered[ $name ] ) && is_array( $filtered[ $name ] ) ? $filtered[ $name ] : array();
+			$value        = isset( $filtered[ $name ] )
+				&& is_array( $filtered[ $name ] ) ? $filtered[ $name ] : array();
 			$out[ $name ] = $value;
 		}
 
@@ -301,7 +319,9 @@ final class Updatronix_Schedule_Context {
 	 * @return bool
 	 */
 	private static function facts_filter_active(): bool {
-		return function_exists( 'has_filter' ) && false !== has_filter( self::FACTS_FILTER );
+		return function_exists( 'has_filter' ) && false !== has_filter(
+			self::FACTS_FILTER
+		);
 	}
 
 	/**
@@ -319,14 +339,19 @@ final class Updatronix_Schedule_Context {
 		$facts    = self::pro_facts( $type, $id );
 		$first    = null;
 
-		if ( class_exists( 'Updatronix_AutoUpdateDelay' ) && is_object( $state['offer'] ) ) {
+		if ( class_exists( 'Updatronix_AutoUpdateDelay' ) && is_object(
+			$state['offer']
+		) ) {
 			/**
 			 * Narrowed item type for the delay peek.
 			 *
 			 * @var 'plugin'|'theme'|'core' $peek_type
 			 */
 			$peek_type = $type;
-			$first     = Updatronix_AutoUpdateDelay::peek_first_seen( $peek_type, $state['offer'] );
+			$first     = Updatronix_AutoUpdateDelay::peek_first_seen(
+				$peek_type,
+				$state['offer']
+			);
 		}
 
 		return Updatronix_Schedule_State::calculate(
@@ -366,7 +391,7 @@ final class Updatronix_Schedule_Context {
 	 * @since 1.3.0
 	 * @param string $surface plugins|themes|core|all.
 	 * @param int    $limit   Optional cap; the filter default applies when 0.
-	 * @return array{items: array<string, array<string, mixed>>, total: int, truncated: bool}
+	 * @return array<string, mixed>
 	 */
 	public static function get_map( string $surface = 'plugins', int $limit = 0 ): array {
 		if ( isset( self::$maps[ $surface ] ) ) {
@@ -377,13 +402,19 @@ final class Updatronix_Schedule_Context {
 		$ids = array();
 
 		if ( in_array( $surface, array( 'plugins', 'all' ), true ) ) {
-			foreach ( Updatronix_Item_State::installed_ids( 'plugin', $cap + 1 ) as $file ) {
+			foreach ( Updatronix_Item_State::installed_ids(
+				'plugin',
+				$cap + 1
+			) as $file ) {
 				$ids[] = array( 'plugin', $file );
 			}
 		}
 
 		if ( in_array( $surface, array( 'themes', 'all' ), true ) ) {
-			foreach ( Updatronix_Item_State::installed_ids( 'theme', $cap + 1 ) as $stylesheet ) {
+			foreach ( Updatronix_Item_State::installed_ids(
+				'theme',
+				$cap + 1
+			) as $stylesheet ) {
 				$ids[] = array( 'theme', $stylesheet );
 			}
 		}
@@ -423,14 +454,20 @@ final class Updatronix_Schedule_Context {
 		 * @since 1.3.0
 		 * @param int $limit Item cap. Default 200.
 		 */
-		return max( 1, (int) apply_filters( self::LIMIT_FILTER, self::DEFAULT_LIMIT ) );
+		return max(
+			1,
+			(int) apply_filters(
+				self::LIMIT_FILTER,
+				self::DEFAULT_LIMIT
+			)
+		);
 	}
 
 	/**
 	 * Counts the states for the update-core next-pass summary.
 	 *
 	 * @since 1.3.0
-	 * @return array{eligible: int, held: int, waiting: int, managed: int, blocked: int, other: int, total: int, truncated: bool}
+	 * @return array<string, int|bool>
 	 */
 	public static function summary(): array {
 		$map   = self::get_map( 'all' );
@@ -450,10 +487,16 @@ final class Updatronix_Schedule_Context {
 			$state = (string) ( $item['state'] ?? '' );
 			match ( $state ) {
 				Updatronix_Schedule_State::STATE_ELIGIBLE => ++$count['eligible'],
-				Updatronix_Schedule_State::STATE_HELD, Updatronix_Schedule_State::STATE_NOT_OBSERVED => ++$count['held'],
-				Updatronix_Schedule_State::STATE_WAITING, Updatronix_Schedule_State::STATE_QUEUED, Updatronix_Schedule_State::STATE_RUNNING => ++$count['waiting'],
+				Updatronix_Schedule_State::STATE_HELD,
+					Updatronix_Schedule_State::STATE_NOT_OBSERVED =>
+					++$count['held'],
+				Updatronix_Schedule_State::STATE_WAITING,
+					Updatronix_Schedule_State::STATE_QUEUED,
+					Updatronix_Schedule_State::STATE_RUNNING => ++$count['waiting'],
 				Updatronix_Schedule_State::STATE_LOCKED => ++$count['managed'],
-				Updatronix_Schedule_State::STATE_BLOCKED, Updatronix_Schedule_State::STATE_FAILED, Updatronix_Schedule_State::STATE_UNCERTAIN => ++$count['blocked'],
+				Updatronix_Schedule_State::STATE_BLOCKED,
+					Updatronix_Schedule_State::STATE_FAILED,
+					Updatronix_Schedule_State::STATE_UNCERTAIN => ++$count['blocked'],
 				default => ++$count['other'],
 			};
 		}
@@ -492,7 +535,8 @@ final class Updatronix_Schedule_Context {
 	/**
 	 * Reads the normalized Schedule settings.
 	 *
-	 * @return array{update_check: array{recurrence: string, time: string}, delay_updates: array{enabled: bool, delay_value: int}}
+	 * @return array{update_check: array{recurrence: string, time: string},
+	 * delay_updates: array{enabled: bool, delay_value: int}}
 	 */
 	private static function schedule(): array {
 		$settings = updatronix_get_settings();

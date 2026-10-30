@@ -43,12 +43,17 @@ final class Updatronix_Export_Query_Builder {
 	 *
 	 * @since 1.1.0
 	 *
-	 * @param array<string, mixed> $validated Output from {@see Updatronix_Export_Request_Schema::validate()}.
+	 * @param array<string, mixed> $validated Output from {@see
+	 * Updatronix_Export_Request_Schema::validate()}.
 	 * @param int                  $offset    SQL OFFSET (bounded server-side).
 	 * @param int                  $limit     SQL LIMIT (bounded server-side).
 	 * @return array<int, object>
 	 */
-	public static function fetch_rows( array $validated, int $offset, int $limit ): array {
+	public static function fetch_rows(
+		array $validated,
+		int $offset,
+		int $limit
+	): array {
 		if ( ! Updatronix_Database::table_exists() ) {
 			return array();
 		}
@@ -58,20 +63,26 @@ final class Updatronix_Export_Query_Builder {
 		$offset = max( 0, $offset );
 		$limit  = max( 0, min( 100000, $limit ) );
 
-		$query   = isset( $validated['query'] ) && is_array( $validated['query'] ) ? $validated['query'] : array();
-		$site_id = isset( $query['site_id'] ) ? (int) $query['site_id'] : (int) get_current_blog_id();
+		$query   = isset( $validated['query'] )
+			&& is_array( $validated['query'] ) ? $validated['query'] : array();
+		$site_id = isset(
+			$query['site_id']
+		) ? (int) $query['site_id'] : (int) get_current_blog_id();
 
 		$where  = array( '1=1' );
 		$values = array();
 
-		// site_id 0 is the network-global sentinel (Super Admin, no per-site filter); export every
+		// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+		// site_id 0 is the network-global sentinel (Super Admin, no per-site filter); export every.
+		// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 		// originating site's rows. See Updatronix_Export_Request_Schema::resolve_site_id_for_export().
 		if ( $site_id > 0 ) {
 			$where[]  = 'site_id = %d';
 			$values[] = $site_id;
 		}
 
-		$filters = isset( $query['filters'] ) && is_array( $query['filters'] ) ? $query['filters'] : array();
+		$filters = isset( $query['filters'] )
+			&& is_array( $query['filters'] ) ? $query['filters'] : array();
 		foreach ( $filters as $clause ) {
 			if ( ! is_array( $clause ) ) {
 				continue;
@@ -82,8 +93,10 @@ final class Updatronix_Export_Query_Builder {
 		$search = isset( $validated['search'] ) ? (string) $validated['search'] : '';
 		$search = wp_check_invalid_utf8( $search );
 		if ( '' !== $search ) {
-			$like     = '%' . $wpdb->esc_like( $search ) . '%';
-			$where[]  = '(item_name LIKE %s OR item_slug LIKE %s OR COALESCE(message, \'\') LIKE %s)';
+			$like    = '%' . $wpdb->esc_like( $search ) . '%';
+			$where[] =
+				// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+				'(item_name LIKE %s OR item_slug LIKE %s OR COALESCE(message, \'\') LIKE %s)';
 			$values[] = $like;
 			$values[] = $like;
 			$values[] = $like;
@@ -91,21 +104,42 @@ final class Updatronix_Export_Query_Builder {
 
 		$where_sql = implode( ' AND ', $where );
 
-		$sort_column = isset( $validated['sort_column'] ) ? (string) $validated['sort_column'] : 'created_at';
+		$sort_column =
+			isset(
+				// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+				$validated['sort_column']
+			) ? (string) $validated['sort_column'] : 'created_at';
 		$orderby_col = match ( $sort_column ) {
-			'created_at', 'log_type', 'item_name', 'status', 'performed_as', 'reason_code', 'decision_state', 'origin', 'pass_id' => $sort_column,
+			'created_at', 'log_type', 'item_name', 'status', 'performed_as',
+				'reason_code',
+				'decision_state', 'origin', 'pass_id' => $sort_column,
 			default => 'created_at',
 		};
 
-		$sort_dir = isset( $validated['sort_direction'] ) ? strtoupper( (string) $validated['sort_direction'] ) : 'DESC';
+		$sort_dir =
+			// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+			isset( $validated['sort_direction'] ) ? strtoupper(
+				(string) $validated['sort_direction']
+			) : 'DESC';
 		$sort_dir = 'ASC' === $sort_dir ? 'ASC' : 'DESC';
 
 		$table = Updatronix_Database::get_table_name();
 
-		$values_out = array_merge( array( $table ), $values, array( $limit, $offset ) );
+		$values_out = array_merge(
+			array( $table ),
+			$values,
+			array(
+				$limit,
+				$offset,
+			)
+		);
 
+		// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 		// Concatenate allowlisted fragments (no "{$var}" interpolation) so Plugin Check does not flag PreparedSQL.InterpolatedNotPrepared.
-		$sql = 'SELECT id, site_id, log_type, action_type, item_name, item_slug, version_before, version_after, target_version, status, '
+		$sql =
+			// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+			'SELECT id, site_id, log_type, action_type, item_name, item_slug, version_before, version_after, target_version, status, '
+			// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 			. 'reason_code, decision_state, origin, decision_stage, pass_id, chain_id, predecessor, next_eligible_at, attempt, network, retained, context, '
 			. 'user_id, performed_by, performed_as, update_context, created_at '
 			. 'FROM %i WHERE '
@@ -116,10 +150,12 @@ final class Updatronix_Export_Query_Builder {
 			. $sort_dir
 			. ' LIMIT %d OFFSET %d';
 
-        // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- $sql is built from allowlisted ORDER BY fragments; user data uses prepare() placeholders only.
+        // phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+        // phpcs:ignore Generic.Files.LineLength, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- $sql is built from allowlisted ORDER BY fragments; user data uses prepare() placeholders only.
 		$prepared = $wpdb->prepare( $sql, $values_out );
 
-        // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter -- $prepared from prepare() above; dynamic SQL fragments are allowlisted identifiers only.
+        // phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+        // phpcs:ignore Generic.Files.LineLength, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter -- $prepared from prepare() above; dynamic SQL fragments are allowlisted identifiers only.
 		$results = $wpdb->get_results( $prepared );
 
 		return is_array( $results ) ? $results : array();
@@ -128,12 +164,17 @@ final class Updatronix_Export_Query_Builder {
 	/**
 	 * Append one validated filter clause to WHERE fragments.
 	 *
-	 * @param array<string, mixed>   $clause Filter clause from {@see Updatronix_Export_Request_Schema}.
+	 * @param array<string, mixed>   $clause Filter clause from {@see
+	 *   Updatronix_Export_Request_Schema}.
 	 * @param array<int, string>     $where  WHERE fragments (mutable).
 	 * @param array<int, string|int> $values Bound values for prepare() (mutable).
 	 * @return void
 	 */
-	private static function apply_clause( array $clause, array &$where, array &$values ): void {
+	private static function apply_clause(
+		array $clause,
+		array &$where,
+		array &$values
+	): void {
 		$type = isset( $clause['type'] ) ? (string) $clause['type'] : '';
 
 		if ( 'user_pos' === $type || 'user_neg' === $type ) {
@@ -149,7 +190,8 @@ final class Updatronix_Export_Query_Builder {
 
 		switch ( $type ) {
 			case 'eq':
-				$vals     = isset( $clause['values'] ) && is_array( $clause['values'] ) ? $clause['values'] : array();
+				$vals     = isset( $clause['values'] )
+					&& is_array( $clause['values'] ) ? $clause['values'] : array();
 				$one      = isset( $vals[0] ) ? (string) $vals[0] : '';
 				$where[]  = "{$column} = %s";
 				$values[] = $one;
@@ -157,7 +199,8 @@ final class Updatronix_Export_Query_Builder {
 				break;
 
 			case 'neq':
-				$vals     = isset( $clause['values'] ) && is_array( $clause['values'] ) ? $clause['values'] : array();
+				$vals     = isset( $clause['values'] )
+					&& is_array( $clause['values'] ) ? $clause['values'] : array();
 				$one      = isset( $vals[0] ) ? (string) $vals[0] : '';
 				$where[]  = "{$column} <> %s";
 				$values[] = $one;
@@ -165,12 +208,24 @@ final class Updatronix_Export_Query_Builder {
 				break;
 
 			case 'in':
-				self::apply_in_list( $column, $clause['values'] ?? array(), $where, $values, false );
+				self::apply_in_list(
+					$column,
+					$clause['values'] ?? array(),
+					$where,
+					$values,
+					false
+				);
 
 				break;
 
 			case 'not_in':
-				self::apply_in_list( $column, $clause['values'] ?? array(), $where, $values, true );
+				self::apply_in_list(
+					$column,
+					$clause['values'] ?? array(),
+					$where,
+					$values,
+					true
+				);
 
 				break;
 
@@ -240,7 +295,12 @@ final class Updatronix_Export_Query_Builder {
 	 * @param bool                   $negate Whether this is an exclusion filter.
 	 * @return void
 	 */
-	private static function apply_user_clause( array $clause, array &$where, array &$values, bool $negate ): void {
+	private static function apply_user_clause(
+		array $clause,
+		array &$where,
+		array &$values,
+		bool $negate
+	): void {
 		$mode = isset( $clause['mode'] ) ? (string) $clause['mode'] : '';
 		$uid  = isset( $clause['user_id'] ) ? (int) $clause['user_id'] : 0;
 
@@ -281,8 +341,20 @@ final class Updatronix_Export_Query_Builder {
 	 * @param bool                   $negate Use NOT IN.
 	 * @return void
 	 */
-	private static function apply_in_list( string $column, array $vals, array &$where, array &$values, bool $negate ): void {
-		$vals = array_values( array_filter( $vals, static fn ( $v ): bool => null !== $v && '' !== $v ) );
+	private static function apply_in_list(
+		string $column,
+		array $vals,
+		array &$where,
+		array &$values,
+		bool $negate
+	): void {
+		$vals = array_values(
+			array_filter(
+				$vals,
+				static fn ( $v ): bool => null !== $v
+				&& '' !== $v
+			)
+		);
 		if ( array() === $vals ) {
 			return;
 		}

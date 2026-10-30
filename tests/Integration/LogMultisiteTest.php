@@ -26,11 +26,16 @@ final class LogMultisiteTest extends WP_UnitTestCase {
 			self::markTestSkipped( 'LogMultisiteTest requires WP_MULTISITE=1.' );
 		}
 
-		require_once UPDATRONIX_PLUGIN_DIR . 'inc/classes/class-updatronix-database.php';
-		require_once UPDATRONIX_PLUGIN_DIR . 'inc/classes/class-updatronix-log-taxonomy.php';
-		require_once UPDATRONIX_PLUGIN_DIR . 'inc/classes/class-updatronix-log-event.php';
-		require_once UPDATRONIX_PLUGIN_DIR . 'inc/classes/class-updatronix-security.php';
-		require_once UPDATRONIX_PLUGIN_DIR . 'inc/classes/class-updatronix-logger.php';
+		require_once UPDATRONIX_PLUGIN_DIR
+			. 'inc/classes/class-updatronix-database.php';
+		require_once UPDATRONIX_PLUGIN_DIR
+			. 'inc/classes/class-updatronix-log-taxonomy.php';
+		require_once UPDATRONIX_PLUGIN_DIR
+			. 'inc/classes/class-updatronix-log-event.php';
+		require_once UPDATRONIX_PLUGIN_DIR
+			. 'inc/classes/class-updatronix-security.php';
+		require_once UPDATRONIX_PLUGIN_DIR
+			. 'inc/classes/class-updatronix-logger.php';
 		require_once dirname( __DIR__ ) . '/Support/LogEventFactory.php';
 
 		Updatronix_Database::create_table();
@@ -54,7 +59,10 @@ final class LogMultisiteTest extends WP_UnitTestCase {
 	 * @return void
 	 */
 	public function test_network_decision_is_attributed_to_the_execution_site(): void {
-		$id = Updatronix_Logger::log_event( LogEventFactory::multisite_network_row() );
+		$id = Updatronix_Logger::log_event(
+			LogEventFactory::multisite_network_row(
+			)
+		);
 
 		self::assertIsInt( $id );
 
@@ -134,7 +142,15 @@ final class LogMultisiteTest extends WP_UnitTestCase {
 		);
 
 		self::assertGreaterThanOrEqual( 1, count( $rows ) );
-		self::assertSame( 1, Updatronix_Logger::get_logs_count( array( 'site_id' => 0 ) ) );
+		self::assertSame(
+			1,
+			Updatronix_Logger::get_logs_count(
+				array(
+					'site_id' =>
+					0,
+				)
+			)
+		);
 	}
 
 	/**

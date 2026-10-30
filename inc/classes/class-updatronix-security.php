@@ -21,7 +21,13 @@ final class Updatronix_Security {
 	 *
 	 * @var array<string>
 	 */
-	public const ALLOWED_LOG_TYPES = array( 'core', 'plugin', 'theme', 'translation', 'system' );
+	public const ALLOWED_LOG_TYPES = array(
+		'core',
+		'plugin',
+		'theme',
+		'translation',
+		'system',
+	);
 
 	/**
 	 * Allowed action types.
@@ -32,38 +38,85 @@ final class Updatronix_Security {
 	 *
 	 * @var array<string>
 	 */
-	public const ALLOWED_ACTION_TYPES = array( 'update', 'downgrade', 'install', 'same_version', 'failed', 'uninstall', 'prevented', 'incompatible', 'disabled', 'safe_mode_disabled', 'pass', 'advisory' );
+	public const ALLOWED_ACTION_TYPES = array(
+		'update',
+		'downgrade',
+		'install',
+		'same_version',
+		'failed',
+		'uninstall',
+		'prevented',
+		'incompatible',
+		'disabled',
+		'safe_mode_disabled',
+		'pass',
+		'advisory',
+	);
 
 	/**
 	 * Allowed decision states.
 	 *
 	 * @var array<string>
 	 */
-	public const ALLOWED_DECISION_STATES = array( 'done', 'blocked', 'waiting', 'delayed', 'skipped', 'failed', 'uncertain', 'canceled', 'info' );
+	public const ALLOWED_DECISION_STATES = array(
+		'done',
+		'blocked',
+		'waiting',
+		'delayed',
+		'skipped',
+		'failed',
+		'uncertain',
+		'canceled',
+		'info',
+	);
 
 	/**
 	 * Allowed origin values.
 	 *
 	 * @var array<string>
 	 */
-	public const ALLOWED_ORIGINS = array( 'manual', 'automatic', 'flow', 'queue', 'external', 'health', 'system', 'cli' );
+	public const ALLOWED_ORIGINS = array(
+		'manual',
+		'automatic',
+		'flow',
+		'queue',
+		'external',
+		'health',
+		'system',
+		'cli',
+	);
 
 	/**
 	 * Allowed decision stages.
 	 *
 	 * @var array<string>
 	 */
-	public const ALLOWED_STAGES = array( 'plan', 'policy', 'gate', 'execute', 'finalize', 'observe' );
+	public const ALLOWED_STAGES = array(
+		'plan',
+		'policy',
+		'gate',
+		'execute',
+		'finalize',
+		'observe',
+	);
 
 	/**
 	 * Allowed status values.
 	 *
 	 * @var array<string>
 	 */
-	public const ALLOWED_STATUSES = array( 'success', 'error', 'cancelled', 'delayed', 'info', 'warning' );
+	public const ALLOWED_STATUSES = array(
+		'success',
+		'error',
+		'cancelled',
+		'delayed',
+		'info',
+		'warning',
+	);
 
 	/**
-	 * Allowed performed_as values: manual, automatic, or file upload (update.php upload flow).
+	 * Allowed performed_as values: manual, automatic, or file upload (update.php
+	 * upload flow).
 	 *
 	 * @var array<string>
 	 */
@@ -85,7 +138,9 @@ final class Updatronix_Security {
 	public static function sanitize_log_type( string $value ): string {
 		$value = sanitize_key( $value );
 
-		return in_array( $value, self::ALLOWED_LOG_TYPES, true ) ? $value : 'plugin'; // counterfactual: equivalent — both sides of the comparison are strings — a declared `string` operand and a haystack of string literals — so the strict comparison and the loose one agree.
+		return in_array( $value, self::ALLOWED_LOG_TYPES, true ) ? $value : 'plugin';
+// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+		// counterfactual: equivalent — both sides of the comparison are strings — a declared `string` operand and a haystack of string literals — so the strict comparison and the loose one agree.
 	}
 
 	/**
@@ -106,7 +161,10 @@ final class Updatronix_Security {
 		 *
 		 * @param array<int, string> $types Allowed action types.
 		 */
-		$types = (array) apply_filters( 'updatronix_log_action_types', self::ALLOWED_ACTION_TYPES );
+		$types = (array) apply_filters(
+			'updatronix_log_action_types',
+			self::ALLOWED_ACTION_TYPES
+		);
 
 		$types = array_values(
 			array_unique(
@@ -132,7 +190,13 @@ final class Updatronix_Security {
 	public static function sanitize_action_type( string $value ): string {
 		$value = sanitize_key( $value );
 
-		return in_array( $value, self::get_allowed_action_types(), true ) ? $value : 'update'; // counterfactual: equivalent — both sides of the comparison are strings — a declared `string` operand and a haystack of string literals — so the strict comparison and the loose one agree.
+		return in_array(
+			$value,
+			self::get_allowed_action_types(),
+			true
+		) ? $value : 'update';
+// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+		// counterfactual: equivalent — both sides of the comparison are strings — a declared `string` operand and a haystack of string literals — so the strict comparison and the loose one agree.
 	}
 
 	/**
@@ -144,7 +208,9 @@ final class Updatronix_Security {
 	public static function sanitize_status( string $value ): string {
 		$value = sanitize_key( $value );
 
-		return in_array( $value, self::ALLOWED_STATUSES, true ) ? $value : 'success'; // counterfactual: equivalent — both sides of the comparison are strings — a declared `string` operand and a haystack of string literals — so the strict comparison and the loose one agree.
+		return in_array( $value, self::ALLOWED_STATUSES, true ) ? $value : 'success';
+// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+		// counterfactual: equivalent — both sides of the comparison are strings — a declared `string` operand and a haystack of string literals — so the strict comparison and the loose one agree.
 	}
 
 	/**
@@ -156,7 +222,13 @@ final class Updatronix_Security {
 	public static function sanitize_performed_as( string $value ): string {
 		$value = sanitize_key( $value );
 
-		return in_array( $value, self::ALLOWED_PERFORMED_AS, true ) ? $value : 'manual'; // counterfactual: equivalent — both sides of the comparison are strings — a declared `string` operand and a haystack of string literals — so the strict comparison and the loose one agree.
+		return in_array(
+			$value,
+			self::ALLOWED_PERFORMED_AS,
+			true
+		) ? $value : 'manual';
+// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+		// counterfactual: equivalent — both sides of the comparison are strings — a declared `string` operand and a haystack of string literals — so the strict comparison and the loose one agree.
 	}
 
 	/**
@@ -168,7 +240,9 @@ final class Updatronix_Security {
 	public static function sanitize_update_context( string $value ): string {
 		$value = sanitize_key( $value );
 
-		return in_array( $value, self::ALLOWED_UPDATE_CONTEXT, true ) ? $value : ''; // counterfactual: equivalent — both sides of the comparison are strings — a declared `string` operand and a haystack of string literals — so the strict comparison and the loose one agree.
+		return in_array( $value, self::ALLOWED_UPDATE_CONTEXT, true ) ? $value : '';
+// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+		// counterfactual: equivalent — both sides of the comparison are strings — a declared `string` operand and a haystack of string literals — so the strict comparison and the loose one agree.
 	}
 
 	/**
@@ -178,7 +252,10 @@ final class Updatronix_Security {
 	 * @param array<int, string>       $fallback Values used when nothing survives.
 	 * @return array<int, string>
 	 */
-	private static function normalize_allowlist( array $values, array $fallback ): array {
+	private static function normalize_allowlist(
+		array $values,
+		array $fallback
+	): array {
 		$clean = array_values(
 			array_unique(
 				array_filter(
@@ -206,7 +283,12 @@ final class Updatronix_Security {
 	 * @return array<int, string>
 	 */
 	public static function get_allowed_reason_codes(): array {
-		$codes = class_exists( 'Updatronix_Log_Taxonomy' ) ? Updatronix_Log_Taxonomy::reason_codes() : array();
+		$codes =
+			// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+			class_exists(
+				'Updatronix_Log_Taxonomy'
+			) ? Updatronix_Log_Taxonomy::reason_codes(
+			) : array();
 
 		/**
 		 * Filters the canonical reason-code allowlist.
@@ -237,7 +319,10 @@ final class Updatronix_Security {
 		 *
 		 * @param array<int, string> $states Decision states.
 		 */
-		$states = (array) apply_filters( 'updatronix_log_decision_states', self::ALLOWED_DECISION_STATES );
+		$states = (array) apply_filters(
+			'updatronix_log_decision_states',
+			self::ALLOWED_DECISION_STATES
+		);
 
 		return self::normalize_allowlist( $states, self::ALLOWED_DECISION_STATES );
 	}
@@ -257,7 +342,10 @@ final class Updatronix_Security {
 		 *
 		 * @param array<int, string> $origins Origins.
 		 */
-		$origins = (array) apply_filters( 'updatronix_log_origins', self::ALLOWED_ORIGINS );
+		$origins = (array) apply_filters(
+			'updatronix_log_origins',
+			self::ALLOWED_ORIGINS
+		);
 
 		return self::normalize_allowlist( $origins, self::ALLOWED_ORIGINS );
 	}
@@ -277,7 +365,10 @@ final class Updatronix_Security {
 		 *
 		 * @param array<int, string> $stages Decision stages.
 		 */
-		$stages = (array) apply_filters( 'updatronix_log_stages', self::ALLOWED_STAGES );
+		$stages = (array) apply_filters(
+			'updatronix_log_stages',
+			self::ALLOWED_STAGES
+		);
 
 		return self::normalize_allowlist( $stages, self::ALLOWED_STAGES );
 	}
@@ -307,7 +398,13 @@ final class Updatronix_Security {
 			return $value;
 		}
 
-		$canonical = class_exists( 'Updatronix_Log_Taxonomy' ) ? Updatronix_Log_Taxonomy::canonical_reason( $value ) : 'unknown';
+		$canonical =
+			// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+			class_exists(
+				'Updatronix_Log_Taxonomy'
+			) ? Updatronix_Log_Taxonomy::canonical_reason(
+				$value
+			) : 'unknown';
 
 		return in_array( $canonical, $allowed, true ) ? $canonical : 'unknown';
 	}
@@ -323,7 +420,11 @@ final class Updatronix_Security {
 	public static function sanitize_decision_state( string $value ): string {
 		$value = sanitize_key( $value );
 
-		return in_array( $value, self::get_allowed_decision_states(), true ) ? $value : '';
+		return in_array(
+			$value,
+			self::get_allowed_decision_states(),
+			true
+		) ? $value : '';
 	}
 
 	/**
@@ -477,7 +578,10 @@ final class Updatronix_Security {
 		 *
 		 * @param array<int, string> $keys Allowed top-level keys.
 		 */
-		$keys = (array) apply_filters( 'updatronix_log_context_keys', self::CONTEXT_KEYS );
+		$keys = (array) apply_filters(
+			'updatronix_log_context_keys',
+			self::CONTEXT_KEYS
+		);
 
 		return self::normalize_allowlist( $keys, self::CONTEXT_KEYS );
 	}
@@ -573,7 +677,10 @@ final class Updatronix_Security {
 	 * @return string
 	 */
 	private static function encode_context( array $context ): string {
-		$encoded = json_encode( $context, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE );
+		$encoded = json_encode(
+			$context,
+			JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
+		);
 
 		return is_string( $encoded ) ? $encoded : '';
 	}
@@ -586,7 +693,11 @@ final class Updatronix_Security {
 	 * @param bool  $truncated Set to true when a string or list was capped.
 	 * @return mixed Sanitized value, or null when it must be dropped.
 	 */
-	private static function sanitize_context_value( mixed $value, int $depth, bool &$truncated ): mixed {
+	private static function sanitize_context_value(
+		mixed $value,
+		int $depth,
+		bool &$truncated
+	): mixed {
 		if ( is_bool( $value ) || is_int( $value ) || is_float( $value ) ) {
 			return $value;
 		}
@@ -654,13 +765,18 @@ final class Updatronix_Security {
 	}
 
 	/**
-	 * Sanitize message (long text). Decodes HTML entities (e.g. &#8230; → …) for readable logs.
+	 * Sanitize message (long text). Decodes HTML entities (e.g. &#8230; → …) for
+	 * readable logs.
 	 *
 	 * @param string $value Raw value.
 	 * @return string
 	 */
 	public static function sanitize_message( string $value ): string {
-		$value = html_entity_decode( wp_unslash( $value ), ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+		$value = html_entity_decode(
+			wp_unslash( $value ),
+			ENT_QUOTES | ENT_HTML5,
+			'UTF-8'
+		);
 		$value = wp_strip_all_tags( $value );
 		$value = self::redact_text( $value );
 
@@ -707,6 +823,7 @@ final class Updatronix_Security {
 		$failed = '[redacted: log text could not be safely redacted]';
 
 		$redacted = preg_replace(
+			// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 			'/([?&](?:[^=&\s]*(?:token|key|secret|password|passwd|pwd|signature|sig)[^=&\s]*|auth|auth_[^=&\s]*|[^=&\s]*_auth)=)[^&\s]+/i',
 			'$1[redacted]',
 			$value
@@ -716,29 +833,42 @@ final class Updatronix_Security {
 		}
 		$value = $redacted;
 
-		$redacted = preg_replace( '/(\bBearer\s+)[A-Za-z0-9._~+\/=\-]+/i', '$1[redacted]', $value );
+		$redacted = preg_replace(
+			'/(\bBearer\s+)[A-Za-z0-9._~+\/=\-]+/i',
+			'$1[redacted]',
+			$value
+		);
 		if ( null === $redacted ) {
 			return $failed;
 		}
 		$value = $redacted;
 
-		$redacted = preg_replace( '/([A-Z0-9._%+\-]+)@([A-Z0-9.\-]+\.[A-Z]{2,})/i', '[redacted-email]', $value );
+		$redacted = preg_replace(
+			'/([A-Z0-9._%+\-]+)@([A-Z0-9.\-]+\.[A-Z]{2,})/i',
+			'[redacted-email]',
+			$value
+		);
 		if ( null === $redacted ) {
 			return $failed;
 		}
 		$value = $redacted;
 
-		// Package URLs reveal the mirror host and the package path; a basename
+		// Package URLs reveal the mirror host and the package path; a basename.
 		// or a source key is enough for the log.
-		$redacted = preg_replace( '~https?://[^\s<>"\']+~i', '[redacted-url]', $value );
+		$redacted = preg_replace(
+			'~https?://[^\s<>"\']+~i',
+			'[redacted-url]',
+			$value
+		);
 		if ( null === $redacted ) {
 			return $failed;
 		}
 		$value = $redacted;
 
-		// Package paths (any archive with a directory component) are redacted
+		// Package paths (any archive with a directory component) are redacted.
 		// even when they are outside the known server roots.
 		$redacted = preg_replace(
+			// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 			'~(?<![\w.\-])(?:[A-Za-z]:)?(?:[\\\\/][^\s\\\\/"\']+)+\.(?:zip|tar|tgz|gz|phar|rar|7z)\b~i',
 			'[redacted-path]',
 			$value
@@ -748,6 +878,7 @@ final class Updatronix_Security {
 		}
 		$value = $redacted;
 
+		// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 		// Redact server paths so internal filesystem layout is not exposed in log entries.
 		$path_prefixes = array();
 		if ( defined( 'ABSPATH' ) && ABSPATH !== '' ) {
@@ -760,9 +891,14 @@ final class Updatronix_Security {
 			$path_prefixes[] = preg_quote( untrailingslashit( WP_CONTENT_DIR ), '/' );
 		}
 		if ( array() !== $path_prefixes ) {
-			// Sort by length descending so longer paths (e.g. WP_CONTENT_DIR) match before
+			// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+			// Sort by length descending so longer paths (e.g. WP_CONTENT_DIR) match before.
 			// shorter ones (e.g. ABSPATH) when one is a parent of another.
-			usort( $path_prefixes, static fn ( string $a, string $b ): int => strlen( $b ) <=> strlen( $a ) );
+			usort(
+				$path_prefixes,
+				static fn ( string $a, string $b ): int =>
+				strlen( $b ) <=> strlen( $a )
+			);
 
 			$pattern     = '/(' . implode( '|', $path_prefixes ) . ')[^\s"]*/i';
 			$replacement = basename( untrailingslashit( ABSPATH ) ) . '[redacted]';

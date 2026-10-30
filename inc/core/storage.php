@@ -2,7 +2,8 @@
 /**
  * Network-aware option and transient helpers for Updatronix-owned keys.
  *
- * Multisite stores in wp_sitemeta; single-site uses wp_options / blog transients.
+ * Multisite stores in wp_sitemeta; single-site uses wp_options / blog
+ * transients.
  *
  * @package updatronix
  * @since 1.1.0
@@ -20,7 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @param mixed  $default Default when missing.
  * @return mixed
  */
-function updatronix_get_plugin_option( string $key, mixed $default = false ): mixed { // phpcs:ignore Universal.NamingConventions.NoReservedKeywordParameterNames.defaultFound -- Mirrors WP core get_option()/$default API; kept for familiarity.
+function updatronix_get_plugin_option( string $key, mixed $default = false ): mixed { // phpcs:ignore Generic.Files.LineLength, Universal.NamingConventions.NoReservedKeywordParameterNames.defaultFound -- Mirrors WP core get_option()/$default API; kept for familiarity.
 	if ( is_multisite() ) {
 		return get_site_option( $key, $default );
 	}
@@ -34,10 +35,15 @@ function updatronix_get_plugin_option( string $key, mixed $default = false ): mi
  * @since 1.1.0
  * @param string    $key      Option key.
  * @param mixed     $value    Value to store.
- * @param bool|null $autoload Autoload flag (single-site only; ignored on Multisite).
+ * @param bool|null $autoload Autoload flag (single-site only; ignored on
+ * Multisite).
  * @return bool
  */
-function updatronix_update_plugin_option( string $key, mixed $value, ?bool $autoload = null ): bool {
+function updatronix_update_plugin_option(
+	string $key,
+	mixed $value,
+	?bool $autoload = null
+): bool {
 	if ( is_multisite() ) {
 		return update_site_option( $key, $value );
 	}
@@ -88,7 +94,11 @@ function updatronix_get_plugin_transient( string $key ): mixed {
  * @param int    $expiration TTL in seconds.
  * @return bool
  */
-function updatronix_set_plugin_transient( string $key, mixed $value, int $expiration ): bool {
+function updatronix_set_plugin_transient(
+	string $key,
+	mixed $value,
+	int $expiration
+): bool {
 	if ( is_multisite() ) {
 		return set_site_transient( $key, $value, $expiration );
 	}
@@ -112,18 +122,24 @@ function updatronix_delete_plugin_transient( string $key ): bool {
 }
 
 /**
- * One-time migration: copy main-site blog options into site options when site meta is empty.
+ * One-time migration: copy main-site blog options into site options when site
+ * meta is empty.
  *
  * @since 1.1.0
  * @param array<int, string> $keys Option keys to migrate.
  * @return void
  */
-function updatronix_maybe_migrate_blog_options_to_site_options( array $keys ): void {
+function updatronix_maybe_migrate_blog_options_to_site_options(
+	array $keys
+): void {
 	if ( ! is_multisite() ) {
 		return;
 	}
 
-	$flag = updatronix_get_plugin_option( 'updatronix_network_storage_migrated', '' );
+	$flag = updatronix_get_plugin_option(
+		'updatronix_network_storage_migrated',
+		''
+	);
 	if ( '1' === $flag ) {
 		return;
 	}
@@ -150,5 +166,9 @@ function updatronix_maybe_migrate_blog_options_to_site_options( array $keys ): v
 		}
 	);
 
-	updatronix_update_plugin_option( 'updatronix_network_storage_migrated', '1', false );
+	updatronix_update_plugin_option(
+		'updatronix_network_storage_migrated',
+		'1',
+		false
+	);
 }

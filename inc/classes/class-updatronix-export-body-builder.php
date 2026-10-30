@@ -11,16 +11,18 @@
  * how → user → outcome). Column widths are computed once per chunk from the
  * longest value in each field so rows align throughout the report:
  *
- *     Element                Action      Version          Date                     Run context        User     Status
- *     ---------------------- ----------- ---------------- ------------------------ ------------------ -------- ---------
- *     WooCommerce            Update      8.0 → 8.2        2026-06-10 09:00, …      (manual, bulk)     admin    Success
+ * Element Action Version Date Run context User Status
+ * ---------------------- ----------- ---------------- ------------------------
+ * ------------------ -------- ---------
+ * WooCommerce Update 8.0 → 8.2 2026-06-10 09:00, … (manual, bulk) admin Success
  *
  * The user column shows the WordPress display name or `System` for automatic
  * updates. Merged lines list distinct users separated by commas. The status
  * label matches the admin UI (`Success` / `Error` / `Cancelled`) and is always
  * the last column. A merged line lists every event date separated by commas.
  *
- * Merge grouping applies **within each SQL chunk only** (rows passed to {@see render()}),
+ * Merge grouping applies **within each SQL chunk only** (rows passed to {@see
+ * render()}),
  * and collapses rows that share entity, action, and status.
  *
  * @package updatronix
@@ -32,7 +34,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Builds UTF-8 plain-text fragments for {@see Updatronix_Export::rest_export()}.
+ * Builds UTF-8 plain-text fragments for {@see
+ * Updatronix_Export::rest_export()}.
  *
  * @since 1.1.0
  */
@@ -42,7 +45,13 @@ final class Updatronix_Export_Body_Builder {
 	 *
 	 * @var list<string>
 	 */
-	private const CATEGORY_ORDER = array( 'core', 'plugin', 'theme', 'translation', 'system' );
+	private const CATEGORY_ORDER = array(
+		'core',
+		'plugin',
+		'theme',
+		'translation',
+		'system',
+	);
 
 	/**
 	 * Sort rank per action type (lower sorts first).
@@ -60,17 +69,60 @@ final class Updatronix_Export_Body_Builder {
 	);
 
 	/** Column keys for merged (sectioned) export rows. */
-	private const ROW_PART_KEYS = array( 'name', 'action', 'versions', 'dates', 'context', 'user', 'status', 'reason', 'state', 'origin', 'pass', 'chain', 'next_eligible', 'retained' );
+	private const ROW_PART_KEYS = array(
+		'name',
+		'action',
+		'versions',
+		'dates',
+		'context',
+		'user',
+		'status',
+		'reason',
+		'state',
+		'origin',
+		'pass',
+		'chain',
+		'next_eligible',
+		'retained',
+	);
 
 	/** Column keys for flat (non-merged) export rows — category first. */
-	private const ROW_PART_KEYS_FLAT = array( 'category', 'name', 'action', 'versions', 'dates', 'context', 'user', 'status', 'reason', 'state', 'origin', 'pass', 'chain', 'next_eligible', 'retained' );
+	private const ROW_PART_KEYS_FLAT = array(
+		'category',
+		'name',
+		'action',
+		'versions',
+		'dates',
+		'context',
+		'user',
+		'status',
+		'reason',
+		'state',
+		'origin',
+		'pass',
+		'chain',
+		'next_eligible',
+		'retained',
+	);
 
 	/** Optional columns omitted from a section when every row value is empty. */
-	private const OPTIONAL_ROW_PART_KEYS = array( 'versions', 'context', 'reason', 'state', 'origin', 'pass', 'chain', 'next_eligible', 'retained' );
+	private const OPTIONAL_ROW_PART_KEYS = array(
+		'versions',
+		'context',
+		'reason',
+		'state',
+		'origin',
+		'pass',
+		'chain',
+		'next_eligible',
+		'retained',
+	);
 
+	// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 	/** Non-breaking space — padding and gaps survive rich-text paste (Word, email). */
 	private const PAD_CHAR = "\u{00A0}";
 
+	// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 	/** Two NBSPs between columns; regular spaces collapse in HTML paste targets. */
 	private const COLUMN_GAP = "\u{00A0}\u{00A0}";
 
@@ -125,7 +177,9 @@ final class Updatronix_Export_Body_Builder {
 
 		foreach ( $columns_in as $k => $v ) {
 			$key = sanitize_key( (string) $k );
-			if ( ! in_array( $key, Updatronix_Export::COLUMN_KEYS, true ) ) { // counterfactual: equivalent — both sides of the comparison are strings — a declared `string` operand and a haystack of string literals — so the strict comparison and the loose one agree.
+			if ( ! in_array( $key, Updatronix_Export::COLUMN_KEYS, true ) ) {
+// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+				// counterfactual: equivalent — both sides of the comparison are strings — a declared `string` operand and a haystack of string literals — so the strict comparison and the loose one agree.
 				continue;
 			}
 			$columns[ $key ] = self::sanitize_column_boolean( $v );
@@ -155,10 +209,14 @@ final class Updatronix_Export_Body_Builder {
 
 		if ( is_string( $value ) ) {
 			$normalised = strtolower( trim( $value ) );
-			if ( in_array( $normalised, array( '1', 'true', 'yes', 'on' ), true ) ) { // counterfactual: equivalent — both sides of the comparison are strings — a declared `string` operand and a haystack of string literals — so the strict comparison and the loose one agree.
+			if ( in_array( $normalised, array( '1', 'true', 'yes', 'on' ), true ) ) {
+// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+				// counterfactual: equivalent — both sides of the comparison are strings — a declared `string` operand and a haystack of string literals — so the strict comparison and the loose one agree.
 				return true;
 			}
-			if ( in_array( $normalised, array( '0', 'false', 'no', 'off' ), true ) ) { // counterfactual: equivalent — both sides of the comparison are strings — a declared `string` operand and a haystack of string literals — so the strict comparison and the loose one agree.
+			if ( in_array( $normalised, array( '0', 'false', 'no', 'off' ), true ) ) {
+// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+				// counterfactual: equivalent — both sides of the comparison are strings — a declared `string` operand and a haystack of string literals — so the strict comparison and the loose one agree.
 				return false;
 			}
 		}
@@ -173,7 +231,10 @@ final class Updatronix_Export_Body_Builder {
 	 * @param array<string, bool> $columns   Normalised column toggles.
 	 * @return list<string>
 	 */
-	private static function filter_row_keys( array $base_keys, array $columns ): array {
+	private static function filter_row_keys(
+		array $base_keys,
+		array $columns
+	): array {
 		$filtered = array();
 
 		foreach ( $base_keys as $key ) {
@@ -216,13 +277,18 @@ final class Updatronix_Export_Body_Builder {
 	 *
 	 * @since 1.1.0
 	 *
-	 * @param array<int, object>  $rows                Rows from {@see Updatronix_Export_Query_Builder::fetch_rows()}.
-	 * @param bool                $merge               Merge rows that share entity, action, and status within this chunk.
-	 * @param array<string, bool> $columns             Column visibility toggles ({@see normalize_export_columns()}).
-	 * @param string              $existing_chunk_body Already emitted bytes for this HTTP chunk.
-	 * @param int                 $max_chunk_bytes     Soft max chunk bytes ({@see Updatronix_Export::MAX_BYTES_PER_CHUNK}).
-	 * @param string              $format              Export format (`txt` or `json`).
-	 * @return array{body: string, rows_emitted: int, merged_lines_added: int, byte_cap_hit: bool}
+	 * @param array<int, object>  $rows Rows from {@see
+	 *  Updatronix_Export_Query_Builder::fetch_rows()}.
+	 * @param bool                $merge Merge rows that share entity, action, and status within
+	 *                this chunk.
+	 * @param array<string, bool> $columns Column visibility toggles ({@see
+	 * normalize_export_columns()}).
+	 * @param string              $existing_chunk_body Already emitted bytes for this HTTP
+	 *              chunk.
+	 * @param int                 $max_chunk_bytes Soft max chunk bytes ({@see
+	 *                 Updatronix_Export::MAX_BYTES_PER_CHUNK}).
+	 * @param string              $format Export format (`txt` or `json`).
+	 * @return array<string, mixed>
 	 */
 	public static function render(
 		array $rows,
@@ -234,8 +300,8 @@ final class Updatronix_Export_Body_Builder {
 	): array {
 		$columns = self::normalize_export_columns( $columns );
 
-		// Guard: switch_to_user_locale() may return false when the user's locale
-		// is invalid or unavailable. The finally block always restores the previous
+		// Guard: switch_to_user_locale() may return false when the user's locale.
+		// is invalid or unavailable. The finally block always restores the previous.
 		// locale, so the worst case is a momentary PHP warning.
 		$locale_switched = switch_to_user_locale( get_current_user_id() );
 
@@ -243,12 +309,22 @@ final class Updatronix_Export_Body_Builder {
 			self::prime_user_cache( $rows );
 
 			if ( 'json' === $format ) {
-				return self::render_json_records( $rows, $merge, $columns, $existing_chunk_body, $max_chunk_bytes );
+				return self::render_json_records(
+					$rows,
+					$merge,
+					$columns,
+					$existing_chunk_body,
+					$max_chunk_bytes
+				);
 			}
 
 			$records = self::build_sectioned_records( $rows, $merge, $columns );
 
-			return self::emit_until_cap( $records, $existing_chunk_body, $max_chunk_bytes );
+			return self::emit_until_cap(
+				$records,
+				$existing_chunk_body,
+				$max_chunk_bytes
+			);
 		} finally {
 			if ( $locale_switched ) {
 				restore_previous_locale();
@@ -265,10 +341,18 @@ final class Updatronix_Export_Body_Builder {
 	 * @param int $matched  Rows matched before truncation (estimate OK).
 	 * @return string Single line without trailing newline.
 	 */
-	public static function truncation_footer( int $included, int $matched ): string {
+	public static function truncation_footer(
+		int $included,
+		int $matched
+	): string {
 		return sprintf(
+			// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 			/* translators: 1: Rows included in the export. 2: Rows matched before truncation. */
-			__( '— Truncated: %1$d of %2$d rows. Narrow your filters to include the rest. —', 'updatronix' ),
+			__(
+				// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+				'— Truncated: %1$d of %2$d rows. Narrow your filters to include the rest. —',
+				'updatronix'
+			),
 			$included,
 			$matched
 		);
@@ -295,12 +379,16 @@ final class Updatronix_Export_Body_Builder {
 	/**
 	 * Emit formatted records up to the per-chunk byte cap.
 	 *
-	 * @param array<int, array{line: string, row_span: int}> $records             Lines with row consumption counts.
-	 * @param string                                         $existing_chunk_body Prefix already counted toward chunk cap.
-	 * @param int                                            $max_chunk_bytes     Chunk ceiling.
-	 * @return array{body: string, rows_emitted: int, merged_lines_added: int, byte_cap_hit: bool}
+	 * @param array<int, array{line: string, row_span: int}> $records Lines and row spans.
+	 * @param string                                         $existing_chunk_body Prefix.
+	 * @param int                                            $max_chunk_bytes Chunk ceiling.
+	 * @return array<string, mixed>
 	 */
-	private static function emit_until_cap( array $records, string $existing_chunk_body, int $max_chunk_bytes ): array {
+	private static function emit_until_cap(
+		array $records,
+		string $existing_chunk_body,
+		int $max_chunk_bytes
+	): array {
 		$body               = $existing_chunk_body;
 		$rows_emitted       = 0;
 		$merged_lines_added = 0;
@@ -313,7 +401,8 @@ final class Updatronix_Export_Body_Builder {
 			$candidate = $body . $sep . $line;
 
 			if ( strlen( $candidate ) > $max_chunk_bytes ) {
-				if ( $body === $existing_chunk_body && '' === $existing_chunk_body && strlen( $line ) > $max_chunk_bytes ) {
+				if ( $body === $existing_chunk_body && '' === $existing_chunk_body
+					&& strlen( $line ) > $max_chunk_bytes ) {
 					$body = $line;
 					if ( $span > 0 ) {
 						$rows_emitted += $span;
@@ -347,13 +436,20 @@ final class Updatronix_Export_Body_Builder {
 	 * Render one JSON chunk as newline-delimited objects.
 	 *
 	 * @param array<int, object>  $rows               Rows in one SQL chunk.
-	 * @param bool                $merge              Collapse rows sharing entity, action, and status.
+	 * @param bool                $merge Collapse rows sharing entity, action, and status.
 	 * @param array<string, bool> $columns            Normalised column toggles.
 	 * @param string              $existing_chunk_body Already emitted bytes for this chunk.
 	 * @param int                 $max_chunk_bytes    Chunk ceiling.
-	 * @return array{body: string, rows_emitted: int, merged_lines_added: int, byte_cap_hit: bool}
+	 * @return array{body: string, rows_emitted: int, merged_lines_added: int,
+	 * byte_cap_hit: bool}
 	 */
-	private static function render_json_records( array $rows, bool $merge, array $columns, string $existing_chunk_body, int $max_chunk_bytes ): array {
+	private static function render_json_records(
+		array $rows,
+		bool $merge,
+		array $columns,
+		string $existing_chunk_body,
+		int $max_chunk_bytes
+	): array {
 		$body               = $existing_chunk_body;
 		$rows_emitted       = 0;
 		$merged_lines_added = 0;
@@ -369,7 +465,9 @@ final class Updatronix_Export_Body_Builder {
 			$candidate = $body . $sep . $line;
 
 			if ( strlen( $candidate ) > $max_chunk_bytes ) {
-				if ( '' === $existing_chunk_body && '' === $body && strlen( $line ) > $max_chunk_bytes ) {
+				if ( '' === $existing_chunk_body && '' === $body && strlen(
+					$line
+				) > $max_chunk_bytes ) {
 					$body          = $line;
 					$rows_emitted += (int) $item['row_span'];
 					++$merged_lines_added;
@@ -402,9 +500,14 @@ final class Updatronix_Export_Body_Builder {
 	 * @param array<int, object>  $rows    Rows in one SQL chunk.
 	 * @param bool                $merge   Merge repeated updates.
 	 * @param array<string, bool> $columns Normalised column toggles.
-	 * @return array<int, array{sort_ts: int, category_rank: int, name: string, data: array<string, string>, row_span: int}>
+	 * @return array<int, array{sort_ts: int, category_rank: int, name: string,
+	 * data: array<string, string>, row_span: int}>
 	 */
-	private static function build_json_items( array $rows, bool $merge, array $columns ): array {
+	private static function build_json_items(
+		array $rows,
+		bool $merge,
+		array $columns
+	): array {
 		$items = array();
 
 		if ( $merge ) {
@@ -424,7 +527,11 @@ final class Updatronix_Export_Body_Builder {
 					'sort_ts'       => self::latest_timestamp( $group ),
 					'category_rank' => (int) array_search( $lt, self::CATEGORY_ORDER, true ),
 					'name'          => mb_strtolower( self::real_name( $first ), 'UTF-8' ),
-					'data'          => self::json_parts( self::build_row_parts( $group ), $lt, $columns ),
+					'data'          => self::json_parts(
+						self::build_row_parts( $group ),
+						$lt,
+						$columns
+					),
 					'row_span'      => count( $group ),
 				);
 			}
@@ -456,7 +563,11 @@ final class Updatronix_Export_Body_Builder {
 				'sort_ts'       => self::latest_timestamp( array( $row ) ),
 				'category_rank' => 0,
 				'name'          => mb_strtolower( self::real_name( $row ), 'UTF-8' ),
-				'data'          => self::json_parts( self::build_row_parts( array( $row ), true ), $lt, $columns ),
+				'data'          => self::json_parts(
+					self::build_row_parts( array( $row ), true ),
+					$lt,
+					$columns
+				),
 				'row_span'      => 1,
 			);
 		}
@@ -483,7 +594,11 @@ final class Updatronix_Export_Body_Builder {
 	 * @param array<string, bool>   $columns  Normalised column toggles.
 	 * @return array<string, string>
 	 */
-	private static function json_parts( array $parts, string $log_type, array $columns ): array {
+	private static function json_parts(
+		array $parts,
+		string $log_type,
+		array $columns
+	): array {
 		$data = array(
 			'element' => $parts['name'],
 			'version' => $parts['versions'],
@@ -503,7 +618,9 @@ final class Updatronix_Export_Body_Builder {
 			$data['status'] = $parts['status'];
 		}
 		if ( $columns['category'] ?? true ) {
-			$data['category'] = $parts['category'] ?? self::category_label_for( $log_type );
+			$data['category'] = $parts['category'] ?? self::category_label_for(
+				$log_type
+			);
 		}
 		if ( $columns['reason'] ?? true ) {
 			$data['reason'] = $parts['reason'] ?? '';
@@ -534,11 +651,15 @@ final class Updatronix_Export_Body_Builder {
 	 * Build the category-sectioned record list for a chunk.
 	 *
 	 * @param array<int, object>  $rows    Rows in one SQL chunk.
-	 * @param bool                $merge   Collapse rows sharing entity, action, and status.
+	 * @param bool                $merge Collapse rows sharing entity, action, and status.
 	 * @param array<string, bool> $columns Normalised column toggles.
 	 * @return array<int, array{line: string, row_span: int}>
 	 */
-	private static function build_sectioned_records( array $rows, bool $merge, array $columns ): array {
+	private static function build_sectioned_records(
+		array $rows,
+		bool $merge,
+		array $columns
+	): array {
 		$buckets = array();
 		if ( $merge ) {
 			foreach ( $rows as $row ) {
@@ -562,13 +683,18 @@ final class Updatronix_Export_Body_Builder {
 	 * @param array<string, bool>            $columns Normalised column toggles.
 	 * @return array<int, array{line: string, row_span: int}>
 	 */
-	private static function build_flat_records( array $buckets, array $columns ): array {
+	private static function build_flat_records(
+		array $buckets,
+		array $columns
+	): array {
 		$items = array();
 
 		foreach ( $buckets as $group ) {
 			$first = $group[0];
 			$lt    = sanitize_key( (string) ( $first->log_type ?? '' ) );
-			if ( ! in_array( $lt, self::CATEGORY_ORDER, true ) ) { // counterfactual: equivalent — both sides of the comparison are strings — a declared `string` operand and a haystack of string literals — so the strict comparison and the loose one agree.
+			if ( ! in_array( $lt, self::CATEGORY_ORDER, true ) ) {
+// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+				// counterfactual: equivalent — both sides of the comparison are strings — a declared `string` operand and a haystack of string literals — so the strict comparison and the loose one agree.
 				continue;
 			}
 
@@ -614,17 +740,25 @@ final class Updatronix_Export_Body_Builder {
 	}
 
 	/**
-	 * Sectioned export (merge on): category headings with date-sorted rows per section.
+	 * Sectioned export (merge on): category headings with date-sorted rows per
+	 * section.
 	 *
-	 * @param array<string, array<int, object>> $buckets Merge groups keyed by {@see merge_key()}.
+	 * @param array<string, array<int, object>> $buckets Merge groups keyed by
+	 * {@see merge_key()}.
 	 * @param array<string, bool>               $columns Normalised column toggles.
 	 * @return array<int, array{line: string, row_span: int}>
 	 */
-	private static function build_merged_sectioned_records( array $buckets, array $columns ): array {
+	private static function build_merged_sectioned_records(
+		array $buckets,
+		array $columns
+	): array {
 		/**
 		 * Category-grouped items for sectioned output.
 		 *
-		 * @var array<string, array<int, array{sort_ts:int, action_rank:int, status_rank:int, name:string, parts:array{name:string, action:string, versions:string, dates:string, context:string, status:string}, row_span:int}>> $by_category
+		 * @var array<string, array<int, array{sort_ts:int, action_rank:int,
+		 * status_rank:int, name:string, parts:array{name:string, action:string,
+		 * versions:string, dates:string, context:string, status:string},
+		 * row_span:int}>> $by_category
 		 */
 		$by_category = array(
 			'core'        => array(),
@@ -642,7 +776,13 @@ final class Updatronix_Export_Body_Builder {
 
 			$by_category[ $lt ][] = array(
 				'sort_ts'     => self::latest_timestamp( $group ),
-				'action_rank' => self::action_rank( sanitize_key( (string) ( $first->action_type ?? '' ) ) ),
+				'action_rank' =>
+					self::action_rank(
+						sanitize_key(
+							(string) (
+							$first->action_type ?? '' )
+						)
+					),
 				'status_rank' => self::status_rank( (string) ( $first->status ?? '' ) ),
 				'name'        => mb_strtolower( self::real_name( $first ), 'UTF-8' ),
 				'parts'       => self::build_row_parts( $group ),
@@ -656,7 +796,7 @@ final class Updatronix_Export_Body_Builder {
 		/**
 		 * Flattened rows for width measurement.
 		 *
-		 * @var array<int, array{parts: array{name: string, action: string, versions: string, dates: string, context: string, status: string}}> $all_items
+		 * @var array<int, array{parts: array<string, string>}> $all_items
 		 */
 		$all_items = array();
 		foreach ( self::CATEGORY_ORDER as $lt ) {
@@ -722,16 +862,21 @@ final class Updatronix_Export_Body_Builder {
 	}
 
 	/**
-	 * Build the display parts for one aggregate group (merged bucket or single row).
+	 * Build the display parts for one aggregate group (merged bucket or single
+	 * row).
 	 *
-	 * @param array<int, object> $group One or more rows sharing entity, action, and status.
-	 * @param bool               $flat  Include a leading category column (non-merged export).
-	 * @return array{category?: string, name: string, action: string, versions: string, dates: string, context: string, user: string, status: string}
+	 * @param array<int, object> $group One or more rows sharing entity, action,
+	 * and status.
+	 * @param bool               $flat Include a leading category column (non-merged export).
+	 * @return array<string, mixed>
 	 */
 	private static function build_row_parts( array $group, bool $flat = false ): array {
 		usort(
 			$group,
-			static fn ( object $a, object $b ): int => strcmp( (string) ( $a->created_at ?? '' ), (string) ( $b->created_at ?? '' ) )
+			static fn ( object $a, object $b ): int => strcmp(
+				(string) ( $a->created_at ?? '' ),
+				(string) ( $b->created_at ?? '' )
+			)
 		);
 		$first     = $group[0];
 		$last      = $group[ count( $group ) - 1 ];
@@ -739,23 +884,55 @@ final class Updatronix_Export_Body_Builder {
 
 		$parts = array(
 			'name'          => self::real_name( $last ),
-			'action'        => self::action_type_display_label( sanitize_key( (string) ( $first_row['action_type'] ?? '' ) ) ),
+			'action'        =>
+				// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+				self::action_type_display_label(
+					sanitize_key(
+						(string) (
+						$first_row['action_type'] ?? '' )
+					)
+				),
 			'versions'      => self::compact_version_plain( $group, $first ),
 			'dates'         => self::format_dates_list( $group ),
 			'context'       => self::trigger_context_suffix( $group ),
 			'user'          => self::format_users_list( $group ),
-			'status'        => self::status_label( (string) ( $first_row['status'] ?? '' ) ),
-			'reason'        => '' !== (string) ( $first_row['reason_code'] ?? '' ) ? Updatronix_Log_Taxonomy::reason_label( (string) $first_row['reason_code'] ) : '',
-			'state'         => '' !== (string) ( $first_row['decision_state'] ?? '' ) ? Updatronix_Log_Taxonomy::state_label( (string) $first_row['decision_state'] ) : '',
-			'origin'        => '' !== (string) ( $first_row['origin'] ?? '' ) ? Updatronix_Log_Taxonomy::origin_label( (string) $first_row['origin'] ) : '',
+			'status'        => self::status_label(
+				(string) (
+				$first_row['status'] ?? '' )
+			),
+			'reason'        =>
+				// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+				'' !== (string) (
+					$first_row['reason_code'] ?? '' ) ? Updatronix_Log_Taxonomy::reason_label(
+						(string) $first_row['reason_code']
+					) : '',
+			'state'         =>
+				// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+				'' !== (string) (
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					$first_row['decision_state'] ?? '' ) ? Updatronix_Log_Taxonomy::state_label( (string) $first_row['decision_state'] ) : '',
+			'origin'        =>
+				// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+				'' !== (string) (
+					$first_row['origin'] ?? '' ) ? Updatronix_Log_Taxonomy::origin_label(
+						(string) $first_row['origin']
+					) : '',
 			'pass'          => (string) ( $first_row['pass_id'] ?? '' ),
 			'chain'         => (string) ( $first_row['chain_id'] ?? '' ),
-			'next_eligible' => isset( $first_row['next_eligible_at'] ) && '' !== (string) $first_row['next_eligible_at'] ? self::format_next_eligible( (string) $first_row['next_eligible_at'] ) : '',
-			'retained'      => (int) ( $first_row['retained'] ?? 0 ) > 0 ? __( 'Retained', 'updatronix' ) : '',
+			'next_eligible' => isset( $first_row['next_eligible_at'] )
+				// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+				&& '' !== (string) $first_row['next_eligible_at'] ? self::format_next_eligible( (string) $first_row['next_eligible_at'] ) : '',
+			'retained'      => (int) ( $first_row['retained'] ?? 0 ) > 0 ? __(
+				'Retained',
+				'updatronix'
+			) : '',
 		);
 
 		if ( $flat ) {
-			return array( 'category' => self::category_label_for( (string) ( $first->log_type ?? '' ) ) ) + $parts;
+			return array(
+				'category' =>
+									self::category_label_for( (string) ( $first->log_type ?? '' ) ),
+			) + $parts;
 		}
 
 		return $parts;
@@ -798,7 +975,8 @@ final class Updatronix_Export_Body_Builder {
 	/**
 	 * Warm the user cache for every numeric `user_id` in an export chunk.
 	 *
-	 * @param array<int, object> $rows Rows from {@see Updatronix_Export_Query_Builder::fetch_rows()}.
+	 * @param array<int, object> $rows Rows from {@see
+	 * Updatronix_Export_Query_Builder::fetch_rows()}.
 	 * @return void
 	 */
 	private static function prime_user_cache( array $rows ): void {
@@ -844,7 +1022,8 @@ final class Updatronix_Export_Body_Builder {
 	}
 
 	/**
-	 * Comma-separated distinct user labels for a merged group (chronological first-seen order).
+	 * Comma-separated distinct user labels for a merged group (chronological
+	 * first-seen order).
 	 *
 	 * @param array<int, object> $group Rows sorted ascending by `created_at`.
 	 * @return string
@@ -859,8 +1038,10 @@ final class Updatronix_Export_Body_Builder {
 				continue;
 			}
 			// @infection-ignore-all.
-			$seen[ $label ] = true; // counterfactual: equivalent — the map's value is never read — it is consulted through `isset()`, `count()` or `array_key_first()` — so `true` and `false` behave the same here.
-			$labels[]       = $label;
+			$seen[ $label ] = true;
+// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+			// counterfactual: equivalent — the map's value is never read — it is consulted through `isset()`, `count()` or `array_key_first()` — so `true` and `false` behave the same here.
+			$labels[] = $label;
 		}
 
 		return array() === $labels ? '—' : implode( ', ', $labels );
@@ -874,11 +1055,15 @@ final class Updatronix_Export_Body_Builder {
 	 * correctly. Optional columns (`versions`, `context`) are dropped when every
 	 * row leaves them empty.
 	 *
-	 * @param array<int, array{parts: array<string, string>}> $items Data rows after sorting.
-	 * @param array<int, string>                              $keys  Column keys for this export layout.
-	 * @return array<string, int> Column key => width in characters (0 means omit optional column).
+	 * @param array<int, array{parts: array<string, string>}> $items Data rows.
+	 * @param array<int, string>                              $keys Column keys.
+	 * @return array<string, int> Column key => width in characters (0 means omit
+	 * optional column).
 	 */
-	private static function column_widths_for_rows( array $items, array $keys ): array {
+	private static function column_widths_for_rows(
+		array $items,
+		array $keys
+	): array {
 		$widths = array_fill_keys( $keys, 0 );
 
 		foreach ( $items as $item ) {
@@ -941,27 +1126,37 @@ final class Updatronix_Export_Body_Builder {
 	 * @param array<int, string> $keys   Column order for this export layout.
 	 * @return string
 	 */
-	private static function format_column_header_row( array $widths, array $keys ): string {
+	private static function format_column_header_row(
+		array $widths,
+		array $keys
+	): string {
 		$segments = array();
 
 		foreach ( $keys as $key ) {
 			if ( ! isset( $widths[ $key ] ) ) {
 				continue;
 			}
-			$segments[] = self::pad_column( self::column_heading_for( $key ), $widths[ $key ] );
+			$segments[] = self::pad_column(
+				self::column_heading_for( $key ),
+				$widths[ $key ]
+			);
 		}
 
 		return self::join_columns( $segments );
 	}
 
 	/**
-	 * Dash separator row under the column headings (one hyphen per column character).
+	 * Dash separator row under the column headings (one hyphen per column
+	 * character).
 	 *
 	 * @param array<string, int> $widths Column widths keyed by column name.
 	 * @param array<int, string> $keys   Column order for this export layout.
 	 * @return string
 	 */
-	private static function format_column_separator_row( array $widths, array $keys ): string {
+	private static function format_column_separator_row(
+		array $widths,
+		array $keys
+	): string {
 		$segments = array();
 
 		foreach ( $keys as $key ) {
@@ -995,7 +1190,11 @@ final class Updatronix_Export_Body_Builder {
 	 * @param array<int, string>    $keys   Column order for this export layout.
 	 * @return string
 	 */
-	private static function format_row_parts( array $parts, array $widths, array $keys ): string {
+	private static function format_row_parts(
+		array $parts,
+		array $widths,
+		array $keys
+	): string {
 		$segments = array();
 
 		foreach ( $keys as $key ) {
@@ -1028,7 +1227,8 @@ final class Updatronix_Export_Body_Builder {
 	}
 
 	/**
-	 * Status label matching the admin UI ({@see Updatronix_Settings} and the log filters).
+	 * Status label matching the admin UI ({@see Updatronix_Settings} and the log
+	 * filters).
 	 *
 	 * @param string $status Raw status value.
 	 * @return string Localised `Success`, `Error`, `Cancelled`, or `Delayed`.
@@ -1041,7 +1241,11 @@ final class Updatronix_Export_Body_Builder {
 			'delayed'   => __( 'Delayed', 'updatronix' ),
 			'info'      => __( 'Info', 'updatronix' ),
 			'warning'   => __( 'Warning', 'updatronix' ),
-			default     => '' !== sanitize_key( $status ) ? ucfirst( sanitize_key( $status ) ) : __( 'Info', 'updatronix' ),
+			default     =>
+				'' !== sanitize_key( $status ) ? ucfirst( sanitize_key( $status ) ) : __(
+					'Info',
+					'updatronix'
+				),
 		};
 	}
 
@@ -1070,7 +1274,8 @@ final class Updatronix_Export_Body_Builder {
 	}
 
 	/**
-	 * Element label for the export (real name for core/plugins/themes; slug for translations).
+	 * Element label for the export (real name for core/plugins/themes; slug for
+	 * translations).
 	 *
 	 * @param object $row Representative row.
 	 * @return string
@@ -1128,8 +1333,10 @@ final class Updatronix_Export_Body_Builder {
 				continue;
 			}
 			// @infection-ignore-all.
-			$seen[ $formatted ] = true; // counterfactual: equivalent — the map's value is never read — it is consulted through `isset()`, `count()` or `array_key_first()` — so `true` and `false` behave the same here.
-			$out[]              = $formatted;
+			$seen[ $formatted ] = true;
+// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+			// counterfactual: equivalent — the map's value is never read — it is consulted through `isset()`, `count()` or `array_key_first()` — so `true` and `false` behave the same here.
+			$out[] = $formatted;
 		}
 
 		return array() === $out ? '—' : implode( ', ', $out );
@@ -1163,7 +1370,9 @@ final class Updatronix_Export_Body_Builder {
 		// @infection-ignore-all.
 		$triggers = array();
 		foreach ( $group as $row ) {
-			$triggers[ sanitize_key( (string) ( $row->performed_as ?? '' ) ) ] = true; // counterfactual: equivalent true -> false — the map's value is never read — it is consulted through `isset()`, `count()` or `array_key_first()` — so `true` and `false` behave the same here.
+			$triggers[ sanitize_key( (string) ( $row->performed_as ?? '' ) ) ] = true;
+// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+			// counterfactual: equivalent true -> false — the map's value is never read — it is consulted through `isset()`, `count()` or `array_key_first()` — so `true` and `false` behave the same here.
 		}
 		unset( $triggers[''] );
 
@@ -1185,7 +1394,9 @@ final class Updatronix_Export_Body_Builder {
 				$all_have_context = false;
 			}
 			// @infection-ignore-all.
-			$contexts[ $ctx ] = true; // counterfactual: equivalent — the map's value is never read — it is consulted through `isset()`, `count()` or `array_key_first()` — so `true` and `false` behave the same here.
+			$contexts[ $ctx ] = true;
+// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+			// counterfactual: equivalent — the map's value is never read — it is consulted through `isset()`, `count()` or `array_key_first()` — so `true` and `false` behave the same here.
 		}
 
 		$context = '';
@@ -1213,12 +1424,15 @@ final class Updatronix_Export_Body_Builder {
 	}
 
 	/**
-	 * Localised action label aligned with {@see Updatronix_Settings::enrich_log_for_display()}.
+	 * Localised action label aligned with {@see
+	 * Updatronix_Settings::enrich_log_for_display()}.
 	 *
 	 * @param string $action_type Sanitized action key.
 	 * @return string
 	 */
-	private static function action_type_display_label( string $action_type ): string {
+	private static function action_type_display_label(
+		string $action_type
+	): string {
 		return match ( $action_type ) {
 			'update' => __( 'Update', 'updatronix' ),
 			'downgrade' => __( 'Rollback', 'updatronix' ),
@@ -1229,7 +1443,10 @@ final class Updatronix_Export_Body_Builder {
 			'prevented' => __( 'Prevented', 'updatronix' ),
 			'incompatible' => __( 'Incompatible', 'updatronix' ),
 			'disabled' => __( 'Disabled', 'updatronix' ),
-			'safe_mode_disabled' => __( 'Auto-updates disabled by Safe Mode', 'updatronix' ),
+			'safe_mode_disabled' => __(
+				'Auto-updates disabled by Safe Mode',
+				'updatronix'
+			),
 			default => '' !== $action_type ? $action_type : '',
 		};
 	}
@@ -1251,7 +1468,8 @@ final class Updatronix_Export_Body_Builder {
 	}
 
 	/**
-	 * WordPress Reading → date + time preference (Settings → General), site timezone via {@see wp_date()}.
+	 * WordPress Reading → date + time preference (Settings → General), site
+	 * timezone via {@see wp_date()}.
 	 */
 	private static function export_datetime_pattern(): string {
 		$df = wp_unslash( (string) get_option( 'date_format', 'Y-m-d' ) );
@@ -1277,19 +1495,25 @@ final class Updatronix_Export_Body_Builder {
 	}
 
 	/**
-	 * Normalise logged `item_slug` so manual rows (`akismet`) and automatic paths (`akismet/akismet.php`)
+	 * Normalise logged `item_slug` so manual rows (`akismet`) and automatic paths
+	 * (`akismet/akismet.php`)
 	 * share one merge bucket.
 	 *
-	 * @param string $slug Raw `item_slug` from the logs table (may be folder or plugin-relative path).
+	 * @param string $slug Raw `item_slug` from the logs table (may be folder or
+	 * plugin-relative path).
 	 * @param string $lt   Sanitized `log_type`.
 	 * @return string Empty when input has no usable token.
 	 */
-	private static function normalise_item_slug_token_for_merge( string $slug, string $lt ): string {
+	private static function normalise_item_slug_token_for_merge(
+		string $slug,
+		string $lt
+	): string {
 		$slug = trim( str_replace( '\\', '/', $slug ) );
 		if ( '' === $slug ) {
 			return '';
 		}
 
+		// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 		// Plugin updates sometimes log the main PHP file (`dir/plugin.php`). Folder is the canonical slug.
 		if ( 'plugin' === $lt && str_contains( $slug, '/' ) ) {
 			$folder = dirname( $slug );
@@ -1316,7 +1540,8 @@ final class Updatronix_Export_Body_Builder {
 	}
 
 	/**
-	 * Entity portion of the merge key (per plugin, theme, core release, or translation package).
+	 * Entity portion of the merge key (per plugin, theme, core release, or
+	 * translation package).
 	 *
 	 * @param object $row Row object.
 	 * @return string
@@ -1324,7 +1549,9 @@ final class Updatronix_Export_Body_Builder {
 	private static function merge_entity_key( object $row ): string {
 		$lt = sanitize_key( (string) ( $row->log_type ?? '' ) );
 
+		// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 		// Core: manual completion logs `item_slug` as "core"; automatic completion often leaves it empty.
+		// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 		// One canonical key prevents duplicate merged lines for the same WordPress update.
 		if ( 'core' === $lt ) {
 			return 'core' . "\x00wordpress-core";
@@ -1341,16 +1568,25 @@ final class Updatronix_Export_Body_Builder {
 		if ( 'translation' === $lt ) {
 			$name = trim( (string) ( $row->item_name ?? '' ) );
 			if ( '' !== $name ) {
-				return 'translation' . "\x00" . mb_strtolower( self::normalize_field( $name ), 'UTF-8' );
+				return 'translation' . "\x00" . mb_strtolower(
+					self::normalize_field(
+						$name
+					),
+					'UTF-8'
+				);
 			}
 
 			return $lt . "\x00wordpress-translation";
 		}
 
+		// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 		// Plugin/theme rows should always carry a slug; fall back to name so we never merge unrelated items under one key.
 		$name = trim( (string) ( $row->item_name ?? '' ) );
 		if ( '' !== $name ) {
-			return $lt . "\x00name:" . mb_strtolower( self::normalize_field( $name ), 'UTF-8' );
+			return $lt . "\x00name:" . mb_strtolower(
+				self::normalize_field( $name ),
+				'UTF-8'
+			);
 		}
 
 		return $lt . "\x00_";
@@ -1363,7 +1599,10 @@ final class Updatronix_Export_Body_Builder {
 	 * @param object             $first First chronologically.
 	 * @return string
 	 */
-	private static function compact_version_plain( array $group, object $first ): string {
+	private static function compact_version_plain(
+		array $group,
+		object $first
+	): string {
 		$lt = sanitize_key( (string) ( $first->log_type ?? '' ) );
 
 		$vb_vals = array();
@@ -1384,7 +1623,13 @@ final class Updatronix_Export_Body_Builder {
 			if ( array() === $vals ) {
 				return '';
 			}
-			usort( $vals, static fn ( $x, $y ): int => strcmp( (string) $x, (string) $y ) );
+			usort(
+				$vals,
+				static fn ( $x, $y ): int => strcmp(
+					(string) $x,
+					(string) $y
+				)
+			);
 
 			return $vals[0];
 		};
@@ -1394,7 +1639,13 @@ final class Updatronix_Export_Body_Builder {
 			if ( array() === $vals ) {
 				return '';
 			}
-			usort( $vals, static fn ( $x, $y ): int => strcmp( (string) $x, (string) $y ) );
+			usort(
+				$vals,
+				static fn ( $x, $y ): int => strcmp(
+					(string) $x,
+					(string) $y
+				)
+			);
 
 			return $vals[ count( $vals ) - 1 ];
 		};

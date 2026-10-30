@@ -1,5 +1,4 @@
 <?php
-// phpcs:ignoreFile -- Unit test with intentional local WordPress stubs.
 /**
  * Unit tests for the truthful automatic-update failure logging.
  *
@@ -12,8 +11,10 @@ use PHPUnit\Framework\TestCase;
 
 require_once dirname( __DIR__ ) . '/stubs/update-logger-stubs.php';
 
-require_once dirname( __DIR__, 2 ) . '/inc/classes/class-updatronix-automatic-update-result-notes.php';
-require_once dirname( __DIR__, 2 ) . '/inc/classes/class-updatronix-update-logger.php';
+require_once dirname( __DIR__, 2 )
+	. '/inc/classes/class-updatronix-automatic-update-result-notes.php';
+require_once dirname( __DIR__, 2 )
+	. '/inc/classes/class-updatronix-update-logger.php';
 
 /**
  * Covers the actual-version guard and the missing-plugin guard.
@@ -39,7 +40,8 @@ final class UpdateLoggerFailureTest extends TestCase {
 		if ( ! is_dir( dirname( $this->plugin_file ) ) ) {
 			mkdir( dirname( $this->plugin_file ), 0777, true );
 		}
-		file_put_contents( $this->plugin_file, "<?php\n/* Plugin Name: Fixture\nVersion: 1.0.0\n*/\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions
+		// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+		file_put_contents( $this->plugin_file, "<?php\n/* Plugin Name: Fixture\nVersion: 1.0.0\n*/\n" ); // phpcs:ignore Generic.Files.LineLength, WordPress.WP.AlternativeFunctions
 		$this->set_static( 'pending_logs', array() );
 		$this->set_static( 'already_logged', array() );
 	}
@@ -51,12 +53,14 @@ final class UpdateLoggerFailureTest extends TestCase {
 	 */
 	protected function tearDown(): void {
 		if ( '' !== $this->plugin_file && file_exists( $this->plugin_file ) ) {
-			unlink( $this->plugin_file ); // phpcs:ignore WordPress.WP.AlternativeFunctions
+			// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+			unlink( $this->plugin_file ); // phpcs:ignore Generic.Files.LineLength, WordPress.WP.AlternativeFunctions
 		}
 	}
 
 	/**
-	 * A completed update whose installed version differs from the target is an error.
+	 * A completed update whose installed version differs from the target is an
+	 * error.
 	 *
 	 * @return void
 	 */
@@ -81,7 +85,13 @@ final class UpdateLoggerFailureTest extends TestCase {
 			'messages' => array( 'Download failed. Service Unavailable' ),
 		);
 
-		Updatronix_Update_Logger::log_automatic_updates( array( 'plugin' => array( $result ) ) );
+		Updatronix_Update_Logger::log_automatic_updates(
+			array(
+				'plugin' => array(
+					$result,
+				),
+			)
+		);
 
 		self::assertNotEmpty( Updatronix_Logger::$calls );
 		$call = Updatronix_Logger::$calls[ count( Updatronix_Logger::$calls ) - 1 ];
@@ -97,7 +107,10 @@ final class UpdateLoggerFailureTest extends TestCase {
 	 * @return void
 	 */
 	public function test_plugin_log_skips_missing_plugin(): void {
-		$method = new ReflectionMethod( 'Updatronix_Update_Logger', 'log_plugin_update' );
+		$method = new ReflectionMethod(
+			'Updatronix_Update_Logger',
+			'log_plugin_update'
+		);
 		$method->setAccessible( true );
 		$method->invoke(
 			null,
@@ -136,7 +149,13 @@ final class UpdateLoggerFailureTest extends TestCase {
 			'result'   => true,
 			'messages' => array(),
 		);
-		Updatronix_Update_Logger::log_automatic_updates( array( 'plugin' => array( $result ) ) );
+		Updatronix_Update_Logger::log_automatic_updates(
+			array(
+				'plugin' => array(
+					$result,
+				),
+			)
+		);
 		$call = Updatronix_Logger::$calls[ count( Updatronix_Logger::$calls ) - 1 ];
 		self::assertSame( 'success', $call['level'] );
 		self::assertSame( '4.0', $call['new_version'] );
@@ -166,7 +185,13 @@ final class UpdateLoggerFailureTest extends TestCase {
 			'result'   => true,
 			'messages' => array(),
 		);
-		Updatronix_Update_Logger::log_automatic_updates( array( 'plugin' => array( $result ) ) );
+		Updatronix_Update_Logger::log_automatic_updates(
+			array(
+				'plugin' => array(
+					$result,
+				),
+			)
+		);
 		$call = Updatronix_Logger::$calls[ count( Updatronix_Logger::$calls ) - 1 ];
 		self::assertSame( 'error', $call['level'] );
 		self::assertSame( '', $call['new_version'] );
@@ -196,7 +221,13 @@ final class UpdateLoggerFailureTest extends TestCase {
 			'result'   => true,
 			'messages' => array(),
 		);
-		Updatronix_Update_Logger::log_automatic_updates( array( 'theme' => array( $result ) ) );
+		Updatronix_Update_Logger::log_automatic_updates(
+			array(
+				'theme' => array(
+					$result,
+				),
+			)
+		);
 		$call = Updatronix_Logger::$calls[ count( Updatronix_Logger::$calls ) - 1 ];
 		self::assertSame( 'error', $call['level'] );
 		self::assertSame( '1.0', $call['new_version'] );
@@ -226,7 +257,13 @@ final class UpdateLoggerFailureTest extends TestCase {
 			'result'   => true,
 			'messages' => array(),
 		);
-		Updatronix_Update_Logger::log_automatic_updates( array( 'theme' => array( $result ) ) );
+		Updatronix_Update_Logger::log_automatic_updates(
+			array(
+				'theme' => array(
+					$result,
+				),
+			)
+		);
 		$call = Updatronix_Logger::$calls[ count( Updatronix_Logger::$calls ) - 1 ];
 		self::assertSame( 'error', $call['level'] );
 		self::assertSame( '', $call['new_version'] );

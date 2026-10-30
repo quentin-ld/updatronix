@@ -78,7 +78,11 @@ final class Updatronix_Health {
 		return array(
 			'generated_at'       => time(),
 			'generated_at_human' => (string) wp_date(
-				trim( (string) get_option( 'date_format' ) . ' ' . (string) get_option( 'time_format' ) ),
+				trim(
+					(string) get_option( 'date_format' ) . ' ' . (string) get_option(
+						'time_format'
+					)
+				),
 				time()
 			),
 			'summary'            => $summary,
@@ -204,9 +208,13 @@ final class Updatronix_Health {
 				'item'          => (string) $row->item_name,
 				'log_type'      => (string) $row->log_type,
 				'severity'      => $attempts >= 3 ? 'High' : 'Medium',
-				'code'          => 'UPD_' . strtoupper( (string) $row->action_type ) . '_FAILED',
+				'code'          => 'UPD_' . strtoupper( (string) $row->action_type )
+					. '_FAILED',
 				'message'       => self::short_message( (string) ( $row->message ?? '' ) ),
-				'detail'        => trim( (string) ( $row->message ?? '' ) . "\n\n" . (string) ( $row->trace ?? '' ) ),
+				'detail'        => trim(
+					(string) ( $row->message ?? '' ) . "\n\n"
+					. (string) ( $row->trace ?? '' )
+				),
 				'version_from'  => (string) $row->version_before,
 				'version_to'    => (string) $row->version_after,
 				'attempts'      => $attempts,
@@ -215,7 +223,14 @@ final class Updatronix_Health {
 				'performed_as'  => (string) $row->performed_as,
 				'site'          => (string) wp_parse_url( home_url(), PHP_URL_HOST ),
 				'php'           => PHP_VERSION,
-				'retryable'     => in_array( (string) $row->log_type, array( 'plugin', 'theme' ), true ),
+				'retryable'     => in_array(
+					(string) $row->log_type,
+					array(
+						'plugin',
+						'theme',
+					),
+					true
+				),
 			);
 		}
 
@@ -234,7 +249,10 @@ final class Updatronix_Health {
 	 * @param array<int, \stdClass> $success Successful rows.
 	 * @return array<int, array<string, mixed>>
 	 */
-	private static function build_resolved( array $failed, array $success ): array {
+	private static function build_resolved(
+		array $failed,
+		array $success
+	): array {
 		$failures = array();
 		foreach ( $failed as $row ) {
 			$key              = self::item_key( $row );
@@ -257,7 +275,10 @@ final class Updatronix_Health {
 			$resolved[]   = array(
 				'id'         => (int) $row->id,
 				'item'       => (string) $row->item_name,
-				'version'    => trim( (string) $row->version_before . ' → ' . (string) $row->version_after ),
+				'version'    => trim(
+					(string) $row->version_before . ' → '
+					. (string) $row->version_after
+				),
 				'resolution' => 'automatic' === (string) $row->performed_as
 					? __( 'Resolved by an automatic retry.', 'updatronix' )
 					: __( 'Resolved by a manual update.', 'updatronix' ),
@@ -297,7 +318,7 @@ final class Updatronix_Health {
 		 * @since 1.5.0
 		 *
 		 * @param array<int, array<string, mixed>> $checks Health checks.
-		 * @param array<int, \stdClass>            $failed Failed log rows in the window.
+		 * @param array<int, \stdClass> $failed Failed log rows in the window.
 		 */
 		$filtered = apply_filters( 'updatronix_health_checks', $checks, $failed );
 
@@ -312,15 +333,28 @@ final class Updatronix_Health {
 			}
 
 			$status = (string) ( $check['status'] ?? '' );
-			if ( ! in_array( $status, array( 'good', 'attention', 'critical' ), true ) ) {
+			if ( ! in_array(
+				$status,
+				array( 'good', 'attention', 'critical' ),
+				true
+			) ) {
 				continue;
 			}
 
-			if ( ! isset( $check['id'], $check['label'], $check['value'], $check['detail'] ) ) {
+			if ( ! isset(
+				$check['id'],
+				$check['label'],
+				$check['value'],
+				$check['detail']
+			) ) {
 				continue;
 			}
 
-			$check['intent']     = (string) ( $check['intent'] ?? ( 'good' === $status ? 'stable' : ( 'attention' === $status ? 'medium' : 'high' ) ) );
+			$check['intent'] =
+				// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+				(string) (
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					$check['intent'] ?? ( 'good' === $status ? 'stable' : ( 'attention' === $status ? 'medium' : 'high' ) ) );
 			$check['href']       = $check['href'] ?? null;
 			$check['link_label'] = $check['link_label'] ?? null;
 			$valid[]             = $check;
@@ -352,7 +386,11 @@ final class Updatronix_Health {
 				__( 'WordPress version', 'updatronix' ),
 				$current,
 				'critical',
-				__( 'WordPress 6.2 or newer is required. Update WordPress before relying on Updatronix.', 'updatronix' )
+				__(
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					'WordPress 6.2 or newer is required. Update WordPress before relying on Updatronix.',
+					'updatronix'
+				)
 			);
 		}
 
@@ -385,7 +423,10 @@ final class Updatronix_Health {
 				__( 'PHP version', 'updatronix' ),
 				$current,
 				'critical',
-				__( 'PHP 8.1 or newer is required. Ask your host to upgrade PHP.', 'updatronix' )
+				__(
+					'PHP 8.1 or newer is required. Ask your host to upgrade PHP.',
+					'updatronix'
+				)
 			);
 		}
 
@@ -395,7 +436,11 @@ final class Updatronix_Health {
 				__( 'PHP version', 'updatronix' ),
 				$current,
 				'attention',
-				__( 'This PHP major version is newer than the tested range. Test updates on staging first.', 'updatronix' )
+				__(
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					'This PHP major version is newer than the tested range. Test updates on staging first.',
+					'updatronix'
+				)
 			);
 		}
 
@@ -404,7 +449,10 @@ final class Updatronix_Health {
 			__( 'PHP version', 'updatronix' ),
 			$current,
 			'good',
-			__( 'Supported PHP version. The update stack is tested through PHP 8.4.', 'updatronix' )
+			__(
+				'Supported PHP version. The update stack is tested through PHP 8.4.',
+				'updatronix'
+			)
 		);
 	}
 
@@ -415,7 +463,8 @@ final class Updatronix_Health {
 	 */
 	private static function check_disk(): array {
 		$free = function_exists( 'disk_free_space' )
-			// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- Disk probes can be disabled by the host.
+			// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+			// phpcs:ignore Generic.Files.LineLength, WordPress.PHP.NoSilencedErrors.Discouraged -- Disk probes can be disabled by the host.
 			? @disk_free_space( ABSPATH )
 			: false;
 
@@ -425,7 +474,12 @@ final class Updatronix_Health {
 				__( 'Disk space', 'updatronix' ),
 				__( 'Unavailable', 'updatronix' ),
 				'attention',
-				__( 'The host does not expose free disk space. Confirm space with your host before a large update.', 'updatronix' )
+				// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+				__(
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					'The host does not expose free disk space. Confirm space with your host before a large update.',
+					'updatronix'
+				)
 			);
 		}
 
@@ -438,7 +492,10 @@ final class Updatronix_Health {
 				__( 'Disk space', 'updatronix' ),
 				$value,
 				'critical',
-				__( 'Less than 100 MB is free. Free space before the next update.', 'updatronix' )
+				__(
+					'Less than 100 MB is free. Free space before the next update.',
+					'updatronix'
+				)
 			);
 		}
 
@@ -448,7 +505,10 @@ final class Updatronix_Health {
 				__( 'Disk space', 'updatronix' ),
 				$value,
 				'attention',
-				__( 'Keep at least 500 MB free so update archives can be unpacked.', 'updatronix' )
+				__(
+					'Keep at least 500 MB free so update archives can be unpacked.',
+					'updatronix'
+				)
 			);
 		}
 
@@ -477,7 +537,12 @@ final class Updatronix_Health {
 				__( 'WP-Cron', 'updatronix' ),
 				__( 'Disabled', 'updatronix' ),
 				'attention',
-				__( 'DISABLE_WP_CRON is set. Scheduled checks will not run until a real cron job calls wp-cron.php.', 'updatronix' ),
+				// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+				__(
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					'DISABLE_WP_CRON is set. Scheduled checks will not run until a real cron job calls wp-cron.php.',
+					'updatronix'
+				),
 				$href,
 				__( 'Review the schedule', 'updatronix' )
 			);
@@ -489,7 +554,11 @@ final class Updatronix_Health {
 				__( 'WP-Cron', 'updatronix' ),
 				__( 'Not scheduled', 'updatronix' ),
 				'attention',
-				__( 'The core update check is not scheduled. Open Schedule and save the settings.', 'updatronix' ),
+				__(
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					'The core update check is not scheduled. Open Schedule and save the settings.',
+					'updatronix'
+				),
 				$href,
 				__( 'Review the schedule', 'updatronix' )
 			);
@@ -497,7 +566,11 @@ final class Updatronix_Health {
 
 		$timestamp = (int) $next;
 		$value     = (string) wp_date(
-			trim( (string) get_option( 'date_format' ) . ' ' . (string) get_option( 'time_format' ) ),
+			trim(
+				(string) get_option( 'date_format' ) . ' ' . (string) get_option(
+					'time_format'
+				)
+			),
 			$timestamp
 		);
 
@@ -507,7 +580,11 @@ final class Updatronix_Health {
 				__( 'WP-Cron', 'updatronix' ),
 				$value,
 				'attention',
-				__( 'The scheduled check is overdue. Check the site cron or the host cron runner.', 'updatronix' ),
+				__(
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					'The scheduled check is overdue. Check the site cron or the host cron runner.',
+					'updatronix'
+				),
 				$href,
 				__( 'Review the schedule', 'updatronix' )
 			);
@@ -542,7 +619,12 @@ final class Updatronix_Health {
 				__( 'Update lock', 'updatronix' ),
 				__( 'Locked', 'updatronix' ),
 				'attention',
-				__( 'An update lock is present. Wait for the running update to finish; a stale lock clears on the next run.', 'updatronix' )
+				// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+				__(
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					'An update lock is present. Wait for the running update to finish; a stale lock clears on the next run.',
+					'updatronix'
+				)
 			);
 		}
 
@@ -585,8 +667,17 @@ final class Updatronix_Health {
 			$max >= 3 ? __( 'Paused', 'updatronix' ) : __( 'Available', 'updatronix' ),
 			'attention',
 			$max >= 3
-				? __( 'One item reached three failed attempts. Retry it from the update log after fixing the cause.', 'updatronix' )
-				: __( 'Some updates failed. Retry them from the open issues list or the update log.', 'updatronix' ),
+				// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+				? __(
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					'One item reached three failed attempts. Retry it from the update log after fixing the cause.',
+					'updatronix'
+				)
+				: __(
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					'Some updates failed. Retry them from the open issues list or the update log.',
+					'updatronix'
+				),
 			admin_url( 'tools.php?page=updatronix&tab=logs' ),
 			__( 'Review failed updates', 'updatronix' )
 		);
@@ -657,7 +748,10 @@ final class Updatronix_Health {
 				'status'   => 'critical',
 				'intent'   => 'high',
 				'label'    => __( 'Needs attention', 'updatronix' ),
-				'title'    => __( 'This site is not ready for its next update.', 'updatronix' ),
+				'title'    => __(
+					'This site is not ready for its next update.',
+					'updatronix'
+				),
 				'sentence' => $critical[0]['detail'],
 			);
 		}
@@ -684,7 +778,11 @@ final class Updatronix_Health {
 			'title'    => __( 'Every check is passing', 'updatronix' ),
 			'sentence' => array() === $issues
 				? __( 'This site is ready for its next scheduled update.', 'updatronix' )
-				: __( 'Environment checks pass. Resolve the open issues below before the next update.', 'updatronix' ),
+				: __(
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					'Environment checks pass. Resolve the open issues below before the next update.',
+					'updatronix'
+				),
 		);
 	}
 
@@ -719,7 +817,11 @@ final class Updatronix_Health {
 		}
 
 		return (string) wp_date(
-			trim( (string) get_option( 'date_format' ) . ' ' . (string) get_option( 'time_format' ) ),
+			trim(
+				(string) get_option( 'date_format' ) . ' ' . (string) get_option(
+					'time_format'
+				)
+			),
 			$timestamp
 		);
 	}
@@ -748,7 +850,13 @@ final class Updatronix_Health {
 			),
 			array(
 				'label' => __( 'Server', 'updatronix' ),
-				'value' => sanitize_text_field( wp_unslash( (string) ( $_SERVER['SERVER_SOFTWARE'] ?? 'Unknown' ) ) ),
+				'value' =>
+					sanitize_text_field(
+						wp_unslash(
+							(string) (
+							$_SERVER['SERVER_SOFTWARE'] ?? 'Unknown' )
+						)
+					),
 			),
 			array(
 				'label' => __( 'Memory limit', 'updatronix' ),
@@ -768,7 +876,10 @@ final class Updatronix_Health {
 			),
 			array(
 				'label' => __( 'Multisite', 'updatronix' ),
-				'value' => is_multisite() ? __( 'Yes', 'updatronix' ) : __( 'No', 'updatronix' ),
+				'value' => is_multisite() ? __( 'Yes', 'updatronix' ) : __(
+					'No',
+					'updatronix'
+				),
 			),
 			array(
 				'label' => __( 'Updatronix', 'updatronix' ),
@@ -776,20 +887,27 @@ final class Updatronix_Health {
 			),
 			array(
 				'label' => __( 'Log table', 'updatronix' ),
-				'value' => Updatronix_Database::table_exists() ? __( 'Present', 'updatronix' ) : __( 'Missing', 'updatronix' ),
+				'value' => Updatronix_Database::table_exists() ? __(
+					'Present',
+					'updatronix'
+				) : __( 'Missing', 'updatronix' ),
 			),
 			array(
 				'label' => __( 'Update check', 'updatronix' ),
 				'value' => false === $cron['update_check_next_scheduled']
 					? __( 'Not scheduled', 'updatronix' )
 					: (string) wp_date(
-						trim( (string) get_option( 'date_format' ) . ' ' . (string) get_option( 'time_format' ) ),
+						trim(
+							(string) get_option( 'date_format' ) . ' ' . (string) get_option(
+								'time_format'
+							)
+						),
 						(int) $cron['update_check_next_scheduled']
 					),
 			),
 			array(
 				'label' => __( 'Logging', 'updatronix' ),
-				'value' => updatronix_get_settings()['logging_enabled']
+				'value' => (bool) updatronix_get_settings()['logging_enabled']
 					? __( 'Enabled', 'updatronix' )
 					: __( 'Disabled', 'updatronix' ),
 			),
@@ -818,51 +936,101 @@ final class Updatronix_Health {
 	public static function queue_retry( int $log_id ) {
 		$log = Updatronix_Logger::get_log( $log_id );
 		if ( ! $log instanceof \stdClass ) {
-			return new \WP_Error( 'updatronix_health_missing', __( 'That log entry does not exist.', 'updatronix' ), array( 'status' => 404 ) );
+			return new \WP_Error(
+				'updatronix_health_missing',
+				__(
+					'That log entry does not exist.',
+					'updatronix'
+				),
+				array( 'status' => 404 )
+			);
 		}
 
 		if ( 'error' !== (string) $log->status ) {
-			return new \WP_Error( 'updatronix_health_not_failed', __( 'Only failed updates can be retried.', 'updatronix' ), array( 'status' => 400 ) );
+			return new \WP_Error(
+				'updatronix_health_not_failed',
+				__( 'Only failed updates can be retried.', 'updatronix' ),
+				array( 'status' => 400 )
+			);
 		}
 
 		$created = strtotime( (string) $log->created_at );
-		if ( false === $created || $created < time() - ( self::ISSUE_WINDOW_DAYS * DAY_IN_SECONDS ) ) {
-			return new \WP_Error( 'updatronix_health_expired', __( 'This failure is older than 30 days and cannot be retried.', 'updatronix' ), array( 'status' => 400 ) );
+		if ( false === $created
+			|| $created < time() - ( self::ISSUE_WINDOW_DAYS * DAY_IN_SECONDS ) ) {
+			return new \WP_Error(
+				'updatronix_health_expired',
+				__(
+					'This failure is older than 30 days and cannot be retried.',
+					'updatronix'
+				),
+				array( 'status' => 400 )
+			);
 		}
 
 		$log_type = (string) $log->log_type;
 		if ( ! in_array( $log_type, array( 'plugin', 'theme' ), true ) ) {
 			return new \WP_Error(
 				'updatronix_health_unsupported',
-				__( 'Only plugin and theme updates can be retried here. Run core and translation updates from the WordPress Updates screen.', 'updatronix' ),
+				// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+				__(
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					'Only plugin and theme updates can be retried here. Run core and translation updates from the WordPress Updates screen.',
+					'updatronix'
+				),
 				array( 'status' => 400 )
 			);
 		}
 
 		$capability = 'plugin' === $log_type ? 'update_plugins' : 'update_themes';
 		if ( ! current_user_can( $capability ) ) {
-			return new \WP_Error( 'updatronix_health_forbidden', __( 'You are not allowed to update this item.', 'updatronix' ), array( 'status' => 403 ) );
+			return new \WP_Error(
+				'updatronix_health_forbidden',
+				__( 'You are not allowed to update this item.', 'updatronix' ),
+				array( 'status' => 403 )
+			);
 		}
 
 		$key  = md5( self::item_key( $log ) );
 		$lock = 'updatronix_health_retry_lock_' . $key;
 		if ( false !== get_transient( $lock ) ) {
-			return new \WP_Error( 'updatronix_health_busy', __( 'A retry for this item is already queued.', 'updatronix' ), array( 'status' => 409 ) );
+			return new \WP_Error(
+				'updatronix_health_busy',
+				__( 'A retry for this item is already queued.', 'updatronix' ),
+				array( 'status' => 409 )
+			);
 		}
 
 		$rate_key = 'updatronix_health_retry_rate_' . $key;
 		$rate     = (int) get_transient( $rate_key );
 		if ( $rate >= 3 ) {
-			return new \WP_Error( 'updatronix_health_rate_limited', __( 'This item has reached three retry attempts in the last hour.', 'updatronix' ), array( 'status' => 429 ) );
+			return new \WP_Error(
+				'updatronix_health_rate_limited',
+				__(
+					'This item has reached three retry attempts in the last hour.',
+					'updatronix'
+				),
+				array( 'status' => 429 )
+			);
 		}
 
 		set_transient( $lock, 1, 15 * MINUTE_IN_SECONDS );
 		set_transient( $rate_key, $rate + 1, HOUR_IN_SECONDS );
 
-		$scheduled = wp_schedule_single_event( time() + MINUTE_IN_SECONDS, self::RETRY_HOOK, array( $log_id ) );
+		$scheduled = wp_schedule_single_event(
+			time() + MINUTE_IN_SECONDS,
+			self::RETRY_HOOK,
+			array( $log_id )
+		);
 		if ( is_wp_error( $scheduled ) || false === $scheduled ) {
 			delete_transient( $lock );
-			return new \WP_Error( 'updatronix_health_schedule_failed', __( 'The retry could not be scheduled. Try again.', 'updatronix' ), array( 'status' => 500 ) );
+			return new \WP_Error(
+				'updatronix_health_schedule_failed',
+				__( 'The retry could not be scheduled. Try again.', 'updatronix' ),
+				array(
+					'status' =>
+					500,
+				)
+			);
 		}
 
 		Updatronix_Logger::log(
@@ -885,7 +1053,10 @@ final class Updatronix_Health {
 			'log_id'  => $log_id,
 			'message' => sprintf(
 				/* translators: %s: plugin or theme name. */
-				__( 'Retry queued for %s. The result will appear in the update log.', 'updatronix' ),
+				__(
+					'Retry queued for %s. The result will appear in the update log.',
+					'updatronix'
+				),
 				(string) $log->item_name
 			),
 		);
@@ -951,30 +1122,57 @@ final class Updatronix_Health {
 			wp_update_plugins();
 			$updates = get_site_transient( 'update_plugins' );
 			if ( ! is_object( $updates ) || ! isset( $updates->response[ $slug ] ) ) {
-				return new \WP_Error( 'updatronix_health_current', __( 'The plugin is already up to date.', 'updatronix' ) );
+				return new \WP_Error(
+					'updatronix_health_current',
+					__(
+						'The plugin is already up to date.',
+						'updatronix'
+					)
+				);
 			}
 			$upgrader = new \Plugin_Upgrader( new \Automatic_Upgrader_Skin() );
 			$result   = $upgrader->upgrade( $slug );
 
 			return true === $result
 				? true
-				: new \WP_Error( 'updatronix_health_plugin_failed', __( 'The plugin retry did not complete. Check the update log for the error.', 'updatronix' ) );
+				: new \WP_Error(
+					'updatronix_health_plugin_failed',
+					__(
+						'The plugin retry did not complete. Check the update log for the error.',
+						'updatronix'
+					)
+				);
 		}
 
 		if ( 'theme' === $log_type ) {
 			wp_update_themes();
 			$updates = get_site_transient( 'update_themes' );
 			if ( ! is_object( $updates ) || ! isset( $updates->response[ $slug ] ) ) {
-				return new \WP_Error( 'updatronix_health_current', __( 'The theme is already up to date.', 'updatronix' ) );
+				return new \WP_Error(
+					'updatronix_health_current',
+					__(
+						'The theme is already up to date.',
+						'updatronix'
+					)
+				);
 			}
 			$upgrader = new \Theme_Upgrader( new \Automatic_Upgrader_Skin() );
 			$result   = $upgrader->upgrade( $slug );
 
 			return true === $result
 				? true
-				: new \WP_Error( 'updatronix_health_theme_failed', __( 'The theme retry did not complete. Check the update log for the error.', 'updatronix' ) );
+				: new \WP_Error(
+					'updatronix_health_theme_failed',
+					__(
+						'The theme retry did not complete. Check the update log for the error.',
+						'updatronix'
+					)
+				);
 		}
 
-		return new \WP_Error( 'updatronix_health_unsupported', __( 'This item type cannot be retried.', 'updatronix' ) );
+		return new \WP_Error(
+			'updatronix_health_unsupported',
+			__( 'This item type cannot be retried.', 'updatronix' )
+		);
 	}
 }

@@ -2,7 +2,8 @@
 /**
  * Creates and manages the custom database table for update logs
  *
- * Table name is always $wpdb->prefix . self::TABLE_LOGS (plugin-controlled suffix).
+ * Table name is always $wpdb->prefix . self::TABLE_LOGS (plugin-controlled
+ * suffix).
  * Use %i in $wpdb->prepare for dynamic table identifiers (WP 6.2+).
  *
  * @package updatronix
@@ -102,7 +103,10 @@ final class Updatronix_Database {
 
 				if ( $installed ) {
 					self::backfill_delay_prefix();
-					updatronix_update_plugin_option( self::OPTION_DB_VERSION, self::SCHEMA_VERSION );
+					updatronix_update_plugin_option(
+						self::OPTION_DB_VERSION,
+						self::SCHEMA_VERSION
+					);
 				}
 
 				return $installed;
@@ -138,7 +142,10 @@ final class Updatronix_Database {
 
 				if ( $installed ) {
 					self::backfill_delay_prefix();
-					updatronix_update_plugin_option( self::OPTION_DB_VERSION, self::SCHEMA_VERSION );
+					updatronix_update_plugin_option(
+						self::OPTION_DB_VERSION,
+						self::SCHEMA_VERSION
+					);
 				}
 
 				updatronix_delete_plugin_transient( self::UPGRADE_LOCK );
@@ -249,9 +256,11 @@ final class Updatronix_Database {
 				$updated = 0;
 
 				for ( $batch = 0; $batch < 20; $batch++ ) {
-					// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Idempotent one-shot backfill on the plugin-owned table; table via %i.
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					// phpcs:ignore Generic.Files.LineLength, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Idempotent one-shot backfill on the plugin-owned table; table via %i.
 					$rows = $wpdb->query(
 						$wpdb->prepare(
+							// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 							"UPDATE %i SET reason_code = %s, decision_state = %s, origin = %s, decision_stage = %s
 							WHERE event_key LIKE %s AND reason_code = '' AND decision_state = ''
 							LIMIT %d",
@@ -292,7 +301,8 @@ final class Updatronix_Database {
 				global $wpdb;
 
 				$table_name = self::get_table_name();
-            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange -- Uninstall; no WP API for dropping custom tables; table name from get_table_name(), passed to prepare() %i.
+            // phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+            // phpcs:ignore Generic.Files.LineLength, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange -- Uninstall; no WP API for dropping custom tables; table name from get_table_name(), passed to prepare() %i.
 				$wpdb->query( $wpdb->prepare( 'DROP TABLE IF EXISTS %i', $table_name ) );
 				updatronix_delete_plugin_option( self::OPTION_DB_VERSION );
 				self::clear_table_exists_cache();
@@ -303,7 +313,8 @@ final class Updatronix_Database {
 	/**
 	 * Check whether the logs table exists in the database (authoritative check).
 	 *
-	 * Uses SHOW TABLES so the result stays correct if the option is missing or stale.
+	 * Uses SHOW TABLES so the result stays correct if the option is missing or
+	 * stale.
 	 *
 	 * @return bool
 	 */
@@ -318,13 +329,22 @@ final class Updatronix_Database {
 				global $wpdb;
 				$table = self::get_table_name();
 
-            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- One-time per request; custom table check.
-				$found  = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $wpdb->esc_like( $table ) ) );
+            // phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+            // phpcs:ignore Generic.Files.LineLength, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- One-time per request; custom table check.
+				$found  = $wpdb->get_var(
+					$wpdb->prepare(
+						'SHOW TABLES LIKE %s',
+						$wpdb->esc_like( $table )
+					)
+				);
 				$exists = ( $found === $table );
 
-				// A missing table must not keep a stale version: the migration
+				// A missing table must not keep a stale version: the migration.
 				// would otherwise skip the create on the next request.
-				if ( ! $exists && updatronix_get_plugin_option( self::OPTION_DB_VERSION, false ) !== false ) {
+				if ( ! $exists && updatronix_get_plugin_option(
+					self::OPTION_DB_VERSION,
+					false
+				) !== false ) {
 					updatronix_delete_plugin_option( self::OPTION_DB_VERSION );
 				}
 

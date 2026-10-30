@@ -28,7 +28,8 @@ final class LogSchemaMigrationTest extends WP_UnitTestCase {
 	protected function setUp(): void {
 		parent::setUp();
 
-		require_once UPDATRONIX_PLUGIN_DIR . 'inc/classes/class-updatronix-database.php';
+		require_once UPDATRONIX_PLUGIN_DIR
+			. 'inc/classes/class-updatronix-database.php';
 
 		$this->drop_logs_table();
 		$this->create_v1_table();
@@ -76,20 +77,49 @@ final class LogSchemaMigrationTest extends WP_UnitTestCase {
 	public function test_v1_table_upgrades_once(): void {
 		self::assertTrue( Updatronix_Database::maybe_upgrade() );
 
-		self::assertSame( Updatronix_Database::SCHEMA_VERSION, updatronix_get_plugin_option( Updatronix_Database::OPTION_DB_VERSION, '' ) );
+		self::assertSame(
+			Updatronix_Database::SCHEMA_VERSION,
+			updatronix_get_plugin_option( Updatronix_Database::OPTION_DB_VERSION, '' )
+		);
 
 		$columns = $this->get_column_names();
-		foreach ( array( 'target_version', 'reason_code', 'decision_state', 'origin', 'decision_stage', 'pass_id', 'chain_id', 'predecessor', 'next_eligible_at', 'attempt', 'network', 'context', 'retained' ) as $column ) {
+		foreach ( array(
+			'target_version',
+			'reason_code',
+			'decision_state',
+			'origin',
+			'decision_stage',
+			'pass_id',
+			'chain_id',
+			'predecessor',
+			'next_eligible_at',
+			'attempt',
+			'network',
+			'context',
+			'retained',
+		) as $column ) {
 			self::assertContains( $column, $columns, 'Missing column: ' . $column );
 		}
 		self::assertCount( 30, $columns );
 
 		$indexes = $this->get_index_columns();
-		self::assertSame( array( 'reason_code', 'created_at' ), $indexes['reason_created'] );
-		self::assertSame( array( 'decision_state', 'created_at' ), $indexes['state_created'] );
-		self::assertSame( array( 'origin', 'created_at' ), $indexes['origin_created'] );
+		self::assertSame(
+			array( 'reason_code', 'created_at' ),
+			$indexes['reason_created']
+		);
+		self::assertSame(
+			array( 'decision_state', 'created_at' ),
+			$indexes['state_created']
+		);
+		self::assertSame(
+			array( 'origin', 'created_at' ),
+			$indexes['origin_created']
+		);
 		self::assertSame( array( 'pass_id', 'chain_id' ), $indexes['pass_chain'] );
-		self::assertSame( array( 'chain_id', 'created_at' ), $indexes['chain_created'] );
+		self::assertSame(
+			array( 'chain_id', 'created_at' ),
+			$indexes['chain_created']
+		);
 
 		$legacy = $this->get_row( $this->row_ids[0] );
 		self::assertSame( '', $legacy->reason_code );
@@ -142,7 +172,10 @@ final class LogSchemaMigrationTest extends WP_UnitTestCase {
 		updatronix_delete_plugin_option( Updatronix_Database::OPTION_DB_VERSION );
 
 		self::assertTrue( Updatronix_Database::create_table() );
-		self::assertSame( Updatronix_Database::SCHEMA_VERSION, updatronix_get_plugin_option( Updatronix_Database::OPTION_DB_VERSION, '' ) );
+		self::assertSame(
+			Updatronix_Database::SCHEMA_VERSION,
+			updatronix_get_plugin_option( Updatronix_Database::OPTION_DB_VERSION, '' )
+		);
 		self::assertContains( 'decision_state', $this->get_column_names() );
 	}
 
@@ -153,9 +186,19 @@ final class LogSchemaMigrationTest extends WP_UnitTestCase {
 	 */
 	public function test_schema_version_is_independent_of_the_plugin_version(): void {
 		self::assertSame( '3', Updatronix_Database::SCHEMA_VERSION );
-		self::assertSame( Updatronix_Database::SCHEMA_VERSION, Updatronix_Database::DB_VERSION );
-		self::assertNotSame( UPDATRONIX_VERSION, Updatronix_Database::SCHEMA_VERSION );
-		self::assertSame( UPDATRONIX_VERSION, UPDATRONIX_DB_VERSION, 'The plugin DB-version constant must stay untouched.' );
+		self::assertSame(
+			Updatronix_Database::SCHEMA_VERSION,
+			Updatronix_Database::DB_VERSION
+		);
+		self::assertNotSame(
+			UPDATRONIX_VERSION,
+			Updatronix_Database::SCHEMA_VERSION
+		);
+		self::assertSame(
+			UPDATRONIX_VERSION,
+			UPDATRONIX_DB_VERSION,
+			'The plugin DB-version constant must stay untouched.'
+		);
 	}
 
 	/**
@@ -172,7 +215,10 @@ final class LogSchemaMigrationTest extends WP_UnitTestCase {
 
 		switch_to_blog( $subsite_id );
 		self::assertTrue( Updatronix_Database::maybe_upgrade() );
-		self::assertSame( Updatronix_Database::SCHEMA_VERSION, updatronix_get_plugin_option( Updatronix_Database::OPTION_DB_VERSION, '' ) );
+		self::assertSame(
+			Updatronix_Database::SCHEMA_VERSION,
+			updatronix_get_plugin_option( Updatronix_Database::OPTION_DB_VERSION, '' )
+		);
 		restore_current_blog();
 
 		$columns = $this->get_column_names( get_main_site_id() );
@@ -229,7 +275,8 @@ final class LogSchemaMigrationTest extends WP_UnitTestCase {
             KEY created_type_status (created_at, log_type, status)
         ) {$charset_collate};";
 
-		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery, WordPress.DB.DirectDatabaseQuery.SchemaChange -- Test fixture.
+		// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+		// phpcs:ignore Generic.Files.LineLength, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery, WordPress.DB.DirectDatabaseQuery.SchemaChange -- Test fixture.
 		$wpdb->query( $sql );
 		Updatronix_Database::clear_table_exists_cache();
 	}
@@ -279,7 +326,13 @@ final class LogSchemaMigrationTest extends WP_UnitTestCase {
 
 		$table = Updatronix_Database::get_table_name();
 
-		return $wpdb->get_row( $wpdb->prepare( 'SELECT * FROM %i WHERE id = %d', $table, $id ) );
+		return $wpdb->get_row(
+			$wpdb->prepare(
+				'SELECT * FROM %i WHERE id = %d',
+				$table,
+				$id
+			)
+		);
 	}
 
 	/**
@@ -296,7 +349,12 @@ final class LogSchemaMigrationTest extends WP_UnitTestCase {
 		}
 
 		$table = Updatronix_Database::get_table_name();
-		$rows  = $wpdb->get_results( $wpdb->prepare( 'SHOW COLUMNS FROM %i', $table ) );
+		$rows  = $wpdb->get_results(
+			$wpdb->prepare(
+				'SHOW COLUMNS FROM %i',
+				$table
+			)
+		);
 		$names = array_map(
 			static function ( $row ): string {
 				$data = (array) $row;
@@ -322,12 +380,18 @@ final class LogSchemaMigrationTest extends WP_UnitTestCase {
 		global $wpdb;
 
 		$table   = Updatronix_Database::get_table_name();
-		$rows    = (array) $wpdb->get_results( $wpdb->prepare( 'SHOW INDEX FROM %i', $table ) );
+		$rows    = (array) $wpdb->get_results(
+			$wpdb->prepare(
+				'SHOW INDEX FROM %i',
+				$table
+			)
+		);
 		$indexes = array();
 
 		foreach ( $rows as $row ) {
 			$data = (array) $row;
-			$indexes[ (string) $data['Key_name'] ][ (int) $data['Seq_in_index'] ] = (string) $data['Column_name'];
+			$indexes[ (string) $data['Key_name'] ][ (int) $data['Seq_in_index'] ] =
+				(string) $data['Column_name'];
 		}
 
 		foreach ( $indexes as $name => $columns ) {

@@ -46,7 +46,8 @@ final class NativeHtml {
 		}
 
 		$path = dirname( __DIR__ ) . '/fixtures/native-update-time.json';
-		$raw  = is_readable( $path ) ? file_get_contents( $path ) : false; // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Local test fixture, not a remote request.
+		// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+		$raw  = is_readable( $path ) ? file_get_contents( $path ) : false; // phpcs:ignore Generic.Files.LineLength, WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Local test fixture, not a remote request.
 		$data = false === $raw ? null : json_decode( $raw, true );
 
 		self::$fixture = is_array( $data ) ? $data : array();
@@ -63,6 +64,7 @@ final class NativeHtml {
 	public static function native_message( string $state ): string {
 		$messages = self::all()['nativeMessages'] ?? array();
 
-		return isset( $messages[ $state ] ) && is_string( $messages[ $state ] ) ? $messages[ $state ] : '';
+		return isset( $messages[ $state ] )
+			&& is_string( $messages[ $state ] ) ? $messages[ $state ] : '';
 	}
 }

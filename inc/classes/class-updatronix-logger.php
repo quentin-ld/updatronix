@@ -41,26 +41,32 @@ final class Updatronix_Logger {
 	/**
 	 * Insert a log entry.
 	 *
-	 * Note: the parameter list is long (12 positional params). Future refactoring may
+	 * Note: the parameter list is long (12 positional params). Future refactoring
+	 * may
 	 * consolidate these into a single parameter array. Callers should prefer named
 	 * parameters or a helper wrapper for readability.
 	 *
 	 * @param string $log_type       One of: core, plugin, theme, translation.
-	 * @param string $action_type    One of: update, downgrade, install, same_version, failed, uninstall, prevented, incompatible, disabled.
+	 * @param string $action_type One of: update, downgrade, install, same_version,
+	 * failed, uninstall, prevented, incompatible, disabled.
 	 * @param string $item_name      Display name of the item.
 	 * @param string $item_slug      Slug/identifier.
 	 * @param string $version_before Previous version.
 	 * @param string $version_after  New version after update.
 	 * @param string $status         success, error, cancelled, delayed.
-	 * @param string $message        Optional message (e.g. process log, error details).
+	 * @param string $message Optional message (e.g. process log, error details).
 	 * @param string $trace          Optional call stack trace.
 	 * @param string $performed_as   manual, automatic, or upload.
-	 * @param string $update_context bulk, single, or '' (for core/translation/legacy).
+	 * @param string $update_context bulk, single, or '' (for
+	 * core/translation/legacy).
 	 * @param string $event_key      Optional canonical event key for dedupe.
 	 *
-	 * Note on `performed_by`: when `get_current_user_id()` returns 0 (e.g. during WP-Cron),
-	 * the log entry is stored with `performed_by = 'system'`. Automatic updates triggered
-	 * by the background updater always use this value. The `performed_as` field ('manual',
+	 * Note on `performed_by`: when `get_current_user_id()` returns 0 (e.g. during
+	 * WP-Cron),
+	 * the log entry is stored with `performed_by = 'system'`. Automatic updates
+	 * triggered
+	 * by the background updater always use this value. The `performed_as` field
+	 * ('manual',
 	 * 'automatic', 'upload') provides the more granular distinction for the UI.
 	 *
 	 * @return int|false Log ID on success, false on failure.
@@ -79,7 +85,7 @@ final class Updatronix_Logger {
 		string $update_context = '',
 		string $event_key = ''
 	): int|false {
-		if ( ! updatronix_get_settings()['logging_enabled'] ) {
+		if ( ! (bool) updatronix_get_settings()['logging_enabled'] ) {
 			return false;
 		}
 
@@ -97,7 +103,9 @@ final class Updatronix_Logger {
 		$message        = Updatronix_Security::sanitize_message( $message );
 		$trace          = Updatronix_Security::sanitize_trace( $trace );
 		$performed_as   = Updatronix_Security::sanitize_performed_as( $performed_as );
-		$update_context = Updatronix_Security::sanitize_update_context( $update_context );
+		$update_context = Updatronix_Security::sanitize_update_context(
+			$update_context
+		);
 		$event_key      = Updatronix_Security::sanitize_string( $event_key, 191 );
 
 		if ( '' !== $event_key ) {
@@ -144,7 +152,7 @@ final class Updatronix_Logger {
 	 * @return int|false Log ID (new or existing) on success, false on failure.
 	 */
 	public static function log_event( array $event ): int|false {
-		if ( ! updatronix_get_settings()['logging_enabled'] ) {
+		if ( ! (bool) updatronix_get_settings()['logging_enabled'] ) {
 			return false;
 		}
 
@@ -187,7 +195,10 @@ final class Updatronix_Logger {
 			(string) $event['target_version']
 		);
 
-		if ( (bool) $previous && Updatronix_Log_Event::is_same_state( $previous, $event ) ) {
+		if ( (bool) $previous && Updatronix_Log_Event::is_same_state(
+			$previous,
+			$event
+		) ) {
 			$previous_row = (array) $previous;
 
 			return (int) ( $previous_row['id'] ?? 0 );
@@ -207,7 +218,10 @@ final class Updatronix_Logger {
 	 * @return bool
 	 */
 	public static function decision_layer_enabled(): bool {
-		$enabled = updatronix_get_plugin_option( 'updatronix_log_decision_layer_enabled', true );
+		$enabled = updatronix_get_plugin_option(
+			'updatronix_log_decision_layer_enabled',
+			true
+		);
 
 		/**
 		 * Filters whether the decision-layer writer is active.
@@ -216,7 +230,10 @@ final class Updatronix_Logger {
 		 *
 		 * @param bool $enabled Whether new decision columns are written.
 		 */
-		return (bool) apply_filters( 'updatronix_log_decision_layer_enabled', (bool) $enabled );
+		return (bool) apply_filters(
+			'updatronix_log_decision_layer_enabled',
+			(bool) $enabled
+		);
 	}
 
 	/**
@@ -258,9 +275,16 @@ final class Updatronix_Logger {
 			$event
 		);
 
-		$log_type       = Updatronix_Security::sanitize_log_type( (string) $event['log_type'] );
-		$item_slug      = Updatronix_Security::sanitize_string( (string) $event['item_slug'], 255 );
-		$target_version = Updatronix_Security::sanitize_version( (string) $event['target_version'] );
+		$log_type       = Updatronix_Security::sanitize_log_type(
+			(string) $event['log_type']
+		);
+		$item_slug      = Updatronix_Security::sanitize_string(
+			(string) $event['item_slug'],
+			255
+		);
+		$target_version = Updatronix_Security::sanitize_version(
+			(string) $event['target_version']
+		);
 
 		/**
 		 * Filters a decision-log event before it is sanitized and stored.
@@ -276,10 +300,24 @@ final class Updatronix_Logger {
 		 * @param string               $item_id Item id (slug or core key).
 		 * @param string               $target  Offered target version.
 		 */
-		$event = (array) apply_filters( 'updatronix_log_context', $event, $log_type, $item_slug, $target_version );
+		$event = (array) apply_filters(
+			'updatronix_log_context',
+			$event,
+			$log_type,
+			$item_slug,
+			$target_version
+		);
 
-		$reason_code    = Updatronix_Security::sanitize_reason_code( (string) ( $event['reason_code'] ?? '' ) );
-		$decision_state = Updatronix_Security::sanitize_decision_state( (string) ( $event['decision_state'] ?? '' ) );
+		$reason_code    =
+			Updatronix_Security::sanitize_reason_code(
+				(string) (
+				$event['reason_code'] ?? '' )
+			);
+		$decision_state =
+			Updatronix_Security::sanitize_decision_state(
+				(string) (
+				$event['decision_state'] ?? '' )
+			);
 
 		if ( '' === $decision_state && '' !== $reason_code ) {
 			$decision_state = Updatronix_Log_Taxonomy::state_for( $reason_code );
@@ -288,50 +326,116 @@ final class Updatronix_Logger {
 		$action_type = (string) ( $event['action_type'] ?? '' );
 		$action_type = '' !== $action_type
 			? Updatronix_Security::sanitize_action_type( $action_type )
-			: ( '' !== $reason_code ? Updatronix_Log_Taxonomy::action_for( $reason_code ) : 'update' );
+			: ( '' !== $reason_code ? Updatronix_Log_Taxonomy::action_for(
+				$reason_code
+			) : 'update' );
 
 		$status = (string) ( $event['status'] ?? '' );
 		$status = '' !== $status
 			? Updatronix_Security::sanitize_status( $status )
-			: ( '' !== $reason_code ? Updatronix_Log_Taxonomy::status_for( $reason_code ) : 'success' );
+			: ( '' !== $reason_code ? Updatronix_Log_Taxonomy::status_for(
+				$reason_code
+			) : 'success' );
 
 		$context = $event['context'] ?? array();
 		if ( is_string( $context ) ) {
 			$context = Updatronix_Security::decode_context( $context );
 		}
-		$context = is_array( $context ) ? Updatronix_Security::sanitize_context( $context ) : '';
+		$context = is_array( $context ) ? Updatronix_Security::sanitize_context(
+			$context
+		) : '';
 
-		$request_id = Updatronix_Log_Event::normalize_request_id( (string) ( $event['request_id'] ?? '' ) );
-		$pass_id    = Updatronix_Log_Event::normalize_pass_id( (string) ( $event['pass_id'] ?? '' ) );
+		$request_id =
+			Updatronix_Log_Event::normalize_request_id(
+				(string) (
+				$event['request_id'] ?? '' )
+			);
+		$pass_id    = Updatronix_Log_Event::normalize_pass_id(
+			(string) (
+			$event['pass_id'] ?? '' )
+		);
 
-		if ( '' === $pass_id && '' === $request_id && class_exists( 'Updatronix_UpdateLogState' ) ) {
-			$request_id = Updatronix_Log_Event::normalize_request_id( Updatronix_UpdateLogState::get_request_run_id() );
+		if ( '' === $pass_id && '' === $request_id && class_exists(
+			'Updatronix_UpdateLogState'
+		) ) {
+			$request_id =
+				// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+				Updatronix_Log_Event::normalize_request_id(
+					Updatronix_UpdateLogState::get_request_run_id()
+				);
 		}
 
 		$normalized = array(
 			'site_id'          => (int) ( $event['site_id'] ?? get_current_blog_id() ),
 			'log_type'         => $log_type,
 			'action_type'      => $action_type,
-			'item_name'        => Updatronix_Security::sanitize_string( (string) ( $event['item_name'] ?? '' ), 255 ),
+			'item_name'        =>
+				Updatronix_Security::sanitize_string(
+					(string) (
+					$event['item_name'] ?? '' ),
+					255
+				),
 			'item_slug'        => $item_slug,
-			'version_before'   => Updatronix_Security::sanitize_version( (string) ( $event['version_before'] ?? '' ) ),
-			'version_after'    => Updatronix_Security::sanitize_version( (string) ( $event['version_after'] ?? '' ) ),
+			'version_before'   =>
+				Updatronix_Security::sanitize_version(
+					(string) (
+					$event['version_before'] ?? '' )
+				),
+			'version_after'    =>
+				Updatronix_Security::sanitize_version(
+					(string) (
+					$event['version_after'] ?? '' )
+				),
 			'target_version'   => $target_version,
 			'status'           => $status,
-			'message'          => Updatronix_Security::sanitize_message( (string) ( $event['message'] ?? '' ) ),
-			'trace'            => Updatronix_Security::sanitize_trace( (string) ( $event['trace'] ?? '' ) ),
-			'performed_as'     => Updatronix_Security::sanitize_performed_as( (string) ( $event['performed_as'] ?? 'manual' ) ),
-			'update_context'   => Updatronix_Security::sanitize_update_context( (string) ( $event['update_context'] ?? '' ) ),
-			'event_key'        => Updatronix_Security::sanitize_string( (string) ( $event['event_key'] ?? '' ), 191 ),
+			'message'          =>
+				Updatronix_Security::sanitize_message(
+					(string) (
+					$event['message'] ?? '' )
+				),
+			'trace'            =>
+				Updatronix_Security::sanitize_trace( (string) ( $event['trace'] ?? '' ) ),
+			'performed_as'     =>
+				// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+				Updatronix_Security::sanitize_performed_as(
+					(string) (
+					$event['performed_as'] ?? 'manual' )
+				),
+			'update_context'   =>
+				Updatronix_Security::sanitize_update_context(
+					(string) (
+					$event['update_context'] ?? '' )
+				),
+			'event_key'        =>
+				Updatronix_Security::sanitize_string(
+					(string) (
+					$event['event_key'] ?? '' ),
+					191
+				),
 			'reason_code'      => $reason_code,
 			'decision_state'   => $decision_state,
-			'origin'           => Updatronix_Security::sanitize_origin( (string) ( $event['origin'] ?? '' ) ),
-			'decision_stage'   => Updatronix_Security::sanitize_stage( (string) ( $event['decision_stage'] ?? '' ) ),
+			'origin'           =>
+				Updatronix_Security::sanitize_origin( (string) ( $event['origin'] ?? '' ) ),
+			'decision_stage'   =>
+				Updatronix_Security::sanitize_stage(
+					(string) (
+					$event['decision_stage'] ?? '' )
+				),
 			'pass_id'          => $pass_id,
 			'request_id'       => $request_id,
-			'chain_id'         => Updatronix_Security::sanitize_string( (string) ( $event['chain_id'] ?? '' ), 64 ),
-			'predecessor'      => Updatronix_Security::sanitize_string( (string) ( $event['predecessor'] ?? '' ), 191 ),
-			'next_eligible_at' => Updatronix_Log_Event::normalize_utc( $event['next_eligible_at'] ?? '' ),
+			'chain_id'         =>
+				Updatronix_Security::sanitize_string(
+					(string) ( $event['chain_id'] ?? '' ),
+					64
+				),
+			'predecessor'      =>
+				Updatronix_Security::sanitize_string(
+					(string) (
+					$event['predecessor'] ?? '' ),
+					191
+				),
+			'next_eligible_at' =>
+				Updatronix_Log_Event::normalize_utc( $event['next_eligible_at'] ?? '' ),
 			'attempt'          => max( 0, (int) ( $event['attempt'] ?? 0 ) ),
 			'network'          => (int) ( $event['network'] ?? 0 ) > 0 ? 1 : 0,
 			'context'          => $context,
@@ -355,7 +459,8 @@ final class Updatronix_Logger {
 		$user_id      = (int) get_current_user_id();
 		$performed_by = $user_id > 0 ? 'user' : 'system';
 		$event_key    = (string) ( $fields['event_key'] ?? '' );
-		$created_at   = current_time( 'mysql' ); // Must match wp_date() timezone in delete_older_than().
+		$created_at   = current_time( 'mysql' );
+		// Must match wp_date() timezone in delete_older_than().
 
 		$insert_data = array(
 			'site_id'        => $site_id,
@@ -376,18 +481,24 @@ final class Updatronix_Logger {
 		);
 
 		if ( array_key_exists( 'target_version', $fields ) ) {
-			$insert_data['target_version']   = (string) $fields['target_version'];
-			$insert_data['reason_code']      = (string) $fields['reason_code'];
-			$insert_data['decision_state']   = (string) $fields['decision_state'];
-			$insert_data['origin']           = (string) $fields['origin'];
-			$insert_data['decision_stage']   = (string) $fields['decision_stage'];
-			$insert_data['pass_id']          = (string) $fields['pass_id'];
-			$insert_data['chain_id']         = '' !== (string) $fields['chain_id'] ? (string) $fields['chain_id'] : null;
-			$insert_data['predecessor']      = '' !== (string) $fields['predecessor'] ? (string) $fields['predecessor'] : null;
-			$insert_data['next_eligible_at'] = '' !== (string) $fields['next_eligible_at'] ? (string) $fields['next_eligible_at'] : null;
-			$insert_data['attempt']          = (int) $fields['attempt'];
-			$insert_data['network']          = (int) $fields['network'];
-			$insert_data['context']          = '' !== (string) $fields['context'] ? (string) $fields['context'] : null;
+			$insert_data['target_version'] = (string) $fields['target_version'];
+			$insert_data['reason_code']    = (string) $fields['reason_code'];
+			$insert_data['decision_state'] = (string) $fields['decision_state'];
+			$insert_data['origin']         = (string) $fields['origin'];
+			$insert_data['decision_stage'] = (string) $fields['decision_stage'];
+			$insert_data['pass_id']        = (string) $fields['pass_id'];
+			$insert_data['chain_id']       =
+				'' !== (string) $fields['chain_id'] ? (string) $fields['chain_id'] : null;
+			$insert_data['predecessor']    =
+				// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+				'' !== (string) $fields['predecessor'] ? (string) $fields['predecessor'] : null;
+			$insert_data['next_eligible_at'] =
+				// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+				'' !== (string) $fields['next_eligible_at'] ? (string) $fields['next_eligible_at'] : null;
+			$insert_data['attempt'] = (int) $fields['attempt'];
+			$insert_data['network'] = (int) $fields['network'];
+			$insert_data['context'] =
+				'' !== (string) $fields['context'] ? (string) $fields['context'] : null;
 		}
 
 		if ( '' !== $event_key ) {
@@ -401,7 +512,8 @@ final class Updatronix_Logger {
 				global $wpdb;
 				$table = Updatronix_Database::get_table_name();
 
-				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom table; $wpdb->insert is the correct API, prepared internally.
+				// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+				// phpcs:ignore Generic.Files.LineLength, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom table; $wpdb->insert is the correct API, prepared internally.
 				$result = $wpdb->insert( $table, $insert_data );
 
 				if ( false === $result ) {
@@ -428,7 +540,7 @@ final class Updatronix_Logger {
 		self::bump_logs_cache_last_changed();
 
 		if ( ! $inserted ) {
-			// A duplicate event key resolved to the existing row: nothing was
+			// A duplicate event key resolved to the existing row: nothing was.
 			// written, so the insert hook must not report a new entry.
 			return $log_id;
 		}
@@ -461,7 +573,11 @@ final class Updatronix_Logger {
 	 * @param string               $created_at  Stored (site-local) creation time.
 	 * @return array<string, mixed>
 	 */
-	private static function build_hook_payload( array $insert_data, int $log_id, string $created_at ): array {
+	private static function build_hook_payload(
+		array $insert_data,
+		int $log_id,
+		string $created_at
+	): array {
 		$has_decision = array_key_exists( 'decision_state', $insert_data );
 
 		return array(
@@ -481,18 +597,30 @@ final class Updatronix_Logger {
 			'site_id'          => (int) $insert_data['site_id'],
 			'user_id'          => (int) $insert_data['user_id'],
 			'performed_by'     => (string) $insert_data['performed_by'],
-			'target_version'   => $has_decision ? (string) $insert_data['target_version'] : '',
-			'reason_code'      => $has_decision ? (string) $insert_data['reason_code'] : '',
-			'decision_state'   => $has_decision ? (string) $insert_data['decision_state'] : '',
+			'target_version'   =>
+				$has_decision ? (string) $insert_data['target_version'] : '',
+			'reason_code'      =>
+				$has_decision ? (string) $insert_data['reason_code'] : '',
+			'decision_state'   =>
+				$has_decision ? (string) $insert_data['decision_state'] : '',
 			'origin'           => $has_decision ? (string) $insert_data['origin'] : '',
-			'decision_stage'   => $has_decision ? (string) $insert_data['decision_stage'] : '',
+			'decision_stage'   =>
+				$has_decision ? (string) $insert_data['decision_stage'] : '',
 			'pass_id'          => $has_decision ? (string) $insert_data['pass_id'] : '',
-			'chain_id'         => $has_decision ? (string) ( $insert_data['chain_id'] ?? '' ) : '',
-			'predecessor'      => $has_decision ? (string) ( $insert_data['predecessor'] ?? '' ) : '',
-			'next_eligible_at' => $has_decision ? (string) ( $insert_data['next_eligible_at'] ?? '' ) : '',
+			'chain_id'         => $has_decision ? (string) (
+				$insert_data['chain_id'] ?? '' ) : '',
+			'predecessor'      => $has_decision ? (string) (
+				$insert_data['predecessor'] ?? '' ) : '',
+			'next_eligible_at' =>
+				$has_decision ? (string) ( $insert_data['next_eligible_at'] ?? '' ) : '',
 			'attempt'          => $has_decision ? (int) $insert_data['attempt'] : 0,
 			'network'          => $has_decision ? (int) $insert_data['network'] : 0,
-			'context'          => $has_decision ? Updatronix_Security::decode_context( (string) ( $insert_data['context'] ?? '' ) ) : array(),
+			'context'          =>
+				// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+				$has_decision ? Updatronix_Security::decode_context(
+					(string) (
+					$insert_data['context'] ?? '' )
+				) : array(),
 		);
 	}
 
@@ -511,7 +639,8 @@ final class Updatronix_Logger {
 	 * @return bool True when the row was updated.
 	 */
 	public static function attach_context( int $log_id, array $fields ): bool {
-		if ( $log_id < 1 || ! Updatronix_Database::table_exists() || ! self::decision_layer_enabled() ) {
+		if ( $log_id < 1 || ! Updatronix_Database::table_exists()
+			|| ! self::decision_layer_enabled() ) {
 			return false;
 		}
 
@@ -542,28 +671,41 @@ final class Updatronix_Logger {
 	 * @return bool True when the row was updated.
 	 */
 	public static function update_summary( int $log_id, array $fields ): bool {
-		if ( $log_id < 1 || ! Updatronix_Database::table_exists() || ! self::decision_layer_enabled() ) {
+		if ( $log_id < 1 || ! Updatronix_Database::table_exists()
+			|| ! self::decision_layer_enabled() ) {
 			return false;
 		}
 
 		$row = self::get_log( $log_id, true );
-		if ( ! (bool) $row || 'system' !== (string) ( $row->log_type ?? '' ) || 'pass' !== (string) ( $row->action_type ?? '' ) ) {
+		if ( ! (bool) $row || 'system' !== (string) ( $row->log_type ?? '' )
+			|| 'pass' !== (string) ( $row->action_type ?? '' ) ) {
 			return false;
 		}
 
 		$updates = array();
 
 		if ( array_key_exists( 'status', $fields ) ) {
-			$updates['status'] = Updatronix_Security::sanitize_status( (string) $fields['status'] );
+			$updates['status'] = Updatronix_Security::sanitize_status(
+				(string) $fields['status']
+			);
 		}
 
 		if ( array_key_exists( 'decision_state', $fields ) ) {
-			$updates['decision_state'] = Updatronix_Security::sanitize_decision_state( (string) $fields['decision_state'] );
+			$updates['decision_state'] =
+				Updatronix_Security::sanitize_decision_state(
+					(string) $fields['decision_state']
+				);
 		}
 
 		if ( array_key_exists( 'context', $fields ) ) {
-			$context            = is_array( $fields['context'] ) ? $fields['context'] : Updatronix_Security::decode_context( (string) $fields['context'] );
-			$merged             = array_merge( Updatronix_Security::decode_context( (string) ( $row->context ?? '' ) ), $context );
+			$context = is_array( $fields['context'] )
+				? $fields['context']
+				: Updatronix_Security::decode_context( (string) $fields['context'] );
+			$merged             =
+				array_merge(
+					Updatronix_Security::decode_context( (string) ( $row->context ?? '' ) ),
+					$context
+				);
 			$updates['context'] = Updatronix_Security::sanitize_context( $merged );
 		}
 
@@ -581,43 +723,68 @@ final class Updatronix_Logger {
 	 * @param array<string, mixed> $fields Requested fields.
 	 * @return array<string, mixed>
 	 */
-	private static function build_decision_updates( object $row, array $fields ): array {
+	private static function build_decision_updates(
+		object $row,
+		array $fields
+	): array {
 		$updates = array();
 
 		if ( array_key_exists( 'reason_code', $fields ) ) {
-			$updates['reason_code'] = Updatronix_Security::sanitize_reason_code( (string) $fields['reason_code'] );
+			$updates['reason_code'] =
+				Updatronix_Security::sanitize_reason_code(
+					(string) $fields['reason_code']
+				);
 		}
 
 		if ( array_key_exists( 'decision_state', $fields ) ) {
-			$updates['decision_state'] = Updatronix_Security::sanitize_decision_state( (string) $fields['decision_state'] );
-		} elseif ( isset( $updates['reason_code'] ) && '' !== $updates['reason_code'] ) {
-			$updates['decision_state'] = Updatronix_Log_Taxonomy::state_for( $updates['reason_code'] );
+			$updates['decision_state'] =
+				Updatronix_Security::sanitize_decision_state(
+					(string) $fields['decision_state']
+				);
+		} elseif ( isset( $updates['reason_code'] )
+			&& '' !== $updates['reason_code'] ) {
+			$updates['decision_state'] = Updatronix_Log_Taxonomy::state_for(
+				$updates['reason_code']
+			);
 		}
 
 		if ( array_key_exists( 'origin', $fields ) ) {
-			$updates['origin'] = Updatronix_Security::sanitize_origin( (string) $fields['origin'] );
+			$updates['origin'] = Updatronix_Security::sanitize_origin(
+				(string) $fields['origin']
+			);
 		}
 
 		if ( array_key_exists( 'decision_stage', $fields ) ) {
-			$updates['decision_stage'] = Updatronix_Security::sanitize_stage( (string) $fields['decision_stage'] );
+			$updates['decision_stage'] =
+				Updatronix_Security::sanitize_stage( (string) $fields['decision_stage'] );
 		}
 
 		if ( array_key_exists( 'pass_id', $fields ) ) {
-			$updates['pass_id'] = Updatronix_Log_Event::normalize_pass_id( (string) $fields['pass_id'] );
+			$updates['pass_id'] = Updatronix_Log_Event::normalize_pass_id(
+				(string) $fields['pass_id']
+			);
 		}
 
 		if ( array_key_exists( 'chain_id', $fields ) ) {
-			$value               = Updatronix_Security::sanitize_string( (string) $fields['chain_id'], 64 );
+			$value               = Updatronix_Security::sanitize_string(
+				(string) $fields['chain_id'],
+				64
+			);
 			$updates['chain_id'] = '' !== $value ? $value : null;
 		}
 
 		if ( array_key_exists( 'predecessor', $fields ) ) {
-			$value                  = Updatronix_Security::sanitize_string( (string) $fields['predecessor'], 191 );
+			$value                  =
+				Updatronix_Security::sanitize_string(
+					(string) $fields['predecessor'],
+					191
+				);
 			$updates['predecessor'] = '' !== $value ? $value : null;
 		}
 
 		if ( array_key_exists( 'next_eligible_at', $fields ) ) {
-			$value                       = Updatronix_Log_Event::normalize_utc( $fields['next_eligible_at'] );
+			$value                       =
+				Updatronix_Log_Event::normalize_utc( $fields['next_eligible_at'] );
 			$updates['next_eligible_at'] = '' !== $value ? $value : null;
 		}
 
@@ -629,15 +796,23 @@ final class Updatronix_Logger {
 			$updates['network'] = (int) $fields['network'] > 0 ? 1 : 0;
 		}
 
-		// The target is a new decision column, but it must never overwrite a
+		// The target is a new decision column, but it must never overwrite a.
 		// recorded version on the native row.
-		if ( array_key_exists( 'target_version', $fields ) && '' === (string) ( $row->target_version ?? '' ) ) {
-			$updates['target_version'] = Updatronix_Security::sanitize_version( (string) $fields['target_version'] );
+		if ( array_key_exists( 'target_version', $fields )
+			&& '' === (string) ( $row->target_version ?? '' ) ) {
+			$updates['target_version'] =
+				Updatronix_Security::sanitize_version( (string) $fields['target_version'] );
 		}
 
 		if ( array_key_exists( 'context', $fields ) ) {
-			$context            = is_array( $fields['context'] ) ? $fields['context'] : Updatronix_Security::decode_context( (string) $fields['context'] );
-			$merged             = array_merge( Updatronix_Security::decode_context( (string) ( $row->context ?? '' ) ), $context );
+			$context = is_array( $fields['context'] )
+				? $fields['context']
+				: Updatronix_Security::decode_context( (string) $fields['context'] );
+			$merged             =
+				array_merge(
+					Updatronix_Security::decode_context( (string) ( $row->context ?? '' ) ),
+					$context
+				);
 			$updates['context'] = Updatronix_Security::sanitize_context( $merged );
 		}
 
@@ -659,8 +834,18 @@ final class Updatronix_Logger {
 			static function () use ( $log_id, $updates ): bool {
 				global $wpdb;
 
-				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom table; $wpdb->update is the correct API, prepared.
-				$result = $wpdb->update( Updatronix_Database::get_table_name(), $updates, array( 'id' => $log_id ), null, array( '%d' ) );
+				// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+				// phpcs:ignore Generic.Files.LineLength, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom table; $wpdb->update is the correct API, prepared.
+				$result = $wpdb->update(
+					Updatronix_Database::get_table_name(),
+					$updates,
+					array(
+						'id' =>
+						$log_id,
+					),
+					null,
+					array( '%d' )
+				);
 
 				return false !== $result;
 			}
@@ -672,7 +857,9 @@ final class Updatronix_Logger {
 
 		$payload = $updates;
 		if ( array_key_exists( 'context', $payload ) ) {
-			$payload['context'] = Updatronix_Security::decode_context( (string) $payload['context'] );
+			$payload['context'] = Updatronix_Security::decode_context(
+				(string) $payload['context']
+			);
 		}
 
 		self::delete_log_cache( $log_id );
@@ -709,7 +896,12 @@ final class Updatronix_Logger {
 	 * @param string $target_version Offered target version ('' for legacy).
 	 * @return object|null
 	 */
-	public static function get_latest_for_item( int $site_id, string $log_type, string $item_slug, string $target_version ): ?object {
+	public static function get_latest_for_item(
+		int $site_id,
+		string $log_type,
+		string $item_slug,
+		string $target_version
+	): ?object {
 		if ( ! Updatronix_Database::table_exists() ) {
 			return null;
 		}
@@ -720,12 +912,19 @@ final class Updatronix_Logger {
 		$target_version = Updatronix_Security::sanitize_version( $target_version );
 
 		return self::with_logs_table(
-			static function () use ( $site_id, $log_type, $item_slug, $target_version ): ?object {
+			static function () use (
+				$site_id,
+				$log_type,
+				$item_slug,
+				$target_version
+			): ?object {
 				global $wpdb;
 
-			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Prepared below; custom table access is required here.
+			// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+			// phpcs:ignore Generic.Files.LineLength, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Prepared below; custom table access is required here.
 				$row = $wpdb->get_row(
 					$wpdb->prepare(
+						// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 						'SELECT * FROM %i WHERE site_id = %d AND log_type = %s AND item_slug = %s AND target_version = %s ORDER BY created_at DESC, id DESC LIMIT 1',
 						Updatronix_Database::get_table_name(),
 						$site_id,
@@ -756,7 +955,9 @@ final class Updatronix_Logger {
 	/**
 	 * Get logs with optional filters and pagination.
 	 *
-	 * @param array<string, mixed> $args            Optional. site_id, log_type, action_type, action_types, status, performed_as, search, created_at_after, created_at_before, per_page, page, orderby, order.
+	 * @param array<string, mixed> $args Optional. site_id, log_type, action_type,
+	 * action_types, status, performed_as, search, created_at_after,
+	 * created_at_before, per_page, page, orderby, order.
 	 * @param bool                 $include_details Whether to include message and trace columns.
 	 * @return array<int, \stdClass> Array of log row objects.
 	 */
@@ -786,7 +987,12 @@ final class Updatronix_Logger {
 				$args     = wp_parse_args( $args, $defaults );
 
 				if ( isset( $args['filters'] ) && is_array( $args['filters'] ) ) {
-					$args = array_merge( $args, Updatronix_Log_Query::parse_filters( $args['filters'] ) );
+					$args = array_merge(
+						$args,
+						Updatronix_Log_Query::parse_filters(
+							$args['filters']
+						)
+					);
 				}
 
 				/**
@@ -803,7 +1009,19 @@ final class Updatronix_Logger {
 				$args = (array) apply_filters( 'updatronix_log_query_args', $args );
 
 				$built    = self::build_logs_where( $args );
-				$orderby  = in_array( $args['orderby'], array( 'id', 'created_at', 'log_type', 'action_type', 'status', 'item_name', 'performed_as' ), true )
+				$orderby  = in_array(
+					$args['orderby'],
+					array(
+						'id',
+						'created_at',
+						'log_type',
+						'action_type',
+						'status',
+						'item_name',
+						'performed_as',
+					),
+					true
+				)
 				? $args['orderby']
 				: 'created_at';
 				$order    = strtoupper( $args['order'] ) === 'ASC' ? 'ASC' : 'DESC';
@@ -811,17 +1029,28 @@ final class Updatronix_Logger {
 				$offset   = max( 0, ( (int) $args['page'] ) - 1 ) * $per_page;
 				$select   = $include_details
 				? '*'
+				// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 				: "id, site_id, log_type, action_type, item_name, item_slug, version_before, version_after, target_version, status, reason_code, decision_state, origin, decision_stage, pass_id, chain_id, predecessor, next_eligible_at, attempt, network, retained, user_id, performed_by, performed_as, update_context, created_at, event_key, CASE WHEN COALESCE(message, '') <> '' OR COALESCE(trace, '') <> '' THEN 1 ELSE 0 END AS detail_available";
 
-				$values = array_merge( array( $table ), $built['values'], array( $per_page, $offset ) );
+				$values = array_merge(
+					array( $table ),
+					$built['values'],
+					array(
+						$per_page,
+						$offset,
+					)
+				);
 
-            // phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- Table/orderby via %i; user input only in $values.
+            // phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+            // phpcs:ignore Generic.Files.LineLength, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- Table/orderby via %i; user input only in $values.
 				$prepared = $wpdb->prepare(
-                // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $where_sql and $order are whitelisted (literal fragments and ASC/DESC).
+                // phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					// phpcs:ignore Generic.Files.LineLength, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $where_sql and $order are whitelisted (literal fragments and ASC/DESC).
 					"SELECT {$select} FROM %i WHERE {$built['where_sql']} ORDER BY {$orderby} {$order} LIMIT %d OFFSET %d",
 					$values
 				);
-            // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter -- $prepared from prepare() above; user input only in bound $values.
+            // phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+            // phpcs:ignore Generic.Files.LineLength, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter -- $prepared from prepare() above; user input only in bound $values.
 				$results = $wpdb->get_results( $prepared );
 
 				return is_array( $results ) ? $results : array();
@@ -832,7 +1061,8 @@ final class Updatronix_Logger {
 	/**
 	 * Get total count of logs matching filters.
 	 *
-	 * @param array<string, mixed> $args Optional. site_id, log_type, action_type, action_types, status, performed_as, created_at_after, created_at_before.
+	 * @param array<string, mixed> $args Optional. site_id, log_type, action_type,
+	 * action_types, status, performed_as, created_at_after, created_at_before.
 	 * @return int
 	 */
 	public static function get_logs_count( array $args = array() ): int {
@@ -849,20 +1079,29 @@ final class Updatronix_Logger {
 				$args = (array) apply_filters( 'updatronix_log_query_args', $args );
 
 				if ( isset( $args['filters'] ) && is_array( $args['filters'] ) ) {
-					$args = array_merge( $args, Updatronix_Log_Query::parse_filters( $args['filters'] ) );
+					$args = array_merge(
+						$args,
+						Updatronix_Log_Query::parse_filters(
+							$args['filters']
+						)
+					);
 				}
 
 				$built  = self::build_logs_where( $args );
 				$values = array_merge( array( $table ), $built['values'] );
 
-            // phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- Table via %i; user input only in $values.
+            // phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+            // phpcs:ignore Generic.Files.LineLength, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- Table via %i; user input only in $values.
 				$prepared = $wpdb->prepare(
-                // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- where_sql is whitelisted literal fragments only.
+                // phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+                // phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+                // phpcs:ignore Generic.Files.LineLength, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- where_sql is whitelisted literal fragments only.
 					"SELECT COUNT(*) FROM %i WHERE {$built['where_sql']}",
 					$values
 				);
 
-            // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter -- $prepared from prepare() above; user input only in bound $values.
+            // phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+            // phpcs:ignore Generic.Files.LineLength, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter -- $prepared from prepare() above; user input only in bound $values.
 				return (int) $wpdb->get_var( $prepared );
 			}
 		);
@@ -894,7 +1133,8 @@ final class Updatronix_Logger {
 				}
 
 				if ( $include_details ) {
-					// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery -- Prepared below; custom table read for plugin-owned table, cached via wp_cache_*.
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					// phpcs:ignore Generic.Files.LineLength, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery -- Prepared below; custom table read for plugin-owned table, cached via wp_cache_*.
 					$row = $wpdb->get_row(
 						$wpdb->prepare(
 							'SELECT * FROM %i WHERE id = %d LIMIT 1',
@@ -903,9 +1143,11 @@ final class Updatronix_Logger {
 						)
 					);
 				} else {
-					// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery -- Prepared below; custom table read for plugin-owned table, cached via wp_cache_*.
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					// phpcs:ignore Generic.Files.LineLength, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery -- Prepared below; custom table read for plugin-owned table, cached via wp_cache_*.
 					$row = $wpdb->get_row(
 						$wpdb->prepare(
+							// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 							"SELECT id, site_id, log_type, action_type, item_name, item_slug, version_before, version_after, target_version, status, reason_code, decision_state, origin, decision_stage, pass_id, chain_id, predecessor, next_eligible_at, attempt, network, retained, user_id, performed_by, performed_as, update_context, created_at, event_key, CASE WHEN COALESCE(message, '') <> '' OR COALESCE(trace, '') <> '' THEN 1 ELSE 0 END AS detail_available FROM %i WHERE id = %d LIMIT 1",
 							$table,
 							$id
@@ -913,12 +1155,20 @@ final class Updatronix_Logger {
 					);
 				}
 
-				// Cache key includes microtime() via get_logs_cache_last_changed(), making it
-				// effectively a per-request cache. The 5-minute TTL is never reached because the
+				// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+				// Cache key includes microtime() via get_logs_cache_last_changed(), making it.
+				// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+				// effectively a per-request cache. The 5-minute TTL is never reached because the.
+				// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 				// key changes on every request; the TTL is a safety net for persistent cache backends.
 				$entry = $row instanceof \stdClass ? $row : null;
 
-				wp_cache_set( $cache_key, $entry, self::CACHE_GROUP, MINUTE_IN_SECONDS * 5 );
+				wp_cache_set(
+					$cache_key,
+					$entry,
+					self::CACHE_GROUP,
+					MINUTE_IN_SECONDS * 5
+				);
 
 				return $entry;
 			}
@@ -951,7 +1201,8 @@ final class Updatronix_Logger {
 				global $wpdb;
 				$table = Updatronix_Database::get_table_name();
 
-            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom table; $wpdb->delete is the correct API, prepared.
+            // phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+            // phpcs:ignore Generic.Files.LineLength, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom table; $wpdb->delete is the correct API, prepared.
 				$result = $wpdb->delete( $table, array( 'id' => $id ), array( '%d' ) );
 
 				if ( false !== $result ) {
@@ -975,8 +1226,8 @@ final class Updatronix_Logger {
 			return 0;
 		}
 
-		// Pin the newest blocking row per item/target before deleting. The
-		// pin and the cap live in one place so the cron job and a manual
+		// Pin the newest blocking row per item/target before deleting. The.
+		// pin and the cap live in one place so the cron job and a manual.
 		// cleanup cannot disagree.
 		if ( class_exists( 'Updatronix_Log_Retention' ) ) {
 			$deleted = Updatronix_Log_Retention::cleanup( $days );
@@ -999,11 +1250,19 @@ final class Updatronix_Logger {
 				}
 				$date = wp_date( 'Y-m-d H:i:s', $timestamp );
 
-				// Note: wp_date() uses the site's timezone, matching the created_at insert
+				// Note: wp_date() uses the site's timezone, matching the created_at insert.
+				// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 				// which uses current_time('mysql'). Both must stay in sync if either API changes.
 
-            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom table; table and date via prepare(); no WP API for bulk delete by date.
-				$result = $wpdb->query( $wpdb->prepare( 'DELETE FROM %i WHERE created_at < %s', $table, $date ) );
+            // phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+            // phpcs:ignore Generic.Files.LineLength, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom table; table and date via prepare(); no WP API for bulk delete by date.
+				$result = $wpdb->query(
+					$wpdb->prepare(
+						'DELETE FROM %i WHERE created_at < %s',
+						$table,
+						$date
+					)
+				);
 
 				if ( is_numeric( $result ) && (int) $result > 0 ) {
 					self::bump_logs_cache_last_changed();
@@ -1018,7 +1277,8 @@ final class Updatronix_Logger {
 	 * Delete every log row from the table.
 	 *
 	 * Intended for the "Clear all logs" destructive action in Settings. Runs via
-	 * {@see with_logs_table()} so on Multisite the main site's table is always targeted.
+	 * {@see with_logs_table()} so on Multisite the main site's table is always
+	 * targeted.
 	 *
 	 * @return int Number of rows deleted.
 	 */
@@ -1032,7 +1292,8 @@ final class Updatronix_Logger {
 				global $wpdb;
 				$table = Updatronix_Database::get_table_name();
 
-            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom table; DELETE FROM without WHERE is the correct API for clearing all rows on user action.
+            // phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+            // phpcs:ignore Generic.Files.LineLength, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom table; DELETE FROM without WHERE is the correct API for clearing all rows on user action.
 				$result = $wpdb->query( $wpdb->prepare( 'DELETE FROM %i', $table ) );
 
 				if ( is_numeric( $result ) && (int) $result > 0 ) {
@@ -1047,7 +1308,8 @@ final class Updatronix_Logger {
 	/**
 	 * Drop every log row that originated on a now-deleted subsite.
 	 *
-	 * Hooked to `wp_delete_site` on Multisite so the network-global table does not accumulate
+	 * Hooked to `wp_delete_site` on Multisite so the network-global table does not
+	 * accumulate
 	 * rows tagged with a `site_id` that no longer maps to a real site.
 	 *
 	 * @param \WP_Site $old_site The site being deleted.
@@ -1073,8 +1335,15 @@ final class Updatronix_Logger {
 				global $wpdb;
 				$table = Updatronix_Database::get_table_name();
 
-            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom table; $wpdb->delete is the correct API, prepared.
-				$result = $wpdb->delete( $table, array( 'site_id' => $site_id ), array( '%d' ) );
+            // phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+            // phpcs:ignore Generic.Files.LineLength, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom table; $wpdb->delete is the correct API, prepared.
+				$result = $wpdb->delete(
+					$table,
+					array( 'site_id' => $site_id ),
+					array(
+						'%d',
+					)
+				);
 
 				if ( is_numeric( $result ) && (int) $result > 0 ) {
 					self::bump_logs_cache_last_changed();
@@ -1101,7 +1370,8 @@ final class Updatronix_Logger {
 				global $wpdb;
 				$table = Updatronix_Database::get_table_name();
 
-            // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Prepared below; custom table access is required here.
+            // phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+            // phpcs:ignore Generic.Files.LineLength, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Prepared below; custom table access is required here.
 				$existing_id = $wpdb->get_var(
 					$wpdb->prepare(
 						'SELECT id FROM %i WHERE event_key = %s LIMIT 1',
@@ -1122,7 +1392,10 @@ final class Updatronix_Logger {
 	 * @param bool $include_details Whether the cached row includes detail fields.
 	 * @return string
 	 */
-	private static function get_log_cache_key( int $id, bool $include_details ): string {
+	private static function get_log_cache_key(
+		int $id,
+		bool $include_details
+	): string {
 		return sprintf(
 			'log:%d:%s:%s',
 			$id,
@@ -1148,11 +1421,18 @@ final class Updatronix_Logger {
 	 * @return string
 	 */
 	private static function get_logs_cache_last_changed(): string {
-		$last_changed = wp_cache_get( self::CACHE_LAST_CHANGED_KEY, self::CACHE_GROUP );
+		$last_changed = wp_cache_get(
+			self::CACHE_LAST_CHANGED_KEY,
+			self::CACHE_GROUP
+		);
 
 		if ( ! is_string( $last_changed ) || '' === $last_changed ) {
 			$last_changed = microtime();
-			wp_cache_set( self::CACHE_LAST_CHANGED_KEY, $last_changed, self::CACHE_GROUP );
+			wp_cache_set(
+				self::CACHE_LAST_CHANGED_KEY,
+				$last_changed,
+				self::CACHE_GROUP
+			);
 		}
 
 		return $last_changed;

@@ -40,7 +40,8 @@ final class Updatronix_Log_Retention {
 			return 0;
 		}
 
-		$cutoff = wp_date( 'Y-m-d H:i:s', $timestamp ); // Matches current_time( 'mysql' ) on insert.
+		$cutoff = wp_date( 'Y-m-d H:i:s', $timestamp );
+		// Matches current_time( 'mysql' ) on insert.
 		if ( false === $cutoff ) {
 			return 0;
 		}
@@ -64,13 +65,15 @@ final class Updatronix_Log_Retention {
 
 				$table = Updatronix_Database::get_table_name();
 
-				// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- The state list is a static literal; cutoff is bound.
+				// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+				// phpcs:ignore Generic.Files.LineLength, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- The state list is a static literal; cutoff is bound.
 				$result = $wpdb->query(
 					$wpdb->prepare(
 						"UPDATE %i l
 						JOIN (
 							SELECT MAX(id) AS id FROM %i
-							WHERE created_at < %s AND decision_state IN ('blocked','failed','uncertain')
+							WHERE created_at < %s AND decision_state IN ('blocked','failed',
+								'uncertain')
 							GROUP BY site_id, log_type, item_slug, target_version
 						) newest ON newest.id = l.id
 						SET l.retained = 1",
@@ -100,12 +103,14 @@ final class Updatronix_Log_Retention {
 
 				$table = Updatronix_Database::get_table_name();
 
-				// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Derived table avoids MySQL's self-reference restriction; cap is bound.
+				// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+				// phpcs:ignore Generic.Files.LineLength, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Derived table avoids MySQL's self-reference restriction; cap is bound.
 				$result = $wpdb->query(
 					$wpdb->prepare(
 						'DELETE FROM %i WHERE retained = 1 AND id NOT IN (
 							SELECT id FROM (
-								SELECT id FROM %i WHERE retained = 1 ORDER BY created_at DESC, id DESC LIMIT %d
+								SELECT id FROM %i WHERE retained = 1 ORDER BY created_at DESC,
+									id DESC LIMIT %d
 							) keep
 						)',
 						$table,
@@ -133,7 +138,8 @@ final class Updatronix_Log_Retention {
 				$table = Updatronix_Database::get_table_name();
 
 				// Keep a pass summary while any retained item row belongs to it.
-				// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Derived tables avoid MySQL's self-reference restriction; cutoff is bound.
+				// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+				// phpcs:ignore Generic.Files.LineLength, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Derived tables avoid MySQL's self-reference restriction; cutoff is bound.
 				$result = $wpdb->query(
 					$wpdb->prepare(
 						"DELETE FROM %i
@@ -144,6 +150,8 @@ final class Updatronix_Log_Retention {
 							AND pass_id <> ''
 							AND pass_id IN (
 								SELECT pass_id FROM (
+									// phpcs:ignore Generic.Files.LineLength -- Long directive.
+									// phpcs:ignore Generic.Files.LineLength, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 									SELECT DISTINCT pass_id FROM %i WHERE retained = 1 AND pass_id <> ''
 								) retained_passes
 							)

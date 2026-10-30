@@ -8,12 +8,16 @@
 declare(strict_types=1);
 
 /**
- * Verify auto-update REST endpoints return correct responses for valid/invalid input
+ * Verify auto-update REST endpoints return correct responses for valid/invalid
+ * input
  * and enforce permission gates.
  *
- * Constant-gate tests (AUTOMATIC_UPDATER_DISABLED, DISALLOW_FILE_MODS) are excluded
- * because PHP's defined() is permanent and cannot be set/unset mid-request. Those
- * paths are covered by manual regression tests (see tests/MANUAL_REGRESSION.md).
+ * Constant-gate tests (AUTOMATIC_UPDATER_DISABLED, DISALLOW_FILE_MODS) are
+ * excluded
+ * because PHP's defined() is permanent and cannot be set/unset mid-request.
+ * Those
+ * paths are covered by manual regression tests (see
+ * tests/MANUAL_REGRESSION.md).
  *
  * @coversNothing
  */
@@ -41,7 +45,12 @@ final class AutoUpdatesRestApiTest extends WP_UnitTestCase {
 	 * @return int New user ID.
 	 */
 	private function create_admin(): int {
-		$user_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		$user_id = self::factory()->user->create(
+			array(
+				'role' =>
+				'administrator',
+			)
+		);
 		if ( is_multisite() && function_exists( 'grant_super_admin' ) ) {
 			grant_super_admin( $user_id );
 		}
@@ -52,7 +61,8 @@ final class AutoUpdatesRestApiTest extends WP_UnitTestCase {
 
 	/**
 	 * Restore $_SERVER keys, clean up REST auth globals, and reset plugin settings
-	 * so state persisted by one test cannot leak into later classes (e.g. `dismissed_constants`).
+	 * so state persisted by one test cannot leak into later classes (e.g.
+	 * `dismissed_constants`).
 	 *
 	 * @return void
 	 */
@@ -151,7 +161,10 @@ final class AutoUpdatesRestApiTest extends WP_UnitTestCase {
 	public function test_toggle_plugin_with_valid_plugin_returns_200(): void {
 		$user_id = $this->create_admin();
 
-		$request = new WP_REST_Request( 'POST', '/updatronix/v1/auto-updates/plugin' );
+		$request = new WP_REST_Request(
+			'POST',
+			'/updatronix/v1/auto-updates/plugin'
+		);
 		$request->set_param( 'plugin', 'hello.php' );
 		$request->set_param( 'enable', true );
 		$response = rest_do_request( $request );
@@ -169,7 +182,10 @@ final class AutoUpdatesRestApiTest extends WP_UnitTestCase {
 	public function test_toggle_plugin_with_invalid_plugin_returns_404(): void {
 		$user_id = $this->create_admin();
 
-		$request = new WP_REST_Request( 'POST', '/updatronix/v1/auto-updates/plugin' );
+		$request = new WP_REST_Request(
+			'POST',
+			'/updatronix/v1/auto-updates/plugin'
+		);
 		$request->set_param( 'plugin', 'nonexistent-plugin/nonexistent.php' );
 		$request->set_param( 'enable', true );
 		$response = rest_do_request( $request );
@@ -201,7 +217,10 @@ final class AutoUpdatesRestApiTest extends WP_UnitTestCase {
 	public function test_toggle_translation_returns_200(): void {
 		$user_id = $this->create_admin();
 
-		$request = new WP_REST_Request( 'POST', '/updatronix/v1/auto-updates/translation' );
+		$request = new WP_REST_Request(
+			'POST',
+			'/updatronix/v1/auto-updates/translation'
+		);
 		$request->set_param( 'enable', false );
 		$response = rest_do_request( $request );
 
@@ -219,7 +238,10 @@ final class AutoUpdatesRestApiTest extends WP_UnitTestCase {
 	public function test_dismiss_constant_with_valid_constant_returns_200(): void {
 		$user_id = $this->create_admin();
 
-		$request = new WP_REST_Request( 'POST', '/updatronix/v1/auto-updates/dismiss-constant' );
+		$request = new WP_REST_Request(
+			'POST',
+			'/updatronix/v1/auto-updates/dismiss-constant'
+		);
 		$request->set_param( 'constant', 'WP_AUTO_UPDATE_CORE' );
 		$response = rest_do_request( $request );
 
@@ -237,7 +259,10 @@ final class AutoUpdatesRestApiTest extends WP_UnitTestCase {
 	public function test_dismiss_constant_with_invalid_constant_returns_400(): void {
 		$user_id = $this->create_admin();
 
-		$request = new WP_REST_Request( 'POST', '/updatronix/v1/auto-updates/dismiss-constant' );
+		$request = new WP_REST_Request(
+			'POST',
+			'/updatronix/v1/auto-updates/dismiss-constant'
+		);
 		$request->set_param( 'constant', 'NOT_A_REAL_CONSTANT' );
 		$response = rest_do_request( $request );
 

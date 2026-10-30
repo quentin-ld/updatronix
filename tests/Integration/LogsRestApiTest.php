@@ -14,24 +14,28 @@
 declare(strict_types=1);
 
 /**
- * Behavioral integration coverage for the activity-log REST API and cron helpers.
+ * Behavioral integration coverage for the activity-log REST API and cron
+ * helpers.
  *
  * @coversNothing
  */
 final class LogsRestApiTest extends WP_UnitTestCase {
 	/**
-	 * `file_mod_allowed` filter installed to simulate the DISALLOW_FILE_MODS kill switch.
+	 * `file_mod_allowed` filter installed to simulate the DISALLOW_FILE_MODS kill
+	 * switch.
 	 *
 	 * The DISALLOW_FILE_MODS/AUTOMATIC_UPDATER_DISABLED constants cannot be set in
 	 * tests (PHP `defined()` is permanent), so the 403 path is driven through the
-	 * WordPress core `file_mod_allowed` filter that `wp_is_file_mod_allowed()` applies.
+	 * WordPress core `file_mod_allowed` filter that `wp_is_file_mod_allowed()`
+	 * applies.
 	 *
 	 * @var \Closure|null
 	 */
 	private ?\Closure $file_mods_filter = null;
 
 	/**
-	 * `wp_doing_cron` filter installed to unlock the cron self-heal context in tests.
+	 * `wp_doing_cron` filter installed to unlock the cron self-heal context in
+	 * tests.
 	 *
 	 * @var \Closure|null
 	 */
@@ -53,7 +57,8 @@ final class LogsRestApiTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Restore pristine plugin state: filters, cron events, transients, and settings.
+	 * Restore pristine plugin state: filters, cron events, transients, and
+	 * settings.
 	 *
 	 * @return void
 	 */
@@ -85,7 +90,12 @@ final class LogsRestApiTest extends WP_UnitTestCase {
 	 * @return int New user ID.
 	 */
 	private function create_admin(): int {
-		$user_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		$user_id = self::factory()->user->create(
+			array(
+				'role' =>
+				'administrator',
+			)
+		);
 		if ( is_multisite() && function_exists( 'grant_super_admin' ) ) {
 			grant_super_admin( $user_id );
 		}
@@ -105,6 +115,7 @@ final class LogsRestApiTest extends WP_UnitTestCase {
 		global $wpdb;
 		$table = Updatronix_Database::get_table_name();
 
+		// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery -- Direct fixture write; no cache semantics in tests.
 		$wpdb->update(
 			$table,
@@ -136,8 +147,24 @@ final class LogsRestApiTest extends WP_UnitTestCase {
 	public function test_logs_list_returns_enriched_rows(): void {
 		$this->create_admin();
 
-		Updatronix_Logger::log( 'plugin', 'update', 'Alpha Plugin', 'alpha', '1.0', '1.1', 'success' );
-		Updatronix_Logger::log( 'theme', 'install', 'Beta Theme', 'beta', '', '2.0', 'success' );
+		Updatronix_Logger::log(
+			'plugin',
+			'update',
+			'Alpha Plugin',
+			'alpha',
+			'1.0',
+			'1.1',
+			'success'
+		);
+		Updatronix_Logger::log(
+			'theme',
+			'install',
+			'Beta Theme',
+			'beta',
+			'',
+			'2.0',
+			'success'
+		);
 
 		$request  = new WP_REST_Request( 'GET', '/updatronix/v1/logs' );
 		$response = rest_do_request( $request );
@@ -170,9 +197,33 @@ final class LogsRestApiTest extends WP_UnitTestCase {
 	public function test_logs_list_filters_by_delayed_and_cancelled_status(): void {
 		$this->create_admin();
 
-		Updatronix_Logger::log( 'plugin', 'update', 'Delay Plugin', 'delay', '1.0', '1.1', 'delayed' );
-		Updatronix_Logger::log( 'plugin', 'update', 'Cancel Plugin', 'cancel', '1.0', '1.1', 'cancelled' );
-		Updatronix_Logger::log( 'plugin', 'update', 'Good Plugin', 'good', '1.0', '1.1', 'success' );
+		Updatronix_Logger::log(
+			'plugin',
+			'update',
+			'Delay Plugin',
+			'delay',
+			'1.0',
+			'1.1',
+			'delayed'
+		);
+		Updatronix_Logger::log(
+			'plugin',
+			'update',
+			'Cancel Plugin',
+			'cancel',
+			'1.0',
+			'1.1',
+			'cancelled'
+		);
+		Updatronix_Logger::log(
+			'plugin',
+			'update',
+			'Good Plugin',
+			'good',
+			'1.0',
+			'1.1',
+			'success'
+		);
 
 		// status=delayed returns only the held-back row.
 		$request = new WP_REST_Request( 'GET', '/updatronix/v1/logs' );
@@ -291,7 +342,15 @@ final class LogsRestApiTest extends WP_UnitTestCase {
 	public function test_delete_log_by_id_removes_row(): void {
 		$this->create_admin();
 
-		$log_id = Updatronix_Logger::log( 'plugin', 'update', 'Doomed Plugin', 'doomed', '1.0', '1.1', 'success' );
+		$log_id = Updatronix_Logger::log(
+			'plugin',
+			'update',
+			'Doomed Plugin',
+			'doomed',
+			'1.0',
+			'1.1',
+			'success'
+		);
 		self::assertIsInt( $log_id );
 
 		$request  = new WP_REST_Request( 'DELETE', '/updatronix/v1/logs/' . $log_id );
@@ -302,7 +361,11 @@ final class LogsRestApiTest extends WP_UnitTestCase {
 		self::assertIsArray( $data );
 		self::assertTrue( $data['deleted'] ?? false );
 
-		$after          = new WP_REST_Request( 'GET', '/updatronix/v1/logs/' . $log_id );
+		$after          = new WP_REST_Request(
+			'GET',
+			'/updatronix/v1/logs/'
+			. $log_id
+		);
 		$after_response = rest_do_request( $after );
 		self::assertSame( 404, $after_response->get_status() );
 	}
@@ -330,8 +393,24 @@ final class LogsRestApiTest extends WP_UnitTestCase {
 		$this->create_admin();
 		$this->set_retention_days( 30 );
 
-		$fresh_id = Updatronix_Logger::log( 'plugin', 'update', 'Fresh Plugin', 'fresh', '1.0', '1.1', 'success' );
-		$old_id   = Updatronix_Logger::log( 'plugin', 'update', 'Old Plugin', 'old', '1.0', '1.1', 'success' );
+		$fresh_id = Updatronix_Logger::log(
+			'plugin',
+			'update',
+			'Fresh Plugin',
+			'fresh',
+			'1.0',
+			'1.1',
+			'success'
+		);
+		$old_id   = Updatronix_Logger::log(
+			'plugin',
+			'update',
+			'Old Plugin',
+			'old',
+			'1.0',
+			'1.1',
+			'success'
+		);
 		self::assertIsInt( $fresh_id );
 		self::assertIsInt( $old_id );
 		$this->stamp_log_age( $old_id, 40 * DAY_IN_SECONDS );
@@ -344,8 +423,14 @@ final class LogsRestApiTest extends WP_UnitTestCase {
 		self::assertIsArray( $data );
 		self::assertSame( 1, (int) ( $data['deleted'] ?? 0 ) );
 
-		self::assertNotNull( Updatronix_Logger::get_log( $fresh_id, false ), 'Fresh log must survive cleanup.' );
-		self::assertNull( Updatronix_Logger::get_log( $old_id, false ), 'Backdated log must be purged by cleanup.' );
+		self::assertNotNull(
+			Updatronix_Logger::get_log( $fresh_id, false ),
+			'Fresh log must survive cleanup.'
+		);
+		self::assertNull(
+			Updatronix_Logger::get_log( $old_id, false ),
+			'Backdated log must be purged by cleanup.'
+		);
 	}
 
 	/**
@@ -356,8 +441,24 @@ final class LogsRestApiTest extends WP_UnitTestCase {
 	public function test_delete_all_logs_returns_deleted_count(): void {
 		$this->create_admin();
 
-		Updatronix_Logger::log( 'plugin', 'update', 'Alpha Plugin', 'alpha', '1.0', '1.1', 'success' );
-		Updatronix_Logger::log( 'theme', 'install', 'Beta Theme', 'beta', '', '2.0', 'success' );
+		Updatronix_Logger::log(
+			'plugin',
+			'update',
+			'Alpha Plugin',
+			'alpha',
+			'1.0',
+			'1.1',
+			'success'
+		);
+		Updatronix_Logger::log(
+			'theme',
+			'install',
+			'Beta Theme',
+			'beta',
+			'',
+			'2.0',
+			'success'
+		);
 
 		$request  = new WP_REST_Request( 'DELETE', '/updatronix/v1/logs/all' );
 		$response = rest_do_request( $request );
@@ -389,7 +490,10 @@ final class LogsRestApiTest extends WP_UnitTestCase {
 		self::assertIsString( $data['body'] ?? null );
 		self::assertIsString( $data['transient_key'] ?? null );
 		self::assertNotEmpty( $data['transient_key'] );
-		self::assertFalse( $data['truncated'] ?? true, 'An empty log table must not truncate.' );
+		self::assertFalse(
+			$data['truncated'] ?? true,
+			'An empty log table must not truncate.'
+		);
 	}
 
 	/**
@@ -439,10 +543,13 @@ final class LogsRestApiTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * The auto-update kill switch returns 403 while file mods are disallowed, then recovers.
+	 * The auto-update kill switch returns 403 while file mods are disallowed, then
+	 * recovers.
 	 *
-	 * Driven through the WordPress core `file_mod_allowed` filter instead of defining
-	 * DISALLOW_FILE_MODS (PHP `defined()` is permanent and would leak across the suite).
+	 * Driven through the WordPress core `file_mod_allowed` filter instead of
+	 * defining
+	 * DISALLOW_FILE_MODS (PHP `defined()` is permanent and would leak across the
+	 * suite).
 	 *
 	 * @return void
 	 */
@@ -458,10 +565,15 @@ final class LogsRestApiTest extends WP_UnitTestCase {
 		$request->set_param( 'mode', 'minor' );
 		$response = rest_do_request( $request );
 
-		self::assertSame( 403, $response->get_status(), 'Updating core must be locked while file mods are disallowed.' );
+		self::assertSame(
+			403,
+			$response->get_status(),
+			'Updating core must be locked while file mods are disallowed.'
+		);
 		$data = $response->get_data();
 		self::assertIsArray( $data );
 		self::assertSame(
+			// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 			'File modifications are not allowed on this site via the DISALLOW_FILE_MODS constant in your wp-config.php file.',
 			$data['message'] ?? null,
 			'The kill-switch 403 must carry the DISALLOW_FILE_MODS explanation.'
@@ -471,7 +583,11 @@ final class LogsRestApiTest extends WP_UnitTestCase {
 		$toggle->set_param( 'plugin', 'hello.php' );
 		$toggle->set_param( 'enable', true );
 		$toggle_response = rest_do_request( $toggle );
-		self::assertSame( 403, $toggle_response->get_status(), 'Toggling plugins must also be locked.' );
+		self::assertSame(
+			403,
+			$toggle_response->get_status(),
+			'Toggling plugins must also be locked.'
+		);
 
 		remove_filter( 'file_mod_allowed', $this->file_mods_filter );
 		$this->file_mods_filter = null;
@@ -479,11 +595,16 @@ final class LogsRestApiTest extends WP_UnitTestCase {
 		$released = new WP_REST_Request( 'POST', '/updatronix/v1/auto-updates/core' );
 		$released->set_param( 'mode', 'minor' );
 		$release_response = rest_do_request( $released );
-		self::assertSame( 200, $release_response->get_status(), 'Removing the lock must restore normal behavior.' );
+		self::assertSame(
+			200,
+			$release_response->get_status(),
+			'Removing the lock must restore normal behavior.'
+		);
 	}
 
 	/**
-	 * The daily cleanup cron is scheduled on demand and throttled by the self-heal transient.
+	 * The daily cleanup cron is scheduled on demand and throttled by the self-heal
+	 * transient.
 	 *
 	 * @return void
 	 */
@@ -497,17 +618,27 @@ final class LogsRestApiTest extends WP_UnitTestCase {
 		wp_clear_scheduled_hook( Updatronix_Cron::HOOK_CLEANUP );
 
 		Updatronix_Cron::maybe_schedule_if_needed();
-		self::assertIsInt( wp_next_scheduled( Updatronix_Cron::HOOK_CLEANUP ), 'First call must schedule the daily cleanup hook.' );
+		self::assertIsInt(
+			wp_next_scheduled( Updatronix_Cron::HOOK_CLEANUP ),
+			'First call must schedule the daily cleanup hook.'
+		);
 
 		// Simulate a lost event while the daily throttle transient is still set.
 		wp_clear_scheduled_hook( Updatronix_Cron::HOOK_CLEANUP );
 		Updatronix_Cron::maybe_schedule_if_needed();
-		self::assertFalse( wp_next_scheduled( Updatronix_Cron::HOOK_CLEANUP ), 'Throttled call must not re-schedule the hook.' );
+		self::assertFalse(
+			wp_next_scheduled( Updatronix_Cron::HOOK_CLEANUP ),
+			'Throttled call must not re-schedule the hook.'
+		);
 
+		// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 		// Expiring the throttle (transient cleared) allows the self-heal to run again.
 		Updatronix_Cron::delete_plugin_transients();
 		Updatronix_Cron::maybe_schedule_if_needed();
-		self::assertIsInt( wp_next_scheduled( Updatronix_Cron::HOOK_CLEANUP ), 'After throttle expiry the cleanup hook must be re-scheduled.' );
+		self::assertIsInt(
+			wp_next_scheduled( Updatronix_Cron::HOOK_CLEANUP ),
+			'After throttle expiry the cleanup hook must be re-scheduled.'
+		);
 	}
 
 	/**
@@ -518,20 +649,43 @@ final class LogsRestApiTest extends WP_UnitTestCase {
 	public function test_run_cleanup_deletes_old_logs_via_cron(): void {
 		$this->set_retention_days( 30 );
 
-		$fresh_id = Updatronix_Logger::log( 'plugin', 'update', 'Fresh Plugin', 'fresh', '1.0', '1.1', 'success' );
-		$old_id   = Updatronix_Logger::log( 'plugin', 'update', 'Old Plugin', 'old', '1.0', '1.1', 'success' );
+		$fresh_id = Updatronix_Logger::log(
+			'plugin',
+			'update',
+			'Fresh Plugin',
+			'fresh',
+			'1.0',
+			'1.1',
+			'success'
+		);
+		$old_id   = Updatronix_Logger::log(
+			'plugin',
+			'update',
+			'Old Plugin',
+			'old',
+			'1.0',
+			'1.1',
+			'success'
+		);
 		self::assertIsInt( $fresh_id );
 		self::assertIsInt( $old_id );
 		$this->stamp_log_age( $old_id, 40 * DAY_IN_SECONDS );
 
 		Updatronix_Cron::run_cleanup();
 
-		self::assertNotNull( Updatronix_Logger::get_log( $fresh_id, false ), 'Fresh log must survive the cron cleanup.' );
-		self::assertNull( Updatronix_Logger::get_log( $old_id, false ), 'Backdated log must be purged by the cron cleanup.' );
+		self::assertNotNull(
+			Updatronix_Logger::get_log( $fresh_id, false ),
+			'Fresh log must survive the cron cleanup.'
+		);
+		self::assertNull(
+			Updatronix_Logger::get_log( $old_id, false ),
+			'Backdated log must be purged by the cron cleanup.'
+		);
 	}
 
 	/**
-	 * On single-site the subsite artifact cleanup is a no-op that keeps main-site events.
+	 * On single-site the subsite artifact cleanup is a no-op that keeps main-site
+	 * events.
 	 *
 	 * @return void
 	 */
@@ -541,11 +695,18 @@ final class LogsRestApiTest extends WP_UnitTestCase {
 		}
 
 		wp_schedule_event( time(), 'daily', Updatronix_Cron::HOOK_CLEANUP );
-		wp_schedule_event( time(), 'daily', Updatronix_Cron::HOOK_WP_CRON_CORE_VERSION_CHECK );
+		wp_schedule_event(
+			time(),
+			'daily',
+			Updatronix_Cron::HOOK_WP_CRON_CORE_VERSION_CHECK
+		);
 
 		Updatronix_Cron::clear_subsite_cron_artifacts();
 
-		self::assertIsInt( wp_next_scheduled( Updatronix_Cron::HOOK_CLEANUP ), 'Main-site cleanup event must be untouched.' );
+		self::assertIsInt(
+			wp_next_scheduled( Updatronix_Cron::HOOK_CLEANUP ),
+			'Main-site cleanup event must be untouched.'
+		);
 		self::assertIsInt(
 			wp_next_scheduled( Updatronix_Cron::HOOK_WP_CRON_CORE_VERSION_CHECK ),
 			'Main-site version-check event must be untouched.'

@@ -39,16 +39,29 @@ final class ScheduleFixtures {
 			return;
 		}
 
-		foreach ( array( 'update_plugins', 'update_themes', 'update_core' ) as $transient ) {
-			self::$originals[ 'transient:' . $transient ] = get_site_transient( $transient );
+		foreach ( array(
+			'update_plugins',
+			'update_themes',
+			'update_core',
+		) as $transient ) {
+			self::$originals[ 'transient:' . $transient ] = get_site_transient(
+				$transient
+			);
 		}
 
-		foreach ( array( 'updatronix_auto_update_delay_ledger', 'updatronix_network_schedule' ) as $option ) {
+		foreach ( array(
+			'updatronix_auto_update_delay_ledger',
+			'updatronix_network_schedule',
+		) as $option ) {
 			self::$originals[ 'option:' . $option ] = get_site_option( $option, null );
 		}
 
-		self::$originals['event:wp_version_check'] = wp_next_scheduled( 'wp_version_check' );
-		self::$originals['event:recurrence']       = wp_get_schedule( 'wp_version_check' );
+		self::$originals['event:wp_version_check'] = wp_next_scheduled(
+			'wp_version_check'
+		);
+		self::$originals['event:recurrence']       = wp_get_schedule(
+			'wp_version_check'
+		);
 	}
 
 	/**
@@ -62,7 +75,11 @@ final class ScheduleFixtures {
 		}
 		self::$stubs = array();
 
-		foreach ( array( 'update_plugins', 'update_themes', 'update_core' ) as $transient ) {
+		foreach ( array(
+			'update_plugins',
+			'update_themes',
+			'update_core',
+		) as $transient ) {
 			$key = 'transient:' . $transient;
 			if ( ! array_key_exists( $key, self::$originals ) ) {
 				continue;
@@ -75,7 +92,10 @@ final class ScheduleFixtures {
 			}
 		}
 
-		foreach ( array( 'updatronix_auto_update_delay_ledger', 'updatronix_network_schedule' ) as $option ) {
+		foreach ( array(
+			'updatronix_auto_update_delay_ledger',
+			'updatronix_network_schedule',
+		) as $option ) {
 			$key = 'option:' . $option;
 			if ( ! array_key_exists( $key, self::$originals ) ) {
 				continue;
@@ -89,11 +109,17 @@ final class ScheduleFixtures {
 		}
 
 		wp_clear_scheduled_hook( 'wp_version_check' );
-		if ( isset( self::$originals['event:wp_version_check'] ) && false !== self::$originals['event:wp_version_check'] ) {
-			$recurrence = is_string( self::$originals['event:recurrence'] ) && '' !== self::$originals['event:recurrence']
+		if ( isset( self::$originals['event:wp_version_check'] )
+			&& false !== self::$originals['event:wp_version_check'] ) {
+			$recurrence = is_string( self::$originals['event:recurrence'] )
+				&& '' !== self::$originals['event:recurrence']
 				? self::$originals['event:recurrence']
 				: 'twicedaily';
-			wp_schedule_event( (int) self::$originals['event:wp_version_check'], $recurrence, 'wp_version_check' );
+			wp_schedule_event(
+				(int) self::$originals['event:wp_version_check'],
+				$recurrence,
+				'wp_version_check'
+			);
 		}
 
 		self::$originals = array();
@@ -112,13 +138,18 @@ final class ScheduleFixtures {
 	/**
 	 * Seeds a plugin offer in the `update_plugins` transient and `checked` map.
 	 *
-	 * @param string               $file      Plugin file relative to WP_PLUGIN_DIR.
+	 * @param string               $file Plugin file relative to WP_PLUGIN_DIR.
 	 * @param string               $installed Installed version recorded in `checked`.
 	 * @param string               $target    Offered version.
 	 * @param array<string, mixed> $extra     Extra fields merged into the offer.
 	 * @return void
 	 */
-	public static function set_plugin_offer( string $file, string $installed, string $target, array $extra = array() ): void {
+	public static function set_plugin_offer(
+		string $file,
+		string $installed,
+		string $target,
+		array $extra = array()
+	): void {
 		self::capture();
 		$transient = get_site_transient( 'update_plugins' );
 		if ( ! is_object( $transient ) ) {
@@ -144,7 +175,13 @@ final class ScheduleFixtures {
 		$transient->checked           = (array) ( $transient->checked ?? array() );
 		$transient->response[ $file ] = $offer;
 		$transient->checked[ $file ]  = $installed;
-		self::touch( $transient, array_key_exists( 'last_checked', $extra ) ? (int) $extra['last_checked'] : time() );
+		self::touch(
+			$transient,
+			array_key_exists(
+				'last_checked',
+				$extra
+			) ? (int) $extra['last_checked'] : time()
+		);
 
 		set_site_transient( 'update_plugins', $transient );
 	}
@@ -155,10 +192,15 @@ final class ScheduleFixtures {
 	 * @param string               $stylesheet Theme directory name.
 	 * @param string               $installed  Installed version.
 	 * @param string               $target     Offered version.
-	 * @param array<string, mixed> $extra      Extra fields merged into the offer row.
+	 * @param array<string, mixed> $extra Extra fields merged into the offer row.
 	 * @return void
 	 */
-	public static function set_theme_offer( string $stylesheet, string $installed, string $target, array $extra = array() ): void {
+	public static function set_theme_offer(
+		string $stylesheet,
+		string $installed,
+		string $target,
+		array $extra = array()
+	): void {
 		self::capture();
 		$transient = get_site_transient( 'update_themes' );
 		if ( ! is_object( $transient ) ) {
@@ -182,7 +224,13 @@ final class ScheduleFixtures {
 			$extra
 		);
 		$transient->checked[ $stylesheet ]  = $installed;
-		self::touch( $transient, array_key_exists( 'last_checked', $extra ) ? (int) $extra['last_checked'] : time() );
+		self::touch(
+			$transient,
+			array_key_exists(
+				'last_checked',
+				$extra
+			) ? (int) $extra['last_checked'] : time()
+		);
 
 		set_site_transient( 'update_themes', $transient );
 	}
@@ -196,7 +244,12 @@ final class ScheduleFixtures {
 	 * @param array<string, mixed> $extra   Extra fields merged into the offer.
 	 * @return void
 	 */
-	public static function set_core_offer( string $current, string $target, string $response = 'upgrade', array $extra = array() ): void {
+	public static function set_core_offer(
+		string $current,
+		string $target,
+		string $response = 'upgrade',
+		array $extra = array()
+	): void {
 		self::capture();
 		$transient = get_site_transient( 'update_core' );
 		if ( ! is_object( $transient ) ) {
@@ -219,7 +272,13 @@ final class ScheduleFixtures {
 			),
 		);
 		$transient->version_checked = $current;
-		self::touch( $transient, array_key_exists( 'last_checked', $extra ) ? (int) $extra['last_checked'] : time() );
+		self::touch(
+			$transient,
+			array_key_exists(
+				'last_checked',
+				$extra
+			) ? (int) $extra['last_checked'] : time()
+		);
 
 		set_site_transient( 'update_core', $transient );
 	}
@@ -231,7 +290,11 @@ final class ScheduleFixtures {
 	 */
 	public static function clear_offers(): void {
 		self::capture();
-		foreach ( array( 'update_plugins', 'update_themes', 'update_core' ) as $name ) {
+		foreach ( array(
+			'update_plugins',
+			'update_themes',
+			'update_core',
+		) as $name ) {
 			$transient = get_site_transient( $name );
 			if ( ! is_object( $transient ) ) {
 				continue;
@@ -253,7 +316,10 @@ final class ScheduleFixtures {
 	 */
 	public static function seed_ledger( array $rows ): void {
 		self::capture();
-		update_site_option( 'updatronix_auto_update_delay_ledger', (string) wp_json_encode( $rows ) );
+		update_site_option(
+			'updatronix_auto_update_delay_ledger',
+			(string) wp_json_encode( $rows )
+		);
 	}
 
 	/**
@@ -265,7 +331,12 @@ final class ScheduleFixtures {
 	 * @param int    $days       Hold days 0..365.
 	 * @return void
 	 */
-	public static function set_schedule( string $recurrence, string $time, bool $hold = true, int $days = 2 ): void {
+	public static function set_schedule(
+		string $recurrence,
+		string $time,
+		bool $hold = true,
+		int $days = 2
+	): void {
 		self::capture();
 		update_site_option(
 			'updatronix_network_schedule',
@@ -291,7 +362,10 @@ final class ScheduleFixtures {
 	 * @param string    $recurrence Recurrence slug.
 	 * @return void
 	 */
-	public static function set_next_check( int|false $timestamp, string $recurrence = 'twicedaily' ): void {
+	public static function set_next_check(
+		int|false $timestamp,
+		string $recurrence = 'twicedaily'
+	): void {
 		self::capture();
 		wp_clear_scheduled_hook( 'wp_version_check' );
 		if ( false !== $timestamp ) {
@@ -317,7 +391,14 @@ final class ScheduleFixtures {
 		self::$stubs[] = 'updatronix_schedule_item_state';
 		add_filter(
 			'updatronix_schedule_item_state',
-			static function ( $state, string $type = '', string $id = '' ) use ( $facts, $merge ) {
+			static function (
+				$state,
+				string $type = '',
+				string $id = ''
+			) use (
+				$facts,
+				$merge
+			) {
 				$state = is_array( $state ) ? $state : array();
 				if ( is_callable( $facts ) ) {
 					return (array) $facts( $state, $type, $id );
@@ -339,7 +420,12 @@ final class ScheduleFixtures {
 	 * @param array<string, mixed> $extra Extra fields.
 	 * @return object
 	 */
-	public static function plugin_offer( string $file, string $installed, string $target, array $extra = array() ): object {
+	public static function plugin_offer(
+		string $file,
+		string $installed,
+		string $target,
+		array $extra = array()
+	): object {
 		return (object) array_merge(
 			array(
 				'plugin'      => $file,
@@ -361,7 +447,12 @@ final class ScheduleFixtures {
 	 * @param array<string, mixed> $extra Extra fields.
 	 * @return object
 	 */
-	public static function theme_offer( string $stylesheet, string $installed, string $target, array $extra = array() ): object {
+	public static function theme_offer(
+		string $stylesheet,
+		string $installed,
+		string $target,
+		array $extra = array()
+	): object {
 		return (object) array_merge(
 			array(
 				'theme'       => $stylesheet,
@@ -381,7 +472,11 @@ final class ScheduleFixtures {
 	 * @param array<string, mixed> $extra Extra fields.
 	 * @return object
 	 */
-	public static function core_offer( string $current, string $target, array $extra = array() ): object {
+	public static function core_offer(
+		string $current,
+		string $target,
+		array $extra = array()
+	): object {
 		return (object) array_merge(
 			array(
 				'current'  => $target,

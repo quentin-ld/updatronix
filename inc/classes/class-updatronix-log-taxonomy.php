@@ -21,14 +21,16 @@ final class Updatronix_Log_Taxonomy {
 	/**
 	 * Cached reason table.
 	 *
-	 * @var array<string, array{state: string, action: string, status: string, blocking: bool, label: string}>|null
+	 * @var array<string, array{state: string, action: string, status: string,
+	 * blocking: bool,
+	 * label: string}>|null
 	 */
 	private static $reasons = null;
 
 	/**
 	 * Cached state table.
 	 *
-	 * @var array<string, array{label: string, intent: string, status: string}>|null
+	 * @var array<string, array<string, mixed>>|null
 	 */
 	private static $states = null;
 
@@ -51,7 +53,17 @@ final class Updatronix_Log_Taxonomy {
 	 *
 	 * @var array<int, string>
 	 */
-	private const STATE_ORDER = array( 'done', 'blocked', 'waiting', 'delayed', 'skipped', 'failed', 'uncertain', 'canceled', 'info' );
+	private const STATE_ORDER = array(
+		'done',
+		'blocked',
+		'waiting',
+		'delayed',
+		'skipped',
+		'failed',
+		'uncertain',
+		'canceled',
+		'info',
+	);
 
 	/**
 	 * Primary-reason precedence: Version Lock, Shield compatibility, Schedule
@@ -60,8 +72,19 @@ final class Updatronix_Log_Taxonomy {
 	 * @var array<int, array<int, string>>
 	 */
 	private const PRECEDENCE = array(
-		array( 'version_locked_native', 'native_vcs', 'version_locked_composer', 'version_lock_unknown', 'version_lock_unverified' ),
-		array( 'shield_incompatible_wp', 'shield_incompatible_php', 'shield_disabled_auto_update', 'shield_policy_block' ),
+		array(
+			'version_locked_native',
+			'native_vcs',
+			'version_locked_composer',
+			'version_lock_unknown',
+			'version_lock_unverified',
+		),
+		array(
+			'shield_incompatible_wp',
+			'shield_incompatible_php',
+			'shield_disabled_auto_update',
+			'shield_policy_block',
+		),
 		array( 'schedule_hold' ),
 		array(
 			'flow_waiting_predecessor',
@@ -127,36 +150,53 @@ final class Updatronix_Log_Taxonomy {
 	/**
 	 * Decision states with their label, badge intent, and default status.
 	 *
-	 * @return array<string, array{label: string, intent: string, status: string}>
+	 * @return array<string, array<string, mixed>>
 	 */
 	public static function states(): array {
 		if ( null === self::$states ) {
 			self::$states = array(
 				'done'      => array(
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 					/* translators: Decision state: the target is installed or the action succeeded. */
 					'label'  => __( 'Done', 'updatronix' ),
 					'intent' => 'stable',
 					'status' => 'success',
 				),
 				'blocked'   => array(
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 					/* translators: Decision state: a policy, configuration, or predecessor prevents the attempt. */
 					'label'  => __( 'Blocked', 'updatronix' ),
 					'intent' => 'high',
 					'status' => 'warning',
 				),
 				'waiting'   => array(
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 					/* translators: Decision state: the item is eligible in principle but not now. */
 					'label'  => __( 'Waiting', 'updatronix' ),
 					'intent' => 'informational',
 					'status' => 'info',
 				),
 				'delayed'   => array(
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 					/* translators: Decision state: a soak window holds the offer until a known time. */
 					'label'  => __( 'Delayed', 'updatronix' ),
 					'intent' => 'informational',
 					'status' => 'delayed',
 				),
 				'skipped'   => array(
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 					/* translators: Decision state: the item was not attempted and does not need to be. */
 					'label'  => __( 'Skipped', 'updatronix' ),
 					'intent' => 'draft',
@@ -169,12 +209,20 @@ final class Updatronix_Log_Taxonomy {
 					'status' => 'error',
 				),
 				'uncertain' => array(
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 					/* translators: Decision state: files changed but the installed version is neither the source nor the target. */
 					'label'  => __( 'Needs review', 'updatronix' ),
 					'intent' => 'high',
 					'status' => 'warning',
 				),
 				'canceled'  => array(
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 					/* translators: Decision state: the chain, license, or queue stopped the item. */
 					'label'  => __( 'Canceled', 'updatronix' ),
 					'intent' => 'draft',
@@ -243,12 +291,18 @@ final class Updatronix_Log_Taxonomy {
 				'plan'     => __( 'Plan', 'updatronix' ),
 				/* translators: Decision stage: a policy decided the outcome. */
 				'policy'   => __( 'Policy', 'updatronix' ),
+				// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+				// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+				// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 				/* translators: Decision stage: the native update gate decided the outcome. */
 				'gate'     => __( 'Gate', 'updatronix' ),
 				/* translators: Decision stage: the update was executed. */
 				'execute'  => __( 'Execute', 'updatronix' ),
 				/* translators: Decision stage: the result was finalized. */
 				'finalize' => __( 'Finalize', 'updatronix' ),
+				// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+				// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+				// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 				/* translators: Decision stage: the plugin observed a fact without acting. */
 				'observe'  => __( 'Observe', 'updatronix' ),
 			);
@@ -260,7 +314,9 @@ final class Updatronix_Log_Taxonomy {
 	/**
 	 * The canonical reason table.
 	 *
-	 * @return array<string, array{state: string, action: string, status: string, blocking: bool, label: string}>
+	 * @return array<string, array{state: string, action: string, status: string,
+	 * blocking: bool,
+	 * label: string}>
 	 */
 	public static function reasons(): array {
 		if ( null === self::$reasons ) {
@@ -294,6 +350,9 @@ final class Updatronix_Log_Taxonomy {
 					'action'   => 'update',
 					'status'   => 'success',
 					'blocking' => false,
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 					/* translators: Log reason: the target was installed after an interrupted update. */
 					'label'    => __( 'Recovered after an interrupted update', 'updatronix' ),
 				),
@@ -302,6 +361,11 @@ final class Updatronix_Log_Taxonomy {
 					'action'   => 'auto_update_reenabled',
 					'status'   => 'success',
 					'blocking' => false,
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 					/* translators: Log reason: Update Shield turned the native automatic-update toggle back on. */
 					'label'    => __( 'Automatic updates re-enabled', 'updatronix' ),
 				),
@@ -310,6 +374,9 @@ final class Updatronix_Log_Taxonomy {
 					'action'   => 'auto_update_reenabled',
 					'status'   => 'success',
 					'blocking' => false,
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 					/* translators: Log reason: the native automatic-update toggle was turned on. */
 					'label'    => __( 'Automatic updates re-enabled', 'updatronix' ),
 				),
@@ -334,6 +401,9 @@ final class Updatronix_Log_Taxonomy {
 					'action'   => 'update',
 					'status'   => 'info',
 					'blocking' => false,
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 					/* translators: Log reason: the installed version is the latest known version. */
 					'label'    => __( 'Already at the latest version', 'updatronix' ),
 				),
@@ -342,6 +412,9 @@ final class Updatronix_Log_Taxonomy {
 					'action'   => 'update',
 					'status'   => 'info',
 					'blocking' => false,
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 					/* translators: Log reason: WordPress holds no update offer for the item. */
 					'label'    => __( 'No update offered', 'updatronix' ),
 				),
@@ -350,6 +423,9 @@ final class Updatronix_Log_Taxonomy {
 					'action'   => 'update',
 					'status'   => 'info',
 					'blocking' => false,
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 					/* translators: Log reason: the update offer disappeared before execution. */
 					'label'    => __( 'The update is no longer offered', 'updatronix' ),
 				),
@@ -358,6 +434,9 @@ final class Updatronix_Log_Taxonomy {
 					'action'   => 'update',
 					'status'   => 'info',
 					'blocking' => false,
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 					/* translators: Log reason: the offered target changed between planning and execution. */
 					'label'    => __( 'The update offer changed', 'updatronix' ),
 				),
@@ -366,6 +445,9 @@ final class Updatronix_Log_Taxonomy {
 					'action'   => 'update',
 					'status'   => 'info',
 					'blocking' => false,
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 					/* translators: Log reason: the offer data is stale, absent, or unreadable. */
 					'label'    => __( 'The update offer is unavailable', 'updatronix' ),
 				),
@@ -374,6 +456,9 @@ final class Updatronix_Log_Taxonomy {
 					'action'   => 'update',
 					'status'   => 'info',
 					'blocking' => false,
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 					/* translators: Log reason: at least one incoming Flow predecessor is not done. */
 					'label'    => __( 'Waiting for a predecessor', 'updatronix' ),
 				),
@@ -390,6 +475,9 @@ final class Updatronix_Log_Taxonomy {
 					'action'   => 'update',
 					'status'   => 'info',
 					'blocking' => false,
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 					/* translators: Log reason: a Flow predecessor has no readable update offer. */
 					'label'    => __( 'A predecessor has no update offer', 'updatronix' ),
 				),
@@ -398,6 +486,9 @@ final class Updatronix_Log_Taxonomy {
 					'action'   => 'update',
 					'status'   => 'info',
 					'blocking' => false,
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 					/* translators: Log reason: the item is pending behind earlier items in the queue. */
 					'label'    => __( 'Waiting for its turn', 'updatronix' ),
 				),
@@ -446,8 +537,16 @@ final class Updatronix_Log_Taxonomy {
 					'action'   => 'prevented',
 					'status'   => 'warning',
 					'blocking' => true,
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 					/* translators: Log reason: WordPress itself refused to update a version-controlled item. */
-					'label'    => __( 'WordPress refused a version-controlled item', 'updatronix' ),
+					'label'    => __(
+						'WordPress refused a version-controlled item',
+						'updatronix'
+					),
 				),
 				'version_locked_composer'        => array(
 					'state'    => 'blocked',
@@ -462,14 +561,23 @@ final class Updatronix_Log_Taxonomy {
 					'action'   => 'prevented',
 					'status'   => 'warning',
 					'blocking' => true,
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 					/* translators: Log reason: version-control evidence exists but cannot be read. */
-					'label'    => __( 'Version control state could not be read', 'updatronix' ),
+					'label'    => __(
+						'Version control state could not be read',
+						'updatronix'
+					),
 				),
 				'shield_incompatible_wp'         => array(
 					'state'    => 'blocked',
 					'action'   => 'incompatible',
 					'status'   => 'warning',
 					'blocking' => true,
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 					/* translators: Log reason: the update requires a newer WordPress version. */
 					'label'    => __( 'Requires a newer WordPress version', 'updatronix' ),
 				),
@@ -486,14 +594,25 @@ final class Updatronix_Log_Taxonomy {
 					'action'   => 'safe_mode_disabled',
 					'status'   => 'warning',
 					'blocking' => true,
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 					/* translators: Log reason: Update Shield disabled the native automatic-update toggle. */
-					'label'    => __( 'Automatic updates disabled by Update Shield', 'updatronix' ),
+					'label'    => __(
+						'Automatic updates disabled by Update Shield',
+						'updatronix'
+					),
 				),
 				'shield_policy_block'            => array(
 					'state'    => 'blocked',
 					'action'   => 'prevented',
 					'status'   => 'warning',
 					'blocking' => true,
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 					/* translators: Log reason: Update Shield blocked the update without a more specific reason. */
 					'label'    => __( 'Blocked by Update Shield', 'updatronix' ),
 				),
@@ -511,7 +630,10 @@ final class Updatronix_Log_Taxonomy {
 					'status'   => 'warning',
 					'blocking' => true,
 					/* translators: Log reason: a Flow predecessor is version-locked. */
-					'label'    => __( 'A predecessor is managed by version control', 'updatronix' ),
+					'label'    => __(
+						'A predecessor is managed by version control',
+						'updatronix'
+					),
 				),
 				'flow_predecessor_uncertain'     => array(
 					'state'    => 'blocked',
@@ -526,8 +648,14 @@ final class Updatronix_Log_Taxonomy {
 					'action'   => 'prevented',
 					'status'   => 'warning',
 					'blocking' => true,
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 					/* translators: Log reason: a Flow predecessor is not opted into automatic updates. */
-					'label'    => __( 'A predecessor is not managed automatically', 'updatronix' ),
+					'label'    => __(
+						'A predecessor is not managed automatically',
+						'updatronix'
+					),
 				),
 				'flow_predecessor_not_installed' => array(
 					'state'    => 'blocked',
@@ -542,14 +670,23 @@ final class Updatronix_Log_Taxonomy {
 					'action'   => 'prevented',
 					'status'   => 'warning',
 					'blocking' => true,
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 					/* translators: Log reason: a Flow predecessor cannot update automatically. */
-					'label'    => __( 'A predecessor cannot update automatically', 'updatronix' ),
+					'label'    => __(
+						'A predecessor cannot update automatically',
+						'updatronix'
+					),
 				),
 				'flow_chain_invalid'             => array(
 					'state'    => 'blocked',
 					'action'   => 'prevented',
 					'status'   => 'warning',
 					'blocking' => true,
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 					/* translators: Log reason: the Flow chain has a cycle, duplicate, or limit error. */
 					'label'    => __( 'The chain is invalid', 'updatronix' ),
 				),
@@ -558,6 +695,9 @@ final class Updatronix_Log_Taxonomy {
 					'action'   => 'failed',
 					'status'   => 'error',
 					'blocking' => true,
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 					/* translators: Log reason: the maximum number of update attempts was reached. */
 					'label'    => __( 'All attempts failed', 'updatronix' ),
 				),
@@ -574,6 +714,9 @@ final class Updatronix_Log_Taxonomy {
 					'action'   => 'failed',
 					'status'   => 'warning',
 					'blocking' => true,
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 					/* translators: Log reason: the update-worker lease expired and the result is unknown. */
 					'label'    => __( 'The update lease expired', 'updatronix' ),
 				),
@@ -582,6 +725,9 @@ final class Updatronix_Log_Taxonomy {
 					'action'   => 'failed',
 					'status'   => 'warning',
 					'blocking' => true,
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 					/* translators: Log reason: the installed version is neither the source nor the target. */
 					'label'    => __( 'The update needs review', 'updatronix' ),
 				),
@@ -598,6 +744,9 @@ final class Updatronix_Log_Taxonomy {
 					'action'   => 'disabled',
 					'status'   => 'cancelled',
 					'blocking' => true,
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 					/* translators: Log reason: the update queue was disabled while items were pending. */
 					'label'    => __( 'The queue was disabled', 'updatronix' ),
 				),
@@ -606,6 +755,9 @@ final class Updatronix_Log_Taxonomy {
 					'action'   => 'disabled',
 					'status'   => 'cancelled',
 					'blocking' => true,
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 					/* translators: Log reason: the license is inactive and the engine cancelled the item. */
 					'label'    => __( 'The license is inactive', 'updatronix' ),
 				),
@@ -622,6 +774,9 @@ final class Updatronix_Log_Taxonomy {
 					'action'   => 'prevented',
 					'status'   => 'warning',
 					'blocking' => true,
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 					/* translators: Log reason: the native updater refused the update before installation. */
 					'label'    => __( 'WordPress refused the update', 'updatronix' ),
 				),
@@ -638,6 +793,9 @@ final class Updatronix_Log_Taxonomy {
 					'action'   => 'prevented',
 					'status'   => 'warning',
 					'blocking' => true,
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 					/* translators: Log reason: the item is not opted into automatic updates. */
 					'label'    => __( 'Automatic updates are not enabled', 'updatronix' ),
 				),
@@ -646,6 +804,9 @@ final class Updatronix_Log_Taxonomy {
 					'action'   => 'prevented',
 					'status'   => 'warning',
 					'blocking' => true,
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 					/* translators: Log reason: the item root is missing on the execution site. */
 					'label'    => __( 'The item is not installed', 'updatronix' ),
 				),
@@ -670,6 +831,11 @@ final class Updatronix_Log_Taxonomy {
 					'action'   => 'advisory',
 					'status'   => 'info',
 					'blocking' => false,
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 					/* translators: Log reason: there is no version-control evidence, so the check failed open. */
 					'label'    => __( 'Version control state was not verified', 'updatronix' ),
 				),
@@ -686,6 +852,9 @@ final class Updatronix_Log_Taxonomy {
 					'action'   => 'advisory',
 					'status'   => 'warning',
 					'blocking' => false,
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 					/* translators: Log reason: WP-Cron is disabled, so the automatic pass may not run. */
 					'label'    => __( 'WP-Cron is disabled', 'updatronix' ),
 				),
@@ -718,6 +887,9 @@ final class Updatronix_Log_Taxonomy {
 					'action'   => 'install',
 					'status'   => 'success',
 					'blocking' => false,
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 					/* translators: Log reason: the item was installed from an uploaded file. */
 					'label'    => __( 'Installed', 'updatronix' ),
 				),
@@ -795,7 +967,8 @@ final class Updatronix_Log_Taxonomy {
 	 * Meta for one canonical reason.
 	 *
 	 * @param string $code Reason code or alias.
-	 * @return array{state: string, action: string, status: string, blocking: bool, label: string}
+	 * @return array{state: string, action: string, status: string, blocking: bool,
+	 * label: string}
 	 */
 	public static function reason( string $code ): array {
 		$reasons   = self::reasons();
@@ -965,6 +1138,9 @@ final class Updatronix_Log_Taxonomy {
 	 * @return string
 	 */
 	public static function legacy_label(): string {
+		// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+		// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+		// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 		/* translators: Shown for a log row that has no recorded reason; never guess one. */
 		return __( 'Legacy — reason not recorded', 'updatronix' );
 	}

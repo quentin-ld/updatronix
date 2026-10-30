@@ -3,7 +3,8 @@
  * Integration tests for the native update-time surfaces.
  *
  * Real WordPress, local fixtures, no network. Each test calls the real filters
- * with the exact markup WordPress renders around `wp_get_auto_update_message()`.
+ * with the exact markup WordPress renders around
+ * `wp_get_auto_update_message()`.
  *
  * @package updatronix
  */
@@ -97,17 +98,27 @@ final class NativeUpdateTimeTest extends WP_UnitTestCase {
 		ScheduleFixtures::set_plugin_offer( $plugin, $installed, '99.0.0' );
 		$enabled   = (array) get_site_option( 'auto_update_plugins', array() );
 		$enabled[] = $plugin;
-		update_site_option( 'auto_update_plugins', array_values( array_unique( $enabled ) ) );
+		update_site_option(
+			'auto_update_plugins',
+			array_values(
+				array_unique(
+					$enabled
+				)
+			)
+		);
 		ScheduleFixtures::set_next_check( time() + 6 * HOUR_IN_SECONDS, 'daily' );
 		ScheduleFixtures::seed_ledger(
 			array(
-				Updatronix_AutoUpdateDelay::ledger_hash( 'plugin', get_site_transient( 'update_plugins' )->response[ $plugin ] ) => time() - HOUR_IN_SECONDS,
+				Updatronix_AutoUpdateDelay::ledger_hash(
+					'plugin',
+					get_site_transient( 'update_plugins' )->response[ $plugin ]
+				) => time() - HOUR_IN_SECONDS,
 			)
 		);
 		$this->reset_caches();
 	}
 
-	// --- Plugin row -------------------------------------------------------
+	// --- Plugin row -------------------------------------------------------.
 
 	/**
 	 * The plugin row shows the held sentence and keeps the toggle and class.
@@ -126,7 +137,10 @@ final class NativeUpdateTimeTest extends WP_UnitTestCase {
 		);
 
 		self::assertStringContainsString( 'Earliest automatic install:', $html );
-		self::assertStringNotContainsString( 'Automatic update scheduled in 3 hours.', $html );
+		self::assertStringNotContainsString(
+			'Automatic update scheduled in 3 hours.',
+			$html
+		);
 		self::assertStringContainsString( '<div class="auto-update-time">', $html );
 		self::assertStringContainsString( 'toggle-auto-update', $html );
 		self::assertStringContainsString( 'Disable auto-updates', $html );
@@ -143,7 +157,12 @@ final class NativeUpdateTimeTest extends WP_UnitTestCase {
 		ScheduleFixtures::set_plugin_offer( $plugin, $installed, '99.0.0' );
 		update_site_option(
 			'auto_update_plugins',
-			array_values( array_diff( (array) get_site_option( 'auto_update_plugins', array() ), array( $plugin ) ) )
+			array_values(
+				array_diff(
+					(array) get_site_option( 'auto_update_plugins', array() ),
+					array( $plugin )
+				)
+			)
 		);
 		ScheduleFixtures::set_next_check( time() + HOUR_IN_SECONDS, 'daily' );
 		$this->reset_caches();
@@ -156,7 +175,10 @@ final class NativeUpdateTimeTest extends WP_UnitTestCase {
 		);
 
 		self::assertStringContainsString( 'class="auto-update-time hidden"', $html );
-		self::assertStringContainsString( 'Automatic updates are off for this item.', $html );
+		self::assertStringContainsString(
+			'Automatic updates are off for this item.',
+			$html
+		);
 	}
 
 	/**
@@ -166,7 +188,12 @@ final class NativeUpdateTimeTest extends WP_UnitTestCase {
 	 */
 	public function test_plugin_row_without_a_map_key_is_unchanged(): void {
 		$in  = NativeHtml::fragment( 'pluginRow' );
-		$out = apply_filters( 'plugin_auto_update_setting_html', $in, 'missing/missing.php', array() );
+		$out = apply_filters(
+			'plugin_auto_update_setting_html',
+			$in,
+			'missing/missing.php',
+			array()
+		);
 
 		self::assertSame( $in, $out );
 	}
@@ -180,8 +207,15 @@ final class NativeUpdateTimeTest extends WP_UnitTestCase {
 		$plugin = $this->plugin();
 		$this->seed_held_plugin( $plugin );
 
-		$in  = '<div class="plugin-autoupdate"><a class="toggle-auto-update" href="#">Disable auto-updates</a></div>';
-		$out = apply_filters( 'plugin_auto_update_setting_html', $in, $plugin, array() );
+		$in =
+			// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+			'<div class="plugin-autoupdate"><a class="toggle-auto-update" href="#">Disable auto-updates</a></div>';
+		$out = apply_filters(
+			'plugin_auto_update_setting_html',
+			$in,
+			$plugin,
+			array()
+		);
 
 		self::assertSame( $in, $out );
 	}
@@ -197,12 +231,17 @@ final class NativeUpdateTimeTest extends WP_UnitTestCase {
 		add_filter( 'updatronix_native_update_time_enabled', '__return_false' );
 
 		$in  = NativeHtml::fragment( 'pluginRow' );
-		$out = apply_filters( 'plugin_auto_update_setting_html', $in, $plugin, array() );
+		$out = apply_filters(
+			'plugin_auto_update_setting_html',
+			$in,
+			$plugin,
+			array()
+		);
 
 		self::assertSame( $in, $out );
 	}
 
-	// --- Network theme row ------------------------------------------------
+	// --- Network theme row ------------------------------------------------.
 
 	/**
 	 * A real theme stylesheet.
@@ -226,11 +265,22 @@ final class NativeUpdateTimeTest extends WP_UnitTestCase {
 		ScheduleFixtures::set_theme_offer( $stylesheet, $installed, '99.0.0' );
 		$enabled   = (array) get_site_option( 'auto_update_themes', array() );
 		$enabled[] = $stylesheet;
-		update_site_option( 'auto_update_themes', array_values( array_unique( $enabled ) ) );
+		update_site_option(
+			'auto_update_themes',
+			array_values(
+				array_unique(
+					$enabled
+				)
+			)
+		);
 		ScheduleFixtures::set_next_check( time() + 6 * HOUR_IN_SECONDS, 'daily' );
 		ScheduleFixtures::seed_ledger(
 			array(
-				Updatronix_AutoUpdateDelay::ledger_hash( 'theme', (object) get_site_transient( 'update_themes' )->response[ $stylesheet ] ) => time() - HOUR_IN_SECONDS,
+				Updatronix_AutoUpdateDelay::ledger_hash(
+					'theme',
+					(object) get_site_transient( 'update_themes' )->response[ $stylesheet ]
+				) =>
+					time() - HOUR_IN_SECONDS,
 			)
 		);
 		$this->reset_caches();
@@ -253,7 +303,10 @@ final class NativeUpdateTimeTest extends WP_UnitTestCase {
 		);
 
 		self::assertStringContainsString( 'Earliest automatic install:', $html );
-		self::assertStringNotContainsString( 'Automatic update scheduled in 3 hours.', $html );
+		self::assertStringNotContainsString(
+			'Automatic update scheduled in 3 hours.',
+			$html
+		);
 		self::assertStringContainsString( '<div class="auto-update-time">', $html );
 		self::assertStringContainsString( 'toggle-auto-update', $html );
 	}
@@ -272,13 +325,20 @@ final class NativeUpdateTimeTest extends WP_UnitTestCase {
 
 		$html = apply_filters(
 			'theme_auto_update_setting_html',
-			str_replace( 'class="auto-update-time"', 'class="auto-update-time hidden"', NativeHtml::fragment( 'networkThemeRow' ) ),
+			str_replace(
+				'class="auto-update-time"',
+				'class="auto-update-time hidden"',
+				NativeHtml::fragment( 'networkThemeRow' )
+			),
 			$stylesheet,
 			null
 		);
 
 		self::assertStringContainsString( 'class="auto-update-time hidden"', $html );
-		self::assertStringContainsString( 'Automatic updates are off for this item.', $html );
+		self::assertStringContainsString(
+			'Automatic updates are off for this item.',
+			$html
+		);
 	}
 
 	/**
@@ -288,7 +348,12 @@ final class NativeUpdateTimeTest extends WP_UnitTestCase {
 	 */
 	public function test_network_theme_row_without_a_map_key_is_unchanged(): void {
 		$in  = NativeHtml::fragment( 'networkThemeRow' );
-		$out = apply_filters( 'theme_auto_update_setting_html', $in, 'missing-theme', null );
+		$out = apply_filters(
+			'theme_auto_update_setting_html',
+			$in,
+			'missing-theme',
+			null
+		);
 
 		self::assertSame( $in, $out );
 	}
@@ -302,13 +367,22 @@ final class NativeUpdateTimeTest extends WP_UnitTestCase {
 		$stylesheet = $this->theme();
 		$this->seed_held_theme( $stylesheet );
 
-		$other = str_replace( 'example-theme', 'another-theme', NativeHtml::fragment( 'networkThemeRow' ) );
-		$out   = apply_filters( 'theme_auto_update_setting_html', $other, 'another-theme', null );
+		$other = str_replace(
+			'example-theme',
+			'another-theme',
+			NativeHtml::fragment( 'networkThemeRow' )
+		);
+		$out   = apply_filters(
+			'theme_auto_update_setting_html',
+			$other,
+			'another-theme',
+			null
+		);
 
 		self::assertSame( $other, $out );
 	}
 
-	// --- Single-site theme overlay ---------------------------------------
+	// --- Single-site theme overlay ---------------------------------------.
 
 	/**
 	 * Loads the admin helpers the native template needs.
@@ -345,11 +419,20 @@ final class NativeUpdateTimeTest extends WP_UnitTestCase {
 		);
 
 		self::assertArrayHasKey( 'updatronixAutoUpdateText', $themes[0] );
-		self::assertStringContainsString( 'Earliest automatic install:', (string) $themes[0]['updatronixAutoUpdateText'] );
-		self::assertStringNotContainsString( 'Automatic update scheduled', (string) $themes[0]['updatronixAutoUpdateText'] );
+		self::assertStringContainsString(
+			'Earliest automatic install:',
+			(string) $themes[0]['updatronixAutoUpdateText']
+		);
+		self::assertStringNotContainsString(
+			'Automatic update scheduled',
+			(string) $themes[0]['updatronixAutoUpdateText']
+		);
 
 		// A theme outside the map keeps the native message.
-		self::assertSame( wp_get_auto_update_message(), $themes[1]['updatronixAutoUpdateText'] );
+		self::assertSame(
+			wp_get_auto_update_message(),
+			$themes[1]['updatronixAutoUpdateText']
+		);
 	}
 
 	/**
@@ -386,8 +469,14 @@ final class NativeUpdateTimeTest extends WP_UnitTestCase {
 			)
 		);
 
-		self::assertStringContainsString( '&lt;b&gt;Composer&lt;/b&gt;', (string) $themes[0]['updatronixAutoUpdateText'] );
-		self::assertStringNotContainsString( '<b>Composer</b>', (string) $themes[0]['updatronixAutoUpdateText'] );
+		self::assertStringContainsString(
+			'&lt;b&gt;Composer&lt;/b&gt;',
+			(string) $themes[0]['updatronixAutoUpdateText']
+		);
+		self::assertStringNotContainsString(
+			'<b>Composer</b>',
+			(string) $themes[0]['updatronixAutoUpdateText']
+		);
 	}
 
 	/**
@@ -402,9 +491,17 @@ final class NativeUpdateTimeTest extends WP_UnitTestCase {
 
 		$out = apply_filters( 'theme_auto_update_setting_template', $template );
 
-		self::assertStringNotContainsString( '<br />' . $native . '</span>', $out, 'The plain native call is replaced.' );
+		self::assertStringNotContainsString(
+			'<br />' . $native . '</span>',
+			$out,
+			'The plain native call is replaced.'
+		);
 		self::assertStringContainsString( 'data.updatronixAutoUpdateText', $out );
-		self::assertStringContainsString( wp_json_encode( $native ), $out, 'The native sentence stays as the fallback.' );
+		self::assertStringContainsString(
+			wp_json_encode( $native ),
+			$out,
+			'The native sentence stays as the fallback.'
+		);
 	}
 
 	/**
@@ -416,7 +513,13 @@ final class NativeUpdateTimeTest extends WP_UnitTestCase {
 		$this->load_theme_helpers();
 		$template = '<span class="auto-update-time">Already custom.</span>';
 
-		self::assertSame( $template, apply_filters( 'theme_auto_update_setting_template', $template ) );
+		self::assertSame(
+			$template,
+			apply_filters(
+				'theme_auto_update_setting_template',
+				$template
+			)
+		);
 	}
 
 	/**
@@ -427,7 +530,9 @@ final class NativeUpdateTimeTest extends WP_UnitTestCase {
 	public function test_theme_template_keeps_the_version_lock_branch(): void {
 		$this->load_theme_helpers();
 		$native   = (string) wp_get_auto_update_message();
-		$template = '<# if ( data.updatronixVersionLocked ) { #><span class="updatronix-version-lock-toggle">{{ data.updatronixVersionLockLabel }}</span><# } else { #><span class="auto-update-time"><br />' . $native . '</span><# } #>';
+		$template =
+			// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+			'<# if ( data.updatronixVersionLocked ) { #><span class="updatronix-version-lock-toggle">{{ data.updatronixVersionLockLabel }}</span><# } else { #><span class="auto-update-time"><br />' . $native . '</span><# } #>';
 
 		$out = apply_filters( 'theme_auto_update_setting_template', $template );
 
@@ -448,10 +553,16 @@ final class NativeUpdateTimeTest extends WP_UnitTestCase {
 		$template = '<span class="auto-update-time"><br />' . $native . '</span>';
 		add_filter( 'updatronix_native_update_time_enabled', '__return_false' );
 
-		self::assertSame( $template, apply_filters( 'theme_auto_update_setting_template', $template ) );
+		self::assertSame(
+			$template,
+			apply_filters(
+				'theme_auto_update_setting_template',
+				$template
+			)
+		);
 	}
 
-	// --- Update-core summary ---------------------------------------------
+	// --- Update-core summary ---------------------------------------------.
 
 	/**
 	 * Renders the core_upgrade_preamble action and returns its markup.
@@ -479,13 +590,41 @@ final class NativeUpdateTimeTest extends WP_UnitTestCase {
 
 		$html = $this->render_summary();
 
-		self::assertSame( 1, substr_count( $html, '<p ' ), 'The summary is one paragraph, not a banner.' );
-		self::assertStringContainsString( 'data-updatronix-schedule-summary="1"', $html );
+		self::assertSame(
+			1,
+			substr_count( $html, '<p ' ),
+			'The summary is one paragraph, not a banner.'
+		);
+		self::assertStringContainsString(
+			'data-updatronix-schedule-summary="1"',
+			$html
+		);
 		self::assertStringContainsString( 'Next automatic pass:', $html );
-		self::assertStringContainsString( sprintf( '%d eligible', $summary['eligible'] ), $html );
-		self::assertStringContainsString( sprintf( '%d delayed', $summary['held'] ), $html );
-		self::assertStringContainsString( sprintf( '%d waiting', $summary['waiting'] ), $html );
-		self::assertStringContainsString( sprintf( '%d managed', $summary['managed'] ), $html );
+		self::assertStringContainsString(
+			sprintf(
+				'%d eligible',
+				$summary['eligible']
+			),
+			$html
+		);
+		self::assertStringContainsString(
+			sprintf( '%d delayed', $summary['held'] ),
+			$html
+		);
+		self::assertStringContainsString(
+			sprintf(
+				'%d waiting',
+				$summary['waiting']
+			),
+			$html
+		);
+		self::assertStringContainsString(
+			sprintf(
+				'%d managed',
+				$summary['managed']
+			),
+			$html
+		);
 		self::assertStringContainsString( 'tab=schedule', $html );
 		self::assertStringContainsString( 'Schedule</a>', $html );
 	}
@@ -533,7 +672,10 @@ final class NativeUpdateTimeTest extends WP_UnitTestCase {
 		$html    = $this->render_summary();
 
 		self::assertGreaterThan( 0, $summary['blocked'] );
-		self::assertStringContainsString( sprintf( '%d items are blocked.', $summary['blocked'] ), $html );
+		self::assertStringContainsString(
+			sprintf( '%d items are blocked.', $summary['blocked'] ),
+			$html
+		);
 	}
 
 	/**
@@ -542,7 +684,14 @@ final class NativeUpdateTimeTest extends WP_UnitTestCase {
 	 * @return void
 	 */
 	public function test_summary_requires_the_capability(): void {
-		wp_set_current_user( self::factory()->user->create( array( 'role' => 'subscriber' ) ) );
+		wp_set_current_user(
+			self::factory()->user->create(
+				array(
+					'role' =>
+					'subscriber',
+				)
+			)
+		);
 
 		self::assertSame( '', $this->render_summary() );
 	}
@@ -568,17 +717,24 @@ final class NativeUpdateTimeTest extends WP_UnitTestCase {
 		$this->load_theme_helpers();
 		$payload = updatronix_native_time_payload();
 
-		self::assertArrayHasKey( 'core:' . Updatronix_Item_State::CORE_ID, $payload['items'], 'The core key is canonical; core:core is a read-only alias.' );
+		self::assertArrayHasKey(
+			'core:' . Updatronix_Item_State::CORE_ID,
+			$payload['items'],
+			'The core key is canonical; core:core is a read-only alias.'
+		);
 		self::assertArrayNotHasKey( 'core:core', $payload['items'] );
 		self::assertArrayHasKey( 'theme:' . $this->theme(), $payload['items'] );
 		self::assertArrayHasKey( 'plugin:' . $this->plugin(), $payload['items'] );
-		self::assertSame( wp_get_auto_update_message(), $payload['nativePatterns']['message'] );
+		self::assertSame(
+			wp_get_auto_update_message(),
+			$payload['nativePatterns']['message']
+		);
 		self::assertSame( 'Schedule', $payload['strings']['schedule'] );
 		self::assertIsBool( $payload['network'] );
 		self::assertIsBool( $payload['truncated'] );
 	}
 
-	// --- WP-Cron hint and the removed banner ----------------------------
+	// --- WP-Cron hint and the removed banner ----------------------------.
 
 	/**
 	 * Renders the admin_notices action and returns its markup.
@@ -599,13 +755,20 @@ final class NativeUpdateTimeTest extends WP_UnitTestCase {
 	 * @return void
 	 */
 	public function test_delay_banner_is_removed(): void {
-		self::assertFalse( function_exists( 'updatronix_render_delay_context_admin_notice' ) );
+		self::assertFalse(
+			function_exists(
+				'updatronix_render_delay_context_admin_notice'
+			)
+		);
 
 		wp_set_current_user( $this->update_admin() );
 		set_current_screen( 'plugins' );
 		$html = $this->render_notices();
 
-		self::assertStringNotContainsString( 'updatronix-delay-context-notice', $html );
+		self::assertStringNotContainsString(
+			'updatronix-delay-context-notice',
+			$html
+		);
 		self::assertStringNotContainsString( '920px', $html );
 	}
 
@@ -625,7 +788,10 @@ final class NativeUpdateTimeTest extends WP_UnitTestCase {
 
 		self::assertStringContainsString( 'updatronix-wp-cron-hint', $html );
 		self::assertSame( 1, substr_count( $html, '<p ' ), 'The hint is one line.' );
-		self::assertStringContainsString( 'a real cron job calls wp-cron.php', $html );
+		self::assertStringContainsString(
+			'a real cron job calls wp-cron.php',
+			$html
+		);
 	}
 
 	/**
@@ -651,11 +817,21 @@ final class NativeUpdateTimeTest extends WP_UnitTestCase {
 	 * @return void
 	 */
 	public function test_cron_hint_requires_the_screen_capability(): void {
-		wp_set_current_user( self::factory()->user->create( array( 'role' => 'subscriber' ) ) );
+		wp_set_current_user(
+			self::factory()->user->create(
+				array(
+					'role' =>
+					'subscriber',
+				)
+			)
+		);
 		set_current_screen( 'plugins' );
 		$this->reset_caches();
 
-		self::assertStringNotContainsString( 'updatronix-wp-cron-hint', $this->render_notices() );
+		self::assertStringNotContainsString(
+			'updatronix-wp-cron-hint',
+			$this->render_notices()
+		);
 	}
 
 	/**
@@ -668,7 +844,10 @@ final class NativeUpdateTimeTest extends WP_UnitTestCase {
 		set_current_screen( 'dashboard' );
 		$this->reset_caches();
 
-		self::assertStringNotContainsString( 'updatronix-wp-cron-hint', $this->render_notices() );
+		self::assertStringNotContainsString(
+			'updatronix-wp-cron-hint',
+			$this->render_notices()
+		);
 	}
 
 	/**

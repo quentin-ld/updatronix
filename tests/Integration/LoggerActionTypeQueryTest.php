@@ -35,9 +35,12 @@ final class LoggerActionTypeQueryTest extends WP_UnitTestCase {
 	protected function setUp(): void {
 		parent::setUp();
 
-		require_once UPDATRONIX_PLUGIN_DIR . 'inc/classes/class-updatronix-database.php';
-		require_once UPDATRONIX_PLUGIN_DIR . 'inc/classes/class-updatronix-security.php';
-		require_once UPDATRONIX_PLUGIN_DIR . 'inc/classes/class-updatronix-logger.php';
+		require_once UPDATRONIX_PLUGIN_DIR
+			. 'inc/classes/class-updatronix-database.php';
+		require_once UPDATRONIX_PLUGIN_DIR
+			. 'inc/classes/class-updatronix-security.php';
+		require_once UPDATRONIX_PLUGIN_DIR
+			. 'inc/classes/class-updatronix-logger.php';
 
 		Updatronix_Database::create_table();
 
@@ -101,11 +104,22 @@ final class LoggerActionTypeQueryTest extends WP_UnitTestCase {
 			)
 		);
 
-		$keys = array_map( static fn ( $row ): string => (string) $row->event_key, $rows );
+		$keys = array_map(
+			static fn ( $row ): string => (string) $row->event_key,
+			$rows
+		);
 
 		self::assertContains( 'logger_action_type_prevented', $keys );
 		self::assertNotContains( 'logger_action_type_update', $keys );
-		self::assertSame( 1, Updatronix_Logger::get_logs_count( array( 'action_type' => 'prevented' ) ) );
+		self::assertSame(
+			1,
+			Updatronix_Logger::get_logs_count(
+				array(
+					'action_type' =>
+					'prevented',
+				)
+			)
+		);
 	}
 
 	/**
@@ -120,7 +134,10 @@ final class LoggerActionTypeQueryTest extends WP_UnitTestCase {
 		);
 
 		$rows = Updatronix_Logger::get_logs( $args );
-		$keys = array_map( static fn ( $row ): string => (string) $row->event_key, $rows );
+		$keys = array_map(
+			static fn ( $row ): string => (string) $row->event_key,
+			$rows
+		);
 
 		self::assertContains( 'logger_action_type_prevented', $keys );
 		self::assertContains( 'logger_action_type_safe_mode', $keys );
@@ -141,7 +158,10 @@ final class LoggerActionTypeQueryTest extends WP_UnitTestCase {
 			)
 		);
 
-		$keys = array_map( static fn ( $row ): string => (string) $row->event_key, $rows );
+		$keys = array_map(
+			static fn ( $row ): string => (string) $row->event_key,
+			$rows
+		);
 
 		self::assertNotContains( 'logger_action_type_update', $keys );
 		self::assertNotContains( 'logger_action_type_prevented', $keys );
@@ -161,7 +181,10 @@ final class LoggerActionTypeQueryTest extends WP_UnitTestCase {
 		add_filter( 'updatronix_log_query_args', $this->filter, 10, 1 );
 
 		$rows = Updatronix_Logger::get_logs( array( 'per_page' => 50 ) );
-		$keys = array_map( static fn ( $row ): string => (string) $row->event_key, $rows );
+		$keys = array_map(
+			static fn ( $row ): string => (string) $row->event_key,
+			$rows
+		);
 
 		self::assertContains( 'logger_action_type_prevented', $keys );
 		self::assertNotContains( 'logger_action_type_update', $keys );

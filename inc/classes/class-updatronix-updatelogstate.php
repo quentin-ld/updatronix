@@ -50,7 +50,12 @@ final class Updatronix_UpdateLogState {
 	 * @param string $context Optional locale or additional context segment.
 	 * @return string
 	 */
-	public static function build_event_key( string $log_type, string $item_slug, string $performed_as = 'manual', string $context = '' ): string {
+	public static function build_event_key(
+		string $log_type,
+		string $item_slug,
+		string $performed_as = 'manual',
+		string $context = ''
+	): string {
 		$parts = array(
 			Updatronix_Security::sanitize_log_type( $log_type ),
 			Updatronix_Security::sanitize_string( $item_slug, 80 ),
@@ -59,7 +64,14 @@ final class Updatronix_UpdateLogState {
 			self::get_request_run_id(),
 		);
 
-		return implode( '|', array_filter( $parts, static fn ( string $part ): bool => '' !== $part ) );
+		return implode(
+			'|',
+			array_filter(
+				$parts,
+				static fn ( string $part ): bool =>
+				'' !== $part
+			)
+		);
 	}
 
 	/**
@@ -123,7 +135,10 @@ final class Updatronix_UpdateLogState {
 	 * @param string $item_slug Item slug.
 	 * @return string
 	 */
-	public static function find_pending_event_key( string $log_type, string $item_slug ): string {
+	public static function find_pending_event_key(
+		string $log_type,
+		string $item_slug
+	): string {
 		$log_type  = Updatronix_Security::sanitize_log_type( $log_type );
 		$item_slug = Updatronix_Security::sanitize_string( $item_slug, 80 );
 		$run_id    = self::get_request_run_id();
@@ -222,7 +237,8 @@ final class Updatronix_UpdateLogState {
 	/**
 	 * Load the current state and purge stale entries.
 	 *
-	 * @return array<string, array<string, mixed>>|null Null when there is no state yet.
+	 * @return array<string, array<string, mixed>>|null Null when there is no state
+	 * yet.
 	 */
 	private static function get_state(): ?array {
 		if ( null !== self::$state_cache ) {
@@ -234,8 +250,12 @@ final class Updatronix_UpdateLogState {
 		$cutoff = time() - self::STATE_TTL;
 
 		foreach ( $state as $event_key => $event ) {
-			$updated_at   = isset( $event['updated_at'] ) ? (int) $event['updated_at'] : 0;
-			$finalized_at = isset( $event['finalized_at'] ) ? (int) $event['finalized_at'] : 0;
+			$updated_at   = isset(
+				$event['updated_at']
+			) ? (int) $event['updated_at'] : 0;
+			$finalized_at = isset(
+				$event['finalized_at']
+			) ? (int) $event['finalized_at'] : 0;
 			$timestamp    = max( $updated_at, $finalized_at );
 			if ( $timestamp > 0 && $timestamp >= $cutoff ) {
 				continue;

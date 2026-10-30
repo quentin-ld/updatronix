@@ -12,7 +12,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Native WordPress auto-update settings reader and mutator.
  *
- * Reads/writes only native WP options and site options — no parallel option structure.
+ * Reads/writes only native WP options and site options — no parallel option
+ * structure.
  * Translation preference is stored inside the plugin's existing JSON settings.
  */
 final class Updatronix_AutoUpdates {
@@ -40,7 +41,7 @@ final class Updatronix_AutoUpdates {
 	/**
 	 * Build the full payload for the GET /auto-updates endpoint.
 	 *
-	 * @return array{constants: array<string, array{defined: bool, value: mixed, affects: array<string>, locks: bool}>, dismissed_constants: array<string>, core: array{mode: string, major: string, minor: string, dev: string, overridden_by_constant: bool}, plugins: array<int, array{file: string, slug: string, name: string, description: string, version: string, author: string, plugin_uri: string, icon: string, auto_update: bool, update_data_available: bool, active: bool}>, themes: array<int, array{stylesheet: string, name: string, description: string, version: string, author: string, theme_uri: string, icon: string, auto_update: bool, update_data_available: bool, active: bool}>, translations: array{auto_update: bool}}
+	 * @return array<string, mixed>
 	 */
 	public static function get_data(): array {
 		$plugins_and_themes = self::with_admin_locale(
@@ -63,7 +64,8 @@ final class Updatronix_AutoUpdates {
 	}
 
 	/**
-	 * Run a callback with locale set to the current user's admin locale (get_user_locale()).
+	 * Run a callback with locale set to the current user's admin locale
+	 * (get_user_locale()).
 	 *
 	 * @template T
 	 * @param callable(): T $callback Callback to run in the admin locale.
@@ -82,26 +84,35 @@ final class Updatronix_AutoUpdates {
 	}
 
 	/**
-	 * Get plugin description for the current locale if a language pack is available.
+	 * Get plugin description for the current locale if a language pack is
+	 * available.
 	 *
-	 * @param string               $file        Plugin basename path (key from get_plugins()).
+	 * @param string               $file Plugin basename path (key from get_plugins()).
 	 * @param string               $slug        Plugin slug.
 	 * @param array<string, mixed> $plugin_data Row from get_plugins().
 	 * @return string Sanitized description.
 	 */
-	private static function get_localized_plugin_description( string $file, string $slug, array $plugin_data ): string {
-		// Note: Plugin Check forbids translating dynamic strings via low-level
-		// functions like `translate( $text, $domain )` because those strings are
+	private static function get_localized_plugin_description(
+		string $file,
+		string $slug,
+		array $plugin_data
+	): string {
+		// Note: Plugin Check forbids translating dynamic strings via low-level.
+		// functions like `translate( $text, $domain )` because those strings are.
 		// not statically extractable for translators.
-		// We therefore only translate known literals (ours), and display
+		// We therefore only translate known literals (ours), and display.
 		// everything else as-is (sanitized).
 		$raw = (string) ( $plugin_data['Description'] ?? '' );
 
 		// Only translate Updatronix's own plugin description (known literal).
 		if ( 'updatronix' === $slug ) {
 			$raw = trim( $raw );
-			if ( 'Manage your WordPress updates with confidence. Control auto-updates, capture technical logs, and route alerts to the right places.' === $raw ) {
+			// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+			if (
+				// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+				'Manage your WordPress updates with confidence. Control auto-updates, capture technical logs, and route alerts to the right places.' === $raw ) {
 				$raw = __(
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 					'Manage your WordPress updates with confidence. Control auto-updates, capture technical logs, and route alerts to the right places.',
 					'updatronix'
 				);
@@ -112,12 +123,15 @@ final class Updatronix_AutoUpdates {
 	}
 
 	/**
-	 * Get theme description for the current locale if a language pack is available.
+	 * Get theme description for the current locale if a language pack is
+	 * available.
 	 *
 	 * @param WP_Theme $theme Theme instance.
 	 * @return string Sanitized description.
 	 */
-	private static function get_localized_theme_description( WP_Theme $theme ): string {
+	private static function get_localized_theme_description(
+		WP_Theme $theme
+	): string {
 		$desc = $theme->display( 'Description', false, true );
 		if ( false === $desc || ! is_string( $desc ) ) {
 			return '';
@@ -129,7 +143,7 @@ final class Updatronix_AutoUpdates {
 	/**
 	 * Detect wp-config constants that override auto-update behaviour.
 	 *
-	 * @return array<string, array{defined: bool, value: mixed, affects: array<string>, locks: bool}>
+	 * @return array<string, array<string, mixed>>
 	 */
 	public static function get_constants(): array {
 		$constants = array();
@@ -165,7 +179,13 @@ final class Updatronix_AutoUpdates {
 			$constants['DISABLE_WP_CRON'] = array(
 				'defined' => true,
 				'value'   => true,
-				'affects' => array( 'core', 'plugins', 'themes', 'translations', 'schedule' ),
+				'affects' => array(
+					'core',
+					'plugins',
+					'themes',
+					'translations',
+					'schedule',
+				),
 				'locks'   => false,
 			);
 		}
@@ -182,7 +202,8 @@ final class Updatronix_AutoUpdates {
 	public static function is_section_locked( string $section ): bool {
 		$constants = self::get_constants();
 		foreach ( $constants as $info ) {
-			if ( $info['locks'] && in_array( $section, $info['affects'], true ) && (bool) $info['value'] ) {
+			if ( (bool) $info['locks'] && in_array( $section, $info['affects'], true )
+				&& (bool) $info['value'] ) {
 				return true;
 			}
 		}
@@ -193,7 +214,8 @@ final class Updatronix_AutoUpdates {
 	/**
 	 * Get core auto-update configuration.
 	 *
-	 * @return array{mode: string, major: string, minor: string, dev: string, overridden_by_constant: bool}
+	 * @return array{mode: string, major: string, minor: string, dev: string,
+	 * overridden_by_constant: bool}
 	 */
 	public static function get_core_config(): array {
 		$major = get_site_option( 'auto_update_core_major', 'unset' );
@@ -211,7 +233,16 @@ final class Updatronix_AutoUpdates {
 		$overridden = defined( 'WP_AUTO_UPDATE_CORE' );
 		if ( $overridden ) {
 			$const_value = constant( 'WP_AUTO_UPDATE_CORE' );
-			if ( true === $const_value || in_array( $const_value, array( 'beta', 'rc', 'development', 'branch-development' ), true ) ) {
+			if ( true === $const_value || in_array(
+				$const_value,
+				array(
+					'beta',
+					'rc',
+					'development',
+					'branch-development',
+				),
+				true
+			) ) {
 				$mode = 'all';
 			} elseif ( 'minor' === $const_value ) {
 				$mode = 'minor';
@@ -232,7 +263,9 @@ final class Updatronix_AutoUpdates {
 	/**
 	 * Get all installed plugins with their auto-update status and metadata.
 	 *
-	 * @return array<int, array{file: string, slug: string, name: string, description: string, version: string, author: string, plugin_uri: string, icon: string, auto_update: bool, update_data_available: bool, active: bool}>
+	 * @return array<int, array{file: string, slug: string, name: string,
+	 * description: string, version: string, author: string, plugin_uri: string,
+	 * icon: string, auto_update: bool, update_data_available: bool, active: bool}>
 	 */
 	public static function get_plugins_data(): array {
 		if ( ! function_exists( 'get_plugins' ) ) {
@@ -240,10 +273,18 @@ final class Updatronix_AutoUpdates {
 		}
 
 		$all_plugins         = get_plugins();
-		$auto_update_plugins = (array) get_site_option( 'auto_update_plugins', array() );
+		$auto_update_plugins = (array) get_site_option(
+			'auto_update_plugins',
+			array()
+		);
 
 		// Prune stale entries from the option (deleted plugins) at read time.
-		$pruned_plugins = array_values( array_intersect( $auto_update_plugins, array_keys( $all_plugins ) ) );
+		$pruned_plugins = array_values(
+			array_intersect(
+				$auto_update_plugins,
+				array_keys( $all_plugins )
+			)
+		);
 		if ( count( $pruned_plugins ) !== count( $auto_update_plugins ) ) {
 			update_site_option( 'auto_update_plugins', $pruned_plugins );
 			$auto_update_plugins = $pruned_plugins;
@@ -273,7 +314,9 @@ final class Updatronix_AutoUpdates {
 			$icon_url = '';
 			if ( isset( $icons[ $file ] ) ) {
 				$icon_data = $icons[ $file ];
-				$icon_url  = $icon_data['svg'] ?? $icon_data['2x'] ?? $icon_data['1x'] ?? $icon_data['default'] ?? '';
+				$icon_url  =
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					$icon_data['svg'] ?? $icon_data['2x'] ?? $icon_data['1x'] ?? $icon_data['default'] ?? '';
 			}
 
 			$auto_update_available = (bool) $update_transient
@@ -286,9 +329,14 @@ final class Updatronix_AutoUpdates {
 					'file'                  => $file,
 					'slug'                  => $slug,
 					'name'                  => $data['Name'] ?? '',
-					'description'           => self::get_localized_plugin_description( $file, $slug, $data ),
+					'description'           => self::get_localized_plugin_description(
+						$file,
+						$slug,
+						$data
+					),
 					'version'               => $data['Version'] ?? '',
-					'author'                => wp_strip_all_tags( $data['AuthorName'] ?? $data['Author'] ?? '' ),
+					'author'                =>
+						wp_strip_all_tags( $data['AuthorName'] ?? $data['Author'] ?? '' ),
 					'plugin_uri'            => $data['PluginURI'] ?? '',
 					'icon'                  => $icon_url,
 					'auto_update'           => in_array( $file, $auto_update_plugins, true ),
@@ -319,14 +367,22 @@ final class Updatronix_AutoUpdates {
 	/**
 	 * Get all installed themes with their auto-update status and metadata.
 	 *
-	 * @return array<int, array{stylesheet: string, name: string, description: string, version: string, author: string, theme_uri: string, icon: string, auto_update: bool, update_data_available: bool, active: bool}>
+	 * @return array<int, array<string, mixed>>
 	 */
 	public static function get_themes_data(): array {
 		$all_themes         = wp_get_themes();
-		$auto_update_themes = (array) get_site_option( 'auto_update_themes', array() );
+		$auto_update_themes = (array) get_site_option(
+			'auto_update_themes',
+			array()
+		);
 
 		// Prune stale entries from the option (deleted themes) at read time.
-		$pruned_themes = array_values( array_intersect( $auto_update_themes, array_keys( $all_themes ) ) );
+		$pruned_themes = array_values(
+			array_intersect(
+				$auto_update_themes,
+				array_keys( $all_themes )
+			)
+		);
 		if ( count( $pruned_themes ) !== count( $auto_update_themes ) ) {
 			update_site_option( 'auto_update_themes', $pruned_themes );
 			$auto_update_themes = $pruned_themes;
@@ -339,7 +395,9 @@ final class Updatronix_AutoUpdates {
 		foreach ( $all_themes as $stylesheet => $theme ) {
 			$auto_update_available = false;
 			if ( (bool) $update_themes_transient ) {
-				$auto_update_available = isset( $update_themes_transient->response[ $stylesheet ] )
+				$auto_update_available = isset(
+					$update_themes_transient->response[ $stylesheet ]
+				)
 					|| isset( $update_themes_transient->no_update[ $stylesheet ] );
 			}
 
@@ -352,8 +410,13 @@ final class Updatronix_AutoUpdates {
 					'version'               => $theme->get( 'Version' ),
 					'author'                => wp_strip_all_tags( $theme->get( 'Author' ) ),
 					'theme_uri'             => $theme->get( 'ThemeURI' ),
-					'icon'                  => (bool) $theme->get_screenshot() ? $theme->get_screenshot() : '',
-					'auto_update'           => in_array( $stylesheet, $auto_update_themes, true ),
+					'icon'                  => (bool) $theme->get_screenshot(
+					) ? $theme->get_screenshot() : '',
+					'auto_update'           => in_array(
+						$stylesheet,
+						$auto_update_themes,
+						true
+					),
 					/**
 					 * Whether this item is known to WordPress.org's update API.
 					 * When false, toggling auto-update is not available.
@@ -418,13 +481,17 @@ final class Updatronix_AutoUpdates {
 	}
 
 	/**
-	 * Toggle auto-update for a single plugin (writes native auto_update_plugins option).
+	 * Toggle auto-update for a single plugin (writes native auto_update_plugins
+	 * option).
 	 *
 	 * @param string $plugin_file Plugin path relative to plugins dir.
 	 * @param bool   $enable      Whether to enable auto-update.
 	 * @return bool
 	 */
-	public static function toggle_plugin( string $plugin_file, bool $enable ): bool {
+	public static function toggle_plugin(
+		string $plugin_file,
+		bool $enable
+	): bool {
 		if ( ! function_exists( 'get_plugins' ) ) {
 			require_once ABSPATH . 'wp-admin/includes/plugin.php';
 		}
@@ -443,14 +510,22 @@ final class Updatronix_AutoUpdates {
 			$auto_updates = array_diff( $auto_updates, array( $plugin_file ) );
 		}
 
-		$auto_updates = array_values( array_intersect( $auto_updates, array_keys( $all_plugins ) ) );
+		$auto_updates = array_values(
+			array_intersect(
+				$auto_updates,
+				array_keys(
+					$all_plugins
+				)
+			)
+		);
 		update_site_option( 'auto_update_plugins', $auto_updates );
 
 		return true;
 	}
 
 	/**
-	 * Toggle auto-update for a single theme (writes native auto_update_themes option).
+	 * Toggle auto-update for a single theme (writes native auto_update_themes
+	 * option).
 	 *
 	 * @param string $stylesheet Theme stylesheet slug.
 	 * @param bool   $enable     Whether to enable auto-update.
@@ -471,7 +546,14 @@ final class Updatronix_AutoUpdates {
 			$auto_updates = array_diff( $auto_updates, array( $stylesheet ) );
 		}
 
-		$auto_updates = array_values( array_intersect( $auto_updates, array_keys( $all_themes ) ) );
+		$auto_updates = array_values(
+			array_intersect(
+				$auto_updates,
+				array_keys(
+					$all_themes
+				)
+			)
+		);
 		update_site_option( 'auto_update_themes', $auto_updates );
 
 		return true;
@@ -480,15 +562,22 @@ final class Updatronix_AutoUpdates {
 	/**
 	 * Dismiss a constant notice (stored in plugin settings JSON).
 	 *
-	 * Only constants the plugin actually surfaces (see {@see updatronix_dismissable_constants_allowlist()})
+	 * Only constants the plugin actually surfaces (see {@see
+	 * updatronix_dismissable_constants_allowlist()})
 	 * may be dismissed; unknown values are silently dropped. Routes through
-	 * {@see updatronix_save_settings_array()} so listeners on `updatronix_after_save_settings` see the write.
+	 * {@see updatronix_save_settings_array()} so listeners on
+	 * `updatronix_after_save_settings` see the write.
 	 *
 	 * @param string $constant_name The constant name to dismiss.
-	 * @return bool True when the constant is allowlisted and dismissal was attempted; false otherwise.
+	 * @return bool True when the constant is allowlisted and dismissal was
+	 * attempted; false otherwise.
 	 */
 	public static function dismiss_constant( string $constant_name ): bool {
-		if ( ! in_array( $constant_name, updatronix_dismissable_constants_allowlist(), true ) ) {
+		if ( ! in_array(
+			$constant_name,
+			updatronix_dismissable_constants_allowlist(),
+			true
+		) ) {
 			return false;
 		}
 

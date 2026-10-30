@@ -2,10 +2,13 @@
 /**
  * Unit tests for the Updatronix_Export_Body_Builder render pipeline.
  *
- * Exercises the one-true-user-path (the xlsx/csv export body) end to end against
+ * Exercises the one-true-user-path (the xlsx/csv export body) end to end
+ * against
  * the minimal WordPress stubs in the unit bootstrap: flat (non-merged) output,
- * merged/sectioned output with category headings, the per-chunk byte cap, column
- * visibility toggles, and the same-version collapse. Guards real rendered strings
+ * merged/sectioned output with category headings, the per-chunk byte cap,
+ * column
+ * visibility toggles, and the same-version collapse. Guards real rendered
+ * strings
  * rather than byte-copied production arrays (QA finding 17).
  *
  * @package updatronix

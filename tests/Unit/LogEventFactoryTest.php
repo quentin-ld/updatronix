@@ -46,7 +46,16 @@ final class LogEventFactoryTest extends TestCase {
 		);
 
 		foreach ( $events as $event ) {
-			foreach ( array( 'log_type', 'action_type', 'item_slug', 'status', 'reason_code', 'decision_state', 'origin', 'decision_stage' ) as $key ) {
+			foreach ( array(
+				'log_type',
+				'action_type',
+				'item_slug',
+				'status',
+				'reason_code',
+				'decision_state',
+				'origin',
+				'decision_stage',
+			) as $key ) {
 				self::assertArrayHasKey( $key, $event );
 				self::assertNotSame( '', $event[ $key ], $key );
 			}
@@ -77,7 +86,10 @@ final class LogEventFactoryTest extends TestCase {
 		self::assertSame( 'delayed', $row['status'] );
 		self::assertStringStartsWith( 'udly|', (string) $row['event_key'] );
 		self::assertArrayNotHasKey( 'next_eligible_at', $row );
-		self::assertStringContainsString( 'eligible no earlier than', (string) $row['message'] );
+		self::assertStringContainsString(
+			'eligible no earlier than',
+			(string) $row['message']
+		);
 	}
 
 	/**

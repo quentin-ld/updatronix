@@ -49,7 +49,8 @@ function updatronix_native_time_text( string $type, string $id ): string {
 		return '';
 	}
 
-	if ( ! class_exists( 'Updatronix_Schedule_Context' ) || ! class_exists( 'Updatronix_Item_State' ) ) {
+	if ( ! class_exists( 'Updatronix_Schedule_Context' )
+		|| ! class_exists( 'Updatronix_Item_State' ) ) {
 		return '';
 	}
 
@@ -80,7 +81,10 @@ function updatronix_native_time_text( string $type, string $id ): string {
  * @param string $text Escaped-plain sentence.
  * @return string HTML with the time text replaced, or the input unchanged.
  */
-function updatronix_native_replace_time_text( string $html, string $text ): string {
+function updatronix_native_replace_time_text(
+	string $html,
+	string $text
+): string {
 	if ( '' === $text ) {
 		return $html;
 	}
@@ -114,10 +118,20 @@ function updatronix_native_replace_time_text( string $html, string $text ): stri
  * @param array<string, mixed> $plugin_data Plugin data.
  * @return string
  */
-function updatronix_filter_plugin_auto_update_html( string $html, string $plugin_file, array $plugin_data ): string {
+function updatronix_filter_plugin_auto_update_html(
+	string $html,
+	string $plugin_file,
+	array $plugin_data
+): string {
 	unset( $plugin_data );
 
-	return updatronix_native_replace_time_text( $html, updatronix_native_time_text( 'plugin', $plugin_file ) );
+	return updatronix_native_replace_time_text(
+		$html,
+		updatronix_native_time_text(
+			'plugin',
+			$plugin_file
+		)
+	);
 }
 
 /**
@@ -129,14 +143,34 @@ function updatronix_filter_plugin_auto_update_html( string $html, string $plugin
  * @param \WP_Theme|mixed $theme      Theme object.
  * @return string
  */
-function updatronix_filter_theme_auto_update_html( string $html, string $stylesheet, mixed $theme ): string {
+function updatronix_filter_theme_auto_update_html(
+	string $html,
+	string $stylesheet,
+	mixed $theme
+): string {
 	unset( $theme );
 
-	return updatronix_native_replace_time_text( $html, updatronix_native_time_text( 'theme', $stylesheet ) );
+	return updatronix_native_replace_time_text(
+		$html,
+		updatronix_native_time_text(
+			'theme',
+			$stylesheet
+		)
+	);
 }
 
-add_filter( 'plugin_auto_update_setting_html', 'updatronix_filter_plugin_auto_update_html', 110, 3 );
-add_filter( 'theme_auto_update_setting_html', 'updatronix_filter_theme_auto_update_html', 110, 3 );
+add_filter(
+	'plugin_auto_update_setting_html',
+	'updatronix_filter_plugin_auto_update_html',
+	110,
+	3
+);
+add_filter(
+	'theme_auto_update_setting_html',
+	'updatronix_filter_theme_auto_update_html',
+	110,
+	3
+);
 
 /**
  * Adds the per-theme Schedule sentence to the single-site theme cards.
@@ -156,10 +190,13 @@ function updatronix_prepare_themes_for_js( array $themes ): array {
 
 	foreach ( $themes as $index => $theme ) {
 		$stylesheet = (string) ( $theme['id'] ?? $theme['stylesheet'] ?? '' );
-		$text       = '' !== $stylesheet ? updatronix_native_time_text( 'theme', $stylesheet ) : '';
+		$text       = '' !== $stylesheet ? updatronix_native_time_text(
+			'theme',
+			$stylesheet
+		) : '';
 
 		if ( '' === $text ) {
-			// Default to the native message so a theme outside the map keeps
+			// Default to the native message so a theme outside the map keeps.
 			// its previous text instead of an empty line.
 			$text = (string) wp_get_auto_update_message();
 		}
@@ -171,7 +208,8 @@ function updatronix_prepare_themes_for_js( array $themes ): array {
 }
 
 /**
- * Replaces the native `wp_get_auto_update_message()` call in the theme template.
+ * Replaces the native `wp_get_auto_update_message()` call in the theme
+ * template.
  *
  * Runs at 110 so Version Lock's locked branch (at 90) stays intact: the branch
  * wraps the template, and only the time call inside it changes. A template that
@@ -181,7 +219,9 @@ function updatronix_prepare_themes_for_js( array $themes ): array {
  * @param string $template Theme overlay template.
  * @return string
  */
-function updatronix_filter_theme_auto_update_template( string $template ): string {
+function updatronix_filter_theme_auto_update_template(
+	string $template
+): string {
 	if ( ! updatronix_native_time_enabled() ) {
 		return $template;
 	}
@@ -191,16 +231,26 @@ function updatronix_filter_theme_auto_update_template( string $template ): strin
 		return $template;
 	}
 
-	// The fallback keeps the native sentence if a theme never received the
-	// per-theme field; {{{ }}} prints the value unescaped, and both operands
+	// The fallback keeps the native sentence if a theme never received the.
+	// per-theme field; {{{ }}} prints the value unescaped, and both operands.
 	// are plain text.
-	$replacement = '{{{ data.updatronixAutoUpdateText ? data.updatronixAutoUpdateText : ' . wp_json_encode( $native ) . ' }}}';
+	$replacement =
+		'{{{ data.updatronixAutoUpdateText ? data.updatronixAutoUpdateText : '
+		. wp_json_encode( $native ) . ' }}}';
 
 	return str_replace( $native, $replacement, $template );
 }
 
-add_filter( 'wp_prepare_themes_for_js', 'updatronix_prepare_themes_for_js', 110 );
-add_filter( 'theme_auto_update_setting_template', 'updatronix_filter_theme_auto_update_template', 110 );
+add_filter(
+	'wp_prepare_themes_for_js',
+	'updatronix_prepare_themes_for_js',
+	110
+);
+add_filter(
+	'theme_auto_update_setting_template',
+	'updatronix_filter_theme_auto_update_template',
+	110
+);
 
 /**
  * Prints the update-core next-pass summary.
@@ -221,7 +271,8 @@ function updatronix_render_schedule_summary(): void {
 		return;
 	}
 
-	if ( ! class_exists( 'Updatronix_Schedule_Context' ) || ! class_exists( 'Updatronix_Schedule_State' ) ) {
+	if ( ! class_exists( 'Updatronix_Schedule_Context' )
+		|| ! class_exists( 'Updatronix_Schedule_State' ) ) {
 		return;
 	}
 
@@ -240,8 +291,14 @@ function updatronix_render_schedule_summary(): void {
 		);
 
 	$copy = sprintf(
+		// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+		// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 		/* translators: 1: next automatic pass date and time, 2: timezone, 3: eligible items, 4: delayed items, 5: waiting items, 6: managed items. */
-		__( 'Next automatic pass: %1$s (%2$s). %3$d eligible, %4$d delayed, %5$d waiting, %6$d managed.', 'updatronix' ),
+		__(
+			// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+			'Next automatic pass: %1$s (%2$s). %3$d eligible, %4$d delayed, %5$d waiting, %6$d managed.',
+			'updatronix'
+		),
 		$when,
 		$zone,
 		(int) $summary['eligible'],
@@ -253,7 +310,12 @@ function updatronix_render_schedule_summary(): void {
 	if ( $summary['blocked'] > 0 ) {
 		$copy .= ' ' . sprintf(
 			/* translators: %d: blocked items. */
-			_n( '%d item is blocked.', '%d items are blocked.', (int) $summary['blocked'], 'updatronix' ),
+			_n(
+				'%d item is blocked.',
+				'%d items are blocked.',
+				(int) $summary['blocked'],
+				'updatronix'
+			),
 			(int) $summary['blocked']
 		);
 	}
@@ -273,9 +335,11 @@ function updatronix_render_schedule_summary(): void {
 	}
 
 	printf(
+		// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 		'<p class="updatronix-schedule-summary" data-updatronix-schedule-summary="1">%s %s</p>',
 		esc_html( $copy ),
-		$links // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Each link is escaped above.
+		// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+		$links // phpcs:ignore Generic.Files.LineLength, WordPress.Security.EscapeOutput.OutputNotEscaped -- Each link is escaped above.
 	);
 }
 
@@ -304,7 +368,7 @@ function updatronix_native_time_payload(): array {
 		'items'          => $items,
 		'timezone'       => (string) wp_timezone_string(),
 		'nativePatterns' => array(
-			// The exact sentence core rendered for this request; any other
+			// The exact sentence core rendered for this request; any other.
 			// text is left alone.
 			'message' => (string) wp_get_auto_update_message(),
 		),
@@ -328,13 +392,20 @@ function updatronix_enqueue_native_time_script( string $admin_page ): void {
 		return;
 	}
 
-	$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+	$screen = function_exists( 'get_current_screen' ) ? get_current_screen(
+	) : null;
 	$id     = $screen instanceof WP_Screen ? (string) $screen->id : $admin_page;
 
 	$capability = match ( $id ) {
-		'plugins', 'plugins-network' => current_user_can( 'update_plugins' ) ? 'update_plugins' : '',
-		'themes', 'themes-network'   => current_user_can( 'update_themes' ) ? 'update_themes' : '',
-		'update-core'                => current_user_can( 'update_core' ) ? 'update_core' : '',
+		'plugins', 'plugins-network' => current_user_can(
+			'update_plugins'
+		) ? 'update_plugins' : '',
+		'themes', 'themes-network'   => current_user_can(
+			'update_themes'
+		) ? 'update_themes' : '',
+		'update-core'                => current_user_can(
+			'update_core'
+		) ? 'update_core' : '',
 		default                      => '',
 	};
 
@@ -342,13 +413,17 @@ function updatronix_enqueue_native_time_script( string $admin_page ): void {
 		return;
 	}
 
-	$asset_file = UPDATRONIX_PLUGIN_DIR . 'assets/build/native-update-time.asset.php';
+	$asset_file = UPDATRONIX_PLUGIN_DIR
+		. 'assets/build/native-update-time.asset.php';
 	if ( ! is_readable( $asset_file ) ) {
 		return;
 	}
 
 	$asset = include $asset_file;
-	if ( ! is_array( $asset ) || ! isset( $asset['dependencies'], $asset['version'] ) ) {
+	if ( ! is_array( $asset ) || ! isset(
+		$asset['dependencies'],
+		$asset['version']
+	) ) {
 		return;
 	}
 
@@ -384,11 +459,13 @@ function updatronix_render_wp_cron_hint(): void {
 		return;
 	}
 
-	if ( ! class_exists( 'Updatronix_Schedule_Context' ) || ! Updatronix_Schedule_Context::cron_disabled() ) {
+	if ( ! class_exists( 'Updatronix_Schedule_Context' )
+		|| ! Updatronix_Schedule_Context::cron_disabled() ) {
 		return;
 	}
 
-	$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+	$screen = function_exists( 'get_current_screen' ) ? get_current_screen(
+	) : null;
 	$id     = $screen instanceof WP_Screen ? (string) $screen->id : '';
 
 	$allowed = match ( $id ) {
@@ -403,6 +480,7 @@ function updatronix_render_wp_cron_hint(): void {
 	}
 
 	echo '<p class="updatronix-wp-cron-hint">' . esc_html__(
+		// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 		'WP-Cron is disabled; the automatic update pass will not run until a real cron job calls wp-cron.php.',
 		'updatronix'
 	) . '</p>';

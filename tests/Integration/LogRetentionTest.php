@@ -28,9 +28,12 @@ final class LogRetentionTest extends WP_UnitTestCase {
 	protected function setUp(): void {
 		parent::setUp();
 
-		require_once UPDATRONIX_PLUGIN_DIR . 'inc/classes/class-updatronix-database.php';
-		require_once UPDATRONIX_PLUGIN_DIR . 'inc/classes/class-updatronix-log-taxonomy.php';
-		require_once UPDATRONIX_PLUGIN_DIR . 'inc/classes/class-updatronix-log-retention.php';
+		require_once UPDATRONIX_PLUGIN_DIR
+			. 'inc/classes/class-updatronix-database.php';
+		require_once UPDATRONIX_PLUGIN_DIR
+			. 'inc/classes/class-updatronix-log-taxonomy.php';
+		require_once UPDATRONIX_PLUGIN_DIR
+			. 'inc/classes/class-updatronix-log-retention.php';
 
 		Updatronix_Database::create_table();
 		$this->delete_all_rows();
@@ -53,9 +56,27 @@ final class LogRetentionTest extends WP_UnitTestCase {
 	 * @return void
 	 */
 	public function test_newest_blocking_row_survives_retention(): void {
-		$old_block   = $this->insert( 'fixture/locked.php', 'blocked', 'version_locked_native', '-200 days', '8f3c0d9a4b6e4c2a9f1d3e5b7a9c0d1e' );
-		$newer_block = $this->insert( 'fixture/locked.php', 'blocked', 'version_locked_native', '-150 days', '8f3c0d9a4b6e4c2a9f1d3e5b7a9c0d1e' );
-		$normal      = $this->insert( 'fixture/normal.php', 'done', 'updated', '-120 days', '' );
+		$old_block   = $this->insert(
+			'fixture/locked.php',
+			'blocked',
+			'version_locked_native',
+			'-200 days',
+			'8f3c0d9a4b6e4c2a9f1d3e5b7a9c0d1e'
+		);
+		$newer_block = $this->insert(
+			'fixture/locked.php',
+			'blocked',
+			'version_locked_native',
+			'-150 days',
+			'8f3c0d9a4b6e4c2a9f1d3e5b7a9c0d1e'
+		);
+		$normal      = $this->insert(
+			'fixture/normal.php',
+			'done',
+			'updated',
+			'-120 days',
+			''
+		);
 
 		$deleted = Updatronix_Logger::delete_older_than( 90 );
 
@@ -76,7 +97,13 @@ final class LogRetentionTest extends WP_UnitTestCase {
 	public function test_retained_cap_drops_the_oldest(): void {
 		$ids = array();
 		foreach ( array( '-300 days', '-290 days', '-280 days' ) as $age ) {
-			$ids[] = $this->insert( 'fixture/cap-' . $age . '.php', 'blocked', 'version_locked_native', $age, '0a1b2c3d4e5f60718293a4b5c6d7e8f9' );
+			$ids[] = $this->insert(
+				'fixture/cap-' . $age . '.php',
+				'blocked',
+				'version_locked_native',
+				$age,
+				'0a1b2c3d4e5f60718293a4b5c6d7e8f9'
+			);
 		}
 
 		Updatronix_Log_Retention::pin( current_time( 'mysql' ) );
@@ -98,13 +125,30 @@ final class LogRetentionTest extends WP_UnitTestCase {
 	 */
 	public function test_pass_summary_is_not_orphaned(): void {
 		$pass    = '0a1b2c3d4e5f60718293a4b5c6d7e8f9';
-		$item    = $this->insert( 'fixture/pass-item.php', 'blocked', 'shield_incompatible_php', '-200 days', $pass );
-		$summary = $this->insert( 'pass:' . $pass, 'done', 'pass_summary', '-200 days', $pass, 'system', 'pass' );
+		$item    = $this->insert(
+			'fixture/pass-item.php',
+			'blocked',
+			'shield_incompatible_php',
+			'-200 days',
+			$pass
+		);
+		$summary = $this->insert(
+			'pass:' . $pass,
+			'done',
+			'pass_summary',
+			'-200 days',
+			$pass,
+			'system',
+			'pass'
+		);
 
 		Updatronix_Logger::delete_older_than( 90 );
 
 		self::assertIsObject( $this->row( $item ) );
-		self::assertIsObject( $this->row( $summary ), 'The pass summary must outlive its retained item.' );
+		self::assertIsObject(
+			$this->row( $summary ),
+			'The pass summary must outlive its retained item.'
+		);
 	}
 
 	/**
@@ -119,7 +163,15 @@ final class LogRetentionTest extends WP_UnitTestCase {
 	 * @param string $action Action type.
 	 * @return int
 	 */
-	private function insert( string $slug, string $state, string $reason, string $age, string $pass, string $type = 'plugin', string $action = 'update' ): int {
+	private function insert(
+		string $slug,
+		string $state,
+		string $reason,
+		string $age,
+		string $pass,
+		string $type = 'plugin',
+		string $action = 'update'
+	): int {
 		global $wpdb;
 
 		$wpdb->insert(
@@ -155,7 +207,13 @@ final class LogRetentionTest extends WP_UnitTestCase {
 		global $wpdb;
 
 		$table = Updatronix_Database::get_table_name();
-		$row   = $wpdb->get_row( $wpdb->prepare( 'SELECT * FROM %i WHERE id = %d', $table, $id ) );
+		$row   = $wpdb->get_row(
+			$wpdb->prepare(
+				'SELECT * FROM %i WHERE id = %d',
+				$table,
+				$id
+			)
+		);
 
 		return $row instanceof stdClass ? $row : null;
 	}
@@ -169,7 +227,12 @@ final class LogRetentionTest extends WP_UnitTestCase {
 		global $wpdb;
 
 		$table = Updatronix_Database::get_table_name();
-		$ids   = $wpdb->get_col( $wpdb->prepare( 'SELECT id FROM %i WHERE retained = 1 ORDER BY id', $table ) );
+		$ids   = $wpdb->get_col(
+			$wpdb->prepare(
+				'SELECT id FROM %i WHERE retained = 1 ORDER BY id',
+				$table
+			)
+		);
 
 		return array_map( 'intval', (array) $ids );
 	}

@@ -1,11 +1,14 @@
 <?php
 /**
- * Unit tests for Updatronix_Export_Body_Builder pure helpers (no WordPress runtime).
+ * Unit tests for Updatronix_Export_Body_Builder pure helpers (no WordPress
+ * runtime).
  *
- * Locks the field-normalization and column-allowlist invariants that the pre-1.1
+ * Locks the field-normalization and column-allowlist invariants that the
+ * pre-1.1
  * hardening cycle must preserve byte-for-byte:
  *
- * - `normalize_field()` strips control characters and flattens newlines (security
+ * - `normalize_field()` strips control characters and flattens newlines
+ * (security
  *   note S2 — prevents log-injection / line-spoofing in the plain-text report).
  * - `default_export_columns()` / `normalize_export_columns()` keep the column
  *   allowlist and boolean coercion stable.
@@ -52,14 +55,24 @@ final class ExportBodyBuilderTest extends TestCase {
 	 * Trims leading and trailing whitespace in normalized output.
 	 */
 	public function test_normalize_field_trims_outer_whitespace(): void {
-		self::assertSame( 'hi', Updatronix_Export_Body_Builder::normalize_field( '  hi  ' ) );
+		self::assertSame(
+			'hi',
+			Updatronix_Export_Body_Builder::normalize_field(
+				'  hi  '
+			)
+		);
 	}
 
 	/**
 	 * Preserves internal tabs in normalized output.
 	 */
 	public function test_normalize_field_preserves_internal_tab(): void {
-		self::assertSame( "a\tb", Updatronix_Export_Body_Builder::normalize_field( "a\tb" ) );
+		self::assertSame(
+			"a\tb",
+			Updatronix_Export_Body_Builder::normalize_field(
+				"a\tb"
+			)
+		);
 	}
 
 	/**
@@ -101,7 +114,12 @@ final class ExportBodyBuilderTest extends TestCase {
 	 * Overrides recognized column keys while keeping defaults for others.
 	 */
 	public function test_normalize_export_columns_overrides_known_keys(): void {
-		$result = Updatronix_Export_Body_Builder::normalize_export_columns( array( 'status' => false ) );
+		$result = Updatronix_Export_Body_Builder::normalize_export_columns(
+			array(
+				'status' =>
+				false,
+			)
+		);
 
 		self::assertFalse( $result['status'] );
 		self::assertTrue( $result['user'] );
@@ -131,8 +149,16 @@ final class ExportBodyBuilderTest extends TestCase {
 	 * @param mixed $input    Raw column value from the request.
 	 * @param bool  $expected Coerced boolean.
 	 */
-	public function test_normalize_export_columns_coerces_booleans( mixed $input, bool $expected ): void {
-		$result = Updatronix_Export_Body_Builder::normalize_export_columns( array( 'status' => $input ) );
+	public function test_normalize_export_columns_coerces_booleans(
+		mixed $input,
+		bool $expected
+	): void {
+		$result = Updatronix_Export_Body_Builder::normalize_export_columns(
+			array(
+				'status' =>
+				$input,
+			)
+		);
 
 		self::assertSame( $expected, $result['status'] );
 	}
