@@ -2020,7 +2020,7 @@ cases:
   oracle:
   - ui
   - integration
-  automation: planned
+  automation: implemented
 - id: TB-ENV-106
   title: 'Dimension: PHP version (env.php_version)'
   owner: shared
@@ -2048,7 +2048,7 @@ cases:
   oracle:
   - ui
   - integration
-  automation: planned
+  automation: implemented
 - id: TB-ENV-102
   title: 'Dimension: Database (env.database)'
   owner: shared
@@ -2076,7 +2076,7 @@ cases:
   oracle:
   - ui
   - integration
-  automation: planned
+  automation: implemented
 - id: TB-ENV-103
   title: 'Dimension: Filesystem method (env.filesystem)'
   owner: shared
@@ -2162,7 +2162,7 @@ cases:
   oracle:
   - ui
   - integration
-  automation: planned
+  automation: implemented
 - id: TB-ENV-101
   title: 'Dimension: WP-Cron (env.cron)'
   owner: shared
@@ -2221,7 +2221,7 @@ cases:
   oracle:
   - ui
   - integration
-  automation: planned
+  automation: implemented
 - id: TB-ENV-105
   title: 'Dimension: Maintenance / recovery mode (env.maintenance)'
   owner: shared
@@ -2247,7 +2247,7 @@ cases:
   oracle:
   - ui
   - integration
-  automation: planned
+  automation: implemented
 - id: TB-ROLE-102
   title: 'Dimension: User role (role.kind)'
   owner: shared

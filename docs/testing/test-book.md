@@ -214,15 +214,15 @@ the run. The release gate stays open until every catalog case has one.
 | TB-UPDATE-102 | Dimension: Item decision state (update.item_state) | shared | critical | @free @pro @update @invariant @dimension | implemented |
 | TB-UPDATE-104 | Dimension: Update package outcome (update.package) | shared | critical | @free @pro @update @invariant @dimension | implemented |
 | TB-UPDATE-101 | Dimension: Native per-item email (update.email) | shared | critical | @free @pro @mail @invariant @dimension | implemented |
-| TB-ENV-109 | Dimension: WordPress version (env.wp_version) | shared | high | @free @pro @environment @dimension | planned |
-| TB-ENV-106 | Dimension: PHP version (env.php_version) | shared | high | @free @pro @environment @dimension | planned |
-| TB-ENV-102 | Dimension: Database (env.database) | shared | high | @free @pro @environment @dimension | planned |
+| TB-ENV-109 | Dimension: WordPress version (env.wp_version) | shared | high | @free @pro @environment @dimension | implemented |
+| TB-ENV-106 | Dimension: PHP version (env.php_version) | shared | high | @free @pro @environment @dimension | implemented |
+| TB-ENV-102 | Dimension: Database (env.database) | shared | high | @free @pro @environment @dimension | implemented |
 | TB-ENV-103 | Dimension: Filesystem method (env.filesystem) | shared | critical | @free @pro @environment @invariant @dimension | implemented |
 | TB-ENV-108 | Dimension: Item VCS provenance (env.vcs) | shared | critical | @pro @environment @version-lock @dimension | implemented |
-| TB-ENV-107 | Dimension: Site timezone (env.timezone) | shared | high | @free @schedule @environment @dimension | planned |
+| TB-ENV-107 | Dimension: Site timezone (env.timezone) | shared | high | @free @schedule @environment @dimension | implemented |
 | TB-ENV-101 | Dimension: WP-Cron (env.cron) | shared | critical | @free @pro @schedule @pass @environment @dimension | implemented |
-| TB-ENV-104 | Dimension: Mail transport (env.mail) | shared | high | @free @pro @mail @environment @dimension | planned |
-| TB-ENV-105 | Dimension: Maintenance / recovery mode (env.maintenance) | shared | high | @free @pro @environment @dimension | planned |
+| TB-ENV-104 | Dimension: Mail transport (env.mail) | shared | high | @free @pro @mail @environment @dimension | implemented |
+| TB-ENV-105 | Dimension: Maintenance / recovery mode (env.maintenance) | shared | high | @free @pro @environment @dimension | implemented |
 | TB-ROLE-102 | Dimension: User role (role.kind) | shared | critical | @free @pro @roles @security @dimension | implemented |
 | TB-ROLE-101 | Dimension: Capability (role.capability) | shared | critical | @free @pro @roles @security @dimension | implemented |
 | TB-MS-102 | Dimension: Multisite scope (multisite.scope) | shared | critical | @free @pro @multisite @invariant @dimension | implemented |
