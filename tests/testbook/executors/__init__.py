@@ -19,6 +19,7 @@ from dataclasses import dataclass, field
 from typing import Any, Callable
 
 RESET_MODES = ( "full", "state", "files", "none" )
+CONTEXTS = ( "frontend", "admin", "cron", "cli" )
 PHASES = (
 	"foundation",
 	"update",
@@ -68,6 +69,8 @@ class CaseSpec:
 	risk: str = ""
 	phase: str = ""
 	reset: str = "full"
+	context: str = "frontend"
+	ui: str = ""
 	partial: bool = False
 	catalog: dict[str, Any] = field( default_factory=dict )
 
@@ -78,6 +81,8 @@ class CaseSpec:
 			raise ValueError( f"{self.id}: executor is not callable" )
 		if self.reset not in RESET_MODES:
 			raise ValueError( f"{self.id}: reset must be one of {RESET_MODES}, got {self.reset!r}" )
+		if self.context not in CONTEXTS:
+			raise ValueError( f"{self.id}: context must be one of {CONTEXTS}, got {self.context!r}" )
 		if self.phase and self.phase not in PHASES:
 			raise ValueError( f"{self.id}: unknown phase {self.phase!r}" )
 		for site in self.sites:
@@ -118,6 +123,8 @@ class CaseSpec:
 			"invariants": list( self.invariants ),
 			"phase": self.phase,
 			"reset": self.reset,
+			"context": self.context,
+			"ui": self.ui,
 		}
 
 

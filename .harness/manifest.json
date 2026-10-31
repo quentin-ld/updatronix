@@ -239,7 +239,7 @@
     },
     ".githooks/pre-push": {
       "class": "owned",
-      "sha256": "e865be2c9ed4f906b90ab76b55a64c8915558c6e4dff81d5872896ed670e6d08"
+      "sha256": "367f0e4dd9c5ed67da868032214a009d7b06d67a4e738f6a0f87046a008903af"
     },
     ".githooks/pre-release": {
       "class": "owned",

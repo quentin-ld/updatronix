@@ -111,6 +111,15 @@ status=0
 # project, against the 360 s target.
 "$ROOT/bin/harness" graft check || status=1
 
+# Task-scoped mutation: a project opts in by recording refs/testbook/base
+# (`bin/gate base`). The branch's upstream remains the fallback, and the full
+# branch is one env var away: HARNESS_MUTATION_BASE=@{upstream} git push.
+if [[ -z "${HARNESS_MUTATION_BASE:-}" ]] && git rev-parse --verify --quiet refs/testbook/base >/dev/null; then
+	export HARNESS_MUTATION_BASE="refs/testbook/base"
+	printf 'pre-push: mutation base refs/testbook/base (%s); set HARNESS_MUTATION_BASE=@{upstream} for the full branch.\n' \
+		"$(git rev-parse --short refs/testbook/base)" >&2
+fi
+
 # A plugin carries a test layer; a theme does not. A theme's pre-push
 # is the full lint and nothing more. The kind is baked into the hook rather than
 # asked of the runtime, because `bin/harness suite` prints a sentence for a

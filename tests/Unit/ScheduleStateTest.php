@@ -259,6 +259,32 @@ final class ScheduleStateTest extends TestCase {
 	}
 
 	/**
+	 * Partial hours and days round down, never to the next whole unit.
+	 *
+	 * This is the oracle for `floor()`: `round()`/`ceil()` would say 2 hours
+	 * for 90 minutes and 2 days for 1 day 12 hours, which the UI would then
+	 * overstate. It kills Infection's RoundingFamily mutants on the fallback
+	 * branch.
+	 *
+	 * @return void
+	 */
+	public function test_overdue_partial_units_round_down(): void {
+		$hours = $this->calc(
+			array(
+				'next_check' => ScheduleInput::NOW - 90 * MINUTE_IN_SECONDS,
+			)
+		);
+		self::assertSame( '1 hour', $hours['overdue_by'] );
+
+		$days = $this->calc(
+			array(
+				'next_check' => ScheduleInput::NOW - ( DAY_IN_SECONDS + 12 * HOUR_IN_SECONDS ),
+			)
+		);
+		self::assertSame( '1 day', $days['overdue_by'] );
+	}
+
+	/**
 	 * A Multisite subsite with no local event shows the network state, not
 	 * "not scheduled".
 	 *

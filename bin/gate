@@ -1,0 +1,80 @@
+#!/usr/bin/env bash
+# Project gate wrapper. The generated pre-push hook is not wired to the test
+# book yet; this is the one command to run those tiers deliberately.
+#
+#   bin/gate fast [base]   lint:changed, unit, integration, affected e2e
+#   bin/gate base [ref]    record refs/testbook/base for task-scoped mutation
+#   bin/gate full          full lint, unit, integration, full e2e book
+#   bin/gate parallel      two single-site shards + multisite, merged verdict
+#   bin/gate mutation [base]  task-scoped Infection + counterfactual
+#   bin/gate release       full + distributable package
+#
+# `fast` without a base runs the @smoke e2e set. With a base it uses
+# `run.py --changed`, which falls back to the full book when a changed file has
+# no dimension-source mapping. `parallel` needs both updatronix-test and
+# updatronix-test2 running; it merges the three reports and fails on any
+# duplicate, failure, error, or pending case.
+set -euo pipefail
+cd "$(dirname "$0")/.."
+
+tier="${1:-fast}"
+shift || true
+
+case "$tier" in
+fast)
+	bin/harness lint:changed
+	bin/harness test
+	bin/harness integration
+	if [[ $# -gt 0 ]]; then
+		python3 tests/testbook/run.py --site both --changed "$@"
+	else
+		python3 tests/testbook/run.py --site both --tag @smoke
+	fi
+	;;
+base)
+	ref="${1:-HEAD}"
+	git update-ref refs/testbook/base "$(git rev-parse "$ref")"
+	printf 'testbook task base: %s (%s)\n' "$(git rev-parse --short "$ref")" "$ref"
+	;;
+full)
+	bin/harness lint
+	bin/harness test
+	bin/harness integration
+	bash tests/testbook/gate-all.sh "$@"
+	;;
+parallel)
+	out=".cache/testbook/parallel-$(date -u +%Y%m%dT%H%M%SZ)"
+	mkdir -p "$out"
+	pids=()
+	python3 tests/testbook/run.py --site single2 --all --shard 1/2 --output "$out/shard1.json" &
+	pids+=($!)
+	python3 tests/testbook/run.py --site single --all --shard 2/2 --output "$out/shard2.json" &
+	pids+=($!)
+	python3 tests/testbook/run.py --site multisite --all --output "$out/multisite.json" &
+	pids+=($!)
+	status=0
+	for pid in "${pids[@]}"; do
+		wait "$pid" || status=1
+	done
+	python3 tests/testbook/merge_reports.py \
+		"$out/shard1.json" "$out/shard2.json" "$out/multisite.json" \
+		--output "$out/merged.json" || status=1
+	exit "$status"
+	;;
+mutation)
+	base="${1:-HEAD~1}"
+	HARNESS_MUTATION_BASE="$base" bin/harness mutation
+	HARNESS_MUTATION_BASE="$base" bin/harness counterfactual
+	;;
+release)
+	"$0" full "$@"
+	bin/harness package
+	;;
+-h | --help | help)
+	sed -n '2,17p' "$0"
+	;;
+*)
+	printf 'usage: bin/gate fast [base] | base [ref] | full | parallel | mutation [base] | release\n' >&2
+	exit 2
+	;;
+esac

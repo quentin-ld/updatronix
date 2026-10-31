@@ -180,12 +180,12 @@ async function collectMetrics( page ) {
 /**
  * Writes the INV-12 inputs for the runner.
  *
- * @param {import('@playwright/test').Page} page Page.
+ * @param {import('@playwright/test').Page} page     Page.
+ * @param {string}                          [target] Optional metrics path.
  * @return {Promise<object>} The written metrics.
  */
-async function writeMetrics( page ) {
+async function writeMetrics( page, target = process.env.TESTBOOK_A11Y_PATH ) {
 	const metrics = await collectMetrics( page );
-	const target = process.env.TESTBOOK_A11Y_PATH;
 	if ( target ) {
 		fs.mkdirSync( path.dirname( target ), { recursive: true } );
 		fs.writeFileSync( target, JSON.stringify( metrics, null, 2 ) );

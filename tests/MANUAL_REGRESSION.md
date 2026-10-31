@@ -1,5 +1,11 @@
 # Manual regression gate (Updatronix)
 
+> **Automation status.** Most items below are covered by the test book,
+> integration suite, or proxy assertions. See
+> `docs/testing/manual-elimination.md` for the item-to-case mapping and the
+> short list that remains genuinely manual (real Word/Gmail rendering, a real
+> screen reader, real SMTP delivery, and visual taste).
+
 Manual checklist to run **before tagging a release**. Pair this with the automated suite in `workflow.md` — automated tests catch regressions in code paths that have tests; this list catches the rest (UX, real cron firing, real WordPress emails, real multisite behaviour, real upgrades through the admin UI).
 
 Tick each item. If a step fails, file an issue and block the release until it passes.

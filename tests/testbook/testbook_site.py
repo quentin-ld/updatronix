@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import shutil
 import subprocess
 from dataclasses import dataclass, field
@@ -130,8 +131,32 @@ class Site:
 	snapshot: str
 	base: str
 	_config_snapshot: str | None = field( default=None, repr=False )
+	context: str = "frontend"
+	_control: Any = field( default=None, repr=False, compare=False )
+	_ui_results: dict[str, Any] = field( default_factory=dict, repr=False, compare=False )
 
 	# -- transport ---------------------------------------------------------
+
+	@property
+	def transport( self ) -> str:
+		"""`http` (default) or `cli`; the latter is the equivalence fallback."""
+		return os.environ.get( "TESTBOOK_TRANSPORT", "http" ).strip().lower()
+
+	@property
+	def control_available( self ) -> bool:
+		return self.transport == "http"
+
+	@property
+	def http_enabled( self ) -> bool:
+		return self.control_available and self.context in ( "frontend", "admin", "cron" )
+
+	@property
+	def control( self ):
+		if self._control is None:
+			from control import ControlClient
+
+			self._control = ControlClient( self )
+		return self._control
 
 	def ddev( self, args: list[str], timeout: int = 300, check: bool = True ) -> subprocess.CompletedProcess[str]:
 		completed = subprocess.run(
@@ -152,6 +177,8 @@ class Site:
 		return self.ddev( [ "wp", *args ], timeout=timeout, check=check )
 
 	def eval_file( self, name: str, php: str, timeout: int = 300 ) -> str:
+		if self.http_enabled:
+			return self.eval_php( php, timeout=timeout )
 		path = self.path / name
 		path.write_text( php, encoding="utf-8" )
 		try:
@@ -160,6 +187,11 @@ class Site:
 			path.unlink( missing_ok=True )
 
 	def eval_php( self, php: str, timeout: int = 300 ) -> str:
+		if self.http_enabled:
+			output, _result, _context = self.control.exec_php(
+				php, context=self.context, timeout=timeout
+			)
+			return output
 		path = self.path / "testbook-eval.php"
 		code = php.lstrip()
 		if code.startswith( "<?php" ):
@@ -175,6 +207,55 @@ class Site:
 
 	# -- reset -------------------------------------------------------------
 
+	def ensure_config_constants( self ) -> bool:
+		"""Keep the test-site constants in wp-config, not a mu-plugin.
+
+		`DISABLE_WP_CRON` has a case that removes it (TB-SCHED-101/TB-AUTO-107),
+		so a mu-plugin that defines it unconditionally makes that case
+		unfalsifiable. DDEV regenerates this file on import; the reset re-adds
+		the constants after any import, and a case's `restore_config()` puts
+		back the copy it captured.
+
+		@return True when the file was changed.
+		"""
+		path = self.path / "wp-config.php"
+		text = path.read_text( encoding="utf-8" )
+		changed = False
+		for name, value in ( ( "DISABLE_WP_CRON", "true" ), ( "FS_METHOD", "'direct'" ) ):
+			if re.search( r"define\(\s*['\"]" + re.escape( name ) + r"['\"]", text ):
+				continue
+			line = f"define( '{name}', {value} );\n"
+			markers = ( "/** Include wp-settings.php */", "/* That's all, stop editing!" )
+			for marker in markers:
+				if marker in text:
+					text = text.replace( marker, line + marker, 1 )
+					break
+			else:
+				raise RuntimeError( f"cannot find an insertion point in {path}" )
+			changed = True
+		if changed:
+			path.write_text( text, encoding="utf-8" )
+		return changed
+
+	def reload_config( self ) -> None:
+		"""Drop FPM's opcache after a wp-config edit.
+
+		PHP-FPM revalidates an included file on a timer (2 s by default), so a
+		config write followed immediately by a control request can still load
+		the old constants. `opcache_reset()` is shared memory, so one request
+		makes the next one read the new file.
+		"""
+		if not self.control_available:
+			return
+		try:
+			self.control.exec_php(
+				"if ( function_exists( 'opcache_reset' ) ) { opcache_reset(); } return true;",
+				context="frontend",
+				timeout=30,
+			)
+		except Exception:  # noqa: BLE001 - a reload failure is repaired by the next reset.
+			pass
+
 	def reset( self, mode: str = "full" ) -> None:
 		"""Reset using one of the four explicit modes.
 
@@ -187,19 +268,97 @@ class Site:
 			raise ValueError( f"unknown reset mode {mode!r}; expected one of {RESET_MODES}" )
 		if mode == "none":
 			return
+		# Maintenance mode is a file, not state. A case that leaves it behind
+		# makes every subsequent HTTP control request return 503 before PHP
+		# reaches the endpoint, so it is cleared before anything else.
+		for maintenance in ( self.path / ".maintenance", self.path / "wp-content" / ".maintenance" ):
+			maintenance.unlink( missing_ok=True )
 		self.restore_config()
+		if self.ensure_config_constants():
+			self.reload_config()
 		if mode == "files":
 			self.restore_files()
 			return
 		if mode == "full":
-			self.ddev(
-				[ "snapshot", "restore", self.snapshot ],
-				timeout=ENV["defaults"]["reset_timeout"],
-			)
+			# The dump import is ~5x faster than a DDEV snapshot restore, which
+			# stops and recreates the DB container. The snapshot stays as the
+			# cold fallback for a site whose baseline dump has not been exported.
+			dump = ROOT / ".cache/testbook" / f"base-{self.name}.sql.gz"
+			if dump.is_file():
+				self.ddev(
+					[ "import-db", f"--file={dump}", "--no-progress" ],
+					timeout=ENV["defaults"]["reset_timeout"],
+				)
+			else:
+				self.ddev(
+					[ "snapshot", "restore", self.snapshot ],
+					timeout=ENV["defaults"]["reset_timeout"],
+				)
 			self.restore_files()
-		self.ensure_multisite()
-		self.ensure_test_env()
-		self.eval_file( "testbook-reset.php", ( PHP / "reset.php" ).read_text( encoding="utf-8" ) )
+		if self.control_available:
+			# Restoring whole option tables is complete, but a plugin shutdown
+			# handler can write a transient after the reset request returns.
+			# Two fresh digests must agree before the case is allowed to start;
+			# one retry absorbs a single late write, and a second failure is a
+			# real isolation leak, not a flake.
+			self.control.reset()
+			first = self.control.digest()
+			second = self.control.digest()
+			unstable = (
+				first.get( "options_hash" ) != second.get( "options_hash" )
+				or first.get( "option_keys_hash" ) != second.get( "option_keys_hash" )
+				or second.get( "log_rows" ) != 0
+			)
+			if unstable:
+				self.control.reset()
+				first = self.control.digest()
+				second = self.control.digest()
+				unstable = (
+					first.get( "options_hash" ) != second.get( "options_hash" )
+					or first.get( "option_keys_hash" ) != second.get( "option_keys_hash" )
+					or second.get( "log_rows" ) != 0
+				)
+			if unstable:
+				raise RuntimeError(
+					f"{self.name}: state did not stabilize after reset: "
+					f"{first} != {second}"
+				)
+			if self.multisite and not self.control.health().get( "multisite" ):
+				self.ensure_multisite( known=False )
+			return
+		# One call does the environment check, the timezone restore, the state
+		# cleanup, and the multisite report. The previous version paid two or
+		# three extra `ddev wp` boots per case to ask the same questions.
+		state = parse_json(
+			self.eval_file( "testbook-reset.php", ( PHP / "reset.php" ).read_text( encoding="utf-8" ) )
+		)
+		if not state.get( "cron_disabled" ):
+			self.wp( [ "config", "set", "DISABLE_WP_CRON", "true", "--raw" ] )
+		if self.multisite and not state.get( "multisite" ):
+			self.ensure_multisite( known=False )
+
+	def restore_core( self ) -> None:
+		"""Restore the clean core tree after a case mutates it.
+
+		TB-UPDATE-003 downgrades core to 7.1.3; without this the next run starts
+		with 7.1.3 while every baseline and fixture assumes 7.1.4. The archive
+		excludes wp-content and wp-config, so the site's data and settings stay
+		untouched.
+		"""
+		archive = ROOT / ".cache/testbook" / f"core-{self.name}.tar.gz"
+		if not archive.is_file():
+			raise RuntimeError( f"missing core baseline archive {archive}" )
+		completed = subprocess.run(
+			[ "tar", "-xzf", str( archive ), "-C", str( self.path ) ],
+			text=True,
+			capture_output=True,
+		)
+		if completed.returncode != 0:
+			raise RuntimeError(
+				f"could not restore core from {archive}: "
+				f"{completed.stderr.strip() or completed.stdout.strip()}"
+			)
+		self.reload_config()
 
 	def restore_files( self ) -> None:
 		base = self.path / self.base
@@ -251,13 +410,16 @@ class Site:
 						pass
 			shutil.rmtree( path )
 
-	def ensure_multisite( self ) -> None:
+	def ensure_multisite( self, known: bool | None = None ) -> None:
 		if not self.multisite:
 			return
-		output = self.wp( [ "eval", "echo is_multisite() ? '1' : '0';" ], check=False ).stdout
-		lines = [ line.strip() for line in output.splitlines() if line.strip() ]
-		if lines and lines[-1].endswith( "1" ):
+		if known is True:
 			return
+		if known is None:
+			output = self.wp( [ "eval", "echo is_multisite() ? '1' : '0';" ], check=False ).stdout
+			lines = [ line.strip() for line in output.splitlines() if line.strip() ]
+			if lines and lines[-1].endswith( "1" ):
+				return
 		host = self.url.split( "//", 1 )[ -1 ].split( "/", 1 )[0]
 		settings = [
 			( "MULTISITE", "true", True ),
@@ -366,6 +528,7 @@ echo wp_json_encode( array( 'root' => $root, 'exists' => is_dir( $root ), 'files
 		if self._config_snapshot is not None:
 			( self.path / "wp-config.php" ).write_text( self._config_snapshot, encoding="utf-8" )
 			self._config_snapshot = None
+			self.reload_config()
 
 	def get_constants( self, names: list[str] ) -> dict:
 		php = f"""<?php
@@ -383,10 +546,12 @@ echo wp_json_encode( $out );
 		if raw:
 			args.append( "--raw" )
 		self.wp( args )
+		self.reload_config()
 
 	def remove_constant( self, name: str ) -> None:
 		self.config_backup()
 		self.wp( [ "config", "delete", name, "--type=constant" ], check=False )
+		self.reload_config()
 
 	# -- plugins and users -------------------------------------------------
 

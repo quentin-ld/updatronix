@@ -441,21 +441,27 @@ def update_type_matrix( site: Site ) -> tuple[dict, dict]:
 
 	# core: a real downgrade from the snapshot's 7.1.4 to 7.1.3.
 	site.reset( "full" )
-	completed = site.wp(
-		[ "core", "update", "wp-content/uploads/testbook/wordpress-7.1.3.zip", "--force" ],
-		timeout=300,
-		check=False,
-	)
-	ok( completed.returncode == 0, f"core update failed: {completed.stderr.strip()[:300]}" )
-	ok( site.core_version() == "7.1.3", f"core version is {site.core_version()}" )
-	obs = site.observe()
-	core_rows = [ row for row in item_rows( obs, [ "core" ] ) if row.get( "log_type" ) == "core" ]
-	ok( core_rows, "the core update was not logged as core" )
-	results.append( { "item": "core", "installed": True, "status": "success" } )
+	core_version = ""
+	try:
+		completed = site.wp(
+			[ "core", "update", "wp-content/uploads/testbook/wordpress-7.1.3.zip", "--force" ],
+			timeout=300,
+			check=False,
+		)
+		ok( completed.returncode == 0, f"core update failed: {completed.stderr.strip()[:300]}" )
+		core_version = site.core_version()
+		ok( core_version == "7.1.3", f"core version is {core_version}" )
+		obs = site.observe()
+		core_rows = [ row for row in item_rows( obs, [ "core" ] ) if row.get( "log_type" ) == "core" ]
+		ok( core_rows, "the core update was not logged as core" )
+		results.append( { "item": "core", "installed": True, "status": "success" } )
+	finally:
+		# This case owns the core tree; restore it even when an assertion fails.
+		site.restore_core()
 
 	return observation( results, [ "plugin", "theme", "translation", "core" ], [ "plugin", "theme", "translation", "core" ], {}, {}, 0 ), {
 		"scenarios": results,
-		"core_version": site.core_version(),
+		"core_version": core_version,
 	}
 
 

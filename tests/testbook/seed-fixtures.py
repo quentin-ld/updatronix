@@ -24,6 +24,8 @@ from pathlib import Path
 
 import yaml
 
+from baseline import export_dump
+
 SITES = [
     Path("/home/quentin/_DDEV/updatronix-test"),
     Path("/home/quentin/_DDEV/updatronix-ms"),
@@ -31,6 +33,10 @@ SITES = [
 SNAPSHOTS = {
     "updatronix-test": "testbook-base2",
     "updatronix-ms": "testbook-ms",
+}
+LABELS = {
+    "updatronix-test": "single",
+    "updatronix-ms": "multisite",
 }
 FREE_ROOT = Path(__file__).resolve().parents[2]
 PRO_ROOT = FREE_ROOT.parent / "updatronix-pro"
@@ -548,6 +554,9 @@ def main() -> int:
 		users = ensure_users( site )
 		sync_baseline( site )
 		apply_unreadable( site )
+		if site.name in LABELS:
+			export_dump( LABELS[ site.name ] )
+			print( f"exported baseline dump for {LABELS[site.name]}" )
 		print( site.name, result, "users", users )
 		if index == 0:
 			plugins = json.loads(
@@ -583,6 +592,19 @@ def main() -> int:
 		if args.refresh_snapshots:
 			refresh_snapshot( site, SNAPSHOTS[ site.name ] )
 			print( f"refreshed snapshot {SNAPSHOTS[site.name]}" )
+
+	existing = {}
+	if OUT.exists():
+		try:
+			existing = yaml.safe_load( OUT.read_text( encoding="utf-8" ) ) or {}
+		except yaml.YAMLError:
+			existing = {}
+	# A single-site run cannot see the multisite-only community themes; merge
+	# instead of replacing the tracked record with an empty map.
+	versions = {
+		"plugins": { **existing.get( "plugins", {} ), **versions.get( "plugins", {} ) },
+		"themes": { **existing.get( "themes", {} ), **versions.get( "themes", {} ) },
+	}
 
 	OUT.write_text(
 		yaml.safe_dump(

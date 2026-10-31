@@ -26,8 +26,16 @@ bin/harness setup   # one-time: writes .config/wp-tests.env + installs the WP te
 | `npm run lint` / `npm run lint:css` / `npm run format` | ESLint / Stylelint / Prettier (`:fix` variants auto-fix) |
 | `composer run lint:pcp` | Plugin Check via WP-CLI (**Local only**) |
 | `composer run make:pot` | Regenerate `languages/updatronix.pot` (**Local only**) |
-| `composer run test:integration` | PHPUnit **integration** suite (uses Local's PHP/mysqli) |
+| `composer run test:integration` | PHPUnit **integration** suite through `bin/harness` (DDEV first) |
 | `WP_MULTISITE=1 bin/harness integration --filter Multisite` | Multisite integration tests (self-skip otherwise) |
+| `bash tests/testbook/gate-smoke.sh` | Fast test-book WIP check (update/pass + UI) |
+| `bash tests/testbook/gate-all.sh` | Full test book, single + multisite; the release gate |
+| `bin/gate fast [base]` | lint:changed, unit, integration, `--changed` or @smoke e2e |
+| `bin/gate base [ref]` | record `refs/testbook/base`; pre-push mutation scopes to it |
+| `bin/gate full` | full lint, unit, integration, full test book |
+| `bin/gate parallel` | two single-site shards + multisite, merged verdict |
+| `bin/gate mutation [base]` | task-scoped Infection + counterfactual (default HEAD~1) |
+| `bin/gate release` | `full` + distributable package |
 
 ## Full gates
 

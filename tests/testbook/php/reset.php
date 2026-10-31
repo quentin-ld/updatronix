@@ -84,8 +84,17 @@ update_site_option(
 	)
 );
 
+update_option( 'timezone_string', 'Europe/Paris' );
+
 wp_delete_file( WP_CONTENT_DIR . '/testbook-mail.log' );
 wp_delete_file( WP_CONTENT_DIR . '/debug.log' );
 wp_cache_flush();
 
-echo wp_json_encode( array( 'reset' => true ) );
+echo wp_json_encode(
+	array(
+		'reset'         => true,
+		'cron_disabled' => defined( 'DISABLE_WP_CRON' ) && DISABLE_WP_CRON,
+		'timezone'      => get_option( 'timezone_string' ),
+		'multisite'     => is_multisite(),
+	)
+);

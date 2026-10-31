@@ -6,20 +6,22 @@ from __future__ import annotations
 import json
 import shlex
 import subprocess
+import time
 
 from testbook_site import ROOT, Site, base_observation, logs_for, parse_json
 
 from . import CaseSpec
 
 
-def _run_playwright( site: Site, config: str, env: dict[str, str], timeout: int = 300 ) -> str:
+def _run_playwright( site: Site, config: str, env: dict[str, str], timeout: int = 300, check: bool = True ) -> str:
 	( ROOT / ".cache/testbook" ).mkdir( parents=True, exist_ok=True )
 	assignments = {
 		"WP_BASE_URL": site.url,
 		"WP_USERNAME": site.user,
 		"WP_PASSWORD": site.password,
 		"TESTBOOK_MULTISITE": "1" if site.multisite else "0",
-		"STORAGE_STATE_PATH": ".cache/testbook/storage-state.json",
+		"STORAGE_STATE_PATH": f".cache/testbook/storage-state-{site.name}.json",
+		"TESTBOOK_OUTPUT_DIR": f".cache/testbook/pw-output-{site.name}",
 		**env,
 	}
 	prefix = " ".join( f"{key}={shlex.quote(value)}" for key, value in assignments.items() )
@@ -31,7 +33,7 @@ def _run_playwright( site: Site, config: str, env: dict[str, str], timeout: int 
 		capture_output=True,
 		timeout=timeout,
 	)
-	if completed.returncode != 0:
+	if check and completed.returncode != 0:
 		raise RuntimeError(
 			f"Playwright {config} failed:\n"
 			f"{completed.stdout.strip()}\n{completed.stderr.strip()}"
@@ -39,10 +41,15 @@ def _run_playwright( site: Site, config: str, env: dict[str, str], timeout: int 
 	return completed.stdout.strip()
 
 
-def _a11y_metrics( relative: str ) -> dict:
+def _a11y_metrics( relative: str, started_at: float | None = None ) -> dict:
 	path = ROOT / relative
 	if not path.exists():
 		raise RuntimeError( f"a11y metrics were not written: {relative}" )
+	if started_at is not None and path.stat().st_mtime < started_at:
+		raise RuntimeError(
+			f"a11y metrics are stale (mtime {path.stat().st_mtime:.0f} < run start "
+			f"{started_at:.0f}): {relative}"
+		)
 	metrics = json.loads( path.read_text( encoding="utf-8" ) )
 	for key in ( "controls", "reachable", "labelled", "focus_visible", "overflow" ):
 		if key not in metrics:
@@ -106,6 +113,9 @@ echo wp_json_encode( array( 'id' => $id ) );
 """
 	seeded = parse_json( site.eval_file( "testbook-ui-seed.php", php ) )
 	a11y_path = f".cache/testbook/a11y-{site.name}-smoke.json"
+	metrics_file = ROOT / a11y_path
+	metrics_file.unlink( missing_ok=True )
+	started = time.time()
 	stdout = _run_playwright(
 		site,
 		"tests/testbook/playwright.config.js",
@@ -114,17 +124,26 @@ echo wp_json_encode( array( 'id' => $id ) );
 	observation = site.observe()
 	data = base_observation( observation )
 	data.update( { "http_status": 200, "fatal": False } )
-	_apply_a11y( data, _a11y_metrics( a11y_path ) )
+	metrics = _a11y_metrics( a11y_path, started )
+	_apply_a11y( data, metrics )
 	return data, {
 		"seeded": seeded,
 		"playwright": stdout.splitlines()[-3:],
-		"a11y": _a11y_metrics( a11y_path ),
+		"a11y": metrics,
 		"log_count": observation.get( "log_count" ),
 	}
 
 
 def ui_surface( site: Site, surface: str ) -> tuple[dict, dict]:
+	if surface in site._ui_results:
+		data, detail, error = site._ui_results[ surface ]
+		if error:
+			raise RuntimeError( f"batched surface {surface} failed: {error}" )
+		return data, detail
 	a11y_path = f".cache/testbook/a11y-{site.name}-{surface}.json"
+	metrics_file = ROOT / a11y_path
+	metrics_file.unlink( missing_ok=True )
+	started = time.time()
 	stdout = _run_playwright(
 		site,
 		"tests/testbook/playwright-surfaces.config.js",
@@ -133,7 +152,7 @@ def ui_surface( site: Site, surface: str ) -> tuple[dict, dict]:
 	observation = site.observe()
 	data = base_observation( observation )
 	data.update( { "http_status": 200, "fatal": False } )
-	metrics = _a11y_metrics( a11y_path )
+	metrics = _a11y_metrics( a11y_path, started )
 	_apply_a11y( data, metrics )
 	return data, {
 		"surface": surface,
@@ -141,6 +160,110 @@ def ui_surface( site: Site, surface: str ) -> tuple[dict, dict]:
 		"a11y": metrics,
 		"log_count": observation.get( "log_count" ),
 	}
+
+
+def _walk_specs( node: dict ):
+	"""Yield every spec in a Playwright JSON report, including nested suites."""
+	for suite in node.get( "suites", [] ) or []:
+		yield from _walk_specs( suite )
+	for spec in node.get( "specs", [] ) or []:
+		yield spec
+
+
+def ui_suite( site: Site, surfaces: list[str] ) -> None:
+	"""Run the selected simple surfaces in one Playwright process.
+
+	The per-case alternative starts a Node process, a browser, and a login for
+	every surface: 26 s each, 24 times. The batch shares all three, resets state
+	through the control endpoint before each test, and leaves one metrics file
+	per surface. A missing or failed surface is reported as that case's error;
+	the other surfaces still run.
+	"""
+	surfaces = sorted( set( surfaces ) )
+	if not surfaces:
+		return
+	batch_dir = ROOT / ".cache/testbook" / f"batch-{site.name}"
+	batch_dir.mkdir( parents=True, exist_ok=True )
+	for old in batch_dir.glob( "*.json" ):
+		old.unlink()
+	results = batch_dir / "results.json"
+	token_path = ROOT / ".cache/testbook" / f"control-{site.name}.token"
+	token = token_path.read_text( encoding="utf-8" ).strip() if token_path.is_file() else ""
+	env = {
+		"TESTBOOK_SURFACES": ",".join( surfaces ),
+		"TESTBOOK_A11Y_DIR": str( batch_dir.relative_to( ROOT ) ),
+		"TESTBOOK_LINKS_DIR": str( batch_dir.relative_to( ROOT ) ),
+		"TESTBOOK_JSON_PATH": str( results.relative_to( ROOT ) ),
+		"TESTBOOK_SITE": site.name,
+		"TESTBOOK_TOKEN": token,
+	}
+	try:
+		stdout = _run_playwright( site, "tests/testbook/playwright-batch.config.js", env, check=False )
+	except Exception as error:  # noqa: BLE001 - every surface must receive the launch error.
+		for surface in surfaces:
+			site._ui_results[ surface ] = ( {}, {}, str( error ) )
+		return
+	if not results.is_file():
+		error = f"batch report missing: {results}\n{stdout[-1200:]}"
+		for surface in surfaces:
+			site._ui_results[ surface ] = ( {}, {}, error )
+		return
+	report = json.loads( results.read_text( encoding="utf-8" ) )
+	statuses: dict[str, tuple[str, str]] = {}
+	for spec in _walk_specs( report ):
+		title = str( spec.get( "title", "" ) )
+		if "surface:" not in title:
+			continue
+		surface = title.split( "surface:", 1 )[1].strip()
+		if surface not in surfaces:
+			continue
+		status = "passed"
+		message = ""
+		for test in spec.get( "tests", [] ) or []:
+			for result in test.get( "results", [] ) or []:
+				if result.get( "status" ) not in ( "passed", "skipped" ):
+					status = str( result.get( "status", "failed" ) )
+					message = "\n".join(
+						str( error.get( "message", error ) )
+						for error in result.get( "errors", [] ) or []
+					) or status
+		statuses[ surface ] = ( status, message )
+	try:
+		observation = site.observe()
+	except Exception as error:  # noqa: BLE001 - the report is already written; surface errors are clearer.
+		observation = {}
+		observation_error = str( error )
+	else:
+		observation_error = ""
+	for surface in surfaces:
+		status, message = statuses.get(
+			surface, ( "missing", "surface was not present in the batch report" )
+		)
+		if status != "passed":
+			site._ui_results[ surface ] = ( {}, {}, message or status )
+			continue
+		if observation_error:
+			site._ui_results[ surface ] = ( {}, {}, observation_error )
+			continue
+		a11y_path = batch_dir / f"a11y-{surface}.json"
+		try:
+			metrics = _a11y_metrics( str( a11y_path.relative_to( ROOT ) ) )
+		except Exception as error:  # noqa: BLE001 - a missing metric is a case failure.
+			site._ui_results[ surface ] = ( {}, {}, str( error ) )
+			continue
+		data = base_observation( observation )
+		data.update( { "http_status": 200, "fatal": False } )
+		_apply_a11y( data, metrics )
+		site._ui_results[ surface ] = (
+			data,
+			{
+				"surface": surface,
+				"playwright": stdout.splitlines()[-3:],
+				"a11y": metrics,
+				"log_count": observation.get( "log_count" ),
+			},
+			"",
+		)
 
 
 def log_probe( site: Site, name: str ) -> dict:
@@ -279,6 +402,7 @@ CASES = [
 		( "INV-08", ),
 		phase="ui",
 		reset="state",
+		ui="surface:auto-updates",
 	),
 	CaseSpec(
 		"TB-UI-003",
@@ -287,6 +411,7 @@ CASES = [
 		( "INV-08", ),
 		phase="ui",
 		reset="state",
+		ui="surface:schedule",
 	),
 	CaseSpec(
 		"TB-UI-005",
@@ -295,6 +420,7 @@ CASES = [
 		( "INV-08", ),
 		phase="ui",
 		reset="state",
+		ui="surface:settings",
 	),
 	CaseSpec(
 		"TB-UI-008",
@@ -303,6 +429,7 @@ CASES = [
 		( "INV-08", ),
 		phase="ui",
 		reset="state",
+		ui="surface:shield",
 	),
 	CaseSpec(
 		"TB-UI-009",
@@ -311,6 +438,7 @@ CASES = [
 		( "INV-08", ),
 		phase="ui",
 		reset="state",
+		ui="surface:flow",
 	),
 	CaseSpec(
 		"TB-UI-011",
@@ -319,6 +447,7 @@ CASES = [
 		( "INV-08", ),
 		phase="ui",
 		reset="state",
+		ui="surface:license",
 	),
 	CaseSpec(
 		"TB-UI-012",
@@ -327,6 +456,7 @@ CASES = [
 		( "INV-08", ),
 		phase="ui",
 		reset="state",
+		ui="surface:plugins",
 	),
 	CaseSpec(
 		"TB-UI-013",
@@ -335,6 +465,7 @@ CASES = [
 		( "INV-08", ),
 		phase="ui",
 		reset="state",
+		ui="surface:themes",
 	),
 	CaseSpec(
 		"TB-UI-014",
@@ -343,6 +474,7 @@ CASES = [
 		( "INV-08", ),
 		phase="ui",
 		reset="state",
+		ui="surface:update-core",
 	),
 	CaseSpec(
 		"TB-UI-015",
@@ -351,6 +483,7 @@ CASES = [
 		( "INV-09", "INV-10", "INV-08" ),
 		phase="ui",
 		reset="state",
+		ui="surface:network-admin",
 	),
 	CaseSpec(
 		"TB-SET-103",

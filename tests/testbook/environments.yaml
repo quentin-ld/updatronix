@@ -26,6 +26,11 @@ sites:
     path: /home/quentin/_DDEV/updatronix-test
     url: https://updatronix-test.ddev.site
     multisite: false
+  single2:
+    project: updatronix-test2
+    path: /home/quentin/_DDEV/updatronix-test2
+    url: https://updatronix-test2.ddev.site
+    multisite: false
   multisite:
     project: updatronix-ms
     path: /home/quentin/_DDEV/updatronix-ms

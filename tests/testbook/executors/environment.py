@@ -88,6 +88,9 @@ def filesystem_matrix( site: Site ) -> tuple[dict, dict]:
 	reset_item( site )
 	state = site.json_eval(
 		r"""<?php
+if ( ! function_exists( 'get_filesystem_method' ) ) {
+	require_once ABSPATH . 'wp-admin/includes/file.php';
+}
 echo wp_json_encode( array(
 	'method' => function_exists( 'get_filesystem_method' ) ? get_filesystem_method() : '',
 	'direct' => defined( 'FS_METHOD' ) ? FS_METHOD : '',
@@ -547,6 +550,7 @@ CASES = [
 		( "INV-08", ),
 		phase="dimensions",
 		reset="state",
+		context="cli",
 	),
 	CaseSpec(
 		"TB-ENV-106",

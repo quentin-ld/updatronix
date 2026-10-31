@@ -27,12 +27,18 @@ case/combination files are outputs; do not edit them by hand.
 
 ## Orchestration split
 
-- **Catalog/runner:** host `python3` (PyYAML is available there).
-- **WordPress/PHP:** `ddev wp` in each disposable site.
+- **Catalog/runner:** host `python3` (PyYAML and requests are available there).
+- **WordPress/PHP:** the token-guarded HTTP control endpoint
+  (`mu-plugin/testbook-control.php`) on each disposable site. It executes one
+  operation per real HTTP request in ~0.12–0.17 s, instead of a `ddev wp` CLI
+  boot at ~4.3 s. `ddev wp` remains for `config`, `db`, `snapshot`, and
+  CLI-only commands.
 - **Playwright:** `bin/harness exec` from the project backend.
 
 `bin/harness exec python3` has no `yaml` module. Do not add a container
-PyYAML dependency; keep the runner on host Python.
+PyYAML dependency; keep the runner on host Python. Set
+`TESTBOOK_TRANSPORT=cli` to run the old `ddev wp` transport for an equivalence
+check.
 
 ## Commands
 
@@ -42,6 +48,8 @@ python3 tests/testbook/testbook.py validate          # catalog + freshness + aut
 python3 tests/testbook/testbook.py sync-automation   # rewrite cases.yaml/Pro automation only
 python3 tests/testbook/runners.py --self-test        # every invariant can fail
 python3 tests/testbook/coverage.py                   # coverage from run.py --list --json
+python3 tests/testbook/baseline.py export            # control, token, DB dump, option snapshot
+python3 tests/testbook/selftest_control.py --site single  # endpoint self-test
 ```
 
 ### Inspect
@@ -67,8 +75,40 @@ or the project-owned gate wrappers:
 ```bash
 bash tests/testbook/gate-smoke.sh
 bash tests/testbook/gate-full.sh
-bash tests/testbook/gate-all.sh   # smoke + full from one block
+bash tests/testbook/gate-all.sh   # full book from one block; smoke is separate
 ```
+
+### Select, resume, shard
+
+```bash
+python3 tests/testbook/run.py --site both --changed origin/main --dry-run
+python3 tests/testbook/run.py --site both --resume latest
+python3 tests/testbook/run.py --site both --shard 1/2
+```
+
+`--changed` maps a diff to the generated cases whose `dimensions.yaml` `source`
+changed. It always adds `@smoke` and the batched UI surfaces; an unmapped file,
+a test-infrastructure change, or a harness change falls back to the full book.
+`--resume` skips passed case-site pairs when the report's `run_key` still
+matches the current code, DB dump, option snapshot, and core archive.
+`--shard i/n` partitions the case-site pairs; parallel execution needs a
+separate site configuration per shard, not two processes on one site. The
+`single2` site (a clone of `updatronix-test`) is that second configuration:
+`--site single2` aliases the single-site cases to it. `bin/gate parallel` runs
+the two single shards plus multisite, merges the reports, and fails on any
+duplicate, failure, error, or pending case. Fixture-tier changes must be seeded
+into both single sites; the runner's code sync covers the plugin runtime only.
+
+For anti-tautology work on the current change, `bin/gate mutation HEAD~1` runs
+Infection and the counterfactual against that diff; the generated pre-push hook
+still judges the whole branch (`@{upstream}`). The manual-regression boundary is
+in `docs/testing/manual-elimination.md`.
+
+The simple UI surfaces (`TB-UI-002/003/005/008/009/011..015`) run in **one**
+Playwright process per site. `CaseSpec.ui="surface:<name>"` opts a case into
+the batch; `surfaces.spec.js` resets state through the control endpoint before
+each test, and writes one a11y file per surface. Cases that need their own
+setup or post-Playwright state checks stay per-case.
 
 ### Reset modes
 
@@ -76,13 +116,20 @@ Every `CaseSpec` declares one mode:
 
 | Mode | What it restores | Use for |
 |---|---|---|
-| `full` | DB snapshot + file baseline + state | update/pass cases that install packages |
-| `state` | options, transients, logs, mail, cron, license | settings, roles, UI, read-only probes |
+| `full` | whole-DB dump + file baseline + state | update/pass cases that install packages |
+| `state` | every option table + logs + mail + cron + license | settings, roles, UI, read-only probes |
 | `files` | file baseline only | filesystem cases that must keep DB state |
 | `none` | nothing | a case that owns its setup entirely |
 
+`state` restores the baseline `wp_options` / `wp_*_options` / `wp_sitemeta`
+tables whole, not a hand-maintained delete list, and then checks two normalized
+digests agree. A leaked option or log row fails the case instead of contaminating
+the next one. `full` imports `base-<site>.sql.gz` (~3 s) instead of restoring a
+DDEV snapshot (~14 s, DB container restart); the snapshot remains the cold
+fallback.
+
 `--no-reset` keeps the old developer shortcut: it downgrades `full` to `state`
-and `files` to `none`, so it never pays for a snapshot but still clears state.
+and `files` to `none`, so it never pays for a dump import but still clears state.
 
 A selected catalog case with no executor is **pending**, and pending fails the
 run unless `--allow-pending` is used. `--all` stays the implemented-only
@@ -91,14 +138,28 @@ developer shortcut; `--all-catalog` is the release gate.
 Each run writes `tests/testbook/results/testbook-<stamp>.json` (ignored) with
 per-case `status`, `reset`, `phase`, `invariants`, `errors`, and `detail`.
 
-## Fixtures and snapshots
+## Fixtures and baseline
 
-`seed-fixtures.py` owns three things:
+`seed-fixtures.py` still owns the live fixture tier and the file baseline:
 
 1. the live fixture plugins, themes, packages, and local update offers;
 2. `wp-content/testbook-base`, the file baseline `restore_files()` copies;
 3. optionally, the `testbook-base2` (single) and `testbook-ms` (multisite)
    snapshots.
+
+`baseline.py export` owns the artifacts the runner actually restores:
+
+- `.cache/testbook/base-<site>.sql.gz` — full DB dump;
+- `.cache/testbook/options-<site>.json` and the site's
+  `wp-content/testbook-baseline/options.json` — option-table snapshot;
+- `.cache/testbook/control-<site>.token` and the site's
+  `wp-content/testbook-token` — control token;
+- `wp-content/mu-plugins/testbook-control.php` — the test-only endpoint.
+
+The runner's preflight (`baseline.prepare`) syncs runtime code, installs the
+control endpoint, and exports a missing baseline. A normal product change no
+longer needs a manual `seed-fixtures.py`; run it only when the fixture tier
+changes.
 
 The deterministic tier includes the happy-path packages, a 404 package
 (`fixture-broken`), a real invalid ZIP (`fixture-corrupt`), a readme-only
@@ -131,10 +192,9 @@ a `full` reset can restore a package the fixtures no longer offer.
 
 ## Current execution coverage
 
-**31 of 152 catalog cases have executors** (28 full, 3 partial); **121 are
-pending**, including 55 critical. The generated report in
-`docs/testing/test-book-coverage.md` is the current list. A release with a
-pending critical case is not ready.
+**152 of 152 catalog cases have executors** (147 full, 5 partial); **0 are
+pending**. The generated report in `docs/testing/test-book-coverage.md` is the
+current list, generated from `run.py --list --json`.
 
 The Playwright project runs from the working checkout/container against the
 disposable site. On multisite it uses
@@ -145,18 +205,23 @@ metrics file fails the case instead of silently passing.
 
 ## Test-site runtime
 
-`seed-fixtures.py` also copies `assets/build`, `inc`, `languages`, and the
-plugin entry files from the Free/Pro checkouts into both test sites. That is
-required: without the built bundle the test-site admin shows the missing-bundle
-notice and the UI cases cannot run.
+`seed-fixtures.py` copies `assets/build`, `inc`, `languages`, and the plugin
+entry files from the Free/Pro checkouts into both test sites. That is required:
+without the built bundle the test-site admin shows the missing-bundle notice and
+the UI cases cannot run.
+
+The runner also syncs those files before case 1 and hashes both sides
+(`baseline.sync_site`). A forgotten seed cannot test the previous code; a stale
+file in the test site is repaired, and a sync that does not converge fails
+before the first case.
 
 ## Release rule
 
 The full book is mandatory before a release, a merge to `main`, or a push to
-`main`. `gate-full.sh` runs every implemented case. The release-truthfulness
-check is `python3 tests/testbook/run.py --site both --all-catalog`: it fails
-while any catalog case lacks an executor, so a missing executor cannot
-disappear. The remaining catalog cases are tracked in the task file and are not
-silent. The harness-generated pre-push hook does not call these scripts yet;
-wiring that hook is a harness change, not a project-owned file edit. A failing
-book blocks the release.
+`main`. `gate-all.sh` runs the full book once; `gate-smoke.sh` is the fast WIP
+check and is not repeated inside it. The release-truthfulness check is
+`python3 tests/testbook/run.py --site both --all-catalog`: it fails while any
+catalog case lacks an executor, so a missing executor cannot disappear. The
+harness-generated pre-push hook does not call these scripts yet; wiring that
+hook is a harness change, not a project-owned file edit. A failing book blocks
+the release.
