@@ -797,7 +797,7 @@ foreach ( $ids as $id ) {{
 $args = array_merge(
 	array(
 		'pass_id'        => str_repeat( 'd', 32 ),
-		'started_at'     => '2026-10-29 10:00:00',
+		'started_at'     => gmdate( 'Y-m-d H:i:s' ),
 		'next_check_at'  => time() + 3600,
 		'last_heartbeat' => time(),
 	),
