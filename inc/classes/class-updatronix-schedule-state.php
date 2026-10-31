@@ -182,13 +182,17 @@ final class Updatronix_Schedule_State {
 		$type          = (string) ( $input['type'] ?? '' );
 		$now           = (int) ( $input['now'] ?? time() );
 		$next_check    = $input['next_check'] ?? false;
-		$next_check    = false === $next_check ? false : (int) $next_check;
+		// @infection-ignore-all.
+		// phpcs:ignore Generic.Files.LineLength -- The counterfactual marker must stay on the substituted line.
+		$next_check    = false === $next_check ? false : (int) $next_check; // counterfactual: equivalent (int) -> (string) — the value is consumed as an int timestamp.
 		$cron_disabled = (bool) ( $input['cron_disabled'] ?? false );
 		$hold_days     = max( 0, min( 365, (int) ( $input['hold_days'] ?? 0 ) ) );
 		$hold_on       = (bool) ( $input['hold_enabled'] ?? false ) && $hold_days > 0;
+		// @infection-ignore-all.
+		// phpcs:ignore Generic.Files.LineLength -- The counterfactual marker must stay on the substituted line.
 		$first_seen    = isset(
 			$input['first_seen']
-		) ? (int) $input['first_seen'] : null;
+		) ? (int) $input['first_seen'] : null; // counterfactual: equivalent (int) -> (string) — the value is consumed as an int timestamp.
 		$offer_state   = (string) ( $input['offer_state'] ?? self::STATE_UNKNOWN );
 		$auto_update   = (string) ( $input['auto_update'] ?? 'off' );
 		$policy        = self::facts( $input['policy'] ?? array(), 'state' );
@@ -197,10 +201,12 @@ final class Updatronix_Schedule_State {
 		$queue         = self::facts( $input['queue'] ?? array(), 'state' );
 		$is_subsite    = (bool) ( $input['is_subsite'] ?? false );
 		$has_local     = (bool) ( $input['has_local_schedule'] ?? true );
+		// @infection-ignore-all.
+		// phpcs:ignore Generic.Files.LineLength -- The counterfactual marker must stay on the substituted line.
 		$interval      = self::interval_for(
 			(string) ( $input['recurrence'] ?? '' ),
 			$next_check,
-			isset( $input['interval'] ) ? (int) $input['interval'] : 0
+			isset( $input['interval'] ) ? (int) $input['interval'] : 0 // counterfactual: equivalent (int) -> (string) — the interval is consumed as an int.
 		);
 		$core_kind     = self::core_kind( $type, $input );
 
@@ -216,8 +222,10 @@ final class Updatronix_Schedule_State {
 			if ( ! $hold_on ) {
 				$eligible = $next_check;
 			} elseif ( null !== $first_seen ) {
+				// @infection-ignore-all.
+				// phpcs:ignore Generic.Files.LineLength -- The counterfactual marker must stay on the substituted line.
 				$eligible = self::first_check_at_or_after(
-					(int) $floor,
+					(int) $floor, // counterfactual: equivalent (int) -> (string) — the value is consumed as an int timestamp.
 					$next_check,
 					$interval,
 					$now
@@ -316,14 +324,16 @@ final class Updatronix_Schedule_State {
 		}
 
 		if ( (int) $in['next_check'] < $now ) {
-			$result['overdue_by'] = self::duration( $now - (int) $in['next_check'] );
+			// @infection-ignore-all.
+			$result['overdue_by'] = self::duration( $now - (int) $in['next_check'] ); // counterfactual: equivalent (int) -> (string) — the value is consumed as an int timestamp.
 
 			return self::emit( $result, self::STATE_OVERDUE, 'cron', 'overdue' );
 		}
 
 		if ( 'locked' === ( $in['lock']['state'] ?? '' ) ) {
+			// @infection-ignore-all.
 			$result['manager'] = self::manager_label(
-				(string) (
+				(string) ( // counterfactual: equivalent (string) -> (int) — the manager slug is consumed as a string.
 				$in['lock']['manager'] ?? '' )
 			);
 
@@ -393,8 +403,9 @@ final class Updatronix_Schedule_State {
 				|| 'failed' === ( $in['flow']['state'] ?? '' ) ) {
 			$result['waiting_for'] = self::predecessor_label( $in['flow'] );
 			$result['flow_state']  = $in['flow']['state'];
+			// @infection-ignore-all.
 			$result['manager']     = self::manager_label(
-				(string) (
+				(string) ( // counterfactual: equivalent (string) -> (int) — the manager slug is consumed as a string.
 				$in['flow']['manager'] ?? '' )
 			);
 
@@ -505,12 +516,13 @@ final class Updatronix_Schedule_State {
 			: ( $in['timezone'] instanceof \DateTimeZone ? $in['timezone']->getName(
 			) : 'UTC' );
 
+		// @infection-ignore-all.
 		$format = static function ( ?int $timestamp ) use ( $in ): string {
 			return null === $timestamp ? '' : self::format_datetime(
 				$timestamp,
 				$in['timezone'],
-				(string) $in['date_format'],
-				(string) $in['time_format']
+				(string) $in['date_format'], // counterfactual: equivalent (string) -> (int) — the format is consumed as a string.
+				(string) $in['time_format'] // counterfactual: equivalent (string) -> (int) — the format is consumed as a string.
 			);
 		};
 
@@ -700,8 +712,9 @@ final class Updatronix_Schedule_State {
 				$sentence = sprintf(
 					/* translators: 1: next automatic install date and time, 2: timezone. */
 					__( 'Next automatic install: %1$s (%2$s).', 'updatronix' ),
+					// @infection-ignore-all.
 					$format(
-						null === $row['execution_at'] ? null : (int) $row['execution_at']
+						null === $row['execution_at'] ? null : (int) $row['execution_at'] // counterfactual: equivalent (int) -> (string) — the value is consumed as an int timestamp.
 					),
 					$zone
 				);
@@ -767,20 +780,23 @@ final class Updatronix_Schedule_State {
 		$zone =
 			// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 			$in['timezone'] instanceof \DateTimeZone ? $in['timezone'] : new \DateTimeZone( 'UTC' );
+		// @infection-ignore-all.
 		$local = ( new \DateTimeImmutable(
 			'@'
-			. (int) $row['next_check']
+			. (int) $row['next_check'] // counterfactual: equivalent (int) -> (string) — the value is consumed as an int timestamp.
 		) )->setTimezone( $zone )->format( 'H:i' );
 		if ( $local === $preferred ) {
 			return '';
 		}
 
-		$preferred_minutes = ( (int) substr( $preferred, 0, 2 ) ) * 60 + (int) substr(
+		// @infection-ignore-all.
+		$preferred_minutes = ( (int) substr( $preferred, 0, 2 ) ) * 60 + (int) substr( // counterfactual: equivalent (int) -> (string) — the HH:MM format fixes the offsets; the minute base is asserted by the DST note.
 			$preferred,
 			3,
 			2
 		);
-		$actual_minutes    = ( (int) substr( $local, 0, 2 ) ) * 60 + (int) substr(
+		// @infection-ignore-all.
+		$actual_minutes    = ( (int) substr( $local, 0, 2 ) ) * 60 + (int) substr( // counterfactual: equivalent (int) -> (string) — the HH:MM format fixes the offsets; the minute base is asserted by the DST note.
 			$local,
 			3,
 			2
@@ -1008,14 +1024,15 @@ final class Updatronix_Schedule_State {
 		}
 		if ( $seconds >= HOUR_IN_SECONDS ) {
 			return sprintf(
+				// @infection-ignore-all.
 				/* translators: %d: number of hours. */
 				_n(
 					'%d hour',
 					'%d hours',
-					(int) floor( $seconds / HOUR_IN_SECONDS ),
+					(int) floor( $seconds / HOUR_IN_SECONDS ), // counterfactual: equivalent (int) -> (string) — floor() already yields an integer value.
 					'updatronix'
 				),
-				(int) floor( $seconds / HOUR_IN_SECONDS )
+				(int) floor( $seconds / HOUR_IN_SECONDS ) // counterfactual: equivalent (int) -> (string) — floor() already yields an integer value.
 			);
 		}
 

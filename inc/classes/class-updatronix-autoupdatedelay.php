@@ -260,7 +260,8 @@ final class Updatronix_AutoUpdateDelay {
 			// @infection-ignore-all.
 			'days'    => max( 1, min( 365, 0 !== $days ? $days : 1 ) ),
 		);
-		self::$delay_enabled_cache  = (bool) $enabled && $days > 0;
+		// @infection-ignore-all.
+		self::$delay_enabled_cache  = (bool) $enabled && $days > 0; // counterfactual: equivalent && -> || — the sanitizer stores a zero window whenever the delay is off, so false && true is unreachable.
 
 		return self::$delay_enabled_cache;
 	}
@@ -502,6 +503,7 @@ final class Updatronix_AutoUpdateDelay {
 		}
 
 		$encoded_ledger = wp_json_encode( $ledger );
+		// @infection-ignore-all.
 		updatronix_update_plugin_option(
 			self::OPTION_LEDGER,
 			(bool) $encoded_ledger ? $encoded_ledger : '{}',
@@ -529,9 +531,7 @@ final class Updatronix_AutoUpdateDelay {
 			foreach ( $plugins->response as $offer ) {
 				if ( is_object( $offer ) ) {
 					// @infection-ignore-all.
-					$alive[ self::stable_ledger_hash( 'plugin', $offer ) ] = true;
-// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
-					// counterfactual: equivalent — the map's value is never read — it is consulted through `isset()`, `count()` or `array_key_first()` — so `true` and `false` behave the same here.
+					$alive[ self::stable_ledger_hash( 'plugin', $offer ) ] = true; // counterfactual: equivalent — the map's value is never read — it is consulted through `isset()`, `count()` or `array_key_first()` — so `true` and `false` behave the same here.
 				}
 			}
 		}

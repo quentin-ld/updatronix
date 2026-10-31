@@ -245,15 +245,34 @@ final class AutoUpdateDelayBehaviorTest extends TestCase {
 
 		Updatronix_AutoUpdateDelay::register_filters();
 
-		foreach ( array(
-			'auto_update_plugin',
-			'auto_update_theme',
-			'auto_update_core',
-			'auto_update_translation',
-		) as $hook ) {
-			$this->assertNotEmpty(
-				$GLOBALS['_updatronix_filters'][ $hook ],
-				"$hook must be registered when delay is enabled."
+		$callbacks = array(
+			'auto_update_plugin'      => 'filter_plugin',
+			'auto_update_theme'       => 'filter_theme',
+			'auto_update_core'        => 'filter_core',
+			'auto_update_translation' => 'filter_translation',
+		);
+
+		foreach ( $callbacks as $hook => $method ) {
+			$priority = null;
+			$accepted = null;
+			$callback = array( Updatronix_AutoUpdateDelay::class, $method );
+
+			foreach ( $GLOBALS['_updatronix_filters'][ $hook ] ?? array() as $entry ) {
+				if ( isset( $entry[0] ) && $entry[0] === $callback ) {
+					$priority = $entry[1] ?? null;
+					$accepted = $entry[2] ?? null;
+				}
+			}
+
+			$this->assertSame(
+				Updatronix_AutoUpdateDelay::FILTER_PRIORITY,
+				$priority,
+				"$hook must register $method at FILTER_PRIORITY when delay is enabled."
+			);
+			$this->assertSame(
+				2,
+				$accepted,
+				"$hook must register $method with two accepted arguments."
 			);
 		}
 	}
@@ -287,6 +306,36 @@ final class AutoUpdateDelayBehaviorTest extends TestCase {
 		$this->assertSame( 'plugin', $log_call['type'] );
 		$this->assertSame( 'update', $log_call['action'] );
 		$this->assertSame( 'delayed', $log_call['level'] );
+
+		$expected_key = 'udly|' . substr(
+			$this->invoke_static( 'stable_ledger_hash', array( 'plugin', $this->plugin_offer() ) ),
+			0,
+			60
+		);
+		$this->assertSame( $expected_key, $log_call['dedup_key'] ?? null, 'The event key must use the 60-char ledger-hash tail.' );
+	}
+
+	/**
+	 * The schedule classes replace the fallback when they are loaded.
+	 *
+	 * @return void
+	 */
+	public function test_eligible_at_uses_the_schedule_when_the_state_classes_are_loaded(): void {
+		require_once dirname( __DIR__, 2 ) . '/inc/classes/class-updatronix-item-state.php';
+		require_once dirname( __DIR__, 2 ) . '/inc/classes/class-updatronix-schedule-state.php';
+		require_once dirname( __DIR__, 2 ) . '/inc/classes/class-updatronix-schedule-context.php';
+
+		$this->enable_delay( 7 );
+
+		$GLOBALS['updatronix_test_next_check'] = time() + 2;
+		Updatronix_Schedule_Context::reset_cache();
+
+		$hold     = time() + 1;
+		$now      = time();
+		$eligible = $this->invoke_static( 'eligible_at_for_log', array( $hold, $now ) );
+
+		$this->assertGreaterThanOrEqual( $hold, $eligible );
+		$this->assertNotSame( max( $hold, $now ), $eligible, 'The schedule path must not be replaced by the fallback.' );
 	}
 
 	/**
@@ -531,6 +580,33 @@ final class AutoUpdateDelayBehaviorTest extends TestCase {
 	}
 
 	/**
+	 * A core offer not marked `autoupdate` must not keep its ledger row.
+	 *
+	 * @return void
+	 */
+	public function test_prune_drops_a_core_row_not_marked_autoupdate(): void {
+		$this->enable_delay( 1 );
+
+		$hash = hash( 'sha256', 'core|6.5.0|6.6.1' );
+		$aged = time() - 2 * DAY_IN_SECONDS;
+
+		$GLOBALS['updatronix_test_site_transients']['update_core'] = (object) array(
+			'updates' => array(
+				(object) array(
+					'response' => 'upgrade',
+					'current'  => '6.5.0',
+					'version'  => '6.6.1',
+				),
+			),
+		);
+		$GLOBALS['updatronix_test_options'][ Updatronix_AutoUpdateDelay::OPTION_LEDGER ] = wp_json_encode( array( $hash => $aged ) );
+
+		Updatronix_AutoUpdateDelay::filter_plugin( true, $this->plugin_offer() );
+
+		$this->assertArrayNotHasKey( $hash, $this->ledger(), 'A core offer not marked autoupdate must not keep its ledger row.' );
+	}
+
+	/**
 	 * Distinct offers must get distinct ledger rows.
 	 *
 	 * @return void
@@ -660,6 +736,23 @@ final class AutoUpdateDelayBehaviorTest extends TestCase {
 			$this->ledger(),
 			'A zero-length soak must not touch the ledger.'
 		);
+	}
+
+	/**
+	 * A non-numeric delay filter value must cast to zero and bypass the soak.
+	 *
+	 * @return void
+	 */
+	public function test_non_numeric_delay_filter_falls_back_to_zero(): void {
+		$this->enable_delay( 7 );
+
+		add_filter(
+			'updatronix_auto_update_delay_seconds',
+			static fn (): string => 'not-a-number'
+		);
+
+		$this->assertTrue( Updatronix_AutoUpdateDelay::filter_plugin( true, $this->plugin_offer() ) );
+		$this->assertSame( array(), $this->ledger(), 'A non-numeric delay must cast to zero and bypass the soak.' );
 	}
 
 	/**

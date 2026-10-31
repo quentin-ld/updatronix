@@ -101,4 +101,26 @@ final class ExportBodyBuilderStatusTest extends TestCase {
 		self::assertSame( 'Mystery', $this->status_label( 'mystery' ) );
 		self::assertSame( 'Info', $this->status_label( '' ) );
 	}
+
+	/**
+	 * Every status vocabulary arm maps to its label.
+	 *
+	 * @return void
+	 */
+	public function test_status_label_covers_the_status_vocabulary(): void {
+		$labels = array(
+			'success'   => 'Success',
+			'error'     => 'Failed',
+			'failed'    => 'Failed',
+			'errors'    => 'Failed',
+			'cancelled' => 'Cancelled',
+			'delayed'   => 'Delayed',
+			'info'      => 'Info',
+			'warning'   => 'Warning',
+		);
+
+		foreach ( $labels as $status => $label ) {
+			self::assertSame( $label, $this->status_label( $status ), 'status_label(' . $status . ')' );
+		}
+	}
 }

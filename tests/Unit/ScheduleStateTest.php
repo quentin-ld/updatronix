@@ -1062,4 +1062,108 @@ final class ScheduleStateTest extends TestCase {
 			)
 		);
 	}
+
+	/**
+	 * A locked item without a reason falls back to the native reason.
+	 *
+	 * @return void
+	 */
+	public function test_locked_reason_defaults_to_native(): void {
+		$out = $this->calc(
+			array(
+				'lock' => array(
+					'state'   => 'locked',
+					'manager' => 'Git',
+				),
+			)
+		);
+
+		self::assertSame( 'version_locked_native', $out['reason_code'] );
+	}
+
+	/**
+	 * A blocked policy without a reason falls back to the shield reason.
+	 *
+	 * @return void
+	 */
+	public function test_blocked_reason_defaults_to_shield_policy_block(): void {
+		$out = $this->calc( array( 'policy' => array( 'state' => 'blocked' ) ) );
+
+		self::assertSame( 'shield_policy_block', $out['reason_code'] );
+	}
+
+	/**
+	 * A waiting flow without a reason falls back to the flow reason.
+	 *
+	 * @return void
+	 */
+	public function test_waiting_reason_defaults_to_flow_waiting_predecessor(): void {
+		$out = $this->calc(
+			array(
+				'flow' => array(
+					'state'       => 'waiting',
+					'waiting_for' => 'Alpha',
+				),
+			)
+		);
+
+		self::assertSame( 'flow_waiting_predecessor', $out['reason_code'] );
+	}
+
+	/**
+	 * The formatter is publicly callable with the site formats.
+	 *
+	 * @return void
+	 */
+	public function test_format_datetime_is_public(): void {
+		self::assertNotSame(
+			'',
+			Updatronix_Schedule_State::format_datetime(
+				ScheduleInput::NOW,
+				ScheduleInput::zone( 'UTC' ),
+				'',
+				''
+			)
+		);
+	}
+
+	/**
+	 * A queue position of zero is not a queued item.
+	 *
+	 * @return void
+	 */
+	public function test_queue_position_zero_is_not_queued(): void {
+		$out = $this->calc(
+			array(
+				'hold_enabled' => false,
+				'hold_days'    => 0,
+				'queue'        => array(
+					'state'    => 'active',
+					'position' => 0,
+				),
+			)
+		);
+
+		self::assertNotSame( Updatronix_Schedule_State::STATE_QUEUED, $out['state'] );
+	}
+
+	/**
+	 * A positive queue position is queued.
+	 *
+	 * @return void
+	 */
+	public function test_queue_position_one_is_queued(): void {
+		$out = $this->calc(
+			array(
+				'hold_enabled' => false,
+				'hold_days'    => 0,
+				'queue'        => array(
+					'state'    => 'active',
+					'position' => 1,
+				),
+			)
+		);
+
+		self::assertSame( Updatronix_Schedule_State::STATE_QUEUED, $out['state'] );
+	}
 }

@@ -226,4 +226,168 @@ final class ExportBodyBuilderRenderTest extends TestCase {
 		$this->assertStringContainsString( 'Cancelled', $result['body'] );
 		$this->assertStringNotContainsString( 'Success', $result['body'] );
 	}
+
+	/**
+	 * Invoke a private static method.
+	 *
+	 * @param string $method Method name.
+	 * @param mixed  $arg    Single argument.
+	 * @return mixed
+	 */
+	private function invoke_private( string $method, $arg ) {
+		$reflection = new \ReflectionMethod(
+			Updatronix_Export_Body_Builder::class,
+			$method
+		);
+		$reflection->setAccessible( true );
+
+		return $reflection->invoke( null, $arg );
+	}
+
+	/**
+	 * Every column key maps to its heading.
+	 *
+	 * @return void
+	 */
+	public function test_column_heading_covers_the_allowlist(): void {
+		$headings = array(
+			'category'         => 'Category',
+			'name'             => 'Element',
+			'action'           => 'Action',
+			'versions'         => 'Version',
+			'dates'            => 'Date',
+			'context'          => 'Run context',
+			'user'             => 'User',
+			'status'           => 'Status',
+			'reason'           => 'Reason',
+			'state'            => 'State',
+			'origin'           => 'Origin',
+			'pass'             => 'Pass',
+			'chain'            => 'Chain',
+			'next_eligible'    => 'Next eligible',
+			'decision_context' => 'Decision context',
+			'retained'         => 'Retained',
+		);
+
+		foreach ( $headings as $key => $heading ) {
+			self::assertSame( $heading, $this->invoke_private( 'column_heading_for', $key ), 'column_heading_for(' . $key . ')' );
+		}
+
+		self::assertSame( '', $this->invoke_private( 'column_heading_for', 'unknown' ) );
+	}
+
+	/**
+	 * Every action type maps to its display label.
+	 *
+	 * @return void
+	 */
+	public function test_action_type_display_label_covers_the_vocabulary(): void {
+		$labels = array(
+			'update'             => 'Update',
+			'downgrade'          => 'Rollback',
+			'install'            => 'Install',
+			'same_version'       => 'Reinstall',
+			'failed'             => 'Failed',
+			'uninstall'          => 'Uninstall',
+			'prevented'          => 'Prevented',
+			'incompatible'       => 'Incompatible',
+			'disabled'           => 'Disabled',
+			'safe_mode_disabled' => 'Auto-updates disabled by Safe Mode',
+		);
+
+		foreach ( $labels as $action => $label ) {
+			self::assertSame( $label, $this->invoke_private( 'action_type_display_label', $action ), 'action_type_display_label(' . $action . ')' );
+		}
+
+		self::assertSame( 'custom', $this->invoke_private( 'action_type_display_label', 'custom' ) );
+	}
+
+	/**
+	 * The retained flag adds the Retained cell only when set.
+	 *
+	 * @return void
+	 */
+	public function test_render_retained_label(): void {
+		$retained = Updatronix_Export_Body_Builder::render(
+			array( $this->row( array( 'retained' => 1 ) ) ),
+			false,
+			array(),
+			'',
+			100000
+		);
+		$plain    = Updatronix_Export_Body_Builder::render(
+			array( $this->row( array( 'retained' => 0 ) ) ),
+			false,
+			array(),
+			'',
+			100000
+		);
+
+		$this->assertSame( 2, substr_count( $retained['body'], 'Retained' ) );
+		$this->assertSame( 0, substr_count( $plain['body'], 'Retained' ) );
+	}
+
+	/**
+	 * A merged group is ordered by created_at before the first/last parts.
+	 *
+	 * @return void
+	 */
+	public function test_render_merged_group_is_sorted_by_created_at(): void {
+		$result = Updatronix_Export_Body_Builder::render(
+			array(
+				$this->row(
+					array(
+						'created_at'     => '2026-06-11 09:00:00',
+						'version_before' => '2.0',
+						'version_after'  => '2.1',
+					)
+				),
+				$this->row(
+					array(
+						'created_at'     => '2026-06-10 09:00:00',
+						'version_before' => '1.0',
+						'version_after'  => '2.0',
+					)
+				),
+			),
+			true,
+			array(),
+			'',
+			100000
+		);
+
+		$this->assertStringContainsString( '1.0', $result['body'] );
+	}
+
+	/**
+	 * The version range picks the lowest and highest values.
+	 *
+	 * @return void
+	 */
+	public function test_render_version_range_picks_min_and_max(): void {
+		$result = Updatronix_Export_Body_Builder::render(
+			array(
+				$this->row(
+					array(
+						'created_at'     => '2026-06-10 09:00:00',
+						'version_before' => '2.0',
+						'version_after'  => '3.0',
+					)
+				),
+				$this->row(
+					array(
+						'created_at'     => '2026-06-11 09:00:00',
+						'version_before' => '1.0',
+						'version_after'  => '2.0',
+					)
+				),
+			),
+			true,
+			array(),
+			'',
+			100000
+		);
+
+		$this->assertStringContainsString( '1.0 → 3.0', $result['body'] );
+	}
 }

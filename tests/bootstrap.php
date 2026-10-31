@@ -152,6 +152,31 @@ if (!function_exists('add_filter')) {
         $GLOBALS['_updatronix_filters'][$tag][] = [$callback, $priority, $accepted_args];
     }
 
+    if (!function_exists('get_bloginfo')) {
+        /**
+         * Stub for WordPress get_bloginfo() in unit tests.
+         *
+         * @param string $show   What to return.
+         * @param string $filter Filter.
+         * @return string
+         */
+        function get_bloginfo(string $show = '', string $filter = 'raw'): string {
+            return 'version' === $show ? '6.5' : 'Test Site';
+        }
+    }
+
+    if (!function_exists('wp_next_scheduled')) {
+        /**
+         * Stub for WordPress wp_next_scheduled() in unit tests.
+         *
+         * @param string $hook Hook name.
+         * @return int|false
+         */
+        function wp_next_scheduled(string $hook): int|false {
+            return (int) ( $GLOBALS['updatronix_test_next_check'] ?? false );
+        }
+    }
+
     /**
      * Remove a filter callback.
      *

@@ -792,4 +792,27 @@ final class SecurityTest extends TestCase {
 
 		$this->assertStringNotContainsString( '/tmp/some-dir/file.php', $traced );
 	}
+
+	/**
+	 * The allowed action types are publicly readable and filterable.
+	 *
+	 * @return void
+	 */
+	public function test_get_allowed_action_types_is_public(): void {
+		$types = Updatronix_Security::get_allowed_action_types();
+
+		self::assertContains( 'update', $types );
+	}
+
+	/**
+	 * The redaction helper is publicly callable by the logging pipeline.
+	 *
+	 * @return void
+	 */
+	public function test_redact_text_is_public(): void {
+		self::assertSame(
+			'[redacted-url]',
+			Updatronix_Security::redact_text( 'https://example.test/package.zip' )
+		);
+	}
 }
