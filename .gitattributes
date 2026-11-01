@@ -21,6 +21,7 @@
 /vendor export-ignore
 
 # Files
+assets/build/*.asset.php whitespace=-blank-at-eol
 *.sql export-ignore
 *.tar.gz export-ignore
 *.zip export-ignore

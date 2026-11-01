@@ -6,6 +6,8 @@ const { test, expect } = require( '@wordpress/e2e-test-utils-playwright' );
 const {
 	seedScheduleFixtures,
 	clearScheduleFixtures,
+	installFixtures,
+	removeFixtures,
 	installCronDisabledFixture,
 	removeCronDisabledFixture,
 } = require( './helpers/wp' );
@@ -14,12 +16,14 @@ test.describe( 'Schedule native surfaces', () => {
 	let fixtures;
 
 	test.beforeAll( () => {
+		installFixtures();
 		fixtures = seedScheduleFixtures();
 	} );
 
 	test.afterAll( () => {
 		removeCronDisabledFixture();
 		clearScheduleFixtures();
+		removeFixtures();
 	} );
 
 	test( 'plugin row shows the hold state, not the next check', async ( {

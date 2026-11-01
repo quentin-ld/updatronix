@@ -29,7 +29,7 @@ test.describe( 'Schedule', () => {
 		).toBeVisible();
 		await expect( page.getByText( /Times use/i ) ).toBeVisible();
 
-		const hold = page.getByLabel( 'Hold new releases for (days)' );
+		const hold = page.getByLabel( 'Hold period (days)' );
 		await hold.fill( '366' );
 		await expect(
 			page.getByText( 'Enter a whole number from 0 to 365.' )
@@ -58,6 +58,9 @@ test.describe( 'Schedule', () => {
 
 		// The default frequency (WordPress default) ignores the time, so the
 		// picker starts disabled. Daily uses it.
+		await expect( page.getByLabel( 'Frequency' ) ).toContainText(
+			'WordPress default'
+		);
 		await page.getByLabel( 'Frequency' ).click();
 		await page
 			.getByRole( 'option', { name: 'Daily', exact: true } )

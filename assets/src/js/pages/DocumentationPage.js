@@ -11,7 +11,7 @@ import { getTabUrl } from '../shell/routes';
 import wpds from '../shell/wpds';
 import { DOCUMENTATION_URLS } from './staticLinks';
 
-const { Badge, Card, Icon, Text } = wpds.ui;
+const { Card, Icon, Text } = wpds.ui;
 const { arrowRight, code, external, page, starFilled } = wpds.icons;
 
 const GUIDES = [
@@ -19,22 +19,21 @@ const GUIDES = [
 		kicker: __( 'Plugin guide', 'updatronix' ),
 		title: __( 'Updatronix documentation', 'updatronix' ),
 		description: __(
-			'Install Updatronix, understand each update setting, and read the update log.',
+			'Install Updatronix, then use the guide to understand each update setting and read the update log.',
 			'updatronix'
 		),
 		href: DOCUMENTATION_URLS.plugin,
 		icon: page,
 	},
 	{
-		kicker: __( 'Pro guide', 'updatronix' ),
+		kicker: __( 'Updatronix 3000 guide', 'updatronix' ),
 		title: __( 'Updatronix 3000 documentation', 'updatronix' ),
 		description: __(
-			'License activation, Update Shield, safe mode, and the Pro maintenance workflow.',
+			'License activation, Update Shield, Safe mode, and the Updatronix 3000 maintenance workflow.',
 			'updatronix'
 		),
 		href: DOCUMENTATION_URLS.pro,
 		icon: starFilled,
-		pro: true,
 	},
 	{
 		kicker: __( 'Developer reference', 'updatronix' ),
@@ -78,13 +77,7 @@ export default function DocumentationPage( { destination, onNavigate } ) {
 							<Card.Root className="updatronix-doc-card-root">
 								<Card.Content className="updatronix-doc-card-content">
 									<div className="updatronix-doc-top">
-										<span
-											className={ `updatronix-doc-icon${
-												guide.pro
-													? ' updatronix-doc-icon--pro'
-													: ''
-											}` }
-										>
+										<span className="updatronix-doc-icon">
 											<Icon
 												icon={ guide.icon }
 												size={ 24 }
@@ -96,11 +89,6 @@ export default function DocumentationPage( { destination, onNavigate } ) {
 											size={ 18 }
 											aria-hidden="true"
 										/>
-										{ guide.pro && (
-											<Badge intent="stable">
-												{ __( 'Pro', 'updatronix' ) }
-											</Badge>
-										) }
 									</div>
 
 									<div className="updatronix-doc-copy">

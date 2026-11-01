@@ -221,7 +221,7 @@ export function usePluginSettings() {
 				const message =
 					e?.message ||
 					__(
-						'Your settings could not be saved. Check your connection and try again.',
+						'Your settings could not be saved. Check your connection, and then try again.',
 						'updatronix'
 					);
 				createErrorNotice( message, {

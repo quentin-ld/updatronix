@@ -175,8 +175,12 @@ The tells, in rough order of how often they appear here:
 
 - **The hedge stack.** "It's worth noting that this may potentially cause
   issues." One hedge, or none. "May cause issues" is already uncertain.
-- **The triad.** Three adjectives or three examples where one was needed.
-  "Fast, reliable, and scalable" says nothing the reader can act on.
+- **The tricolon.** Three parallel items where the content has two or four.
+  "Fast, reliable, and scalable" says nothing the reader can act on. Three is a
+  rhythm, not a quota: keep it only for three real items, and never put two
+  tricolons in one paragraph or a colon before exactly three comma-separated
+  items. Do not fix it by chopping the sentence into fragments; vary the
+  sentence, not its integrity.
 - **The symmetry.** Every paragraph the same length, every list the same shape.
   Real prose is uneven because real points are uneven.
 - **The summary paragraph.** A closing paragraph beginning "In conclusion" or
@@ -196,6 +200,9 @@ to keep going. Say the thing, then explain it.
 
 **Be specific.** "It broke" is not a bug report. "The second call returned an
 empty string when the cache was cold" is. Names, numbers, file paths.
+
+**Use the number the content has.** Two and four are not failures; the third
+item is often there only to close the rhythm.
 
 **Vary the length.** A short sentence after two long ones lands. That is rhythm,
 and it is the difference between prose and a specification.

@@ -129,7 +129,7 @@ function seedUpdateOffer() {
 function seedScheduleFixtures() {
 	const php = `
 		$now    = time();
-		$plugin = 'updatronix/updatronix.php';
+		$plugin = 'plugin-check/plugin.php';
 		$theme  = get_stylesheet();
 
 		update_site_option( 'updatronix_network_schedule', wp_json_encode( array(

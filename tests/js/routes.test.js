@@ -46,10 +46,24 @@ describe( 'DESTINATIONS', () => {
 		for ( const destination of DESTINATIONS ) {
 			expect( groupIds.has( destination.group ) ).toBe( true );
 			expect( destination.label ).toBeTruthy();
-			expect( destination.description ).toBeTruthy();
 			expect( destination.icon ).toBeTruthy();
 			expect( [ 'free', 'pro' ] ).toContain( destination.edition );
 		}
+
+		const described = DESTINATIONS.filter(
+			( destination ) => destination.slug !== 'documentation'
+		);
+		expect(
+			described.every( ( destination ) =>
+				Boolean( destination.description )
+			)
+		).toBe( true );
+	} );
+
+	it( 'keeps the Documentation page description empty', () => {
+		expect(
+			getDestination( 'documentation', DESTINATIONS )?.description
+		).toBeUndefined();
 	} );
 
 	it( 'keeps the four groups in the rail order', () => {

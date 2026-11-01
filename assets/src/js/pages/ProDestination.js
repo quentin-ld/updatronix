@@ -147,13 +147,13 @@ export default function ProDestination( {
 					<EmptyState.Icon icon={ starFilled } />
 					<EmptyState.Title>
 						{ __(
-							'This Pro panel is not available yet.',
+							'This panel is not available in this version of Updatronix 3000.',
 							'updatronix'
 						) }
 					</EmptyState.Title>
 					<EmptyState.Description>
 						{ __(
-							'The panel is part of the next Updatronix 3000 update. Your current Pro tools remain available on the Updatronix 3000 page.',
+							'Your Updatronix 3000 tools are on that page.',
 							'updatronix'
 						) }
 					</EmptyState.Description>
@@ -177,13 +177,13 @@ export default function ProDestination( {
 				<EmptyState.Icon icon={ starFilled } />
 				<EmptyState.Title>
 					{ __(
-						'Updatronix 3000 is the Pro edition.',
+						'Updatronix 3000 adds more update tools.',
 						'updatronix'
 					) }
 				</EmptyState.Title>
 				<EmptyState.Description>
 					{ __(
-						'It adds Update Shield, Update Flow, white label, and advanced exports (CSV and JSON). XML export and development tools are on the roadmap. No Pro feature is active on this site.',
+						'Updatronix 3000 adds Update Shield, Update Flow, White label, and exports in CSV and JSON. No Updatronix 3000 feature is active on this site.',
 						'updatronix'
 					) }
 				</EmptyState.Description>

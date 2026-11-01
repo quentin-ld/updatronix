@@ -64,7 +64,7 @@ export function getStatusLabel( status ) {
 		return __( 'Failed', 'updatronix' );
 	}
 	if ( s === 'cancelled' ) {
-		return __( 'Cancelled', 'updatronix' );
+		return __( 'Canceled', 'updatronix' );
 	}
 	if ( s === 'delayed' ) {
 		return __( 'Delayed', 'updatronix' );
@@ -289,7 +289,7 @@ export function getDecisionFacts( log ) {
 	if ( row.predecessor ) {
 		facts.push( {
 			key: 'predecessor',
-			label: __( 'Predecessor', 'updatronix' ),
+			label: __( 'Earlier step', 'updatronix' ),
 			value: String( row.predecessor ),
 		} );
 	}

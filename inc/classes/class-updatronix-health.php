@@ -450,7 +450,7 @@ final class Updatronix_Health {
 			$current,
 			'good',
 			__(
-				'Supported PHP version. The update stack is tested through PHP 8.4.',
+				'Supported PHP version. Updatronix tests its update tools through PHP 8.4.',
 				'updatronix'
 			)
 		);
@@ -493,7 +493,7 @@ final class Updatronix_Health {
 				$value,
 				'critical',
 				__(
-					'Less than 100 MB is free. Free space before the next update.',
+					'Less than 100 MB is free. Free space before the next update.',
 					'updatronix'
 				)
 			);
@@ -506,7 +506,7 @@ final class Updatronix_Health {
 				$value,
 				'attention',
 				__(
-					'Keep at least 500 MB free so update archives can be unpacked.',
+					'Keep at least 500 MB free so update archives can be unpacked.',
 					'updatronix'
 				)
 			);
@@ -863,11 +863,11 @@ final class Updatronix_Health {
 				'value' => (string) ini_get( 'memory_limit' ),
 			),
 			array(
-				'label' => __( 'Max execution time', 'updatronix' ),
+				'label' => __( 'Maximum execution time', 'updatronix' ),
 				'value' => (string) ini_get( 'max_execution_time' ),
 			),
 			array(
-				'label' => __( 'Upload max filesize', 'updatronix' ),
+				'label' => __( 'Maximum upload file size', 'updatronix' ),
 				'value' => (string) ini_get( 'upload_max_filesize' ),
 			),
 			array(
@@ -960,7 +960,7 @@ final class Updatronix_Health {
 			return new \WP_Error(
 				'updatronix_health_expired',
 				__(
-					'This failure is older than 30 days and cannot be retried.',
+					'This failure is older than 30 days and cannot be retried.',
 					'updatronix'
 				),
 				array( 'status' => 400 )
@@ -1089,7 +1089,7 @@ final class Updatronix_Health {
 				is_wp_error( $result ) ? 'error' : 'success',
 				is_wp_error( $result )
 					? $result->get_error_message()
-					: __( 'Retry finished successfully.', 'updatronix' ),
+					: __( 'Retry finished.', 'updatronix' ),
 				'',
 				'automatic',
 				'single',

@@ -18,7 +18,7 @@ surface_cases:
       - Filter by reason, state, origin, and the pass/chain deep links.
       - Open details and the export modal.
     assertions:
-      - The feed shows reason and state for the new row and “Legacy — reason not recorded” for the old one.
+      - The feed shows reason and state for the new row and “Legacy: reason not recorded” for the old one.
       - The pass deep link returns the matching rows; the chain deep link returns its row.
       - The details section shows state, reason, origin, stage, pass, chain, predecessor, target, next eligible.
       - The export offers reason, state, origin, pass, chain, next eligible, decision context, and retained.

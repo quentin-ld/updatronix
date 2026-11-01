@@ -88,10 +88,10 @@ final class ExportBodyBuilderStatusTest extends TestCase {
 	}
 
 	/**
-	 * Cancelled keeps its localized "Cancelled" label.
+	 * Cancelled keeps its localized "Canceled" label.
 	 */
 	public function test_status_label_cancelled_renders_cancelled(): void {
-		self::assertSame( 'Cancelled', $this->status_label( 'cancelled' ) );
+		self::assertSame( 'Canceled', $this->status_label( 'cancelled' ) );
 	}
 
 	/**
@@ -113,7 +113,7 @@ final class ExportBodyBuilderStatusTest extends TestCase {
 			'error'     => 'Failed',
 			'failed'    => 'Failed',
 			'errors'    => 'Failed',
-			'cancelled' => 'Cancelled',
+			'cancelled' => 'Canceled',
 			'delayed'   => 'Delayed',
 			'info'      => 'Info',
 			'warning'   => 'Warning',

@@ -17,7 +17,6 @@ const {
 	CheckboxControl,
 	Fieldset,
 	InputControl,
-	Notice,
 	SearchableChipSelectControl,
 	Stack,
 	SwitchControl,
@@ -277,7 +276,7 @@ export const SettingsPanel = memo( function SettingsPanelForm( {
 									'updatronix'
 								) }
 								description={ __(
-									'Between 1 and 365 days. A daily cleanup removes older entries.',
+									'Between 1 and 365\u00A0days. A daily cleanup removes older entries.',
 									'updatronix'
 								) }
 								type="number"
@@ -397,7 +396,7 @@ export const SettingsPanel = memo( function SettingsPanelForm( {
 
 							<SwitchControl
 								label={ __(
-									'Disable all update emails',
+									'Turn off all update emails',
 									'updatronix'
 								) }
 								description={ __(
@@ -418,18 +417,6 @@ export const SettingsPanel = memo( function SettingsPanelForm( {
 						</Stack>
 					</Section>
 				</div>
-
-				<Notice.Root intent="warning">
-					<Notice.Title>
-						{ __( 'Recovery mode emails stay on', 'updatronix' ) }
-					</Notice.Title>
-					<Notice.Description>
-						{ __(
-							'They contain the recovery link. Do not disable them, or you could lock yourself out of the site.',
-							'updatronix'
-						) }
-					</Notice.Description>
-				</Notice.Root>
 
 				<Section
 					title={ __( 'Data', 'updatronix' ) }
@@ -467,21 +454,6 @@ export const SettingsPanel = memo( function SettingsPanelForm( {
 						}
 					/>
 				</Section>
-
-				<div className="updatronix-surface-note">
-					<Text variant="body-sm">
-						{ __(
-							'One save for the whole surface. Toggles are staged until you choose Save changes, and nothing is persisted on this page.',
-							'updatronix'
-						) }
-					</Text>
-				</div>
-				<Text variant="body-sm" className="updatronix-muted">
-					{ __(
-						'Email delivery is handled by WordPress; Updatronix only changes who receives update emails.',
-						'updatronix'
-					) }
-				</Text>
 			</div>
 
 			<SaveBar

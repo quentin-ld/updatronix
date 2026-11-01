@@ -83,7 +83,7 @@ export function ItemsDataViewSection( {
 		() => [
 			{
 				id: 'auto_update',
-				label: __( 'Auto-update', 'updatronix' ),
+				label: __( 'Auto updates', 'updatronix' ),
 				render: ( { item } ) => (
 					<span className="updatronix-autoupdates__toggle">
 						{ item.update_data_available === false ? (
@@ -110,7 +110,7 @@ export function ItemsDataViewSection( {
 									item.auto_update_locked
 										? item.auto_update_locked_reason ||
 											__(
-												'Locked by Safe Mode due to incompatibility',
+												'Locked by Safe mode due to incompatibility',
 												'updatronix'
 											)
 										: undefined
@@ -123,7 +123,7 @@ export function ItemsDataViewSection( {
 										return sprintf(
 											/* translators: %s: plugin or theme name */
 											__(
-												'Disable auto-update for %s',
+												'Turn off automatic updates for %s',
 												'updatronix'
 											),
 											item.name
@@ -132,7 +132,7 @@ export function ItemsDataViewSection( {
 									return sprintf(
 										/* translators: %s: plugin or theme name */
 										__(
-											'Enable auto-update for %s',
+											'Turn on automatic updates for %s',
 											'updatronix'
 										),
 										item.name

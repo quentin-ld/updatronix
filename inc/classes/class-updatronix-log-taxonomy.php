@@ -262,9 +262,9 @@ final class Updatronix_Log_Taxonomy {
 				/* translators: Log origin: the automatic update pass started the action. */
 				'automatic' => __( 'Automatic', 'updatronix' ),
 				/* translators: Log origin: an update Flow chain started the action. */
-				'flow'      => __( 'Flow', 'updatronix' ),
+				'flow'      => __( 'Update Flow', 'updatronix' ),
 				/* translators: Log origin: the update queue started the action. */
-				'queue'     => __( 'Queue', 'updatronix' ),
+				'queue'     => __( 'Update queue', 'updatronix' ),
 				/* translators: Log origin: an update happened outside WordPress. */
 				'external'  => __( 'External', 'updatronix' ),
 				/* translators: Log origin: Site Health started the action. */
@@ -394,7 +394,7 @@ final class Updatronix_Log_Taxonomy {
 					'status'   => 'success',
 					'blocking' => false,
 					/* translators: Log reason: one automatic update pass completed. */
-					'label'    => __( 'Automatic pass summary', 'updatronix' ),
+					'label'    => __( 'Automatic update summary', 'updatronix' ),
 				),
 				'already_latest'                 => array(
 					'state'    => 'skipped',
@@ -416,7 +416,7 @@ final class Updatronix_Log_Taxonomy {
 					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 					/* translators: Log reason: WordPress holds no update offer for the item. */
-					'label'    => __( 'No update offered', 'updatronix' ),
+					'label'    => __( 'No update available', 'updatronix' ),
 				),
 				'no_longer_offered'              => array(
 					'state'    => 'skipped',
@@ -427,7 +427,7 @@ final class Updatronix_Log_Taxonomy {
 					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 					/* translators: Log reason: the update offer disappeared before execution. */
-					'label'    => __( 'The update is no longer offered', 'updatronix' ),
+					'label'    => __( 'This update is no longer available', 'updatronix' ),
 				),
 				'flow_offer_stale'               => array(
 					'state'    => 'skipped',
@@ -438,7 +438,7 @@ final class Updatronix_Log_Taxonomy {
 					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 					/* translators: Log reason: the offered target changed between planning and execution. */
-					'label'    => __( 'The update offer changed', 'updatronix' ),
+					'label'    => __( 'A different update is available', 'updatronix' ),
 				),
 				'unknown_offer'                  => array(
 					'state'    => 'waiting',
@@ -449,7 +449,7 @@ final class Updatronix_Log_Taxonomy {
 					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 					/* translators: Log reason: the offer data is stale, absent, or unreadable. */
-					'label'    => __( 'The update offer is unavailable', 'updatronix' ),
+					'label'    => __( 'The update is unavailable', 'updatronix' ),
 				),
 				'flow_waiting_predecessor'       => array(
 					'state'    => 'waiting',
@@ -460,7 +460,7 @@ final class Updatronix_Log_Taxonomy {
 					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 					/* translators: Log reason: at least one incoming Flow predecessor is not done. */
-					'label'    => __( 'Waiting for a predecessor', 'updatronix' ),
+					'label'    => __( 'Waiting for an earlier step', 'updatronix' ),
 				),
 				'flow_predecessor_failed'        => array(
 					'state'    => 'waiting',
@@ -468,7 +468,7 @@ final class Updatronix_Log_Taxonomy {
 					'status'   => 'info',
 					'blocking' => false,
 					/* translators: Log reason: a Flow predecessor failed in this pass. */
-					'label'    => __( 'A predecessor failed', 'updatronix' ),
+					'label'    => __( 'An earlier step failed', 'updatronix' ),
 				),
 				'flow_predecessor_unknown'       => array(
 					'state'    => 'waiting',
@@ -479,7 +479,7 @@ final class Updatronix_Log_Taxonomy {
 					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 					/* translators: Log reason: a Flow predecessor has no readable update offer. */
-					'label'    => __( 'A predecessor has no update offer', 'updatronix' ),
+					'label'    => __( 'An earlier step has no update available', 'updatronix' ),
 				),
 				'queue_waiting_turn'             => array(
 					'state'    => 'waiting',
@@ -554,7 +554,7 @@ final class Updatronix_Log_Taxonomy {
 					'status'   => 'warning',
 					'blocking' => true,
 					/* translators: Log reason: Composer manages the item. */
-					'label'    => __( 'Managed by Composer', 'updatronix' ),
+					'label'    => __( 'Installed with Composer', 'updatronix' ),
 				),
 				'version_lock_unknown'           => array(
 					'state'    => 'blocked',
@@ -566,7 +566,7 @@ final class Updatronix_Log_Taxonomy {
 					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 					/* translators: Log reason: version-control evidence exists but cannot be read. */
 					'label'    => __(
-						'Version control state could not be read',
+						'The version-control state could not be read',
 						'updatronix'
 					),
 				),
@@ -622,7 +622,7 @@ final class Updatronix_Log_Taxonomy {
 					'status'   => 'warning',
 					'blocking' => true,
 					/* translators: Log reason: a Flow predecessor is policy-blocked. */
-					'label'    => __( 'A predecessor is blocked', 'updatronix' ),
+					'label'    => __( 'An earlier step is blocked', 'updatronix' ),
 				),
 				'flow_predecessor_locked'        => array(
 					'state'    => 'blocked',
@@ -631,7 +631,7 @@ final class Updatronix_Log_Taxonomy {
 					'blocking' => true,
 					/* translators: Log reason: a Flow predecessor is version-locked. */
 					'label'    => __(
-						'A predecessor is managed by version control',
+						'An earlier step is managed by version control',
 						'updatronix'
 					),
 				),
@@ -641,7 +641,7 @@ final class Updatronix_Log_Taxonomy {
 					'status'   => 'warning',
 					'blocking' => true,
 					/* translators: Log reason: a Flow predecessor needs review. */
-					'label'    => __( 'A predecessor needs review', 'updatronix' ),
+					'label'    => __( 'An earlier step needs review', 'updatronix' ),
 				),
 				'flow_predecessor_not_managed'   => array(
 					'state'    => 'blocked',
@@ -653,7 +653,7 @@ final class Updatronix_Log_Taxonomy {
 					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 					/* translators: Log reason: a Flow predecessor is not opted into automatic updates. */
 					'label'    => __(
-						'A predecessor is not managed automatically',
+						'An earlier step is not managed automatically',
 						'updatronix'
 					),
 				),
@@ -663,7 +663,7 @@ final class Updatronix_Log_Taxonomy {
 					'status'   => 'warning',
 					'blocking' => true,
 					/* translators: Log reason: a Flow predecessor is no longer installed. */
-					'label'    => __( 'A predecessor is not installed', 'updatronix' ),
+					'label'    => __( 'An earlier step is not installed', 'updatronix' ),
 				),
 				'flow_predecessor_never_ready'   => array(
 					'state'    => 'blocked',
@@ -675,7 +675,7 @@ final class Updatronix_Log_Taxonomy {
 					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 					/* translators: Log reason: a Flow predecessor cannot update automatically. */
 					'label'    => __(
-						'A predecessor cannot update automatically',
+						'An earlier step cannot update automatically',
 						'updatronix'
 					),
 				),
@@ -718,7 +718,7 @@ final class Updatronix_Log_Taxonomy {
 					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 					/* translators: Log reason: the update-worker lease expired and the result is unknown. */
-					'label'    => __( 'The update lease expired', 'updatronix' ),
+					'label'    => __( 'The update lock expired', 'updatronix' ),
 				),
 				'partial_state'                  => array(
 					'state'    => 'uncertain',
@@ -837,7 +837,7 @@ final class Updatronix_Log_Taxonomy {
 					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 					/* translators: Log reason: there is no version-control evidence, so the check failed open. */
-					'label'    => __( 'Version control state was not verified', 'updatronix' ),
+					'label'    => __( 'The version-control state was not verified', 'updatronix' ),
 				),
 				'abandoned_advisory'             => array(
 					'state'    => 'info',
@@ -1142,7 +1142,7 @@ final class Updatronix_Log_Taxonomy {
 		// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 		// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 		/* translators: Shown for a log row that has no recorded reason; never guess one. */
-		return __( 'Legacy — reason not recorded', 'updatronix' );
+		return __( 'Legacy: reason not recorded', 'updatronix' );
 	}
 
 	/**

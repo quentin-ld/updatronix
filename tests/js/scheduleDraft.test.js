@@ -5,6 +5,7 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+	frequencySelectValue,
 	HOLD_VALIDATION_MESSAGE,
 	HOURS,
 	MAX_HOLD_DAYS,
@@ -13,16 +14,17 @@ import {
 	getSchedule,
 	holdRuleCopy,
 	holdRuleNote,
-	holdRuleRows,
 	isScheduleDirty,
 	isTimeValue,
 	joinTime,
 	manualCheckCopy,
 	normalizeTime,
 	recurrenceDescription,
+	recurrenceFromFrequency,
 	recurrenceUsesPreferredTime,
 	splitTime,
 	validateHoldDays,
+	WORDPRESS_DEFAULT_FREQUENCY,
 } from '../../assets/src/js/components/schedule/scheduleDraft.js';
 
 const SAVED = {
@@ -37,6 +39,29 @@ describe( 'getSchedule', () => {
 
 	it( 'falls back when the payload is missing', () => {
 		expect( getSchedule( null ).update_check.time ).toBe( '03:00' );
+	} );
+} );
+
+describe( 'frequency select value', () => {
+	it( 'maps the empty recurrence to the WordPress default sentinel and back', () => {
+		expect( frequencySelectValue( '' ) ).toBe(
+			WORDPRESS_DEFAULT_FREQUENCY
+		);
+		expect( recurrenceFromFrequency( WORDPRESS_DEFAULT_FREQUENCY ) ).toBe(
+			''
+		);
+	} );
+
+	it( 'round-trips every named recurrence unchanged', () => {
+		for ( const recurrence of [
+			'daily',
+			'twicedaily',
+			'hourly',
+			'weekly',
+		] ) {
+			expect( frequencySelectValue( recurrence ) ).toBe( recurrence );
+			expect( recurrenceFromFrequency( recurrence ) ).toBe( recurrence );
+		}
 	} );
 } );
 
@@ -173,7 +198,7 @@ describe( 'time picker helpers', () => {
 	it( 'explains each recurrence in one sentence', () => {
 		expect( recurrenceDescription( 'daily' ) ).toContain( 'every day' );
 		expect( recurrenceDescription( 'twicedaily' ) ).toContain(
-			'12 hours later'
+			'12\u00A0hours later'
 		);
 		expect( recurrenceDescription( 'hourly' ) ).toContain(
 			'ignores the preferred time'
@@ -208,7 +233,7 @@ describe( 'time picker helpers', () => {
 describe( 'next-run copy', () => {
 	it( 'states the hold rule and the earliest install for a positive hold', () => {
 		expect( holdRuleCopy( 2 ) ).toBe(
-			'New releases are held for 2 days after the first automatic check sees them; the earliest install is the first check at or after that.'
+			'New releases are held for 2 days after the first automatic check finds them. The earliest install is the first check at or after that.'
 		);
 		expect( holdRuleCopy( 1 ) ).toContain( 'held for 1 day ' );
 	} );
@@ -227,34 +252,17 @@ describe( 'next-run copy', () => {
 		const copy = manualCheckCopy();
 
 		expect( copy ).toContain( 'does not start the hold' );
-		expect( copy ).toContain( 'next automatic pass' );
+		expect( copy ).toContain( 'next automatic run' );
 	} );
 } );
 
 describe( 'hold rule copy', () => {
-	it( 'has one core row without a security exemption', () => {
-		const rows = holdRuleRows();
-		const core = rows.filter( ( row ) => /core/i.test( row.type ) );
-
-		expect( core ).toHaveLength( 1 );
-		expect( core[ 0 ].type ).toBe( 'Core releases' );
-		expect( core[ 0 ].withHold ).toBe(
-			'Deferred by the selected number of days'
-		);
-
-		const all = rows
-			.map( ( row ) => `${ row.type } ${ row.withHold } ${ row.manual }` )
-			.join( ' ' );
-		expect( all ).not.toContain( 'Installed immediately' );
-		expect( all ).not.toContain( 'security' );
-	} );
-
 	it( 'states the hold applies to every core automatic update', () => {
 		const note = holdRuleNote();
 
 		expect( note ).toContain( 'every core automatic update' );
 		expect( note ).not.toContain( 'skip' );
-		expect( note ).toContain( 'security-release flag' );
+		expect( note ).toContain( 'which releases are security releases' );
 	} );
 } );
 

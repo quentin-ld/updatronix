@@ -424,7 +424,7 @@ dimensions:
     source: inc/classes/class-updatronix-log-taxonomy.php
     risk: high
     tags: ["@free", "@logger"]
-    notes: Legacy rows show “Legacy — reason not recorded”.
+    notes: Legacy rows show “Legacy: reason not recorded”.
 
   - id: free.log.filters
     owner: free
@@ -514,7 +514,7 @@ dimensions:
     source: assets/src/js/components/activityLog/constants.js
     risk: medium
     tags: ["@free", "@pro", "@export"]
-    notes: Decision context is opt-in; element/version/date are always shown.
+    notes: Decision context is opt-in; element and version are always shown, and date is optional.
 
   - id: free.export.empty
     owner: free

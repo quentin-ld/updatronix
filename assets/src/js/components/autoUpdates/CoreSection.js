@@ -25,20 +25,20 @@ export function CoreSection( { core, constants, setCoreMode, busy } ) {
 	const options = [
 		{
 			label: __(
-				'Minor releases only (e.g. 6.4.1 to 6.4.2)',
+				'Minor releases only (for example, 6.4.1 to 6.4.2)',
 				'updatronix'
 			),
 			value: 'minor',
 		},
 		{
 			label: __(
-				'All releases, including major (e.g. 6.4 to 6.5)',
+				'All releases, including major (for example, 6.4 to 6.5)',
 				'updatronix'
 			),
 			value: 'all',
 		},
 		{
-			label: __( 'Disabled (no core auto-updates)', 'updatronix' ),
+			label: __( 'Disabled (no automatic core updates)', 'updatronix' ),
 			value: 'disabled',
 		},
 	];
@@ -55,7 +55,7 @@ export function CoreSection( { core, constants, setCoreMode, busy } ) {
 				lockingOnly
 			/>
 			<RadioControl
-				label={ __( 'Core auto-update mode', 'updatronix' ) }
+				label={ __( 'Core update mode', 'updatronix' ) }
 				selected={ core.mode }
 				options={ options }
 				onChange={ ( value ) => setCoreMode( value ) }

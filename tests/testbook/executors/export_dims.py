@@ -190,6 +190,19 @@ echo wp_json_encode( array( 'ok' => true ) );
 		ok( heading not in toggled_body, f"the {heading} column survived its toggle: {toggled_body[:400]}" )
 	ok( "Element" in toggled_body and "Retained" in toggled_body, "the toggles removed an always-on column" )
 
+	date_off = _export(
+		site,
+		{
+			"view": { "filters": [] },
+			"merge": False,
+			"columns": { "date": False },
+			"format": "txt",
+		},
+	)
+	date_off_body = _body( date_off )
+	ok( "Date" not in date_off_body, f"the Date column survived its toggle: {date_off_body[:400]}" )
+	ok( "Element" in date_off_body, "the Date toggle removed an always-on column" )
+
 	as_json = _export(
 		site,
 		{ "view": { "filters": [] }, "merge": False, "format": "json" },

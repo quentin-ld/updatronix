@@ -53,6 +53,17 @@ describe( 'buildXmlReport', () => {
 		expect( xml ).not.toContain( 'name="Category"' );
 	} );
 
+	it( 'omits the date when the Date column is off', () => {
+		const xml = buildXmlReport(
+			[ { element: 'WooCommerce', date: '2026-10-27 10:00' } ],
+			{ date: false }
+		);
+
+		expect( xml ).not.toContain( 'name="Date"' );
+		expect( xml ).not.toContain( '2026-10-27' );
+		expect( xml ).toContain( '<field name="Element">WooCommerce</field>' );
+	} );
+
 	it( 'returns an empty root for no rows', () => {
 		const xml = buildXmlReport( [] );
 

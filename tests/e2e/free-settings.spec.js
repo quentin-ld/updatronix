@@ -37,7 +37,7 @@ test.describe( 'Settings', () => {
 		await page.getByLabel( 'Retention period (days)' ).fill( '30' );
 
 		const emailOff = page.getByRole( 'switch', {
-			name: 'Disable all update emails',
+			name: 'Turn off all update emails',
 		} );
 		if ( 'true' === ( await emailOff.getAttribute( 'aria-checked' ) ) ) {
 			await emailOff.click();
@@ -94,7 +94,9 @@ test.describe( 'Settings', () => {
 
 		await admin.visitAdminPage( 'tools.php', 'page=updatronix&tab=logs' );
 		await expect(
-			page.getByText( /Entries older than 30 days/ )
+			page.getByText(
+				/The daily cleanup removes entries older than 30 days/
+			)
 		).toBeVisible();
 	} );
 } );

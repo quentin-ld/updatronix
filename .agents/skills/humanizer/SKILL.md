@@ -34,8 +34,9 @@ equally detectable way.
 ## How to work
 
 1. **Mark the tells**, strongest first. Read paragraph shape as well as
-   sentences: a contrast split across two sentences, three parallel examples, or
-   the same closer after every section is the same tell at a larger scale.
+   sentences: a contrast split across two sentences, a three-part shape that
+   returns after every section, or the same closer after every section is the
+   same tell at a larger scale.
 2. **Draft the rewrite.** Keep every supported claim. You may shorten dull parts,
    merge or split paragraphs and change the structure, but keep the information.
    **Never add a fact, name, number, date, quote or citation that is not in the
@@ -43,7 +44,9 @@ equally detectable way.
    for it or write a simpler sentence.
 3. **Check the draft.** Read it aloud. Search for the five tells that survive a
    rewrite most often: a not-X-but-Y contrast, a one-line closer, a dash, a
-   triad, a bold label.
+   tricolon, a bold label. Then check the count: no paragraph carries two
+   tricolons, and no colon opens onto exactly three items unless the content has
+   three parts.
 4. **Write the final version.** State each point naturally rather than patching
    flagged phrases one at a time. If a sentence stays awkward, rewrite the
    paragraph around its main point.
@@ -99,10 +102,30 @@ objection the text attributes and answers in full; drop the defence.
 
 A person may do any one of these on purpose, so the weaker ones need company.
 
-**6 · Forced triads.** Ideas arriving in threes to sound complete. Check that
-each item adds a distinct idea; merge examples, develop the strongest, or vary
-the structure when they do not. Keep three real items when the meaning needs
-three.
+**6 · Forced triads, and the tricolon.** Ideas arriving in threes to sound
+complete. The precise name is *tricolon*: three members of the same grammatical
+shape, often the same length (*isocolon*). Three is a rhythm, not a quota. Keep
+a group of three only when there are three real items; use two or four when the
+content has two or four; never add or remove an item to hold the rhythm.
+
+The strongest shapes are the **colon into a triple** (a colon opening onto
+exactly three comma-separated items: "separate ports, processes, and local
+state"), the **AI triple** (three imperative verbs with abstract objects:
+"stop X, order Y, and protect Z"), and the **tri-tricolon** (two or three such
+groups in one paragraph, or the same three-part shape after every section). The
+first sounds concrete; the second sounds authoritative without ranking the
+actions; the third is the one a reader notices.
+
+Rewrite by subordinating the actions ("By blocking incompatible updates, Shield
+protects version-controlled extensions"), by ordering them (cause → effect →
+benefit), or by naming the one action that matters. *Weak alone:* one tricolon
+can be deliberate; density and parallel shape decide.
+
+One ornamental tricolon per text is enough, and never two in the same
+paragraph. If the piece already has its triple, write the next group in full.
+Do not replace a triple with a row of clipped fragments: the staccato conversion
+is another machine rhythm, not a fix. Vary sentence length, not sentence
+integrity.
 
 **7 · Repeated sentence openings.** Several sentences in a row starting with the
 same subject. Merge them, change the subject, or open on the action. Do not ban
@@ -244,6 +267,9 @@ The skill was followed correctly when:
 - no fact, number, date, quote or citation was added;
 - code, paths, placeholders and link targets are unchanged;
 - the read-aloud test passes and the rhythm is uneven;
+- no paragraph carries two tricolons, and no colon opens onto exactly three
+  items unless the content has three parts;
+- the rewrite did not replace a triple with clipped fragments;
 - where the owner gave a sample, its voice survives.
 
 ## What this skill kept from upstream
@@ -265,6 +291,10 @@ Upstream is 25 numbered patterns from Wikipedia's *Signs of AI writing*. Kept:
 - **The three output modes**, and the file mode's "change prose only, leave code
   and link targets alone".
 
+The tricolon entry also sharpens Wikipedia's Rule of three with
+`conorbronsdon/avoid-ai-writing` (MIT) and Simon Willison's LLM cliché
+highlighter, which named the colon-into-a-triple and the staccato counter-risk.
+
 ## What was dropped, and why
 
 - **The before/after pairs.** Upstream carries 25 of them, mostly American
@@ -279,6 +309,10 @@ Upstream is 25 numbered patterns from Wikipedia's *Signs of AI writing*. Kept:
   steps.
 - **The upstream sourcing note in full.** The provenance is in the frontmatter
   and in `.agents/docs/DISTILLATION.md`.
+- **The detector catalogues.** The 49-trope directory and the highlighter are
+  finding aids, not prose rules. A regex cannot tell three real items from a
+  rhythm quota, so the skill keeps the shapes and the judgment, not the
+  detectors.
 
 ## What upstream was missing
 

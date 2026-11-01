@@ -607,8 +607,7 @@ function updatronix_sanitize_settings_json( mixed $value ): string {
 	$encoded       = wp_json_encode( $out );
 
 	if ( false === $encoded ) {
-        // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
-		// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log, Generic.Files.LineLength -- Diagnostic log for a failed settings encode.
 		error_log(
 			// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 			'Updatronix: wp_json_encode failed in updatronix_sanitize_settings_json — settings data may be corrupted.'

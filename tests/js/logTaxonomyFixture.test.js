@@ -82,6 +82,6 @@ describe( 'log taxonomy fixture', () => {
 	} );
 
 	it( 'carries the legacy label', () => {
-		expect( taxonomy.legacy_label ).toBe( 'Legacy — reason not recorded' );
+		expect( taxonomy.legacy_label ).toBe( 'Legacy: reason not recorded' );
 	} );
 } );

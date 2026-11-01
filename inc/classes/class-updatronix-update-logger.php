@@ -2187,10 +2187,10 @@ final class Updatronix_Update_Logger {
 				$steps,
 				sprintf(
 					/* translators: %s: package download URL */
-					__( 'Downloading the update from %s…', 'updatronix' ),
+					__( 'Downloading the update from %s', 'updatronix' ),
 					self::$core_package_url
 				),
-				__( 'Unpacking the update…', 'updatronix' )
+				__( 'Unpacking the update', 'updatronix' )
 			);
 		}
 

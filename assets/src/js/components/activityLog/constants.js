@@ -28,7 +28,7 @@ export const ACTION_LABELS = {
 	incompatible: __( 'Incompatible', 'updatronix' ),
 	disabled: __( 'Disabled', 'updatronix' ),
 	safe_mode_disabled: __(
-		'Auto-updates disabled by Safe Mode',
+		'Automatic updates disabled by Safe mode',
 		'updatronix'
 	),
 	auto_update_reenabled: __( 'Automatic updates re-enabled', 'updatronix' ),
@@ -72,8 +72,8 @@ export const STATE_INTENTS = {
 export const ORIGIN_LABELS = {
 	manual: __( 'Manual', 'updatronix' ),
 	automatic: __( 'Automatic', 'updatronix' ),
-	flow: __( 'Flow', 'updatronix' ),
-	queue: __( 'Queue', 'updatronix' ),
+	flow: __( 'Update Flow', 'updatronix' ),
+	queue: __( 'Update queue', 'updatronix' ),
 	external: __( 'External', 'updatronix' ),
 	health: __( 'Site Health', 'updatronix' ),
 	system: __( 'System', 'updatronix' ),
@@ -107,16 +107,16 @@ export const REASON_LABELS = {
 	shield_reenabled: __( 'Automatic updates re-enabled', 'updatronix' ),
 	auto_update_reenabled: __( 'Automatic updates re-enabled', 'updatronix' ),
 	external_update: __( 'Updated outside WordPress', 'updatronix' ),
-	pass_summary: __( 'Automatic pass summary', 'updatronix' ),
+	pass_summary: __( 'Automatic update summary', 'updatronix' ),
 	already_latest: __( 'Already at the latest version', 'updatronix' ),
-	no_pending_offer: __( 'No update offered', 'updatronix' ),
-	no_longer_offered: __( 'The update is no longer offered', 'updatronix' ),
-	flow_offer_stale: __( 'The update offer changed', 'updatronix' ),
-	unknown_offer: __( 'The update offer is unavailable', 'updatronix' ),
-	flow_waiting_predecessor: __( 'Waiting for a predecessor', 'updatronix' ),
-	flow_predecessor_failed: __( 'A predecessor failed', 'updatronix' ),
+	no_pending_offer: __( 'No update available', 'updatronix' ),
+	no_longer_offered: __( 'This update is no longer available', 'updatronix' ),
+	flow_offer_stale: __( 'A different update is available', 'updatronix' ),
+	unknown_offer: __( 'The update is unavailable', 'updatronix' ),
+	flow_waiting_predecessor: __( 'Waiting for an earlier step', 'updatronix' ),
+	flow_predecessor_failed: __( 'An earlier step failed', 'updatronix' ),
 	flow_predecessor_unknown: __(
-		'A predecessor has no update offer',
+		'An earlier step has no update available',
 		'updatronix'
 	),
 	queue_waiting_turn: __( 'Waiting for its turn', 'updatronix' ),
@@ -129,9 +129,9 @@ export const REASON_LABELS = {
 		'WordPress refused a version-controlled item',
 		'updatronix'
 	),
-	version_locked_composer: __( 'Managed by Composer', 'updatronix' ),
+	version_locked_composer: __( 'Installed with Composer', 'updatronix' ),
 	version_lock_unknown: __(
-		'Version control state could not be read',
+		'The version-control state could not be read',
 		'updatronix'
 	),
 	shield_incompatible_wp: __(
@@ -144,31 +144,31 @@ export const REASON_LABELS = {
 		'updatronix'
 	),
 	shield_policy_block: __( 'Blocked by Update Shield', 'updatronix' ),
-	flow_predecessor_blocked: __( 'A predecessor is blocked', 'updatronix' ),
+	flow_predecessor_blocked: __( 'An earlier step is blocked', 'updatronix' ),
 	flow_predecessor_locked: __(
-		'A predecessor is managed by version control',
+		'An earlier step is managed by version control',
 		'updatronix'
 	),
 	flow_predecessor_uncertain: __(
-		'A predecessor needs review',
+		'An earlier step needs review',
 		'updatronix'
 	),
 	flow_predecessor_not_managed: __(
-		'A predecessor is not managed automatically',
+		'An earlier step is not managed automatically',
 		'updatronix'
 	),
 	flow_predecessor_not_installed: __(
-		'A predecessor is not installed',
+		'An earlier step is not installed',
 		'updatronix'
 	),
 	flow_predecessor_never_ready: __(
-		'A predecessor cannot update automatically',
+		'An earlier step cannot update automatically',
 		'updatronix'
 	),
 	flow_chain_invalid: __( 'The chain is invalid', 'updatronix' ),
 	queue_attempts_exhausted: __( 'All attempts failed', 'updatronix' ),
 	update_failed: __( 'The update failed', 'updatronix' ),
-	queue_lease_expired: __( 'The update lease expired', 'updatronix' ),
+	queue_lease_expired: __( 'The update lock expired', 'updatronix' ),
 	partial_state: __( 'The update needs review', 'updatronix' ),
 	flow_chain_canceled: __( 'The chain was canceled', 'updatronix' ),
 	queue_disabled: __( 'The queue was disabled', 'updatronix' ),
@@ -184,7 +184,7 @@ export const REASON_LABELS = {
 		'updatronix'
 	),
 	version_lock_unverified: __(
-		'Version control state was not verified',
+		'The version-control state was not verified',
 		'updatronix'
 	),
 	abandoned_advisory: __( 'No release for a long time', 'updatronix' ),
@@ -200,6 +200,6 @@ export const REASON_LABELS = {
  * Shown for a log row written before the decision layer; never guess a reason.
  */
 export const LEGACY_REASON_LABEL = __(
-	'Legacy — reason not recorded',
+	'Legacy: reason not recorded',
 	'updatronix'
 );

@@ -23,7 +23,7 @@ export const DESTINATIONS = [
 		slug: 'logs',
 		label: __( 'Update logs', 'updatronix' ),
 		description: __(
-			'Every core, plugin, theme, and translation update, with the version before and after.',
+			'A record of every update, with the version before and after.',
 			'updatronix'
 		),
 		group: 'updates',
@@ -34,7 +34,7 @@ export const DESTINATIONS = [
 		slug: 'auto-updates',
 		label: __( 'Auto updates', 'updatronix' ),
 		description: __(
-			'Core, translation, theme, and plugin settings in one place.',
+			'All automatic update settings in one place.',
 			'updatronix'
 		),
 		group: 'updates',
@@ -45,7 +45,7 @@ export const DESTINATIONS = [
 		slug: 'schedule',
 		label: __( 'Schedule', 'updatronix' ),
 		description: __(
-			'Choose how often WordPress checks for updates, and how long new releases are held.',
+			'Choose the update check frequency and the hold period for new releases.',
 			'updatronix'
 		),
 		group: 'updates',
@@ -56,7 +56,7 @@ export const DESTINATIONS = [
 		slug: 'updatronix-3000',
 		label: __( 'Updatronix 3000', 'updatronix' ),
 		description: __(
-			'Manage your Updatronix 3000 license and Pro tools.',
+			'Manage your Updatronix 3000 license and tools.',
 			'updatronix'
 		),
 		group: 'automations',
@@ -67,7 +67,7 @@ export const DESTINATIONS = [
 		slug: 'update-shield',
 		label: __( 'Update Shield', 'updatronix' ),
 		description: __(
-			'Stop incompatible updates, order automatic updates, and protect version-controlled extensions.',
+			'Blocks incompatible updates and protects extensions under version control.',
 			'updatronix'
 		),
 		group: 'automations',
@@ -89,7 +89,7 @@ export const DESTINATIONS = [
 		slug: 'white-label',
 		label: __( 'White label', 'updatronix' ),
 		description: __(
-			'Put your name, mark, and colors on every Updatronix screen.',
+			'Make every Updatronix screen look like your own.',
 			'updatronix'
 		),
 		group: 'automations',
@@ -100,7 +100,7 @@ export const DESTINATIONS = [
 		slug: 'health',
 		label: __( 'Health', 'updatronix' ),
 		description: __(
-			'See whether this site is ready for its next update, and what needs attention.',
+			'See what needs attention before the next update.',
 			'updatronix'
 		),
 		group: 'system',
@@ -111,7 +111,7 @@ export const DESTINATIONS = [
 		slug: 'settings',
 		label: __( 'Settings', 'updatronix' ),
 		description: __(
-			'Logging, retention, email routing, and uninstall data.',
+			'Set how long logs are kept and where email goes. Choose what uninstall removes.',
 			'updatronix'
 		),
 		group: 'system',
@@ -121,10 +121,6 @@ export const DESTINATIONS = [
 	{
 		slug: 'documentation',
 		label: __( 'Documentation', 'updatronix' ),
-		description: __(
-			'Official guides for Updatronix, Updatronix 3000, and the WordPress update system.',
-			'updatronix'
-		),
 		group: 'help',
 		icon: 'page',
 		edition: 'free',
@@ -133,7 +129,7 @@ export const DESTINATIONS = [
 		slug: 'support',
 		label: __( 'Support', 'updatronix' ),
 		description: __(
-			'What to check before you post, and where to ask the WordPress community.',
+			'How to report a problem and where to get help from the WordPress community.',
 			'updatronix'
 		),
 		group: 'help',

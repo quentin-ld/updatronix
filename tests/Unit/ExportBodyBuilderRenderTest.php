@@ -167,6 +167,42 @@ final class ExportBodyBuilderRenderTest extends TestCase {
 	}
 
 	/**
+	 * Disabling the date toggle drops the Date heading and value from text.
+	 */
+	public function test_render_column_toggle_omits_date(): void {
+		$result = Updatronix_Export_Body_Builder::render(
+			array( $this->row() ),
+			false,
+			array( 'date' => false ),
+			'',
+			100000
+		);
+
+		$this->assertStringNotContainsString( 'Date', $result['body'] );
+		$this->assertStringNotContainsString( '2026-06-10', $result['body'] );
+		$this->assertStringContainsString( 'Akismet', $result['body'] );
+	}
+
+	/**
+	 * Disabling the date toggle drops the date field from JSON records.
+	 */
+	public function test_json_column_toggle_omits_date(): void {
+		$result  = Updatronix_Export_Body_Builder::render(
+			array( $this->row() ),
+			false,
+			array( 'date' => false ),
+			'',
+			100000,
+			'json'
+		);
+		$payload = json_decode( trim( (string) $result['body'] ), true );
+
+		$this->assertIsArray( $payload );
+		$this->assertArrayNotHasKey( 'date', $payload );
+		$this->assertArrayHasKey( 'element', $payload );
+	}
+
+	/**
 	 * Same_version rows render a single version instead of a range.
 	 */
 	public function test_render_same_version_collapses_to_single(): void {
@@ -211,7 +247,7 @@ final class ExportBodyBuilderRenderTest extends TestCase {
 	}
 
 	/**
-	 * A cancelled row still exports its localized "Cancelled" label — the status
+	 * A cancelled row still exports its localized "Canceled" label — the status
 	 * vocabulary was extended, not replaced, so legacy rows keep their meaning.
 	 */
 	public function test_render_cancelled_status_labels_as_cancelled(): void {
@@ -223,7 +259,7 @@ final class ExportBodyBuilderRenderTest extends TestCase {
 			100000
 		);
 
-		$this->assertStringContainsString( 'Cancelled', $result['body'] );
+		$this->assertStringContainsString( 'Canceled', $result['body'] );
 		$this->assertStringNotContainsString( 'Success', $result['body'] );
 	}
 
@@ -292,7 +328,7 @@ final class ExportBodyBuilderRenderTest extends TestCase {
 			'prevented'          => 'Prevented',
 			'incompatible'       => 'Incompatible',
 			'disabled'           => 'Disabled',
-			'safe_mode_disabled' => 'Auto-updates disabled by Safe Mode',
+			'safe_mode_disabled' => 'Automatic updates disabled by Safe mode',
 		);
 
 		foreach ( $labels as $action => $label ) {

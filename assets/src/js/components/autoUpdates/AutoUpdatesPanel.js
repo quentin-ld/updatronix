@@ -159,12 +159,12 @@ function ExtensionRow( {
 			<div className="updatronix-auto-item-switch">
 				<div className="updatronix-auto-item-switch-row">
 					<Text variant="body-sm" className="updatronix-muted">
-						{ __( 'Auto-updates', 'updatronix' ) }
+						{ __( 'Auto updates', 'updatronix' ) }
 					</Text>
 					<SwitchControl
 						label={ sprintf(
 							/* translators: %s: plugin or theme name. */
-							__( 'Auto-updates for %s', 'updatronix' ),
+							__( 'Auto updates for %s', 'updatronix' ),
 							item.name
 						) }
 						hideLabelFromVision
@@ -241,7 +241,7 @@ export function AutoUpdatesPanel( {
 				<Notice.Root intent="error">
 					<Notice.Title>
 						{ __(
-							'Auto-updates could not be loaded',
+							'Auto updates could not be loaded',
 							'updatronix'
 						) }
 					</Notice.Title>
@@ -270,7 +270,7 @@ export function AutoUpdatesPanel( {
 				>
 					<Spinner />
 					<Text variant="body-sm" className="updatronix-muted">
-						{ __( 'Loading auto-update settings…', 'updatronix' ) }
+						{ __( 'Loading auto updates', 'updatronix' ) }
 					</Text>
 				</div>
 			</div>
@@ -316,7 +316,7 @@ export function AutoUpdatesPanel( {
 						<Notice.Root intent="warning">
 							<Notice.Title>
 								{ __(
-									'Auto-updates could not be refreshed',
+									'Auto updates could not be refreshed',
 									'updatronix'
 								) }
 							</Notice.Title>
@@ -372,7 +372,10 @@ export function AutoUpdatesPanel( {
 					) }
 				>
 					<SwitchControl
-						label={ __( 'Translation auto-updates', 'updatronix' ) }
+						label={ __(
+							'Automatic translation updates',
+							'updatronix'
+						) }
 						description={ __(
 							'Language packs follow the core update mode.',
 							'updatronix'
@@ -460,14 +463,12 @@ export function AutoUpdatesPanel( {
 					</div>
 				</Section>
 
-				<div className="updatronix-surface-note">
-					<Text variant="body-sm">
-						{ __(
-							'Turning auto-updates on does not install anything right away. The next scheduled check uses these settings after you save.',
-							'updatronix'
-						) }
-					</Text>
-				</div>
+				<Text variant="body-sm" className="updatronix-surface-note">
+					{ __(
+						'Turning automatic updates on does not install anything right away. The next scheduled check uses these settings after you save.',
+						'updatronix'
+					) }
+				</Text>
 			</div>
 
 			<SaveBar

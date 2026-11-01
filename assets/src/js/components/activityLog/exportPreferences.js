@@ -8,6 +8,7 @@ const STORAGE_VERSION = 1;
 /** @type {Readonly<Record<string, boolean>>} */
 export const DEFAULT_EXPORT_COLUMNS = {
 	headingTable: true,
+	date: true,
 	action: true,
 	runContext: true,
 	user: true,
@@ -119,6 +120,7 @@ export function saveExportPreferences( prefs ) {
 export function columnsToApiPayload( columns ) {
 	return {
 		table_heading: columns.headingTable,
+		date: columns.date,
 		action_type: columns.action,
 		run_context: columns.runContext,
 		user: columns.user,

@@ -131,6 +131,7 @@ final class Updatronix_Export_Body_Builder {
 	/** Maps export row part keys to REST `columns` toggle keys. */
 	private const ROW_PART_COLUMN_MAP = array(
 		'category'      => 'category',
+		'dates'         => 'date',
 		'action'        => 'action_type',
 		'context'       => 'run_context',
 		'user'          => 'user',
@@ -153,6 +154,7 @@ final class Updatronix_Export_Body_Builder {
 	public static function default_export_columns(): array {
 		return array(
 			'table_heading'    => true,
+			'date'             => true,
 			'action_type'      => true,
 			'run_context'      => true,
 			'user'             => true,
@@ -605,8 +607,11 @@ final class Updatronix_Export_Body_Builder {
 		$data = array(
 			'element' => $parts['name'],
 			'version' => $parts['versions'],
-			'date'    => $parts['dates'],
 		);
+
+		if ( $columns['date'] ?? true ) {
+			$data['date'] = $parts['dates'];
+		}
 
 		if ( $columns['action_type'] ?? true ) {
 			$data['action'] = $parts['action'];
@@ -1269,7 +1274,7 @@ final class Updatronix_Export_Body_Builder {
 		return match ( strtolower( sanitize_key( $status ) ) ) {
 			'success' => __( 'Success', 'updatronix' ),
 			'error', 'failed', 'errors' => __( 'Failed', 'updatronix' ),
-			'cancelled' => __( 'Cancelled', 'updatronix' ),
+			'cancelled' => __( 'Canceled', 'updatronix' ),
 			'delayed'   => __( 'Delayed', 'updatronix' ),
 			'info'      => __( 'Info', 'updatronix' ),
 			'warning'   => __( 'Warning', 'updatronix' ),
@@ -1476,7 +1481,7 @@ final class Updatronix_Export_Body_Builder {
 			'incompatible' => __( 'Incompatible', 'updatronix' ),
 			'disabled' => __( 'Disabled', 'updatronix' ),
 			'safe_mode_disabled' => __(
-				'Auto-updates disabled by Safe Mode',
+				'Automatic updates disabled by Safe mode',
 				'updatronix'
 			),
 			default => '' !== $action_type ? $action_type : '',

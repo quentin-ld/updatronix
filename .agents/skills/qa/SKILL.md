@@ -68,7 +68,7 @@ Sections: **Scope** · **Summary** · **Findings** · **Missed opportunities** �
 | Exploit scenario | How this manifests as a real bug, crash, leak, or user-facing failure. If none, say "none — quality/correctness issue." |
 | Remediation | What to change. Atomic, actionable. |
 
-**Humanizer pass — a finding, under the same bar.** For any diff that adds or rewrites a sentence or more of reader-visible prose, raise a finding with `Surface` = docs that records whether the humanizer pass ran: `humanizer` for an English text, `humaniseur-fr` for a French one. A one-word comment fix is exempt. The prose itself is held to the WordPress Documentation Style Guide, which the `writing` skill carries in `references/`.
+**Humanizer pass — a finding, under the same bar.** For any diff that adds or rewrites a sentence or more of reader-visible prose, raise a finding with `Surface` = docs that records whether the humanizer pass ran: `humanizer` for an English text, `humaniseur-fr` for a French one. A one-word comment fix is exempt. The prose itself is held to the WordPress Documentation Style Guide, which the `writing` skill carries in `references/`. When it ran, check the tricolon: one ornamental triple per text in English, density and register in French; never two in a paragraph, no colon into a triple, and no staccato conversion.
 
 **Missed opportunities** — Things you would have tested or checked that the scope doesn't cover. Surfaced as a signal for the user to widen scope.
 

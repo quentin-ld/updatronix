@@ -68,7 +68,13 @@ anywhere.
 | `mattpocock/skills/writing-for-agents` | 316k | **distilled** into `documentation`, and the levers reused in `writing` |
 | `blader/humanizer/humanizer` | 7,853 | **distilled** into `humanizer`: 25 patterns down to 24, the vocabulary list kept, the worked examples dropped |
 | `samber/cc-skills/humaniseur-fr` | 2,420 | **distilled** into `humaniseur-fr`, in US English with the French triggers kept verbatim |
+| `conorbronsdon/avoid-ai-writing` | — | **partially distilled** into `humanizer` and `humaniseur-fr`: the tricolon density rule, the colon-into-a-triple, and the staccato-conversion guard; the 49-trope catalogue and detector were not imported |
+| Simon Willison's LLM cliché highlighter | — | **reference only**: it named the colon-into-a-triple and rule-of-three observations that `avoid-ai-writing` attributes to it; no code or text imported |
 | `mattpocock/skills/grilling` + `grill-with-docs` + `grill-me` + `batch-grill-me` | 782k + 1.05M + 1.2M + 65k | **merged and distilled** into one `grilling`: three wrappers and a duplicate became the method plus the documents it produces |
+
+The tricolon entry in `humanizer` and `humaniseur-fr` sharpens the existing
+Wikipedia Rule of three upstream with the density and colon-into-triple rules
+from `avoid-ai-writing`; the detectors themselves were not imported.
 
 ## What has been rejected
 

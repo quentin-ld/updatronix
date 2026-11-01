@@ -242,7 +242,7 @@ final class Updatronix_Database {
 	 * Backfill only the deterministic delay prefix.
 	 *
 	 * Rows written by the v1 delay gate carry a `udly|` event key. Anything
-	 * else stays empty so the UI can show “Legacy — reason not recorded”
+	 * else stays empty so the UI can show “Legacy: reason not recorded”
 	 * instead of guessing.
 	 *
 	 * @return int Number of rows updated.

@@ -39,7 +39,7 @@ export function TranslationsSection( {
 			/>
 			<ToggleControl
 				__nextHasNoMarginBottom
-				label={ __( 'Translation auto-updates', 'updatronix' ) }
+				label={ __( 'Automatic translation updates', 'updatronix' ) }
 				help={ __(
 					'WordPress downloads translation updates automatically by default. Turn this off to skip automatic downloads.',
 					'updatronix'

@@ -1,4 +1,7 @@
 .updatronix-autoupdates-panel {
+	display: flex;
+	flex-direction: column;
+	gap: var(--wpds-dimension-gap-xl);
 
 	> .components-notice {
 		margin-bottom: var(--wpds-dimension-gap-md);

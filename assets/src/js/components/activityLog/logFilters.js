@@ -216,7 +216,7 @@ export const LOG_FILTERS = [
 		getElements: () => [
 			{ value: 'success', label: __( 'Success', 'updatronix' ) },
 			{ value: 'error', label: __( 'Failed', 'updatronix' ) },
-			{ value: 'cancelled', label: __( 'Cancelled', 'updatronix' ) },
+			{ value: 'cancelled', label: __( 'Canceled', 'updatronix' ) },
 			{ value: 'delayed', label: __( 'Delayed', 'updatronix' ) },
 			{ value: 'info', label: __( 'Info', 'updatronix' ) },
 			{ value: 'warning', label: __( 'Warning', 'updatronix' ) },
@@ -543,8 +543,8 @@ export function summarizeView( view ) {
 
 	const dirLabel =
 		sortDir === 'asc'
-			? __( 'oldest first', 'updatronix' )
-			: __( 'newest first', 'updatronix' );
+			? __( 'Oldest first', 'updatronix' )
+			: __( 'Newest first', 'updatronix' );
 
 	const sortLine = {
 		label: __( 'Sort', 'updatronix' ),

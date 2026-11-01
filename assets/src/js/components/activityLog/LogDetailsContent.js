@@ -93,7 +93,7 @@ export function LogDetailsContent( { log, logId, fetchLogDetails } ) {
 	if ( loading ) {
 		return (
 			<Text variant="body-sm" className="updatronix-muted">
-				{ __( 'Loading log details…', 'updatronix' ) }
+				{ __( 'Loading log details', 'updatronix' ) }
 			</Text>
 		);
 	}
@@ -388,7 +388,7 @@ export function LogDetailsContent( { log, logId, fetchLogDetails } ) {
 					</summary>
 					<p className="updatronix-log-detail-redaction-note">
 						{ __(
-							'Server paths have been redacted for security.',
+							'Updatronix removed server paths from this entry for security.',
 							'updatronix'
 						) }
 					</p>

@@ -126,7 +126,26 @@ connectors the model almost never uses, which are therefore free authenticity:
 **9 · Negative parallelism.** `Non seulement … mais aussi …`, `Il ne s'agit pas
 seulement de … mais de …`, `Ce n'est pas un simple X, c'est un Y`.
 
-**10 · Systematic rule of three.** Ideas forced into groups of three.
+**10 · Le tricolon systématique (règle de trois).** Trois membres de même
+construction, souvent de même longueur (*tricolon isocolique*). Le tic n'est
+pas le nombre trois : c'est la série de triples parallèles, à têtes abstraites
+(`rapide, fiable et scalable`), qui donne une impression de complétude sans
+hiérarchie. Un tricolon isolé peut être une figure ; jugez la densité, pas
+l'occurrence.
+
+La règle des 80 % et la règle du registre s'appliquent : un tricolon peut être
+légitime en *soutenu*, surtout dans une phrase périodique. Mais pas deux dans le
+même paragraphe, et pas de deux-points ouvrant sur exactement trois éléments
+séparés par des virgules. Si le texte a déjà son triple, écrivez le groupe
+suivant autrement.
+
+La liste française s'écrit `A, B et C`, sans virgule avant `et` : le marqueur
+n'est donc pas la virgule sérialle anglaise, mais le parallélisme et l'absence
+de hiérarchie. Corrigez en subordonnant (`En empêchant les mises à jour
+incompatibles, on protège les extensions sous contrôle de version`), en
+ordonnant cause → conséquence → bénéfice, ou en nommant l'action qui compte. Ne
+remplacez pas le triple par une pluie de fragments courts : c'est le *staccato*,
+une autre signature machine.
 
 **11 · Synonym cycling.** One referent under three names — `le protagoniste`,
 `le personnage principal`, `la figure centrale`.
@@ -323,6 +342,9 @@ The skill was followed correctly when:
 - no fact, date, number or source was invented;
 - typography is consistent and correct — spacing, guillemets, number format;
 - the sentences have a short tail and a long tail, not just a mean;
+- the tricolon density follows the register: one can stay, two in a paragraph
+  cannot, and no colon opens onto three items without three real parts;
+- the rewrite did not turn a triple into staccato fragments;
 - the result came out in one pass.
 
 ## What this skill kept from upstream
@@ -342,6 +364,9 @@ The skill was followed correctly when:
 - **The measured French figures** — `également` at four times human rate, the
   sentence-length distribution, the tense and pronoun profile — because they are
   the only quantified evidence in the source.
+- **The tricolon density rule, adapted.** The French entry keeps the
+  three-signal and register rules; it treats the English "one per text" quota as
+  a default, not a fixed ceiling.
 
 ## What was dropped, and why
 
@@ -349,6 +374,9 @@ The skill was followed correctly when:
   to this repository is US English, so the reasoning is in English and only the
   terms, triggers and examples stay French. `translation` is written the same
   way.
+- **The English "one tricolon per text" quota as a fixed rule.** French has a
+  heavier rhetorical tradition and different sentence lengths; the 80 % rule and
+  the register decide, so one legitimate triple in *soutenu* stays.
 - **The full worked example.** A thirteen-line *avant* and three versions of it,
   about AI coding assistants, then a summary of the twelve patterns removed. The
   patterns are stated in the list; the example was illustration and long.

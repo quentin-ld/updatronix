@@ -94,6 +94,10 @@
 	margin-bottom: var(--wpds-dimension-gap-xl);
 }
 
+.updatronix-logs-note {
+	margin-top: var(--wpds-dimension-gap-xl);
+}
+
 .updatronix-log-preview {
 	position: sticky;
 	top: var(--wpds-dimension-gap-lg);
@@ -438,6 +442,9 @@
 	}
 
 	&__output {
+		display: flex;
+		flex-direction: column;
+		gap: var(--wpds-dimension-gap-xs);
 
 		.updatronix-export-output {
 			background: var(--wpds-color-background-surface-neutral-weak);

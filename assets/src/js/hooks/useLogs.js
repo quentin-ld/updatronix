@@ -79,7 +79,7 @@ export function useLogs() {
 			setError(
 				e?.message ||
 					__(
-						'Your update logs could not be loaded. Try refreshing the page.',
+						'Your update logs could not be loaded. Refresh the page.',
 						'updatronix'
 					)
 			);

@@ -52,6 +52,25 @@ export default function AppShell( {
 		}
 	}, [ destination.slug ] );
 
+	useEffect( () => {
+		const handleKeyDown = ( event ) => {
+			const isSave =
+				( event.metaKey || event.ctrlKey ) &&
+				event.key.toLowerCase() === 's';
+
+			if ( isSave ) {
+				// Keep the browser “Save page” dialog out of the admin screen.
+				// SaveBar handles the actual save on dirty surfaces.
+				event.preventDefault();
+			}
+		};
+
+		document.addEventListener( 'keydown', handleKeyDown, true );
+
+		return () =>
+			document.removeEventListener( 'keydown', handleKeyDown, true );
+	}, [] );
+
 	return (
 		<div className="updatronix-shell">
 			<a className="updatronix-skip-link" href="#updatronix-main">

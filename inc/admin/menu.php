@@ -144,7 +144,7 @@ function updatronix_options_page(): void {
 						<p class="updatronix-loading-text">
 							<?php
 							echo esc_html__(
-								'Loading your Updatronix settings…',
+								'Loading your Updatronix settings',
 								'updatronix'
 							);
 							?>

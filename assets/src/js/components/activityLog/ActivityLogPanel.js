@@ -394,6 +394,9 @@ export function ActivityLogPanel( {
 			filters: toServerFilters( view, logs ),
 			search: view.search || '',
 		} );
+		// `logs` changes after every fetch, so `logsVersion` is the refresh
+		// trigger; adding `logs` or the whole `view` object would refetch in a loop.
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [
 		fetchLogs,
 		logsVersion,
@@ -788,7 +791,7 @@ export function ActivityLogPanel( {
 				{
 					label: sprintf(
 						/* translators: %s: retention period in days. */
-						__( 'Retention %s days', 'updatronix' ),
+						__( 'Retention: %s days', 'updatronix' ),
 						retentionDays
 					),
 				},
@@ -855,7 +858,7 @@ export function ActivityLogPanel( {
 				<Section
 					title={ __( 'Recent updates', 'updatronix' ) }
 					description={ __(
-						'Search and filter the history, then open a record for the full process details.',
+						'Search and filter the history, then open a record for the full details.',
 						'updatronix'
 					) }
 					actions={
@@ -890,7 +893,7 @@ export function ActivityLogPanel( {
 						searchLabel={ __( 'Search update log', 'updatronix' ) }
 						empty={
 							loading || ! loaded
-								? __( 'Loading update logs…', 'updatronix' )
+								? __( 'Loading update logs', 'updatronix' )
 								: __(
 										'No update logs yet. Entries appear after WordPress runs an update.',
 										'updatronix'
@@ -1025,11 +1028,14 @@ export function ActivityLogPanel( {
 				</Dialog.Root>
 			) }
 
-			<Text variant="body-sm" className="updatronix-muted">
+			<Text
+				variant="body-sm"
+				className="updatronix-muted updatronix-logs-note"
+			>
 				{ sprintf(
 					/* translators: %s: retention period in days. */
 					__(
-						'Entries older than %s days are removed by the daily cleanup task.',
+						'The daily cleanup removes entries older than %s days.',
 						'updatronix'
 					),
 					retentionDays

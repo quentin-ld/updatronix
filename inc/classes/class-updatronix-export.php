@@ -122,6 +122,7 @@ final class Updatronix_Export {
 	 */
 	public const COLUMN_KEYS = array(
 		'table_heading',
+		'date',
 		'action_type',
 		'run_context',
 		'user',

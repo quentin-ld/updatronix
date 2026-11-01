@@ -17,6 +17,7 @@ import Section from '../../shell/Section';
 import wpds from '../../shell/wpds';
 import { ConstantNotices } from '../autoUpdates/ConstantNotices';
 import {
+	frequencySelectValue,
 	HOLD_VALIDATION_MESSAGE,
 	HOURS,
 	holdRuleCopy,
@@ -27,22 +28,26 @@ import {
 	manualCheckCopy,
 	getSchedule,
 	holdRuleNote,
-	holdRuleRows,
 	isScheduleDirty,
 	recurrenceDescription,
+	recurrenceFromFrequency,
 	recurrenceUsesPreferredTime,
 	splitTime,
 	validateHoldDays,
+	WORDPRESS_DEFAULT_FREQUENCY,
 } from './scheduleDraft';
 
 const { Button, InputControl, Notice, SelectControl, Stack, Text } = wpds.ui;
 
 const FREQUENCIES = [
+	{
+		value: WORDPRESS_DEFAULT_FREQUENCY,
+		label: __( 'WordPress default', 'updatronix' ),
+	},
 	{ value: 'daily', label: __( 'Daily', 'updatronix' ) },
 	{ value: 'twicedaily', label: __( 'Twice daily', 'updatronix' ) },
 	{ value: 'hourly', label: __( 'Hourly', 'updatronix' ) },
 	{ value: 'weekly', label: __( 'Weekly', 'updatronix' ) },
-	{ value: '', label: __( 'WordPress default', 'updatronix' ) },
 ];
 
 const HOUR_ITEMS = HOURS.map( ( value ) => ( { value, label: value } ) );
@@ -87,9 +92,10 @@ export const SchedulePanel = memo( function SchedulePanelComponent( {
 	const isDirty = isScheduleDirty( draft, savedRef.current );
 	const hold = getHoldDays( draft );
 
+	const recurrence = draft.update_check.recurrence ?? '';
 	const selectedFrequency =
 		FREQUENCIES.find(
-			( item ) => item.value === ( draft.update_check.recurrence ?? '' )
+			( item ) => item.value === frequencySelectValue( recurrence )
 		) || FREQUENCIES[ 0 ];
 
 	const { hour, minute } = splitTime( draft.update_check.time );
@@ -106,7 +112,7 @@ export const SchedulePanel = memo( function SchedulePanelComponent( {
 			...previous,
 			update_check: {
 				...previous.update_check,
-				recurrence: value,
+				recurrence: recurrenceFromFrequency( value ),
 				time: previous.update_check.time || '03:00',
 			},
 		} ) );
@@ -281,7 +287,7 @@ export const SchedulePanel = memo( function SchedulePanelComponent( {
 							>
 								{ usesPreferredTime
 									? __(
-											'The check runs on the next cron tick after this time. Twice daily runs again 12 hours later.',
+											'The check runs at the next WP-Cron event after this time. Twice daily runs again 12\u00A0hours later.',
 											'updatronix'
 										)
 									: __(
@@ -303,13 +309,13 @@ export const SchedulePanel = memo( function SchedulePanelComponent( {
 
 							<InputControl
 								label={ __(
-									'Hold new releases for (days)',
+									'Hold period (days)',
 									'updatronix'
 								) }
 								description={
 									hold > 0
 										? __(
-												'Updates stay automatic; they are deferred so unstable builds can be fixed first.',
+												'Updates stay automatic; Updatronix defers them so unstable releases can be fixed first.',
 												'updatronix'
 											)
 										: __(
@@ -354,7 +360,7 @@ export const SchedulePanel = memo( function SchedulePanelComponent( {
 									</Notice.Title>
 									<Notice.Description>
 										{ __(
-											'WordPress will not run the scheduled check until WP-Cron is enabled or a real cron job calls it.',
+											'WordPress does not run the scheduled check until WP-Cron is enabled or a system cron job calls it.',
 											'updatronix'
 										) }
 									</Notice.Description>
@@ -382,7 +388,7 @@ export const SchedulePanel = memo( function SchedulePanelComponent( {
 								</Notice.Title>
 								<Notice.Description>
 									{ __(
-										'If another plugin delays WP-Cron, the check runs on the next available tick rather than exactly at the selected time.',
+										'If another plugin delays WP-Cron, the check runs at the next available event instead of exactly at the selected time.',
 										'updatronix'
 									) }
 								</Notice.Description>
@@ -390,41 +396,6 @@ export const SchedulePanel = memo( function SchedulePanelComponent( {
 						</Stack>
 					</Section>
 				</div>
-
-				<Section
-					title={ __( 'What the hold period does', 'updatronix' ) }
-					description={ __(
-						'Applies to automatic updates only.',
-						'updatronix'
-					) }
-				>
-					<div className="updatronix-table-scroll">
-						<table className="updatronix-ref-table">
-							<thead>
-								<tr>
-									<th scope="col">
-										{ __( 'Update type', 'updatronix' ) }
-									</th>
-									<th scope="col">
-										{ __( 'With a hold', 'updatronix' ) }
-									</th>
-									<th scope="col">
-										{ __( 'Manual action', 'updatronix' ) }
-									</th>
-								</tr>
-							</thead>
-							<tbody>
-								{ holdRuleRows().map( ( row ) => (
-									<tr key={ row.type }>
-										<td>{ row.type }</td>
-										<td>{ row.withHold }</td>
-										<td>{ row.manual }</td>
-									</tr>
-								) ) }
-							</tbody>
-						</table>
-					</div>
-				</Section>
 
 				<Text variant="body-sm" className="updatronix-surface-note">
 					{ holdRuleNote() }

@@ -190,7 +190,7 @@ final class LogTruthfulnessTest extends WP_UnitTestCase {
 		);
 
 		self::assertTrue( $log->is_legacy );
-		self::assertSame( 'Legacy — reason not recorded', $log->reason_label );
+		self::assertSame( 'Legacy: reason not recorded', $log->reason_label );
 	}
 
 	/**

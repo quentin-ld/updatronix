@@ -78,7 +78,7 @@ describe( 'log decision details', () => {
 		);
 
 		expect( byKey.state ).toBe( 'Waiting' );
-		expect( byKey.reason ).toBe( 'Waiting for a predecessor' );
+		expect( byKey.reason ).toBe( 'Waiting for an earlier step' );
 		expect( byKey.next_eligible_at ).toBe( '3 November 2026, 03:00' );
 		expect( byKey.predecessor ).toBe( 'plugin:a/a.php' );
 	} );
@@ -93,15 +93,15 @@ describe( 'log decision details', () => {
 
 		expect( facts ).toHaveLength( 1 );
 		expect( facts[ 0 ].key ).toBe( 'reason' );
-		expect( facts[ 0 ].value ).toBe( 'Legacy — reason not recorded' );
-		expect( getReasonLabel( '' ) ).toBe( 'Legacy — reason not recorded' );
+		expect( facts[ 0 ].value ).toBe( 'Legacy: reason not recorded' );
+		expect( getReasonLabel( '' ) ).toBe( 'Legacy: reason not recorded' );
 	} );
 
 	it( 'treats an empty row as legacy even without the server flag', () => {
 		const facts = getDecisionFacts( { item_name: 'Old row' } );
 
 		expect( facts ).toHaveLength( 1 );
-		expect( facts[ 0 ].value ).toBe( 'Legacy — reason not recorded' );
+		expect( facts[ 0 ].value ).toBe( 'Legacy: reason not recorded' );
 	} );
 
 	it( 'shows the retained badge only for a pinned row', () => {

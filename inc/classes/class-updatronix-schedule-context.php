@@ -290,7 +290,7 @@ final class Updatronix_Schedule_Context {
 		 * @param string               $type  plugin, theme, core, translation.
 		 * @param string               $id    Item id.
 		 */
-		$filtered = apply_filters( self::FACTS_FILTER, $facts, $type, $id );
+		$filtered = apply_filters( self::FACTS_FILTER, $facts, $type, $id ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound -- Prefixed constant filter name.
 		$filtered = is_array( $filtered ) ? $filtered : $facts;
 
 		$out = array();
@@ -457,6 +457,7 @@ final class Updatronix_Schedule_Context {
 		return max(
 			1,
 			(int) apply_filters(
+				// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound -- Prefixed constant filter name.
 				self::LIMIT_FILTER,
 				self::DEFAULT_LIMIT
 			)

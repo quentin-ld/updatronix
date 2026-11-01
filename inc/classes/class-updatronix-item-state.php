@@ -244,7 +244,7 @@ final class Updatronix_Item_State {
 		 * @since 1.3.0
 		 * @param int $ttl Seconds. Default six hours.
 		 */
-		$ttl = (int) apply_filters( self::TTL_FILTER, self::DEFAULT_TTL );
+		$ttl = (int) apply_filters( self::TTL_FILTER, self::DEFAULT_TTL ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound -- Prefixed constant filter name.
 
 		return max( 0, $ttl );
 	}

@@ -14,12 +14,12 @@ describe( 'export decision columns', () => {
 
 		expect( keys.slice( 0, 7 ) ).toEqual( [
 			'headingTable',
+			'date',
 			'action',
 			'runContext',
 			'user',
 			'status',
 			'category',
-			'reason',
 		] );
 
 		for ( const key of [
@@ -43,6 +43,7 @@ describe( 'export decision columns', () => {
 
 		expect( payload ).toMatchObject( {
 			table_heading: true,
+			date: true,
 			action_type: true,
 			run_context: true,
 			user: true,

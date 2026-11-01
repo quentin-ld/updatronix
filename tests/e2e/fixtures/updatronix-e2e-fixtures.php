@@ -15,8 +15,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 add_filter(
 	'pre_set_site_transient_update_plugins',
 	static function ( $value ) {
-		$plugin = 'updatronix/updatronix.php';
-
 		if ( ! is_object( $value ) ) {
 			$value = new stdClass();
 		}
@@ -25,13 +23,17 @@ add_filter(
 			$value->response = array();
 		}
 
-		$value->response[ $plugin ] = (object) array(
-			'slug'        => 'updatronix',
-			'plugin'      => $plugin,
-			'new_version' => '9.9.9',
-			'package'     => 'https://example.invalid/updatronix.zip',
-			'url'         => 'https://example.invalid/updatronix',
-		);
+		foreach ( array( 'updatronix/updatronix.php', 'plugin-check/plugin.php' ) as $plugin ) {
+			$slug = dirname( $plugin );
+
+			$value->response[ $plugin ] = (object) array(
+				'slug'        => $slug,
+				'plugin'      => $plugin,
+				'new_version' => '9.9.9',
+				'package'     => 'https://example.invalid/' . $slug . '.zip',
+				'url'         => 'https://example.invalid/' . $slug,
+			);
+		}
 		$value->last_checked        = time();
 
 		return $value;

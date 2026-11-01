@@ -356,10 +356,13 @@ body.updatronix-admin-page {
 }
 
 .updatronix-surface-note {
-	max-width: 80ch;
 	color: var(--wpds-color-foreground-content-neutral-weak);
 	font-size: var(--wpds-typography-font-size-sm);
 	line-height: var(--wpds-typography-line-height-xs);
+}
+
+.updatronix-empty-state--centered {
+	margin-inline: auto;
 }
 
 .updatronix-auto-list {
@@ -633,12 +636,6 @@ body.updatronix-admin-page {
 	color: var(--wpds-color-foreground-content-neutral-weak);
 }
 
-.updatronix-doc-pro {
-	display: inline-block;
-	margin-top: var(--wpds-dimension-gap-sm);
-	color: var(--wpds-color-foreground-interactive-brand);
-}
-
 .updatronix-doc-card-root {
 	height: 100%;
 }
@@ -667,11 +664,6 @@ body.updatronix-admin-page {
 	height: var(--wpds-dimension-size-lg);
 	justify-content: center;
 	width: var(--wpds-dimension-size-lg);
-}
-
-.updatronix-doc-icon--pro {
-	background: var(--wpds-color-background-interactive-brand-weak);
-	color: var(--wpds-color-foreground-interactive-brand);
 }
 
 .updatronix-doc-copy {

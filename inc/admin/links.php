@@ -96,7 +96,7 @@ function updatronix_plugin_row_meta( array $links, string $file ): array {
 					'Support Updatronix development (opens in a new tab)',
 					'updatronix'
 				),
-				esc_html__( 'Support', 'updatronix' ) . ' ☕'
+				esc_html__( 'Support', 'updatronix' )
 			),
 		);
 		$links       = array_merge( $links, $extra_links );

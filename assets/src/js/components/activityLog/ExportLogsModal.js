@@ -2,7 +2,14 @@
  * Modal surface for POST /updatronix/v1/logs/export — plain-text preview + chunked fetch loop.
  */
 
-import { useCallback, useEffect, useMemo, useState } from '@wordpress/element';
+import {
+	useCallback,
+	useEffect,
+	useLayoutEffect,
+	useMemo,
+	useRef,
+	useState,
+} from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { useDispatch } from '@wordpress/data';
 import { store as noticesStore } from '@wordpress/notices';
@@ -44,6 +51,10 @@ const NOTICE_INTENTS = {
 
 /** @type {ReadonlyArray<{ id: string, label: string }>} */
 const COLUMN_OPTIONS = [
+	{
+		id: 'date',
+		label: __( 'Date', 'updatronix' ),
+	},
 	{
 		id: 'action',
 		label: __( 'Action', 'updatronix' ),
@@ -114,7 +125,7 @@ const CSV_COLUMNS = [
 	[ 'element', __( 'Element', 'updatronix' ), null ],
 	[ 'action', __( 'Action', 'updatronix' ), 'action' ],
 	[ 'version', __( 'Version', 'updatronix' ), null ],
-	[ 'date', __( 'Date', 'updatronix' ), null ],
+	[ 'date', __( 'Date', 'updatronix' ), 'date' ],
 	[ 'context', __( 'Run context', 'updatronix' ), 'runContext' ],
 	[ 'user', __( 'User', 'updatronix' ), 'user' ],
 	[ 'status', __( 'Status', 'updatronix' ), 'status' ],
@@ -258,6 +269,7 @@ export function ExportLogsModal( {
 	const [ exportFormat, setExportFormat ] = useState(
 		() => formatItems[ 0 ]?.value || 'txt'
 	);
+	const popupRef = useRef( null );
 
 	useEffect( () => {
 		if ( ! formatItems.some( ( item ) => item.value === exportFormat ) ) {
@@ -350,6 +362,40 @@ export function ExportLogsModal( {
 		resetOutput();
 	}, [ scope, exportFormat, merge, columns, resetOutput ] );
 
+	useLayoutEffect( () => {
+		if ( ! isOpen ) {
+			return undefined;
+		}
+
+		const popup = popupRef.current;
+		const main = document.querySelector( '.updatronix-shell-main' );
+
+		if ( ! popup || ! main ) {
+			return undefined;
+		}
+
+		const center = () => {
+			const rect = main.getBoundingClientRect();
+			popup.style.left = `${ rect.left + rect.width / 2 }px`;
+			popup.style.top = `${ rect.top + rect.height / 2 }px`;
+		};
+
+		center();
+
+		const observer =
+			typeof window.ResizeObserver === 'function'
+				? new window.ResizeObserver( center )
+				: null;
+
+		observer?.observe( main );
+		window.addEventListener( 'resize', center );
+
+		return () => {
+			observer?.disconnect();
+			window.removeEventListener( 'resize', center );
+		};
+	}, [ isOpen ] );
+
 	const handleClose = useCallback( () => {
 		resetOutput();
 		onClose?.();
@@ -397,7 +443,7 @@ export function ExportLogsModal( {
 		}
 
 		return __(
-			'The export could not be generated. Try again, or adjust your filters and try again.',
+			'The export could not be generated. Adjust your filters and try again.',
 			'updatronix'
 		);
 	}, [] );
@@ -494,7 +540,7 @@ export function ExportLogsModal( {
 					} else {
 						setLiveRegion(
 							__(
-								'Export ready. Copy the report to save it. It expires after 15 minutes.',
+								'Export ready. Copy the report to save it. It expires after 15\u00A0minutes.',
 								'updatronix'
 							)
 						);
@@ -619,7 +665,11 @@ export function ExportLogsModal( {
 				}
 			} }
 		>
-			<Dialog.Popup size="large" className="updatronix-export-modal">
+			<Dialog.Popup
+				ref={ popupRef }
+				size="large"
+				className="updatronix-export-modal"
+			>
 				<Dialog.Header>
 					<Dialog.Title>
 						{ __( 'Export update logs', 'updatronix' ) }
@@ -681,11 +731,11 @@ export function ExportLogsModal( {
 									{
 										value: 'month',
 										label: __(
-											'Last 30 days',
+											'Last 30\u00A0days',
 											'updatronix'
 										),
 										description: __(
-											'Records from the last 30 days.',
+											'Records from the last 30\u00A0days.',
 											'updatronix'
 										),
 									},
@@ -702,7 +752,7 @@ export function ExportLogsModal( {
 							{ summaryParts.dimensions.length === 0 ? (
 								<p className="updatronix-export-modal__filters-empty">
 									{ __(
-										'No filters applied — all logs in the current view are included.',
+										'No filters applied. All logs in the current view are included.',
 										'updatronix'
 									) }
 								</p>
@@ -767,7 +817,7 @@ export function ExportLogsModal( {
 							<legend>{ __( 'Columns', 'updatronix' ) }</legend>
 							<p className="updatronix-export-modal__columns-help">
 								{ __(
-									'Choose which parts of the report to include. Element, version, and date columns are always shown.',
+									'Choose which parts of the report to include. Element and version columns are always shown.',
 									'updatronix'
 								) }
 							</p>
@@ -812,7 +862,7 @@ export function ExportLogsModal( {
 							>
 								{ busy
 									? __(
-											'Generating the export…',
+											'Generating the export',
 											'updatronix'
 										)
 									: __( 'Generate export', 'updatronix' ) }
@@ -850,7 +900,7 @@ export function ExportLogsModal( {
 										className="updatronix-muted"
 									>
 										{ __(
-											'Copy the report to save it. It expires after 15 minutes.',
+											'Copy the report to save it. It expires after 15\u00A0minutes.',
 											'updatronix'
 										) }
 									</Text>

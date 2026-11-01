@@ -35,14 +35,14 @@ export function useAutoUpdates( onDismissedConstantsChange ) {
 			setFetchError(
 				e?.message ||
 					__(
-						'Your auto-update settings could not be loaded. Try refreshing the page.',
+						'Your automatic update settings could not be loaded. Refresh the page.',
 						'updatronix'
 					)
 			);
 			createErrorNotice(
 				e?.message ||
 					__(
-						'Your auto-update settings could not be loaded. Try refreshing the page.',
+						'Your automatic update settings could not be loaded. Refresh the page.',
 						'updatronix'
 					),
 				{ id: 'updatronix-autoupdate-toggle' }
@@ -67,14 +67,14 @@ export function useAutoUpdates( onDismissedConstantsChange ) {
 				} );
 				setData( response );
 				createSuccessNotice(
-					__( 'Core auto-update setting saved.', 'updatronix' ),
+					__( 'Core update setting saved.', 'updatronix' ),
 					{ id: 'updatronix-autoupdate-toggle' }
 				);
 			} catch ( e ) {
 				createErrorNotice(
 					e?.message ||
 						__(
-							'The core auto-update setting could not be saved. Check your connection and try again.',
+							'The core update setting could not be saved. Check your connection, and then try again.',
 							'updatronix'
 						),
 					{ id: 'updatronix-autoupdate-toggle' }
@@ -99,11 +99,11 @@ export function useAutoUpdates( onDismissedConstantsChange ) {
 				createSuccessNotice(
 					enable
 						? __(
-								'Auto-update enabled for this plugin.',
+								'Automatic updates enabled for this plugin.',
 								'updatronix'
 							)
 						: __(
-								'Auto-update disabled for this plugin.',
+								'Automatic updates disabled for this plugin.',
 								'updatronix'
 							),
 					{ id: 'updatronix-autoupdate-toggle' }
@@ -112,7 +112,7 @@ export function useAutoUpdates( onDismissedConstantsChange ) {
 				createErrorNotice(
 					e?.message ||
 						__(
-							'The plugin auto-update setting could not be changed. Try again.',
+							'The plugin update setting could not be changed. Try again.',
 							'updatronix'
 						),
 					{ id: 'updatronix-autoupdate-toggle' }
@@ -137,11 +137,11 @@ export function useAutoUpdates( onDismissedConstantsChange ) {
 				createSuccessNotice(
 					enable
 						? __(
-								'Auto-update enabled for this theme.',
+								'Automatic updates enabled for this theme.',
 								'updatronix'
 							)
 						: __(
-								'Auto-update disabled for this theme.',
+								'Automatic updates disabled for this theme.',
 								'updatronix'
 							),
 					{ id: 'updatronix-autoupdate-toggle' }
@@ -150,7 +150,7 @@ export function useAutoUpdates( onDismissedConstantsChange ) {
 				createErrorNotice(
 					e?.message ||
 						__(
-							'The theme auto-update setting could not be changed. Try again.',
+							'The theme update setting could not be changed. Try again.',
 							'updatronix'
 						),
 					{ id: 'updatronix-autoupdate-toggle' }
@@ -173,17 +173,14 @@ export function useAutoUpdates( onDismissedConstantsChange ) {
 				} );
 				setData( response );
 				createSuccessNotice(
-					__(
-						'Translation auto-update setting saved.',
-						'updatronix'
-					),
+					__( 'Translation update setting saved.', 'updatronix' ),
 					{ id: 'updatronix-autoupdate-toggle' }
 				);
 			} catch ( e ) {
 				createErrorNotice(
 					e?.message ||
 						__(
-							'The translation auto-update setting could not be changed. Try again.',
+							'The translation update setting could not be changed. Try again.',
 							'updatronix'
 						),
 					{ id: 'updatronix-autoupdate-toggle' }
@@ -216,7 +213,7 @@ export function useAutoUpdates( onDismissedConstantsChange ) {
 				setFetchError( null );
 
 				createSuccessNotice(
-					__( 'Auto-update settings saved.', 'updatronix' ),
+					__( 'Automatic update settings saved.', 'updatronix' ),
 					{ id: 'updatronix-autoupdate-toggle' }
 				);
 
@@ -225,7 +222,7 @@ export function useAutoUpdates( onDismissedConstantsChange ) {
 				const original =
 					e?.message ||
 					__(
-						'The auto-update settings could not be saved. Try again.',
+						'The automatic update settings could not be saved. Try again.',
 						'updatronix'
 					);
 
@@ -240,7 +237,7 @@ export function useAutoUpdates( onDismissedConstantsChange ) {
 					setFetchError( null );
 					createErrorNotice(
 						__(
-							'Some auto-update changes may have been applied. The page now shows the server state. Review the changes and try again.',
+							'Some automatic update changes may have been applied. The page now shows the server state. Review the changes, and then try again.',
 							'updatronix'
 						),
 						{ id: 'updatronix-autoupdate-toggle' }

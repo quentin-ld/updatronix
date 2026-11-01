@@ -604,7 +604,7 @@ final class ScheduleStateTest extends TestCase {
 
 		self::assertSame( Updatronix_Schedule_State::STATE_QUEUED, $out['state'] );
 		self::assertStringContainsString(
-			'Next in the current pass',
+			'Next in the current run',
 			$out['display']
 		);
 	}

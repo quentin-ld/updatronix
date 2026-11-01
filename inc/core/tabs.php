@@ -40,7 +40,7 @@ function updatronix_default_admin_tabs(): array {
 		),
 		'auto-updates' => array(
 			'slug'     => 'auto-updates',
-			'label'    => __( 'Auto-updates', 'updatronix' ),
+			'label'    => __( 'Auto updates', 'updatronix' ),
 			'icon'     => '',
 			'priority' => 20,
 		),

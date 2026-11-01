@@ -422,7 +422,7 @@ final class LogQueryFilterTest extends WP_UnitTestCase {
 		self::assertSame( 1, $legacy_data['total'] );
 		$legacy = $legacy_data['logs'][0];
 		self::assertTrue( $legacy->is_legacy );
-		self::assertSame( 'Legacy — reason not recorded', $legacy->reason_label );
+		self::assertSame( 'Legacy: reason not recorded', $legacy->reason_label );
 		self::assertSame( '', $legacy->decision_state_label );
 	}
 

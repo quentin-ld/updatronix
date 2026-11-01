@@ -63,7 +63,7 @@ export function SaveButton( {
 			data-updatronix-save-anchor="header"
 		>
 			{ busy
-				? __( 'Saving…', 'updatronix' )
+				? __( 'Saving', 'updatronix' )
 				: label || __( 'Save changes', 'updatronix' ) }
 			<span
 				className="updatronix-save-button-shortcut"
@@ -162,7 +162,13 @@ export default function SaveBar( {
 				( event.metaKey || event.ctrlKey ) &&
 				event.key.toLowerCase() === 's';
 
-			if ( ! isSave || ! isDirty || isSaving ) {
+			if ( ! isSave ) {
+				return;
+			}
+
+			event.preventDefault();
+
+			if ( ! isDirty || isSaving ) {
 				return;
 			}
 
@@ -174,7 +180,6 @@ export default function SaveBar( {
 				return;
 			}
 
-			event.preventDefault();
 			onSave();
 		};
 
@@ -223,7 +228,7 @@ export default function SaveBar( {
 					aria-keyshortcuts="Control+S Meta+S"
 				>
 					{ isSaving
-						? __( 'Saving…', 'updatronix' )
+						? __( 'Saving', 'updatronix' )
 						: saveLabel || __( 'Save changes', 'updatronix' ) }
 					<span
 						className="updatronix-savebar-shortcut"

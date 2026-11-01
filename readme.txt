@@ -13,9 +13,9 @@ WordPress updates made easy. Monitor every change, control all updates, and fine
 
 == Description ==
 
-WordPress applies your updates, but it keeps no record of them. Not what, not when, not how. Updatronix adds two layers to the native system: one for monitoring, one for control.
+WordPress applies your updates but keeps no record of what changed. Updatronix keeps that record and puts the automatic update settings in one place.
 
-Updatronix is built on WordPress's own update engine, everything keeps working exactly as WordPress intends. It simply adds the monitoring and control you're missing: a clear record of every update, and every automatic update setting on one page.
+It uses WordPress's own update engine, so updates keep working the way WordPress intends. You get a clear history of every update and every automatic update setting on one page.
 
 = Built for every user in their diversity of needs =
 
@@ -131,6 +131,23 @@ Up to you. In **Settings**, set the retention window between 1 and 365 days. The
 Yes. Network-activate Updatronix and manage everything as a Super Admin from the Network Admin. Settings, schedule, email controls, and update history are shared across every site in one unified log.
 
 == Changelog ==
+
+= Unreleased =
+* Fix: The Update logs retention note and the Auto updates header now use the same spacing as the other screens, long notes wrap at the content width, and the export dialog centers on the Updatronix surface.
+* Fix: Schedule shows WordPress default instead of the empty Select placeholder, keeps the saved frequency, and no longer renders the separate hold explanation table.
+* New: Export update logs can omit the Date column, and the export help text now lists Element and Version as the columns that are always shown.
+* Fix: Cmd/Ctrl+S is intercepted across Updatronix screens, so the browser Save-page dialog no longer opens; dirty screens still save.
+* Fix: Documentation uses the shared gray card icon and no longer shows the Pro badge or the redundant page description.
+* Fix: Health centers its empty state, and Settings no longer shows the redundant save and email notes or the yellow recovery-mode notice.
+* Copy: Rewrote the interface text across all eleven destinations to follow the WordPress Documentation Style Guide: US English, sentence case, second person, straight quotes, and no ellipses.
+* Copy: Standardized the terms Canceled, license, changelog, re-enable, automatic updates, Auto updates, Update logs, Update Shield, Update Flow, White label, and Updatronix 3000.
+* Copy: Removed developer terms from reader copy (VCS, Composer provenance, item root, lease, offer, predecessor, soak window, drain, cron tick) and rebuilt the blocked-items and item-count messages with proper plural forms.
+* Copy: The Updatronix 3000 preview and the roadmap copy now describe only what ships; the XML export and roadmap promises are gone.
+* Copy: Final consistency pass: the Auto updates label, the Health issue count, nonbreaking disk-space units, the Updatronix 3000 preview subject, and the Earlier step detail label.
+* Copy: Second pass: rewrote the plugin description, the Update Shield summary, the switch verbs, the time-unit spacing, and the export error. The tricolon rule now applies to the interface; see `docs/wpds/62-ui-copy-second-pass.md`.
+* Copy: Follow-up: the health-check nonbreaking spaces now ship as literal U+00A0, both plugin descriptions are translated, and the readmes match the shipped interface.
+* Copy: Third pass: rebuilt the stale bundles and rewrote the nine destination descriptions; see `docs/wpds/63-ui-copy-third-pass.md`.
+* Copy: The full before-and-after list is in `docs/wpds/61-ui-copy-review.md`.
 
 = 2.0.0 =
 * New: The activity log records the decision behind each update: reason, state, origin, stage, pass, chain, predecessor, next eligible time, and attempt. Filter by reason, state, or origin, or open a pass or chain deep link; the details panel and export include the same fields.

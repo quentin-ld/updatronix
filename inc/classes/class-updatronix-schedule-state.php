@@ -636,7 +636,7 @@ final class Updatronix_Schedule_State {
 
 			case self::STATE_FAILED:
 				$sentence = __(
-					'The last automatic attempt failed. The next pass re-evaluates.',
+					'The last automatic attempt failed. The next automatic run re-evaluates.',
 					'updatronix'
 				);
 				break;
@@ -681,7 +681,7 @@ final class Updatronix_Schedule_State {
 					$sentence = sprintf(
 						/* translators: %s: earliest eligible date and time. */
 						__(
-							'Next in the current pass at %s. It may run after the current item.',
+							'Next in the current run at %s. It may run after the current item.',
 							'updatronix'
 						),
 						$format( null === $row['eligible_at'] ? null : (int) $row['eligible_at'] )

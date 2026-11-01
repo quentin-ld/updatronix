@@ -82,6 +82,7 @@ final class ExportBodyBuilderTest extends TestCase {
 		self::assertSame(
 			array(
 				'table_heading'    => true,
+				'date'             => true,
 				'action_type'      => true,
 				'run_context'      => true,
 				'user'             => true,
@@ -138,7 +139,7 @@ final class ExportBodyBuilderTest extends TestCase {
 
 		self::assertArrayNotHasKey( 'bogus', $result );
 		self::assertFalse( $result['user'] );
-		self::assertCount( 14, $result );
+		self::assertCount( 15, $result );
 	}
 
 	/**

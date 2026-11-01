@@ -15,7 +15,7 @@ const XML_COLUMNS = [
 	[ 'element', __( 'Element', 'updatronix' ), null ],
 	[ 'action', __( 'Action', 'updatronix' ), 'action' ],
 	[ 'version', __( 'Version', 'updatronix' ), null ],
-	[ 'date', __( 'Date', 'updatronix' ), null ],
+	[ 'date', __( 'Date', 'updatronix' ), 'date' ],
 	[ 'context', __( 'Run context', 'updatronix' ), 'runContext' ],
 	[ 'user', __( 'User', 'updatronix' ), 'user' ],
 	[ 'status', __( 'Status', 'updatronix' ), 'status' ],

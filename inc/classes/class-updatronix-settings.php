@@ -677,7 +677,7 @@ final class Updatronix_Settings {
 		if ( isset( $context['queue_position'], $context['queue_total'] ) ) {
 			$parts[] = sprintf(
 				/* translators: 1: position in the queue, 2: total items in the queue */
-				__( 'Queue position %1$d of %2$d', 'updatronix' ),
+				__( 'Update queue position %1$d of %2$d', 'updatronix' ),
 				(int) $context['queue_position'],
 				(int) $context['queue_total']
 			);
@@ -953,7 +953,7 @@ final class Updatronix_Settings {
 			'incompatible'       => __( 'Incompatible', 'updatronix' ),
 			'disabled'           => __( 'Disabled', 'updatronix' ),
 			'safe_mode_disabled' => __(
-				'Auto-updates disabled by Safe Mode',
+				'Automatic updates disabled by Safe mode',
 				'updatronix'
 			),
 		);
@@ -1613,7 +1613,7 @@ final class Updatronix_Settings {
 			return new WP_REST_Response(
 				array(
 					'message' => __(
-						'That constant is not recognised by Updatronix.',
+						'Updatronix does not recognize that constant.',
 						'updatronix'
 					),
 				),

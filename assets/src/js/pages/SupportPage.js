@@ -126,7 +126,7 @@ export default function SupportPage( { destination, onNavigate } ) {
 								className="updatronix-support-forum-description"
 							>
 								{ __(
-									'Free support for Updatronix is handled by the WordPress.org community.',
+									'The WordPress.org community provides free support for Updatronix.',
 									'updatronix'
 								) }
 							</Text>

@@ -110,10 +110,26 @@ final class Updatronix_AutoUpdates {
 			// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 			if (
 				// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
-				'Manage your WordPress updates with confidence. Control auto-updates, capture technical logs, and route alerts to the right places.' === $raw ) {
+				'Keeps a record of every update and puts the automatic update settings in one place.' === $raw ) {
 				$raw = __(
 					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
-					'Manage your WordPress updates with confidence. Control auto-updates, capture technical logs, and route alerts to the right places.',
+					'Keeps a record of every update and puts the automatic update settings in one place.',
+					'updatronix'
+				);
+			}
+		}
+
+		// The Pro description is a known literal too. Free is required, so its
+		// catalog is the reliable extractor for this string.
+		if ( 'updatronix-pro' === $slug ) {
+			$raw = trim( $raw );
+			// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+			if (
+				// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+				'Adds Update Shield and Update Flow, plus White label, to Updatronix.' === $raw ) {
+				$raw = __(
+					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+					'Adds Update Shield and Update Flow, plus White label, to Updatronix.',
 					'updatronix'
 				);
 			}

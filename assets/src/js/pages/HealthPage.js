@@ -239,10 +239,10 @@ export default function HealthPage( { destination, onNavigate } ) {
 					? [
 							{
 								label: sprintf(
-									/* translators: %d: number of open issues. */
+									/* translators: %d: number of issues to review. */
 									_n(
-										'%d open issue',
-										'%d open issues',
+										'%d issue to review',
+										'%d issues to review',
 										snapshot.counts.open,
 										'updatronix'
 									),
@@ -299,7 +299,7 @@ export default function HealthPage( { destination, onNavigate } ) {
 				>
 					<Spinner />
 					<Text variant="body-sm" className="updatronix-muted">
-						{ __( 'Running health checks…', 'updatronix' ) }
+						{ __( 'Running health checks', 'updatronix' ) }
 					</Text>
 				</div>
 			</div>
@@ -481,7 +481,10 @@ export default function HealthPage( { destination, onNavigate } ) {
 								{ item.href && (
 									<Link href={ item.href }>
 										{ item.link_label ||
-											__( 'Learn more', 'updatronix' ) }
+											__(
+												'Read the guide',
+												'updatronix'
+											) }
 									</Link>
 								) }
 							</article>
@@ -511,10 +514,10 @@ export default function HealthPage( { destination, onNavigate } ) {
 					) }
 
 					{ snapshot.open_issues.length === 0 ? (
-						<EmptyState.Root>
+						<EmptyState.Root className="updatronix-empty-state--centered">
 							<EmptyState.Icon icon={ check } />
 							<EmptyState.Title>
-								{ __( 'No open issues', 'updatronix' ) }
+								{ __( 'No issues to review', 'updatronix' ) }
 							</EmptyState.Title>
 							<EmptyState.Description>
 								{ __(
@@ -648,14 +651,14 @@ export default function HealthPage( { destination, onNavigate } ) {
 				<Section
 					title={ __( 'Recently fixed', 'updatronix' ) }
 					description={ __(
-						'Failures cleared in the last 30 days, with the action that resolved them.',
+						'Failures cleared in the last 30\u00A0days, with the action that resolved them.',
 						'updatronix'
 					) }
 				>
 					{ snapshot.resolved.length === 0 ? (
 						<Text variant="body-sm" className="updatronix-muted">
 							{ __(
-								'No failures were resolved in the last 30 days.',
+								'No failures were resolved in the last 30\u00A0days.',
 								'updatronix'
 							) }
 						</Text>
@@ -941,7 +944,7 @@ export default function HealthPage( { destination, onNavigate } ) {
 							disabled={ retryBusy }
 						>
 							{ retryBusy
-								? __( 'Scheduling…', 'updatronix' )
+								? __( 'Scheduling', 'updatronix' )
 								: __( 'Schedule retry', 'updatronix' ) }
 						</Button>
 					</Dialog.Footer>

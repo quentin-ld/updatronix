@@ -28,7 +28,7 @@ test.describe( 'Auto updates', () => {
 		);
 
 		await expect(
-			page.getByText( /Auto-updates could not be (loaded|refreshed)/i )
+			page.getByText( /Auto updates could not be (loaded|refreshed)/i )
 		).toBeVisible();
 		await expect(
 			page.getByRole( 'button', { name: 'Retry' } )
@@ -59,7 +59,7 @@ test.describe( 'Auto updates', () => {
 		);
 
 		await page
-			.getByRole( 'switch', { name: /Auto-updates for/ } )
+			.getByRole( 'switch', { name: /Auto updates for/ } )
 			.first()
 			.click();
 		await page
@@ -69,7 +69,9 @@ test.describe( 'Auto updates', () => {
 
 		await expect(
 			page
-				.getByText( /could not be saved|Some auto-update changes/i )
+				.getByText(
+					/could not be saved|Some automatic update changes/i
+				)
 				.first()
 		).toBeVisible();
 	} );
@@ -107,7 +109,7 @@ test.describe( 'Auto updates', () => {
 			.click();
 
 		await expect(
-			page.getByText( 'Auto-update settings saved.' ).first()
+			page.getByText( 'Automatic update settings saved.' ).first()
 		).toBeVisible();
 		expect( posts.length ).toBeGreaterThanOrEqual( 2 );
 		expect( new Set( posts ).size ).toBe( posts.length );
@@ -131,7 +133,7 @@ test.describe( 'Auto updates', () => {
 			.click();
 
 		await expect(
-			page.getByText( 'Auto-update settings saved.' ).first()
+			page.getByText( 'Automatic update settings saved.' ).first()
 		).toBeVisible();
 	} );
 } );

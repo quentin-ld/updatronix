@@ -12,6 +12,34 @@ export const MAX_HOLD_DAYS = 365;
 /** Preferred time used when the stored value is empty or invalid. */
 export const DEFAULT_TIME = '03:00';
 
+/**
+ * Select value for the WordPress default recurrence.
+ *
+ * The stored recurrence is an empty string; the select needs a non-empty value
+ * so it does not fall back to its “Select” placeholder.
+ */
+export const WORDPRESS_DEFAULT_FREQUENCY = 'wp-default';
+
+/**
+ * Map a stored recurrence to the select value.
+ *
+ * @param {string} recurrence Stored recurrence slug.
+ * @return {string} Select value.
+ */
+export function frequencySelectValue( recurrence ) {
+	return recurrence === '' ? WORDPRESS_DEFAULT_FREQUENCY : recurrence;
+}
+
+/**
+ * Map a select value back to the stored recurrence.
+ *
+ * @param {string} value Select value.
+ * @return {string} Stored recurrence slug.
+ */
+export function recurrenceFromFrequency( value ) {
+	return value === WORDPRESS_DEFAULT_FREQUENCY ? '' : value;
+}
+
 /** The `HH:MM` shape the server stores. */
 export const TIME_PATTERN = /^([01][0-9]|2[0-3]):[0-5][0-9]$/;
 
@@ -174,7 +202,7 @@ export function recurrenceDescription( recurrence ) {
 			return __( 'Runs every day at the preferred time.', 'updatronix' );
 		case 'twicedaily':
 			return __(
-				'The first run anchors at the preferred time; the second runs 12 hours later.',
+				'The first run anchors at the preferred time; the second runs 12\u00A0hours later.',
 				'updatronix'
 			);
 		case 'hourly':
@@ -234,8 +262,8 @@ export function holdRuleCopy( days ) {
 		return sprintf(
 			/* translators: %d: number of hold days. */
 			_n(
-				'New releases are held for %d day after the first automatic check sees them; the earliest install is the first check at or after that.',
-				'New releases are held for %d days after the first automatic check sees them; the earliest install is the first check at or after that.',
+				'New releases are held for %d day after the first automatic check finds them. The earliest install is the first check at or after that.',
+				'New releases are held for %d days after the first automatic check finds them. The earliest install is the first check at or after that.',
 				days,
 				'updatronix'
 			),
@@ -256,49 +284,19 @@ export function holdRuleCopy( days ) {
  */
 export function manualCheckCopy() {
 	return __(
-		'Run a check now refreshes the update data. It does not start the hold; the hold starts at the next automatic pass.',
+		'Run a check now refreshes the update data. It does not start the hold; the hold starts at the next automatic run.',
 		'updatronix'
 	);
 }
 
 /**
- * Rows for the "What the hold period does" table.
- *
- * The old table claimed core security releases were installed immediately; the
- * delay gate holds every core offer, so that claim is gone (T9, analysis 04
- * §6.4). The copy is exported so a test can pin it.
- *
- * @return {Array<{type: string, withHold: string, manual: string}>} Rows.
- */
-export function holdRuleRows() {
-	return [
-		{
-			type: __( 'Core releases', 'updatronix' ),
-			withHold: __(
-				'Deferred by the selected number of days',
-				'updatronix'
-			),
-			manual: __( 'Optional', 'updatronix' ),
-		},
-		{
-			type: __( 'Plugin and theme updates', 'updatronix' ),
-			withHold: __(
-				'Deferred by the selected number of days',
-				'updatronix'
-			),
-			manual: __( 'Available from the update log', 'updatronix' ),
-		},
-	];
-}
-
-/**
- * Closing note under the hold table.
+ * Closing note under the hold period field.
  *
  * @return {string} Translated sentence.
  */
 export function holdRuleNote() {
 	return __(
-		'The hold applies after the first automatic check sees a release. It applies to every core automatic update; WordPress does not expose a reliable security-release flag.',
+		'The hold applies after the first automatic check finds a release. It applies to every core automatic update; WordPress does not report which releases are security releases.',
 		'updatronix'
 	);
 }
