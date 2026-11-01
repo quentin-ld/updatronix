@@ -609,7 +609,6 @@ final class Updatronix_Export_Body_Builder {
 			'version' => $parts['versions'],
 		);
 
-		// @infection-ignore-all — normalize_export_columns always supplies the key.
 		if ( $columns['date'] ?? true ) { // counterfactual: equivalent — normalize_export_columns always supplies the key.
 			$data['date'] = $parts['dates'];
 		}
@@ -1273,12 +1272,8 @@ final class Updatronix_Export_Body_Builder {
 	 */
 	private static function status_label( string $status ): string {
 		return match ( strtolower( sanitize_key( $status ) ) ) {
-			'success' => __( 'Success', 'updatronix' ), // @infection-ignore-all — the default arm returns the same label.
-			'error', 'failed', 'errors' => __( 'Failed', 'updatronix' ),
+			'error', 'errors' => __( 'Failed', 'updatronix' ),
 			'cancelled' => __( 'Canceled', 'updatronix' ),
-			'delayed'   => __( 'Delayed', 'updatronix' ), // @infection-ignore-all — the default arm returns the same label.
-			'info'      => __( 'Info', 'updatronix' ),
-			'warning'   => __( 'Warning', 'updatronix' ),
 			default     =>
 				'' !== sanitize_key( $status ) ? ucfirst( sanitize_key( $status ) ) : __(
 					'Info',
