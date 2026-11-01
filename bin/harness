@@ -8,10 +8,9 @@
 # working toolchain with no extra install — no Python, no Node, no global CLI.
 # See AGENTS.md for the contracts this enforces.
 #
-# Backend order: DDEV, then LocalWP, then the host. The host is never used
-# implicitly when a project backend exists, because a host toolchain and a
-# container toolchain disagree about PHP versions in ways that are expensive to
-# debug.
+# Backend order: DDEV, then the host. The host is never used implicitly when a
+# project backend exists, because a host toolchain and a container toolchain
+# disagree about PHP versions in ways that are expensive to debug.
 set -euo pipefail
 
 HARNESS_VERSION="0.1.0"
@@ -36,7 +35,6 @@ PROJECT_ARCHIVE_NAME="updatronix"
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PROJECT_REL=""
 WP_ROOT=""
-LOCAL_SITE_SHELL=""
 
 # ---------------------------------------------------------------------------
 # environment
@@ -50,35 +48,6 @@ _find_wp_root() {
 			return 0
 		fi
 		dir="$(dirname "$dir")"
-	done
-	return 1
-}
-
-# LocalWP is a compatibility floor, not a second implementation. Only the
-# documented "Site Shell" environment file is supported: Local writes one into
-# ~/.config/Local/ssh-entry/ the first time a site's shell is opened, and it
-# carries the exports that put Local's PHP, MySQL and WP-CLI on PATH.
-#
-# The hand-written `.config/local-wp-cli.sh` resolved this from
-# `~/.config/Local/sites.json` with an embedded Python helper. Bash cannot parse
-# JSON without a dependency and this runtime is required to run with none, so
-# the entry is located by matching the `cd` line it already contains against the
-# WordPress root. `LOCAL_SITE_SHELL` still overrides.
-_find_local_shell() {
-	if [[ -n "${LOCAL_SITE_SHELL:-}" && -f "${LOCAL_SITE_SHELL}" ]]; then
-		printf '%s' "$LOCAL_SITE_SHELL"
-		return 0
-	fi
-
-	local entry cd_path
-	for entry in "${HOME}"/.config/Local/ssh-entry/*.sh; do
-		[[ -f "$entry" ]] || continue
-		cd_path="$(sed -n 's/^cd "\(.*\)"$/\1/p' "$entry" | head -1)"
-		[[ -n "$cd_path" ]] || continue
-		if [[ "$(cd "$cd_path" 2>/dev/null && pwd -P)" == "$WP_ROOT" ]]; then
-			printf '%s' "$entry"
-			return 0
-		fi
 	done
 	return 1
 }
@@ -109,10 +78,6 @@ detect_backend() {
 		warn "DDEV project detected but not running — treating the host as fallback."
 		warn "Start it with: cd ${WP_ROOT} && ddev start"
 	fi
-	if [[ -n "$LOCAL_SITE_SHELL" && -f "$LOCAL_SITE_SHELL" ]]; then
-		printf 'local'
-		return 0
-	fi
 	printf 'host'
 }
 
@@ -131,7 +96,6 @@ _init() {
 	# its working directory instead of being wrapped in `cd … && …`.
 	PROJECT_CONTAINER_DIR="/var/www/html/${PROJECT_REL}"
 
-	LOCAL_SITE_SHELL="$(_find_local_shell || true)"
 	BACKEND="$(detect_backend)"
 }
 
@@ -164,25 +128,6 @@ _ddev_exec() {
 	(cd "$WP_ROOT" && ddev exec -q --raw -d "$PROJECT_CONTAINER_DIR" -- "$@")
 }
 
-# The Site Shell file ends with `exec $SHELL`. Sourcing it raw replaces this
-# process with an interactive shell, so every command after it silently does
-# nothing — the LocalWP backend looked like it worked and ran nothing at all.
-# Only the lines that set up the environment are kept: the exports, the `cd`,
-# and the NODE_ENV unset. The hand-written `.config/local-wp-cli.sh` filtered
-# the file the same way; this is that behaviour, carried over.
-_source_local_shell() {
-	[[ -f "$LOCAL_SITE_SHELL" ]] || return 0
-	# shellcheck disable=SC1090
-	source <(awk '/^export / { print } /^cd "/ { print } /^unset NODE_ENV$/ { print }' "$LOCAL_SITE_SHELL")
-}
-
-_local_exec() {
-	_source_local_shell
-	local command
-	command="$(printf '%q ' "$@")"
-	(cd "$PROJECT_ROOT" && eval "$command")
-}
-
 _host_exec() {
 	(cd "$PROJECT_ROOT" && "$@")
 }
@@ -190,7 +135,6 @@ _host_exec() {
 run() {
 	case "$BACKEND" in
 	ddev) _ddev_exec "$@" ;;
-	local) _local_exec "$@" ;;
 	host) _host_exec "$@" ;;
 	*) fail "unknown backend: $BACKEND" ;;
 	esac
@@ -201,10 +145,6 @@ run() {
 run_sh() {
 	case "$BACKEND" in
 	ddev) (cd "$WP_ROOT" && ddev exec -q --raw -d "$PROJECT_CONTAINER_DIR" -- bash -lc "$1") ;;
-	local)
-		_source_local_shell
-		(cd "$PROJECT_ROOT" && bash -lc "$1")
-		;;
 	host) (cd "$PROJECT_ROOT" && bash -lc "$1") ;;
 	esac
 }
@@ -224,7 +164,7 @@ has_tool() {
 # command that takes about 10 ms.
 #
 # So the entry point re-enters itself, once, with the argument vector unchanged.
-# Only the container backend re-enters: `local` and `host` are already there.
+# Only the container backend re-enters: `host` is already there.
 #
 # Four output lines legitimately differ, and all four are facts about *where* the
 # runtime is running rather than about what it found: the two root paths and the
@@ -259,8 +199,7 @@ _reenter_in_container() {
 require_tool() {
 	if ! has_tool "$1"; then
 		fail "'$1' is not available in the '$BACKEND' backend.
-  DDEV:   add it to .ddev/web-build/Dockerfile or a .ddev/commands file.
-  LocalWP: use the Site Shell binary that ships it."
+  DDEV: add it to .ddev/web-build/Dockerfile or a .ddev/commands file."
 	fi
 }
 
@@ -358,7 +297,7 @@ cmd_graft() {
 #
 # Delegating to `composer run <script>` was the first design and it broke on the
 # first real run: `"test": "phpunit --configuration=…"` resolves only because
-# LocalWP's Site Shell put `phpunit` on PATH. Under DDEV there is no such
+# one backend happened to put `phpunit` on PATH. Under DDEV there is no such
 # binary, so the project's own contract fails for a reason that has nothing to
 # do with the project. A runtime that only works under one backend is the
 # coupling this harness exists to remove.
@@ -895,9 +834,6 @@ cmd_integration() {
 	# path differs between the host and the container. It is sourced inside the
 	# backend and absolutised there, so one file is valid in both.
 	#
-	# The previous LocalWP-only path sourced the file on the host and then ran
-	# PHPUnit with container paths that pointed at the host's home directory.
-	#
 	# `WP_MULTISITE` is forwarded explicitly: ddev exec does not carry arbitrary
 	# host variables into the container, so `WP_MULTISITE=1 bin/harness
 	# integration` would otherwise quietly run the single-site suite and report
@@ -1341,8 +1277,8 @@ _admin_db_credentials() {
 
 	local attempt user pass protocol
 	# `--protocol=tcp` first: DDEV's database service is reached over the
-	# network. A socket-based host (LocalWP's `localhost`) only answers the
-	# second pass, which is why the protocol is not hardcoded.
+	# network. A socket-based server only answers the second pass, which is why
+	# the protocol is not hardcoded.
 	for protocol in "--protocol=tcp" ""; do
 		for attempt in "root:root" "root:${site_pass}" "root:"; do
 			user="${attempt%%:*}"
@@ -1368,7 +1304,7 @@ _local_write_env() {
 	# The site's own URL, asked of WordPress rather than assumed.
 	#
 	# `wp option get siteurl` answers on every backend this fleet runs on, so it
-	# works on DDEV, on LocalWP and on the host without a branch. It is what the
+	# works on DDEV and on the host without a branch. It is what the
 	# end-to-end browser needs: the E2E config used to hardcode a hostname, and
 	# the one it hardcoded belonged to a different site.
 	local site_url

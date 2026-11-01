@@ -100,7 +100,7 @@ Activation creates the log table and schedules a daily cleanup. Deactivation can
 
 - PHP **8.1+** · WordPress **6.2+** · Composer · Node.js LTS + npm
 - Docker. Every command runs through `bin/harness`, which resolves the backend
-  for you — DDEV first, then LocalWP, then the host. Nothing needs installing.
+  for you — DDEV first, then the host. Nothing needs installing.
 
 ### Setup
 

@@ -141,7 +141,7 @@ no API key, $0).
 ## Harness runtime (0.1.0)
 
 Every tool goes through `bin/harness`. It resolves the execution backend for
-you, in this order: **DDEV**, then **LocalWP**, then the host.
+you, in this order: **DDEV**, then the host.
 
 ```bash
 bin/harness doctor          # backend, tools, graft, manifest — run this first

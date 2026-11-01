@@ -11,10 +11,10 @@
 #
 # See https://raw.githubusercontent.com/wp-cli/scaffold-command/master/templates/install-wp-tests.sh
 
-# Unset LD_LIBRARY_PATH to avoid Local's PHP environment polluting system curl.
-# When the LocalWP backend is used, `bin/harness` sources Local's environment,
-# which sets LD_LIBRARY_PATH for PHP. This breaks system curl with
-# "undefined symbol: curl_global_trace".
+# A host PHP installation may export LD_LIBRARY_PATH for its own PHP, and that
+# breaks the system curl with "undefined symbol: curl_global_trace". The script
+# only needs curl and unzip, so the variable is cleared before the first
+# download.
 unset LD_LIBRARY_PATH
 
 # See https://raw.githubusercontent.com/wp-cli/scaffold-command/master/templates/install-wp-tests.sh
