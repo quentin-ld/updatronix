@@ -666,6 +666,14 @@ cmd_prose() {
 	run php bin/check-prose-drift.php "$@"
 }
 
+# The user guide's mechanical checks: links, images with alt text, heading
+# hierarchy. Manual, not in pre-push: a project without a guide is not a broken
+# gate.
+cmd_docs_check() {
+	step "User docs (links, images, headings)"
+	run php bin/check-user-docs.php "$@"
+}
+
 # The three front-end gates, which run `wp-scripts` through the scripts the
 # harness generates into `package.json`.
 #
@@ -4596,6 +4604,7 @@ ${PROJECT_SLUG} harness ${HARNESS_VERSION} — backend: ${BACKEND:-unresolved}
   bin/harness prose [--base=<ref>]
                                comments that changed while the code did not.
                                Reports, never fails
+  bin/harness docs check        user docs: links, images, headings
   bin/harness lint:js|lint:css|format
   bin/harness build|start         assets via @wordpress/scripts
   bin/harness test                unit suite
@@ -4651,6 +4660,11 @@ main() {
 	test:js) cmd_test_js ;;
 	e2e) cmd_e2e "$@" ;;
 	prose) cmd_prose "$@" ;;
+	docs)
+		[[ "${1:-}" == "check" ]] || fail "usage: bin/harness docs check"
+		shift
+		cmd_docs_check "$@"
+		;;
 	lint:js) cmd_lint_js ;;
 	lint:css) cmd_lint_css ;;
 	format) cmd_format ;;

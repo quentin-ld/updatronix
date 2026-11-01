@@ -405,3 +405,5 @@ test-results/
 artifacts/
 **/artifacts/
 /.ignore
+!docs/user/
+!docs/user/**
