@@ -1,5 +1,8 @@
 # Updatronix — Agent Instructions
 
+**Read `workflow.md` first.** It carries the setup, the commands, the gates and
+the code layout; this file is the agent's delta and does not repeat them.
+
 ## Communication
 
 Messages may arrive in French or English. **Always reply in US English.** WordPress prose style: the fleet's `wordpress-documentation-style-guide-consolidated.md` mirror (look a section up with `./bin/harness docs find "<query>"` — never load the full file).
@@ -34,7 +37,7 @@ You describe the outcome. The agent plans, implements, lints, logs, and fixes fr
 |------|-----|-------|
 | 1 | `/architect` + describe change | Clarify → plan → create task file |
 | 2 | “go” / adjust plan | Execute all tasks autonomously |
-| 3 | Test in Local | Fix issues from your notes |
+| 3 | Test in the site | Fix issues from your notes |
 | 4 | Done testing | `/reviewer` if required (see below) |
 | 5 | Release ready | `/release` after explicit version authorization |
 
@@ -48,7 +51,7 @@ Skills define **what** to do. **Model tier** defines which capability level to u
 | **Worker** | Task file is the contract | `/architect` Phase 4–5 (execute) · `/resume` · `/release` |
 | **Audit** | Judge only — no implementation | `/reviewer` when required · `/security` always · `/qa` always |
 
-**Rules:** planning until `go`, then worker to build, audit before ship. Audit for `/security` and `/qa` always. Record `model_tier` in note frontmatter, not vendor SKUs. Full detail lives in `HOW_TO_USE.md`.
+**Rules:** planning until `go`, then worker to build, audit before ship. Audit for `/security` and `/qa` always. Record `model_tier` in note frontmatter, not vendor SKUs. Full detail: `workflow.md`.
 
 ## Token Optimization
 
@@ -90,7 +93,7 @@ Before rotating, update `## Session checkpoint` (last task done, files touched, 
 
 ## Maintenance — Monthly Rule Review
 
-Review `AGENTS.md` and skills monthly: rules still relevant to `inc/`? repeated agent mistakes needing a rule? redundant rules to prune? token creep? Do **not** rewrite for style. Human playbook: `.agents/HOW_TO_USE.md`.
+Review `AGENTS.md` and skills monthly: rules still relevant to `inc/`? repeated agent mistakes needing a rule? redundant rules to prune? token creep? Do **not** rewrite for style. Human playbook: `workflow.md`.
 
 <!-- graft:start -->
 ## Graft — repo context graph
@@ -210,7 +213,7 @@ convenience. If a gate is wrong, fix the gate and say so.
 
 Most of this repository's tooling is **generated** and recorded in
 `.harness/manifest.json`: `bin/`, `.config/`, `.githooks/`, `.agents/skills/`,
-`.agents/docs/`, `.reasonix/`, `composer.json`, `package.json`, `.gitignore`,
+`.agents/docs/`, `composer.json`, `package.json`, `.gitignore`,
 `.distignore` and this section. Editing one does not stick: `harness sync`
 overwrites it. What the manifest does not own — your code, `readme.txt`, a seeded
 file once it exists, and any text outside a marked region — is yours, and stays

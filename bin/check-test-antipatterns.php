@@ -50,8 +50,7 @@ foreach ( $harness_paths as $harness_path ) {
 		new RecursiveDirectoryIterator( $harness_path, FilesystemIterator::SKIP_DOTS )
 	);
 	foreach ( $harness_iterator as $harness_file ) {
-		if ( $harness_file->isFile() && 'php' === strtolower(
-			$harness_file->getExtension() ) ) {
+		if ( $harness_file->isFile() && 'php' === strtolower( $harness_file->getExtension() ) ) {
 			$harness_files[] = $harness_file->getPathname();
 		}
 	}
@@ -61,7 +60,7 @@ foreach ( $harness_paths as $harness_path ) {
  * Split a token stream into per-call argument lists.
  *
  * @param array<int, array{0:int,1:string,2:int}|string> $tokens Token stream.
- * @param int $start Index of the opening parenthesis.
+ * @param int                                            $start  Index of the opening parenthesis.
  * @return array{args: array<int, array<int, string>>, end: int}
  */
 function harness_call_arguments( array $tokens, int $start ): array {
@@ -127,8 +126,7 @@ function harness_inside_catch( array $in_catch, int $depth ): bool {
 $harness_findings = array();
 
 foreach ( $harness_files as $harness_file ) {
-	// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
-	$harness_source = file_get_contents( $harness_file ); // phpcs:ignore Generic.Files.LineLength, WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Standalone CLI checker: WordPress is never loaded here, so WP_Filesystem does not exist. This is the whole point of the file.
+	$harness_source = file_get_contents( $harness_file ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Standalone CLI checker: WordPress is never loaded here, so WP_Filesystem does not exist. This is the whole point of the file.
 	if ( false === $harness_source ) {
 		continue;
 	}
@@ -141,13 +139,12 @@ foreach ( $harness_files as $harness_file ) {
 
 	for ( $harness_i = 0; $harness_i < $harness_count; $harness_i++ ) {
 		$harness_token = $harness_tokens[ $harness_i ];
-		$harness_text  = is_array(
-			$harness_token ) ? $harness_token[1] : $harness_token;
+		$harness_text  = is_array( $harness_token ) ? $harness_token[1] : $harness_token;
 		$harness_line  = is_array( $harness_token ) ? $harness_token[2] : 0;
 
-		// `try` and `catch` are their own token types, not T_STRING, so they.
-		// have to be handled before the identifier check below. The flag is.
-		// applied to the *next* opening brace, because that brace is the block.
+		// `try` and `catch` are their own token types, not T_STRING, so they
+		// have to be handled before the identifier check below. The flag is
+		// applied to the *next* opening brace, because that brace is the block
 		// body: setting it at the keyword itself would be wiped by the brace.
 		if ( is_array( $harness_token )
 			&& ( T_TRY === $harness_token[0] || T_CATCH === $harness_token[0] ) ) {
@@ -176,9 +173,7 @@ foreach ( $harness_files as $harness_file ) {
 		$harness_next = $harness_i + 1;
 		while ( $harness_next < $harness_count ) {
 			$harness_peek = $harness_tokens[ $harness_next ];
-			if ( is_array( $harness_peek ) && in_array( $harness_peek[0], array(
-				T_WHITESPACE, T_COMMENT,
-				T_DOC_COMMENT ), true ) ) {
+			if ( is_array( $harness_peek ) && in_array( $harness_peek[0], array( T_WHITESPACE, T_COMMENT, T_DOC_COMMENT ), true ) ) {
 				++$harness_next;
 				continue;
 			}
@@ -188,8 +183,7 @@ foreach ( $harness_files as $harness_file ) {
 			continue;
 		}
 		$harness_opener = $harness_tokens[ $harness_next ];
-		if ( '(' !== ( is_array(
-			$harness_opener ) ? $harness_opener[1] : $harness_opener ) ) {
+		if ( '(' !== ( is_array( $harness_opener ) ? $harness_opener[1] : $harness_opener ) ) {
 			continue;
 		}
 
@@ -208,8 +202,7 @@ foreach ( $harness_files as $harness_file ) {
 			);
 		}
 
-		if ( in_array( $harness_name, HARNESS_SKIPPERS, true )
-			&& '' === $harness_first ) {
+		if ( in_array( $harness_name, HARNESS_SKIPPERS, true ) && '' === $harness_first ) {
 			$harness_findings[] = sprintf(
 				'%s:%d  %s() with no reason — a skipped test is not a passing test',
 				$harness_file,
@@ -218,21 +211,16 @@ foreach ( $harness_files as $harness_file ) {
 			);
 		}
 
-		if ( 'expectException' === $harness_name
-			&& '' === ( $harness_arguments[1] ?? '' ) ) {
+		if ( 'expectException' === $harness_name && '' === ( $harness_arguments[1] ?? '' ) ) {
 			$harness_findings[] = sprintf(
-				// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 				'%s:%d  expectException() with no message — an over-broad expectation passes for the wrong reason',
 				$harness_file,
 				$harness_line
 			);
 		}
 
-		if ( 0 === strpos( $harness_name, 'assert' ) && harness_inside_catch(
-			$harness_in_catch,
-			$harness_depth ) ) {
+		if ( 0 === strpos( $harness_name, 'assert' ) && harness_inside_catch( $harness_in_catch, $harness_depth ) ) {
 			$harness_findings[] = sprintf(
-				// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 				'%s:%d  %s() inside a catch block — the assertion cannot distinguish success from failure',
 				$harness_file,
 				$harness_line,
@@ -242,12 +230,11 @@ foreach ( $harness_files as $harness_file ) {
 	}
 }
 
-// This block reports to STDOUT/STDERR through PHP's own functions. The script.
-// runs before WordPress is loaded — that is what makes it usable as a.
+// This block reports to STDOUT/STDERR through PHP's own functions. The script
+// runs before WordPress is loaded — that is what makes it usable as a
 // pre-commit gate — so WP_Filesystem and wp_remote_get() do not exist here.
-// The sniff is disabled for the reporting block rather than for the file, so a.
+// The sniff is disabled for the reporting block rather than for the file, so a
 // real file-system mistake introduced elsewhere is still caught.
-// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 // phpcs:disable WordPress.WP.AlternativeFunctions.file_system_operations_fwrite -- Standalone CLI checker, WordPress is never loaded.
 
 if ( empty( $harness_findings ) ) {
@@ -255,12 +242,10 @@ if ( empty( $harness_findings ) ) {
 	exit( 0 );
 }
 
-fwrite( STDERR, 'anti-tautology: ' . count( $harness_findings )
-	. " finding(s)\n" );
+fwrite( STDERR, 'anti-tautology: ' . count( $harness_findings ) . " finding(s)\n" );
 foreach ( $harness_findings as $harness_finding ) {
 	fwrite( STDERR, '  ' . $harness_finding . "\n" );
 }
-fwrite( STDERR,
-	"\nRewrite the assertion so that it fails when the behaviour changes.\n" );
+fwrite( STDERR, "\nRewrite the assertion so that it fails when the behaviour changes.\n" );
 // phpcs:enable WordPress.WP.AlternativeFunctions.file_system_operations_fwrite
 exit( 1 );
