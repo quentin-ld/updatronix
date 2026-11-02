@@ -9,72 +9,60 @@ Requires PHP: 8.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Monitor every update and control every automatic update, so you can update your site without the worry.
+See every update. Control every automatic update.
 
 == Description ==
 
-WordPress applies your updates but keeps no record of what changed. Updatronix keeps that record and puts the automatic update settings in one place.
+WordPress keeps your site updated, but it does not keep a clear record of what changed. Updatronix adds that record and brings the automatic update settings together on one screen.
 
-It uses WordPress's own update engine. You get a clear history of every update and every automatic update setting on one page, so a failed update is a fact you can check instead of a guess.
+It uses the update engine WordPress already runs. You see the version before and after, what started the update, and how it ended. You choose when WordPress checks for updates, how long to hold a new release, and where update emails go.
 
-= Update without the worry =
+= What you get =
 
-You do not have to choose between staying updated and staying safe. Updatronix shows you what changed, what is waiting, and what will happen next. When an update goes wrong, the log gives you the exact version, trigger, and error to work from.
+**A record you can use.** Every core, plugin, theme, and translation update is logged. Open a row to see the versions, the trigger, the result, and the decision behind it. Filter the log or search it. Export a report when you need one.
+
+**One place for automatic updates.** Core, plugins, themes, and translations are on one screen. The Plugins, Themes, and Updates screens also show whether an item updates automatically.
+
+**A schedule that fits your site.** Choose the check frequency and the time of day. Hold new releases for up to 365 days, so a broken release has time to be fixed before it reaches you.
+
+**Health checks.** See what needs attention before the next update. Retry a failed check from the Health screen.
+
+**Settings.** Set how long logs are kept. Route update emails to the right address, or turn them off. Recovery mode emails stay on. You can also choose whether deleting the plugin removes your data.
 
 = Who it is for =
 
-* **Solo site owners:** Keep your site up to date and know what changed.
-* **Freelancers:** When a client asks what you did, the answer is in the log.
-* **Developers:** Control automatic updates and scheduling, with the detail behind every event.
-* **Agencies:** Run the same update policy on every client site, each with its own log.
-
-== Features ==
-
-= Update logs =
-
-Every core, plugin, theme, and translation update is logged with its before and after versions, what triggered it, and how it ended. The log also records the reason, state, origin, stage, pass, chain, predecessor, next eligible time, and attempt behind each update. Existing rows show "Legacy - reason not recorded" where those fields do not apply.
-
-Filter the log by reason, state, or origin, search it, and export it as a clean report. The Date column is optional; Element and Version are always included.
-
-= Auto updates =
-
-Automatic update settings are scattered across several places in WordPress. Updatronix brings them together on one page: core, plugins, themes, and translations. The plugin, theme, and update-core screens also show whether an update installs automatically, or is waiting, held, queued, blocked, or managed.
-
-= Schedule =
-
-Choose how often WordPress checks for updates, down to the hour and minute. Pick the time of day, and hold new releases for 0 to 365 days so unstable builds get fixed before they reach you. The screen previews the next run and keeps the saved frequency.
-
-= Health =
-
-Health checks show what needs attention before the next update, with a retry action when a check fails.
-
-= Settings =
-
-Set how long the log is kept, route WordPress update emails to the right address, or turn them off entirely. Recovery mode emails stay on, so you won't lock yourself out. You can also choose whether uninstall removes your data.
+* **Solo site owners:** Know what changed and when.
+* **Freelancers:** Show a client exactly what you did.
+* **Developers:** Control automatic updates and scheduling, with the details behind each event.
+* **Agencies:** Apply one update policy across client sites, with one shared log.
 
 == Updatronix 3000 ==
 
-**Updatronix 3000** is the Pro edition for sites that need the update routine to run itself. It adds the automations on top of the same native engine:
+Updatronix 3000 is the Pro edition. It runs the automatic update routine for you, with a compatibility check before each update and a fixed order between items.
 
-* **Update Shield:** checks every automatic update against your WordPress and PHP versions before it runs, and blocks what does not match.
-* **Version Lock:** keeps automatic updates off for VCS checkouts and Composer-managed items, and names the manager.
-* **Update Flow:** orders the automatic pass so dependencies run in the right sequence.
-* **One automatic pass:** WordPress makes one native call per item and keeps its lock, maintenance mode, and rollback.
-* **CSV and JSON exports, White label, and Developer tools.**
+* **Update Shield** compares each automatic update with your WordPress and PHP versions and blocks a mismatch.
+* **Version Lock** keeps automatic updates off for Git, SVN, Mercurial, and Bazaar checkouts and for Composer-managed items.
+* **Update Flow** runs updates in the order you set, so an item waits for what it depends on.
+* **One automatic pass** uses WordPress's own updater for each item, with its lock, maintenance mode, and rollback.
+* **Exports.** Download the log as CSV or JSON.
+* **White label.** Put your name, logo, and colors on the Updatronix screens and emails.
+* **Developer tools.** Connect Updatronix to your own workflow with hooks, functions, and the REST API.
 
 Updatronix 3000 requires the free Updatronix plugin.
 
 == Privacy ==
 
-Nothing leaves your site. No analytics, no telemetry, no third-party calls. Updatronix reads from WordPress and writes to your site's storage, and that's the whole network footprint.
+The free plugin sends no analytics or telemetry. It makes no third-party calls of its own; logs and settings stay in your site's database.
+
+Updatronix 3000 checks its license with our server. That request carries the license key and the site domain.
 
 == Accessibility ==
 
-Updatronix aims to be fully accessible to all of its users. If you run into a problem, open a support thread on the plugin page and it'll get fixed.
+We want Updatronix to work for everyone. If you find an accessibility problem, open a support thread and we will look at it.
 
 == Multisite Support ==
 
-Updatronix supports multisite networks. Network-activate it once and manage settings, update history, schedule, and email controls from the Network Admin, with one unified update log.
+Updatronix works on multisite. Network-activate it and manage the settings, schedule, email controls, and update log from the Network Admin.
 
 == Screenshots ==
 
@@ -96,7 +84,7 @@ Updatronix supports multisite networks. Network-activate it once and manage sett
 2. Activate the plugin from the Plugins screen.
 3. Open **Tools → Updatronix** (or **Dashboard → Update logs**) to see the history and adjust the settings.
 
-Activation creates the log table and schedules a daily cleanup. Deactivation cancels the cleanup but leaves your data alone. Deletion removes everything. On multisite, network-activate the plugin from the Network Admin; its data lives at the network level.
+Activation creates the log table and schedules a daily cleanup. Deactivation cancels the cleanup but keeps your data. Deletion removes the data only if you turn on **Delete all data on uninstall** in Settings. On multisite, network-activate the plugin from the Network Admin; its data lives at the network level.
 
 == Support ==
 
@@ -108,19 +96,19 @@ If Updatronix helps you, [leave a review](https://wordpress.org/plugins/updatron
 
 = Where do I see the history of updates on my site? =
 
-Open **Tools → Updatronix**. The first tab is the log: date, item, version change, outcome, and the decision behind it. Click any row to see the full detail. Logging is on by default.
+Open **Tools → Updatronix**. The first tab is the log. It shows the date, the item, the version change, and the result. Open a row to see the decision behind it. Logging is on by default.
 
 = Can I export my update log? =
 
-Yes. Filter the log, then click **Export logs**. The free plugin exports a clean plain-text report. Updatronix 3000 adds CSV and JSON.
+Yes. Filter or search the log, then click **Export logs**. The free plugin writes a plain-text report. Updatronix 3000 adds CSV and JSON.
 
 = Can I turn off WordPress update notification emails completely? =
 
-Yes. In **Settings**, turn on **Disable all update notification emails**. Recovery mode emails are deliberately kept on: without them, you could lock yourself out of your own site.
+Yes. In **Settings**, turn on **Disable all update notification emails**. Recovery mode emails stay on, so you can still recover a locked site.
 
 = Can I delay automatic updates? =
 
-Yes. In **Schedule**, enable **Delay updates** and choose how many days WordPress should wait after a release appears, from 0 to 365. At 0 the hold is off. Updates stay automatic; they are deferred, so unstable builds get fixed before they reach you.
+Yes. In **Schedule**, enable **Delay updates** and choose 0 to 365 days. At 0, the hold is off. Updates stay automatic; they are deferred.
 
 = Does Updatronix check whether an update is compatible with my site? =
 
@@ -128,50 +116,50 @@ The free plugin records what happened and shows what is waiting or held. Updatro
 
 = Will an update break my site? =
 
-No plugin can promise that. Updatronix gives you the record and the controls: hold new releases, see what changed, and export the detail when something goes wrong. With Updatronix 3000, an incompatible automatic update is blocked before it runs.
+No plugin can promise that. Updatronix gives you the record and the controls. You can hold a release or check what changed. Export the details when you need them. Updatronix 3000 blocks an incompatible automatic update before it runs.
 
 = Does Updatronix work with my plugins, themes, and host? =
 
-Yes. Updatronix hooks into the same update pipeline WordPress already runs, so everything that updates through the standard system gets logged, whether it comes from WordPress.org, a private source, or your host's mirror.
+Yes. It logs updates that go through WordPress's normal update system, including updates from a private source or a host mirror.
 
 = Does Updatronix replace WordPress's native update system? =
 
-No. Updatronix builds on WordPress's update engine without replacing it. Everything that goes through the standard update system keeps working as before; Updatronix logs and manages, nothing more.
+No. It adds a log and controls around the update engine WordPress already uses. The update process itself is unchanged.
 
 = Can Updatronix undo a failed update? =
 
-No, and that is not its purpose. When an update fails, Updatronix captures the WordPress error and the version snapshot before WordPress moves on. That is the data you need to recover by hand, or to hand to your host's support. For extra peace of mind, schedule updates right after a backup.
+No. It records the WordPress error and the version before the update, so you have the details to recover or ask your host for help. Schedule updates after a backup if you want an extra safety net.
 
 = Where does my data go? =
 
-Nowhere. Logs and settings stay on your site. The plugin makes no outbound network calls of its own: every API it touches is one WordPress was already going to call without it.
+Logs and settings stay in your site's database. The free plugin adds no outbound calls. It uses WordPress's own update checks, which already contact WordPress.org or your update source.
 
 = How long are log entries kept? =
 
-Up to you. In **Settings**, set the retention window between 1 and 365 days. The default is 90 days; a daily cleanup drops anything older.
+From 1 to 365 days. The default is 90. A daily cleanup removes older entries.
 
 = Does Updatronix work on multisite? =
 
-Yes. Network-activate Updatronix and manage everything as a Super Admin from the Network Admin. Settings, schedule, email controls, and update history are shared across every site in one unified log.
+Yes. Network-activate Updatronix and manage it as a Super Admin from the Network Admin. Settings, schedule, email controls, and update history are shared across the network.
 
 = Do I need Updatronix 3000? =
 
-No. The free plugin monitors updates and controls the automatic update settings on its own. Updatronix 3000 adds the automations: compatibility checks, Version Lock, ordered passes, CSV and JSON exports, White label, and Developer tools.
+No. The free plugin logs updates and controls the automatic update settings. Updatronix 3000 adds the automation layer.
 
 == Changelog ==
 
 = 2.0.0 =
-* New: The activity log records the reason, state, origin, stage, pass, chain, predecessor, next eligible time, and attempt behind each update. Filter by reason, state, or origin, or open a pass or chain from the log. Existing rows stay and show "Legacy - reason not recorded" where the new fields do not apply.
-* New: Schedule accepts every hour and every minute, keeps the preferred time when the frequency ignores it, and holds new releases for 0 to 365 days. The screen shows the WordPress default instead of an empty placeholder and drops the separate hold table.
-* New: Export update logs as a clean report. The Date column is optional, and Element and Version are always included.
-* New: The admin uses the WordPress Design System: a dark rail, eleven destinations, one header per screen, and one save button. Health, Documentation, Support, Update Shield, Update Flow, and White label are part of the shell, and White label colors apply to it.
-* Improvement: The plugin, theme, and update-core screens show whether an update installs automatically, or is waiting, held, queued, blocked, or managed. Update-core shows a one-paragraph next-pass summary; the next update check is no longer shown as the install time.
-* Fix: Theme log details load the theme API before fetching a changelog, so the REST details request no longer fatals.
-* Fix: Cmd/Ctrl+S no longer opens the browser save dialog on Updatronix screens, and dirty screens still save.
-* Fix: Health centers its empty state, and Settings no longer shows the redundant save and email notes or the recovery-mode notice.
-* Note: Updatronix 3000 0.8.0 runs one automatic update pass and no longer uses the legacy queue table. Take a database backup before upgrading; queue rows are not migrated.
-* Copy: The interface follows the WordPress Documentation Style Guide across all eleven destinations: US English, sentence case, second person, straight quotes, and no ellipses.
-* Dev: The plugin bundles the pinned WordPress Design System packages and shares one runtime with Updatronix 3000. `updatronix_log_decision_layer_enabled` and `updatronix_native_update_time_enabled` are the kill switches.
+* New: Each log entry records why an update was allowed, held, or blocked, and which pass or chain it belonged to. Old rows show "Legacy - reason not recorded".
+* New: Schedule keeps the check frequency and the preferred time, and holds new releases for up to 365 days. The screen shows the WordPress default instead of an empty field.
+* New: Export the log as a plain-text report. The Date column is optional; Element and Version are always included.
+* New: The admin uses the WordPress Design System: a dark rail, eleven destinations, one header per screen, and one save button. Health, Documentation, Support, Update Shield, Update Flow, and White label are part of the shell. White label colors apply to it.
+* Improvement: The Plugins, Themes, and Updates screens show whether an item updates automatically. Update-core shows a one-paragraph next-pass summary; the next update check is no longer shown as the install time.
+* Fix: Theme details load the theme API before fetching a changelog, so the REST request no longer fails.
+* Fix: Cmd/Ctrl+S no longer opens the browser save dialog on Updatronix screens. Dirty screens still save.
+* Fix: Health centers its empty state. Settings no longer shows the duplicate save and email notes or the recovery-mode notice.
+* Note: Updatronix 3000 0.8.0 runs one automatic pass and drops the legacy queue table. Back up the database before upgrading; queue rows are not migrated.
+* Copy: The interface follows the WordPress Documentation Style Guide across all eleven destinations.
+* Dev: The plugin shares the pinned WordPress Design System packages with Updatronix 3000. `updatronix_log_decision_layer_enabled` and `updatronix_native_update_time_enabled` are the switches.
 * Compatibility: WordPress 6.2 or later and PHP 8.1 or later.
 
 = 1.3.0 =

@@ -9,22 +9,18 @@
 [![License](https://img.shields.io/badge/license-GPL--2.0--or--later-brightgreen)](https://www.gnu.org/licenses/gpl-2.0.html)
 [![WordPress downloads](https://img.shields.io/wordpress/plugin/dt/updatronix)](https://wordpress.org/plugins/updatronix/)
 
-**Monitor every update and control every automatic update, so you can update your site without the worry.**
+**See every update. Control every automatic update.**
 
-WordPress applies your updates but keeps no record of what changed. Updatronix keeps that record and puts the automatic update settings in one place.
+WordPress keeps your site updated, but it does not keep a clear record of what changed. Updatronix adds that record and brings the automatic update settings together on one screen.
 
-It uses WordPress's own update engine. You get a clear history of every update and every automatic update setting on one page, so a failed update is a fact you can check instead of a guess.
-
-### Update without the worry
-
-You do not have to choose between staying updated and staying safe. Updatronix shows you what changed, what is waiting, and what will happen next. When an update goes wrong, the log gives you the exact version, trigger, and error to work from.
+It uses the update engine WordPress already runs. You see the version before and after, what started the update, and how it ended. You choose when WordPress checks for updates, how long to hold a new release, and where update emails go.
 
 **Who it is for:**
 
-- **Solo site owners:** Keep your site up to date and know what changed.
-- **Freelancers:** When a client asks what you did, the answer is in the log.
-- **Developers:** Control automatic updates and scheduling, with the detail behind every event.
-- **Agencies:** Run the same update policy on every client site, each with its own log.
+- **Solo site owners:** Know what changed and when.
+- **Freelancers:** Show a client exactly what you did.
+- **Developers:** Control automatic updates and scheduling, with the details behind each event.
+- **Agencies:** Apply one update policy across client sites, with one shared log.
 
 ## Table of Contents
 
@@ -37,41 +33,37 @@ You do not have to choose between staying updated and staying safe. Updatronix s
 
 ## Features
 
-### Admin interface
+### A record you can use
 
-The admin is a dark rail with eleven destinations, one page header per screen, and one manual save. It is built on the WordPress Design System and keeps the native WordPress update engine.
+Every core, plugin, theme, and translation update is logged. Open a row to see the versions, the trigger, the result, and the decision behind it. Filter the log or search it. Export a report when you need one.
 
-### Update logs
+### One place for automatic updates
 
-Every core, plugin, theme, and translation update is logged with its before and after versions, what triggered it, and how it ended. The log also records the reason, state, origin, stage, pass, chain, predecessor, next eligible time, and attempt behind each update. Existing rows show "Legacy - reason not recorded" where those fields do not apply.
+Core, plugins, themes, and translations are on one screen. The Plugins, Themes, and Updates screens also show whether an item updates automatically.
 
-Filter the log by reason, state, or origin, search it, and export it as a clean report. The Date column is optional; Element and Version are always included.
+### A schedule that fits your site
 
-### Auto updates
+Choose the check frequency and the time of day. Hold new releases for up to 365 days, so a broken release has time to be fixed before it reaches you.
 
-Automatic update settings are scattered across several places in WordPress. Updatronix brings them together on one page: core, plugins, themes, and translations. The plugin, theme, and update-core screens also show whether an update installs automatically, or is waiting, held, queued, blocked, or managed.
+### Health checks
 
-### Schedule
-
-Choose how often WordPress checks for updates, down to the hour and minute. Pick the time of day, and hold new releases for 0 to 365 days so unstable builds get fixed before they reach you. The screen previews the next run and keeps the saved frequency.
-
-### Health
-
-Health checks show what needs attention before the next update, with a retry action when a check fails.
+See what needs attention before the next update. Retry a failed check from the Health screen.
 
 ### Settings
 
-Set how long the log is kept, route WordPress update emails to the right address, or turn them off entirely. Recovery mode emails stay on, so you won't lock yourself out. You can also choose whether uninstall removes your data.
+Set how long logs are kept. Route update emails to the right address, or turn them off. Recovery mode emails stay on. You can also choose whether deleting the plugin removes your data.
 
 ## Updatronix 3000 (Pro)
 
-**Updatronix 3000** is the Pro edition for sites that need the update routine to run itself. It adds the automations on top of the same native engine:
+Updatronix 3000 is the Pro edition. It runs the automatic update routine for you, with a compatibility check before each update and a fixed order between items.
 
-- **Update Shield:** checks every automatic update against your WordPress and PHP versions before it runs, and blocks what does not match.
-- **Version Lock:** keeps automatic updates off for VCS checkouts and Composer-managed items, and names the manager.
-- **Update Flow:** orders the automatic pass so dependencies run in the right sequence.
-- **One automatic pass:** WordPress makes one native call per item and keeps its lock, maintenance mode, and rollback.
-- **CSV and JSON exports, White label, and Developer tools.**
+- **Update Shield:** compares each automatic update with your WordPress and PHP versions and blocks a mismatch.
+- **Version Lock:** keeps automatic updates off for Git, SVN, Mercurial, and Bazaar checkouts and for Composer-managed items.
+- **Update Flow:** runs updates in the order you set, so an item waits for what it depends on.
+- **One automatic pass:** uses WordPress's own updater for each item, with its lock, maintenance mode, and rollback.
+- **Exports:** download the log as CSV or JSON.
+- **White label:** put your name, logo, and colors on the Updatronix screens and emails.
+- **Developer tools:** connect Updatronix to your own workflow with hooks, functions, and the REST API.
 
 Updatronix 3000 requires the free Updatronix plugin.
 
@@ -91,15 +83,17 @@ GPL-2.0-or-later. See [`LICENSE`](LICENSE).
 
 ### Multisite
 
-Updatronix supports multisite networks. Network-activate it once and manage settings, update history, schedule, and email controls from the Network Admin, with one unified update log.
+Updatronix works on multisite. Network-activate it and manage the settings, schedule, email controls, and update log from the Network Admin.
 
 ### Privacy
 
-Nothing leaves your site. No analytics, no telemetry, no third-party calls. Updatronix reads from WordPress and writes to your site's storage, and that's the whole network footprint.
+The free plugin sends no analytics or telemetry. It makes no third-party calls of its own; logs and settings stay in your site's database.
+
+Updatronix 3000 checks its license with our server. That request carries the license key and the site domain.
 
 ### Accessibility
 
-Updatronix aims to be fully accessible to all of its users. If you run into a problem, open a support thread on the plugin page and it'll get fixed.
+We want Updatronix to work for everyone. If you find an accessibility problem, open a support thread and we will look at it.
 
 ## Installation
 
@@ -107,7 +101,7 @@ Updatronix aims to be fully accessible to all of its users. If you run into a pr
 2. Activate the plugin from the Plugins screen.
 3. Open **Tools → Updatronix** (or **Dashboard → Update logs**) to see the history and adjust the settings.
 
-Activation creates the log table and schedules a daily cleanup. Deactivation cancels the cleanup but leaves your data alone. Deletion removes everything. On multisite, network-activate the plugin from the Network Admin; its data lives at the network level.
+Activation creates the log table and schedules a daily cleanup. Deactivation cancels the cleanup but keeps your data. Deletion removes the data only if you turn on **Delete all data on uninstall** in Settings. On multisite, network-activate the plugin from the Network Admin; its data lives at the network level.
 
 <!-- harness:start -->
 ## Development
