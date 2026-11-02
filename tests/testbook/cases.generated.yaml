@@ -1249,7 +1249,7 @@ cases:
   - Apply pro.pass.enabled at [True, False] through the owning surface.
   - 'Run the case''s oracle: UI plus the real WordPress effect.'
   assertions:
-  - The behavior matches inc/update-engine/class-updatronix-update-pass.php:1161.
+  - The behavior matches inc/update-engine/class-updatronix-update-pass.php.
   - The invariants that apply to this dimension hold.
   oracle:
   - ui

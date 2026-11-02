@@ -128,12 +128,15 @@ surface_cases:
     risk: critical
     tags: ["@pro", "@flow", "@ui", "@smoke"]
     surfaces: [update_flow]
-    dimensions: [pro.flow.chain_count, pro.flow.chain_shape, pro.flow.predecessor_state]
-    steps: [Open Flow with a seeded chain and a seeded last pass.]
+    dimensions: [pro.flow.chain_count, pro.flow.chain_shape, pro.flow.predecessor_state, pro.pass.enabled]
+    steps:
+      - Open Flow with a seeded chain and a seeded last pass.
+      - Check the Automatic updates switch; turn it off and reload.
     assertions:
       - The chain editor is available; there is no Run now, run route, cooldown, or polling.
       - Waiting/Blocked steps show the predecessor, reason, eligible time, and manager.
       - The Last pass card is read-only and shows the pass id, times, counters, and first waiting reason.
+      - The switch is on by default; off shows the native-updates notice; the chain stays editable.
     oracle: [ui, pass, log]
     automation: implemented
 

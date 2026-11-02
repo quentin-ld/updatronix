@@ -49,6 +49,7 @@ routes:
   "/run-check": TB-UI-003
   "/settings": TB-UI-005
   "/flow/chains": TB-UI-009
+  "/flow/automatic-updates": TB-PRO-009
   "/flow/items": TB-UI-009
   "/license/activate": TB-UI-011
   "/license/deactivate": TB-UI-011

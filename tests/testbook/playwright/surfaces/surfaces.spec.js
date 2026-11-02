@@ -150,6 +150,43 @@ for ( const surface of surfaces ) {
 				await expect(
 					page.getByText( 'New update chain' ).first()
 				).toBeVisible();
+
+				{
+					const toggle = page.getByRole( 'switch', {
+						name: /Use Updatronix automatic updates/i,
+					} );
+
+					await expect( toggle ).toBeVisible();
+					await expect( toggle ).toBeChecked();
+
+					const saved = page.waitForResponse(
+						( response ) =>
+							response
+								.url()
+								.includes(
+									'/updatronix-pro/v1/flow/automatic-updates'
+								) && response.request().method() === 'POST'
+					);
+
+					await toggle.click();
+					expect( ( await saved ).status() ).toBe( 200 );
+					await expect( toggle ).not.toBeChecked();
+					await expect(
+						page.getByText(
+							/WordPress is running its normal automatic updates/i
+						)
+					).toBeVisible();
+
+					await page.reload();
+					await expect(
+						page.getByRole( 'switch', {
+							name: /Use Updatronix automatic updates/i,
+						} )
+					).not.toBeChecked();
+					await expect(
+						page.getByText( 'Chains', { exact: true } ).first()
+					).toBeVisible();
+				}
 				break;
 			case 'license':
 				await page.goto( `${ updatronixBase }&tab=updatronix-3000` );

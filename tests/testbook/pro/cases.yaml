@@ -94,3 +94,23 @@ cases:
     assertions: [The files are real and parse; columns match; the feed total agrees.]
     oracle: [export, log]
     automation: implemented
+
+  - id: TB-PRO-009
+    title: Update Flow automatic-updates switch
+    owner: pro
+    risk: critical
+    tags: ["@pro", "@pass", "@flow", "@ui", "@smoke", "@kill-switch"]
+    dimensions: [pro.pass.enabled, pro.flow.chain_enabled]
+    steps:
+      - Open Update Flow with an active license and a saved chain.
+      - Toggle the switch off through the page and through REST; reload; run the next update check.
+      - Turn the switch back on; run the next check.
+      - Hold the native lock while the switch turns off.
+    assertions:
+      - The switch is on by default; off saves immediately and shows the native-updates notice.
+      - Off builds no pass; WordPress runs its native loop; Flow order is not applied; the chain stays saved.
+      - Shield still blocks an incompatible item and Version Lock still locks a VCS item while off.
+      - Stop finishes the current item, cancels the rest, writes one canceled summary, and clears the follow-up.
+      - On resumes the pass and the saved Flow order; a code constant/filter makes the switch read-only.
+    oracle: [ui, options, pass, log, http]
+    automation: implemented

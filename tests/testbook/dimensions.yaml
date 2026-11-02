@@ -424,7 +424,7 @@ dimensions:
     source: inc/classes/class-updatronix-log-taxonomy.php
     risk: high
     tags: ["@free", "@logger"]
-    notes: Legacy rows show “Legacy: reason not recorded”.
+    notes: "Legacy rows show “Legacy: reason not recorded”."
 
   - id: free.log.filters
     owner: free
@@ -787,10 +787,15 @@ dimensions:
     domain: boolean
     values: [true, false]
     default: true
-    source: inc/update-engine/class-updatronix-update-pass.php:1161
+    source: inc/update-engine/class-updatronix-update-pass.php
     risk: critical
     tags: ["@pro", "@pass", "@kill-switch", "@invariant"]
-    notes: Filter `updatronix_pro_update_pass_enabled`.
+    notes: >-
+      Stored network option `updatronix_pro_update_pass_enabled`. The
+      `UPDATRONIX_PRO_UPDATE_PASS_ENABLED` constant and the
+      `updatronix_pro_update_pass_enabled` filter override it. The Update Flow
+      switch writes the option. Off returns WordPress native automatic updates
+      and pauses Flow ordering.
 
   - id: pro.pass.node_count
     owner: pro

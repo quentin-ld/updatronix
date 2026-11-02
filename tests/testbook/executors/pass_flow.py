@@ -630,6 +630,128 @@ def combo_008( site: Site ) -> tuple[dict, dict]:
 	), { "trace": result["trace"], "last": result["last"] }
 
 
+def flow_automatic_updates_switch( site: Site ) -> tuple[dict, dict]:
+	"""The Update Flow switch: off returns native updates, on resumes the pass."""
+	results = []
+	switch = "/updatronix-pro/v1/flow/automatic-updates"
+	chain = [
+		{
+			"id": "switch-chain",
+			"name": "Switch Chain",
+			"description": "",
+			"enabled": True,
+			"steps": [ f"plugin:{PLUGIN_BRAVO}", f"plugin:{PLUGIN_ALPHA}" ],
+		}
+	]
+
+	site.set_license( "active" )
+	site.set_flow_chains( chain )
+
+	# Default on.
+	state = site.rest( "GET", "/updatronix-pro/v1/flow/chains", login="testbook" ).get( "data", {} )
+	auto = state.get( "automatic_updates", {} )
+	ok( auto.get( "enabled" ) is True, f"the switch is not on by default: {auto}" )
+	ok( auto.get( "stored" ) is True, f"the stored switch is not on: {auto}" )
+	ok( auto.get( "editable" ) is True, f"the switch is not editable: {auto}" )
+
+	# Off saves immediately and keeps the chain.
+	off = site.rest( "POST", switch, { "enabled": False }, login="testbook" )
+	ok( off.get( "status" ) == 200, f"off returned {off}" )
+	ok( off.get( "data", {} ).get( "enabled" ) is False, f"off did not turn the switch off: {off}" )
+	ok( site.get_flow_chains() == chain, "off changed the saved chains" )
+	results.append( { "item": "switch_off", "installed": False, "status": "observed" } )
+
+	# Off: the native loop runs both items, groups the mail, and builds no pass.
+	reset_item( site )
+	site.rest( "POST", switch, { "enabled": False }, login="testbook" )
+	result, obs = pump( site, [ PLUGIN_ALPHA, PLUGIN_BRAVO ], max_requests=3 )
+	ok( version( result, PLUGIN_ALPHA ) == "2.0.0", "alpha did not install with the switch off" )
+	ok( version( result, PLUGIN_BRAVO ) == "2.0.0", "bravo did not install with the switch off" )
+	ok( not pass_rows( obs ), "a switch-off pass wrote a summary row" )
+	ok( len( mail( site, obs ) ) == 1, "the native loop did not group the mail" )
+	ok( all( not entry.get( "selected" ) for entry in result["trace"] ), f"the gate still selected: {result['trace']}" )
+	results.append( { "item": "native_loop", "installed": True, "status": "success" } )
+
+	# Invalid input and a user without the Pro capability.
+	bad = site.rest( "POST", switch, { "enabled": "false" }, login="testbook" )
+	ok( bad.get( "status" ) == 400, f"a string enabled value returned {bad}" )
+	editor = site.rest( "POST", switch, { "enabled": True }, login="editor" )
+	ok( editor.get( "status" ) == 403, f"an editor changed the switch: {editor}" )
+
+	# On: the pass returns and Flow order applies.
+	reset_item( site )
+	site.set_flow_chains( chain )
+	on = site.rest( "POST", switch, { "enabled": True }, login="testbook" )
+	ok( on.get( "data", {} ).get( "enabled" ) is True, f"on did not turn the switch on: {on}" )
+
+	result, obs = pump( site, [ PLUGIN_ALPHA, PLUGIN_BRAVO ], max_requests=4 )
+	ok( len( pass_rows( obs ) ) == 1, "re-enabling did not build one pass" )
+	selected = [ entry.get( "selected" ) for entry in result["trace"] if entry.get( "selected" ) ]
+	ok( selected and selected[0] == f"plugin:{PLUGIN_BRAVO}", f"Flow order was not applied: {selected}" )
+	results.append( { "item": "switch_on", "installed": True, "status": "success" } )
+
+	# Shield still blocks while the switch is off.
+	reset_item( site )
+	site.set_shield(
+		{
+			"safe_mode": True,
+			"version_control_lock": False,
+			"flag_abandoned": False,
+			"notify_email": False,
+			"incompatible_behavior": "disable",
+		}
+	)
+	site.rest( "POST", switch, { "enabled": False }, login="testbook" )
+	blocked, obs = pump( site, [ PLUGIN_INCOMPATIBLE ], max_requests=2 )
+	ok( version( blocked, PLUGIN_INCOMPATIBLE ) == "1.0.0", "Shield did not block while the switch was off" )
+	ok( not pass_rows( obs ), "the switch-off Shield scenario built a pass" )
+	results.append( { "item": "shield_off", "installed": False, "status": "observed" } )
+
+	# Stop after the current item: hold the native lock, then fire the follow-up.
+	reset_item( site )
+	site.set_auto_update( plugins=[ PLUGIN_ALPHA, PLUGIN_BRAVO ] )
+	site.seed_pass( [ PLUGIN_ALPHA, PLUGIN_BRAVO ] )
+	site.json_eval( "<?php update_option( 'auto_updater.lock', time() ); echo wp_json_encode( array( 'ok' => true ) );" )
+	stopping = site.rest( "POST", switch, { "enabled": False }, login="testbook" )
+	ok( stopping.get( "status" ) == 200, f"stop returned {stopping}" )
+	state = site.json_eval(
+		"<?php $p = Updatronix_Update_Pass::load(); echo wp_json_encode( array( 'exists' => null !== $p, 'waits' => null !== $p ? $p->lock_waits() : null, 'scheduled' => wp_next_scheduled( Updatronix_Update_Pass::FOLLOW_UP_HOOK ) ) );"
+	)
+	ok( state["exists"] is True, "stop did not wait for the native lock" )
+	ok( int( state["waits"] ) >= 1, f"stop did not record a lock wait: {state}" )
+	ok( state["scheduled"], "stop did not schedule the retry" )
+	site.json_eval( "<?php delete_option( 'auto_updater.lock' ); do_action( 'updatronix_pro_update_pass_follow_up' ); echo wp_json_encode( array( 'ok' => true ) );" )
+	stopped = site.json_eval(
+		"<?php echo wp_json_encode( array( 'exists' => Updatronix_Update_Pass::exists(), 'last' => Updatronix_Update_Pass::get_last_pass(), 'scheduled' => wp_next_scheduled( Updatronix_Update_Pass::FOLLOW_UP_HOOK ) ) );"
+	)
+	ok( stopped["exists"] is False, "stop left the pass behind" )
+	ok( stopped["last"].get( "status" ) == "canceled", f"stop summary is {stopped['last'].get('status')}" )
+	ok( int( stopped["last"].get( "canceled", 0 ) ) >= 1, f"stop did not cancel a node: {stopped['last']}" )
+	ok( not stopped["scheduled"], "stop left the follow-up scheduled" )
+	results.append( { "item": "stop_after_current", "installed": False, "status": "observed" } )
+
+	# A code constant makes the switch read-only and truthful.
+	site.set_constant( "UPDATRONIX_PRO_UPDATE_PASS_ENABLED", "false" )
+	try:
+		state = site.rest( "GET", "/updatronix-pro/v1/flow/chains", login="testbook" ).get( "data", {} )
+		auto = state.get( "automatic_updates", {} )
+		ok( auto.get( "enabled" ) is False, f"the constant did not turn the switch off: {auto}" )
+		ok( auto.get( "editable" ) is False, f"the constant did not make the switch read-only: {auto}" )
+	finally:
+		site.remove_constant( "UPDATRONIX_PRO_UPDATE_PASS_ENABLED" )
+	results.append( { "item": "constant_override", "installed": False, "status": "observed" } )
+
+	return observation(
+		results,
+		[ "fixture-alpha", "fixture-bravo", "fixture-incompatible" ],
+		[ "fixture-alpha", "fixture-bravo" ],
+		{ "fixture-alpha": 1, "fixture-bravo": 1 },
+		{ "fixture-alpha": 1, "fixture-bravo": 1 },
+		1,
+		[ "fixture-incompatible" ],
+	), { "scenarios": results }
+
+
 CASES = [
 	CaseSpec(
 		"TB-PASS-001",
@@ -746,6 +868,14 @@ CASES = [
 	CaseSpec(
 		"COMBO-008",
 		combo_008,
+		( "single", ),
+		( "INV-04", "INV-08" ),
+		phase="flow",
+		reset="state",
+	),
+	CaseSpec(
+		"TB-PRO-009",
+		flow_automatic_updates_switch,
 		( "single", ),
 		( "INV-04", "INV-08" ),
 		phase="flow",
