@@ -93,10 +93,6 @@ test.describe( 'Settings', () => {
 		).toHaveAttribute( 'aria-checked', 'true' );
 
 		await admin.visitAdminPage( 'tools.php', 'page=updatronix&tab=logs' );
-		await expect(
-			page.getByText(
-				/The daily cleanup removes entries older than 30 days/
-			)
-		).toBeVisible();
+		await expect( page.getByText( /Retention: 30 days/ ) ).toBeVisible();
 	} );
 } );

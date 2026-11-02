@@ -277,7 +277,7 @@ dimensions:
     source: inc/classes/class-updatronix-schedule-context.php
     risk: high
     tags: ["@free", "@schedule", "@environment"]
-    notes: The UI shows one line, not the old large notice.
+    notes: The UI shows no WP-Cron notice; the estimate stays truthful when disabled.
 
   # ---------------------------------------------------------------------
   # Native auto-update options and constants

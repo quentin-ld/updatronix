@@ -28,8 +28,7 @@ module.exports = defineConfig( {
 	//
 	// Reached through `@wordpress/scripts` rather than reimplemented: the login
 	// is WordPress's, and a second copy of it is a second thing to keep right.
-	globalSetup:
-		require.resolve( '@wordpress/scripts/config/playwright/global-setup.js' ),
+	globalSetup: require.resolve( './global-setup.js' ),
 	testDir: __dirname,
 	fullyParallel: false,
 	forbidOnly: !! process.env.CI,

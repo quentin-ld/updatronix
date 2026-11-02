@@ -182,7 +182,7 @@ _reenter_in_container() {
 	# The inner runtime must resolve to `host`, so `HARNESS_BACKEND` is
 	# deliberately *not* forwarded — `IS_DDEV_PROJECT` is the signal that it is
 	# already inside. It goes first so the array is never empty.
-	local -a forward=(IS_DDEV_PROJECT=1)
+	local -a forward=(IS_DDEV_PROJECT=true)
 	local knob
 	for knob in HARNESS_MUTATION_BASE HARNESS_COVERAGE_TIMEOUT \
 		HARNESS_COUNTERFACTUAL_MAX HARNESS_COUNTERFACTUAL_LOCK_WAIT \

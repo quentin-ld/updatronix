@@ -205,21 +205,67 @@ final class ScheduleStateTest extends TestCase {
 	}
 
 	/**
-	 * WP-Cron disabled wins over everything.
+	 * WP-Cron disabled still shows the item's real estimate.
 	 *
 	 * @return void
 	 */
-	public function test_wp_cron_disabled_wins(): void {
+	public function test_cron_disabled_keeps_the_estimate(): void {
 		$out = $this->calc( array( 'cron_disabled' => true ) );
 
+		self::assertSame( Updatronix_Schedule_State::STATE_HELD, $out['state'] );
+		self::assertStringContainsString(
+			'Earliest automatic install',
+			$out['display']
+		);
+		self::assertStringNotContainsString( 'WP-Cron', $out['display'] );
+	}
+
+	/**
+	 * A cron-disabled overdue item names the server cron, not a stuck WP-Cron.
+	 *
+	 * @return void
+	 */
+	public function test_cron_disabled_overdue_names_the_server_cron(): void {
+		$out = $this->calc(
+			array(
+				'cron_disabled' => true,
+				'next_check'    => ScheduleInput::NOW - 2 * HOUR_IN_SECONDS,
+			)
+		);
+
+		self::assertSame( Updatronix_Schedule_State::STATE_OVERDUE, $out['state'] );
+		self::assertSame( '2 hours', $out['overdue_by'] );
+		self::assertStringContainsString( '2 hours', $out['display'] );
+		self::assertStringContainsString(
+			'Waiting for your server cron',
+			$out['display']
+		);
+		self::assertStringNotContainsString( 'may be stuck', $out['display'] );
+	}
+
+	/**
+	 * A cron-disabled site with no event is not told WP-Cron is broken.
+	 *
+	 * @return void
+	 */
+	public function test_cron_disabled_not_scheduled_does_not_blame_wp_cron(): void {
+		$out = $this->calc(
+			array(
+				'cron_disabled' => true,
+				'next_check'    => false,
+			)
+		);
+
 		self::assertSame(
-			Updatronix_Schedule_State::STATE_WP_CRON_DISABLED,
+			Updatronix_Schedule_State::STATE_NOT_SCHEDULED,
 			$out['state']
 		);
-		self::assertSame( 'cron', $out['display_kind'] );
-		self::assertNull( $out['execution_at'] );
 		self::assertStringContainsString(
-			'WP-Cron spawning is disabled',
+			'Save the schedule',
+			$out['display']
+		);
+		self::assertStringNotContainsString(
+			'problem with WP-Cron',
 			$out['display']
 		);
 	}

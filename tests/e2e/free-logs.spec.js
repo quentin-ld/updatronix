@@ -44,6 +44,29 @@ test.describe( 'Update logs', () => {
 		await expect( page.getByText( 'E2E seeded log' ) ).toBeVisible();
 	} );
 
+	test( 'scrolls the details content in its capped card', async ( {
+		admin,
+		page,
+	} ) => {
+		await admin.visitAdminPage(
+			'tools.php',
+			`page=updatronix&tab=logs&log=${ logId }`
+		);
+
+		const scroll = page.locator( '.updatronix-log-preview__scroll' );
+		await expect( scroll ).toBeVisible();
+
+		const metrics = await scroll.evaluate( ( element ) => ( {
+			overflow: window.getComputedStyle( element ).overflowY,
+			tabIndex: element.getAttribute( 'tabindex' ),
+			canScroll: element.scrollHeight > element.clientHeight,
+		} ) );
+
+		expect( metrics.overflow ).toBe( 'auto' );
+		expect( metrics.tabIndex ).toBe( '0' );
+		expect( metrics.canScroll ).toBe( true );
+	} );
+
 	test( 'filters the feed by search', async ( { admin, page } ) => {
 		await admin.visitAdminPage( 'tools.php', 'page=updatronix&tab=logs' );
 

@@ -58,11 +58,12 @@ def schedule_cron_disabled( site: Site ) -> tuple[dict, dict]:
 	on = site.json_eval( _cron_state_php() )
 	ok( on["context"] is True, f"DISABLE_WP_CRON is not detected: {on}" )
 	ok( on["meta"].get( "wp_cron_disabled" ) is True, f"cron meta hides DISABLE_WP_CRON: {on['meta']}" )
-	ok( on["calc"]["state"] == "wp_cron_disabled", f"schedule state is {on['calc']['state']}" )
-	ok( on["calc"]["reason_code"] == "wp_cron_disabled", f"schedule reason is {on['calc']['reason_code']}" )
+	ok( on["calc"]["state"] == "eligible", f"schedule state is {on['calc']['state']}" )
+	ok( "Next automatic install" in on["calc"]["display"], f"the estimate is missing: {on['calc']['display']}" )
 	ok( "DISABLE_WP_CRON" in on["constants"], f"the constant notice is missing: {on['constants']}" )
 	ok( on["health"].get( "status" ) == "attention", f"health cron status is {on['health'].get('status')}" )
 	ok( "DISABLE_WP_CRON" in ( on["health"].get( "detail" ) or "" ), f"health copy does not name the constant: {on['health']}" )
+	ok( "server cron" in ( on["health"].get( "detail" ) or "" ), f"health copy does not mention the server cron: {on['health']}" )
 	ok( "\n" not in ( on["health"].get( "detail" ) or "" ), "the health copy is not the single line the dimension promises" )
 
 	site.config_backup()
@@ -73,7 +74,7 @@ def schedule_cron_disabled( site: Site ) -> tuple[dict, dict]:
 		site.restore_config()
 	ok( off["context"] is False, f"the removed constant is still detected: {off}" )
 	ok( off["meta"].get( "wp_cron_disabled" ) is False, f"cron meta still reports the removed constant: {off['meta']}" )
-	ok( off["calc"]["state"] != "wp_cron_disabled", f"schedule state is still disabled: {off['calc']}" )
+	ok( off["calc"]["state"] == on["calc"]["state"], f"the schedule state changed with the constant: {off['calc']}" )
 	ok( "DISABLE_WP_CRON" not in off["constants"], f"the constant notice survived removal: {off['constants']}" )
 	ok( off["health"].get( "value" ) != "Disabled", f"health still reports Disabled: {off['health']}" )
 
@@ -1374,7 +1375,7 @@ def ui_docs_surface( site: Site ) -> tuple[dict, dict]:
 	hrefs = { link["href"].split( "#" )[0] for link in links }
 	for guide in guides:
 		ok( guide in hrefs, f"the guide {guide} is not linked: {sorted(hrefs)}" )
-	ok( metrics["proBadges"] == 1, f"the Pro badge count is {metrics['proBadges']}" )
+	ok( metrics["proBadges"] == 0, f"the guide cards carry a Pro badge: {metrics['proBadges']}" )
 	body = metrics["body"].lower()
 	for promise in ( "guarantee", "instant", "always works", "100%" ):
 		ok( promise not in body, f"the documentation promises {promise}: {body[:400]}" )
@@ -1492,25 +1493,11 @@ echo wp_json_encode( $out );
 
 
 def schedule_native_copy( site: Site ) -> tuple[dict, dict]:
-	"""TB-SCHED-002: truthful states, a check-not-install time, one line."""
+	"""TB-SCHED-002: truthful states and a check-not-install time."""
 	reset_item( site )
 	site.set_shield( { "safe_mode": True, "version_control_lock": True } )
 	site.set_delay( 365, True )
 	site.set_auto_update( plugins=[ PLUGIN_ALPHA ] )
-	hint = site.json_eval(
-		r"""<?php
-echo wp_json_encode(
-	array(
-		'hint'  => ( static function () {
-			ob_start();
-			updatronix_render_wp_cron_hint();
-			return ( string ) ob_get_clean();
-		} )(),
-		'hooks' => has_action( 'admin_notices', 'updatronix_render_wp_cron_hint' ),
-	)
-);
-"""
-	)
 	site.config_backup()
 	try:
 		site.remove_constant( "DISABLE_WP_CRON" )
@@ -1574,10 +1561,7 @@ echo wp_json_encode(
 	ok( "Managed via" in state["locked"]["display"], f"the locked copy is not truthful: {state['locked']['display']}" )
 	ok( state["waiting"]["display"].startswith( "Waiting for fixture-alpha" ), f"the waiting copy is {state['waiting']['display']}" )
 	ok( "install time" in state["waiting"]["display"].lower(), "the waiting copy does not name the install time" )
-	hint_text = str( hint["hint"] or "" )
-	ok( chr( 10 ) not in hint_text.strip(), f"the WP-Cron hint is not one line: {hint_text!r}" )
-	ok( bool( hint["hooks"] ), "the one-line WP-Cron hint is not registered" )
-	return base_observation( site.observe() ), { "states": state, "hint": hint_text }
+	return base_observation( site.observe() ), { "states": state }
 
 
 def esc_html_text( value: str ) -> str:

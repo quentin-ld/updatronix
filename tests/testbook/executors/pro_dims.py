@@ -1284,6 +1284,18 @@ def export_empty_matrix( site: Site ) -> tuple[dict, dict]:
 	return export_empty( site )
 
 
+def _enable_flow_automatic_updates( site: Site ) -> None:
+	"""Enable the Flow automatic-updates switch before a surface check."""
+	site.json_eval(
+		r"""<?php
+if ( class_exists( 'Updatronix_Update_Pass' ) ) {
+	update_site_option( Updatronix_Update_Pass::ENABLED_OPTION, 1 );
+}
+echo wp_json_encode( array( 'enabled' => true ) );
+"""
+	)
+
+
 def _flow_surface( site: Site ) -> dict:
 	links_path = f".cache/testbook/links-{site.name}-flow.json"
 	a11y_path = f".cache/testbook/a11y-{site.name}-flow.json"
@@ -1305,8 +1317,9 @@ def _flow_surface( site: Site ) -> dict:
 def pass_summary_states( site: Site ) -> tuple[dict, dict]:
 	"""TB-PASS-004: absent, completed, and stale/expired summaries."""
 	reset_item( site )
+	_enable_flow_automatic_updates( site )
 	absent = _flow_surface( site )
-	ok( "Last pass" not in absent["body"], f"the absent summary still renders: {absent['body'][:400]}" )
+	ok( "Last run" not in absent["body"], f"the absent summary still renders: {absent['body'][:400]}" )
 	empty = _pass_state( site )
 	ok( empty["last"] in ( {}, [] ), f"a last pass exists before any run: {empty['last']}" )
 
@@ -1315,11 +1328,48 @@ def pass_summary_states( site: Site ) -> tuple[dict, dict]:
 		"started_at": "2026-10-30 10:00:00",
 		"finished_at": "2026-10-30 10:01:00",
 		"status": "completed",
-		"counts": { "total": 2, "done": 2, "failed": 0, "uncertain": 0 },
+		"counts": {
+			"total": 2,
+			"done": 2,
+			"blocked": 0,
+			"waiting": 0,
+			"delayed": 0,
+			"skipped": 0,
+			"failed": 0,
+			"uncertain": 0,
+			"canceled": 0,
+		},
 		"total": 2,
 		"done": 2,
+		"blocked": 0,
+		"waiting": 0,
+		"delayed": 0,
+		"skipped": 0,
 		"failed": 0,
 		"uncertain": 0,
+		"canceled": 0,
+		"next_check_at": 0,
+		"last_heartbeat": 0,
+		"first_waiting_reason": "",
+		"waiting_for": "",
+		"flow_nodes": {
+			"plugin:updatronix/updatronix.php": {
+				"state": "done",
+				"reason_code": "updated",
+				"waiting_for": "",
+				"blocking": False,
+				"manager": "",
+				"eligible_at": 0,
+			},
+			"plugin:updatronix-pro/updatronix-pro.php": {
+				"state": "done",
+				"reason_code": "updated",
+				"waiting_for": "",
+				"blocking": False,
+				"manager": "",
+				"eligible_at": 0,
+			},
+		},
 	}
 	site.json_eval(
 		f"""<?php
@@ -1327,12 +1377,13 @@ Updatronix_Update_Pass::cache_last_pass( json_decode( '{php_json(summary)}', tru
 echo wp_json_encode( array( 'ok' => true ) );
 """
 	)
+	_enable_flow_automatic_updates( site )
 	completed = _flow_surface( site )
 	lower = completed["body"].lower()
-	ok( "last pass" in lower, f"the completed summary is missing: {completed['body'][:400]}" )
+	ok( "last run" in lower, f"the completed summary is missing: {completed['body'][:400]}" )
 	ok( "completed" in lower, f"the completed status is missing: {completed['body'][:400]}" )
 	ok( "0123456789abcdef0123456789abcdef" in completed["body"] or "0123456789" in completed["body"], "the pass id is missing from the card" )
-	ok( "run now" not in lower, "the Last pass card offers a Run now control" )
+	ok( "run now" not in lower, "the Last run card offers a Run now control" )
 
 	expired = site.json_eval(
 		r"""<?php
@@ -1365,8 +1416,9 @@ echo wp_json_encode( array( 'expired' => null !== $pass ? $pass->is_expired() : 
 	ok( expired["expired"] is True, f"the stale pass did not expire: {expired}" )
 	ok( expired["health"].get( "value" ) == "Idle", f"the stale pass renders as {expired['health'].get('value')}" )
 	ok( expired["last"].get( "pass_id" ) == summary["pass_id"], "the stale pass replaced the last-pass cache" )
+	_enable_flow_automatic_updates( site )
 	stale_surface = _flow_surface( site )
-	ok( "last pass" in stale_surface["body"].lower(), "the stale pass hid the completed summary" )
+	ok( "last run" in stale_surface["body"].lower(), "the stale pass hid the completed summary" )
 	return base_observation( site.observe() ), { "absent": absent["body"][:120], "completed": completed["body"][:200], "expired": expired }
 
 

@@ -32,7 +32,7 @@ bin/harness setup   # one-time: writes .config/wp-tests.env + installs the WP te
 | `bash tests/testbook/gate-all.sh` | Full test book, single + multisite; the release gate |
 | `bin/gate fast [base]` | lint:changed, unit, integration, `--changed` or @smoke e2e |
 | `bin/gate base [ref]` | record `refs/testbook/base`; pre-push mutation scopes to it |
-| `bin/gate full` | full lint, unit, integration, full test book |
+| `bin/gate full` | full lint, unit, JS, integration, Free + Pro browser suites, full test book |
 | `bin/gate parallel` | two single-site shards + multisite, merged verdict |
 | `bin/gate mutation [base]` | task-scoped Infection + counterfactual (default HEAD~1) |
 | `bin/gate release` | `full` + distributable package |
@@ -44,6 +44,10 @@ bin/harness setup   # one-time: writes .config/wp-tests.env + installs the WP te
 | `npm run test:all` | All linters + unit + integration (no build) |
 | `npm run build:all` | `test:all` + `make:pot` + `build` |
 | `npm run zip` | Build distributable zip via `.config/zip.js` |
+
+`bin/gate full` is the single no-manual-test gate: PHP lint, unit,
+integration, JS unit, both browser suites, and the full test book. Use
+`bin/gate fast` while working; use `bin/gate full` before calling a change done.
 
 Integration tests skip gracefully (exit 0) when the WP test environment is not installed.
 

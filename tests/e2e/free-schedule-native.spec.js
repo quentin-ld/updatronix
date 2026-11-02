@@ -79,7 +79,7 @@ test.describe( 'Schedule native surfaces', () => {
 		).toBeVisible();
 	} );
 
-	test( 'WP-Cron hint is one line and the banner is gone', async ( {
+	test( 'WP-Cron hint is gone and the banner is gone', async ( {
 		admin,
 		page,
 	} ) => {
@@ -87,9 +87,12 @@ test.describe( 'Schedule native surfaces', () => {
 
 		await admin.visitAdminPage( 'plugins.php' );
 
+		await expect( page.locator( '.updatronix-wp-cron-hint' ) ).toHaveCount(
+			0
+		);
 		await expect(
-			page.locator( '.updatronix-wp-cron-hint' )
-		).toBeVisible();
+			page.getByText( /the automatic update pass will not run/ )
+		).toHaveCount( 0 );
 		await expect(
 			page.locator( '.updatronix-delay-context-notice' )
 		).toHaveCount( 0 );

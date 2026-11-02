@@ -5,7 +5,7 @@ const { test, expect } = require( '@wordpress/e2e-test-utils-playwright' );
 const { expectResponsiveLayout } = require( './helpers/a11y' );
 
 test.describe( 'Documentation and Support', () => {
-	test( 'renders the guides with the Pro badge', async ( {
+	test( 'renders the guides without a Pro badge', async ( {
 		admin,
 		page,
 	} ) => {
@@ -17,9 +17,9 @@ test.describe( 'Documentation and Support', () => {
 		await expect(
 			page.getByRole( 'heading', { name: 'Updatronix documentation' } )
 		).toBeVisible();
-		await expect(
-			page.getByText( 'Pro', { exact: true } ).first()
-		).toBeVisible();
+		await expect( page.locator( '.updatronix-doc-icon--pro' ) ).toHaveCount(
+			0
+		);
 		await expect(
 			page.getByRole( 'link', { name: /Updatronix 3000 documentation/ } )
 		).toBeVisible();

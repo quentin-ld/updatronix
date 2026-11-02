@@ -23,6 +23,10 @@ function wp( args ) {
 	return execFileSync( 'wp', [ '--path=/var/www/html', ...args ], {
 		encoding: 'utf8',
 		stdio: [ 'ignore', 'pipe', 'pipe' ],
+		// wp-config.php only loads wp-config-ddev.php when the value is the
+		// string "true"; the harness forwards 1, so the raw CLI would miss the
+		// database settings and fail with an undefined $table_prefix.
+		env: { ...process.env, IS_DDEV_PROJECT: 'true' },
 	} ).trim();
 }
 
@@ -46,7 +50,7 @@ function resetUpdatronixState() {
 function seedLog() {
 	const output = wp( [
 		'eval',
-		"echo Updatronix_Logger::log('plugin', 'update', 'E2E plugin', 'e2e/e2e.php', '1.0.0', '1.1.0', 'success', 'E2E seeded log');",
+		"echo Updatronix_Logger::log('plugin', 'update', 'E2E plugin', 'e2e/e2e.php', '1.0.0', '1.1.0', 'success', 'E2E seeded log ' . str_repeat('Long detail line for the scroll check. ', 60));",
 	] );
 	const lines = output
 		.split( /\r?\n/ )

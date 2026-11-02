@@ -23,6 +23,27 @@ test.describe( 'Health', () => {
 		).toBeVisible();
 	} );
 
+	test( 'sizes the summary badge to its text', async ( { admin, page } ) => {
+		await admin.visitAdminPage( 'tools.php', 'page=updatronix&tab=health' );
+
+		const badge = page.locator( '.updatronix-health-summary-badge' );
+		await expect( badge ).toBeVisible();
+
+		const metrics = await badge.evaluate( ( element ) => {
+			const range = document.createRange();
+			range.selectNodeContents( element );
+
+			return {
+				badgeWidth: element.getBoundingClientRect().width,
+				textWidth: range.getBoundingClientRect().width,
+			};
+		} );
+
+		expect( metrics.badgeWidth ).toBeLessThanOrEqual(
+			metrics.textWidth + 48
+		);
+	} );
+
 	test( 'recovers from a load failure with Try again', async ( {
 		admin,
 		page,

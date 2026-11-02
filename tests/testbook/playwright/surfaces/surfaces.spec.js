@@ -186,6 +186,7 @@ for ( const surface of surfaces ) {
 					await expect(
 						page.getByText( 'Chains', { exact: true } ).first()
 					).toBeVisible();
+					await page.waitForLoadState( 'networkidle' );
 				}
 				break;
 			case 'license':

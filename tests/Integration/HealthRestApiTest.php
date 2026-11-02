@@ -68,6 +68,32 @@ final class HealthRestApiTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * The cron check stays attention and offers the server-cron explanation.
+	 *
+	 * @return void
+	 */
+	public function test_cron_check_mentions_the_server_cron(): void {
+		$this->create_admin();
+
+		$request  = new WP_REST_Request( 'GET', '/updatronix/v1/health' );
+		$response = rest_do_request( $request );
+		$data     = $response->get_data();
+		$checks   = array_column( $data['checks'], null, 'id' );
+
+		self::assertSame( 200, $response->get_status() );
+		self::assertArrayHasKey( 'cron', $checks );
+		self::assertSame( 'attention', $checks['cron']['status'] );
+		self::assertStringContainsString(
+			'server cron',
+			(string) $checks['cron']['detail']
+		);
+		self::assertStringNotContainsString(
+			"\n",
+			(string) $checks['cron']['detail']
+		);
+	}
+
+	/**
 	 * The Health check filter can append a row with the canonical shape.
 	 *
 	 * @return void

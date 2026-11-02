@@ -773,11 +773,15 @@ final class NativeUpdateTimeTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * The hint is one line when WP-Cron is disabled.
+	 * The one-line WP-Cron hint is gone from every native screen.
 	 *
 	 * @return void
 	 */
-	public function test_cron_hint_is_shown_when_disabled(): void {
+	public function test_cron_hint_is_gone_from_the_update_screens(): void {
+		self::assertFalse(
+			function_exists( 'updatronix_render_wp_cron_hint' )
+		);
+
 		wp_set_current_user( $this->update_admin() );
 		set_current_screen( 'plugins' );
 		// Let the real DISABLE_WP_CRON (set by the WP test library) through.
@@ -786,68 +790,34 @@ final class NativeUpdateTimeTest extends WP_UnitTestCase {
 
 		$html = $this->render_notices();
 
-		self::assertStringContainsString( 'updatronix-wp-cron-hint', $html );
-		self::assertSame( 1, substr_count( $html, '<p ' ), 'The hint is one line.' );
-		self::assertStringContainsString(
-			'a real cron job calls wp-cron.php',
+		self::assertStringNotContainsString( 'updatronix-wp-cron-hint', $html );
+		self::assertStringNotContainsString(
+			'the automatic update pass will not run',
 			$html
 		);
 	}
 
 	/**
-	 * No hint when the cron flag is healthy.
+	 * A cron-disabled item keeps its real Schedule estimate.
 	 *
 	 * @return void
 	 */
-	public function test_cron_hint_is_hidden_when_cron_is_healthy(): void {
-		wp_set_current_user( $this->update_admin() );
-		set_current_screen( 'plugins' );
-		add_filter( 'updatronix_schedule_cron_disabled', '__return_false' );
-		$this->reset_caches();
-
-		$html = $this->render_notices();
-
+	public function test_cron_disabled_item_keeps_its_estimate(): void {
+		$plugin = $this->plugin();
+		$this->seed_held_plugin( $plugin );
+		// Let the real DISABLE_WP_CRON (set by the WP test library) through.
 		remove_filter( 'updatronix_schedule_cron_disabled', '__return_false' );
-		self::assertStringNotContainsString( 'updatronix-wp-cron-hint', $html );
-	}
-
-	/**
-	 * No hint without the screen capability.
-	 *
-	 * @return void
-	 */
-	public function test_cron_hint_requires_the_screen_capability(): void {
-		wp_set_current_user(
-			self::factory()->user->create(
-				array(
-					'role' =>
-					'subscriber',
-				)
-			)
-		);
-		set_current_screen( 'plugins' );
 		$this->reset_caches();
 
-		self::assertStringNotContainsString(
-			'updatronix-wp-cron-hint',
-			$this->render_notices()
+		$html = apply_filters(
+			'plugin_auto_update_setting_html',
+			NativeHtml::fragment( 'pluginRow' ),
+			$plugin,
+			array( 'Name' => 'Example' )
 		);
-	}
 
-	/**
-	 * No hint on a screen without update actions.
-	 *
-	 * @return void
-	 */
-	public function test_cron_hint_is_scoped_to_the_update_screens(): void {
-		wp_set_current_user( $this->update_admin() );
-		set_current_screen( 'dashboard' );
-		$this->reset_caches();
-
-		self::assertStringNotContainsString(
-			'updatronix-wp-cron-hint',
-			$this->render_notices()
-		);
+		self::assertStringContainsString( 'Earliest automatic install:', $html );
+		self::assertStringNotContainsString( 'WP-Cron', $html );
 	}
 
 	/**

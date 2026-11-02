@@ -296,6 +296,10 @@ class Site:
 				)
 			self.restore_files()
 		if self.control_available:
+			# A full reset imports the fast base dump, which is single-site; the
+			# multisite conversion has to happen before the digests, not after.
+			if self.multisite and not self.control.health().get( "multisite" ):
+				self.ensure_multisite( known=False )
 			# Restoring whole option tables is complete, but a plugin shutdown
 			# handler can write a transient after the reset request returns.
 			# Two fresh digests must agree before the case is allowed to start;
