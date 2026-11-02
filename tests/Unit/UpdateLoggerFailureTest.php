@@ -167,7 +167,7 @@ final class UpdateLoggerFailureTest extends TestCase {
 	 * @return void
 	 */
 	public function test_init_core_feedback_on_download_accepts_null_package(): void {
-		$upgrader = new \WP_Upgrader();
+		$upgrader = new \Core_Upgrader();
 
 		self::assertFalse(
 			Updatronix_Update_Logger::init_core_feedback_on_download(

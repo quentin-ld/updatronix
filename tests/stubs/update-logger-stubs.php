@@ -12,6 +12,13 @@ if ( ! class_exists( 'WP_Upgrader' ) ) {
 	class WP_Upgrader {}
 }
 
+if ( ! class_exists( 'Core_Upgrader' ) ) {
+	/**
+	 * Minimal core-upgrader stand-in so the null-package guard is exercised.
+	 */
+	class Core_Upgrader extends WP_Upgrader {}
+}
+
 if ( ! class_exists( 'Updatronix_ErrorHandler' ) ) {
 	/**
 	 * Minimal error handler stand-in.
