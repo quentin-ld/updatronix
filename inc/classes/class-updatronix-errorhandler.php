@@ -426,13 +426,13 @@ final class Updatronix_ErrorHandler {
 	 *
 	 * @param bool|WP_Error $reply Whether to short-circuit. Pass WP_Error to
 	 * record error.
-	 * @param string        $package  Package URL.
+	 * @param string|null   $package  Package URL, or null when the offer has none.
 	 * @param WP_Upgrader   $upgrader Upgrader instance.
 	 * @return bool|WP_Error
 	 */
 	public static function capture_download_error(
 		bool|\WP_Error $reply,
-		string $package,
+		?string $package,
 		WP_Upgrader $upgrader
 	): bool|\WP_Error {
 		if ( ! is_wp_error( $reply ) ) {

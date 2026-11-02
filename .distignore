@@ -16,6 +16,8 @@
 .phpunit.cache
 .reasonix/
 .reasonix
+scripts/
+scripts
 .sublime/
 .sublime
 .vscode/
@@ -65,6 +67,7 @@ multisite.xml
 multisite.xml.dist
 package-lock.json
 package.json
+webpack.config.js
 phpcs.ruleset.xml
 phpcs.xml
 phpcs.xml.dist

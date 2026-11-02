@@ -1302,13 +1302,13 @@ final class Updatronix_Update_Logger {
 	 * install_package.
 	 *
 	 * @param bool|\WP_Error $reply    Whether to short-circuit.
-	 * @param string         $package  Package URL.
+	 * @param string|null    $package  Package URL, or null when the offer has none.
 	 * @param \WP_Upgrader   $upgrader Upgrader instance.
 	 * @return bool|\WP_Error Unchanged.
 	 */
 	public static function start_bulk_post_flush_buffer(
 		bool|\WP_Error $reply,
-		string $package,
+		?string $package,
 		\WP_Upgrader $upgrader
 	): bool|\WP_Error {
 		if ( self::$bulk_flush_happened
@@ -1325,15 +1325,19 @@ final class Updatronix_Update_Logger {
 	 * (EUM-style; catches manual core update flow).
 	 *
 	 * @param bool|\WP_Error $reply    Whether to short-circuit.
-	 * @param string         $package  Package URL.
+	 * @param string|null    $package  Package URL, or null when the offer has none.
 	 * @param \WP_Upgrader   $upgrader Upgrader instance.
 	 * @return bool|\WP_Error Unchanged.
 	 */
 	public static function init_core_feedback_on_download(
 		bool|\WP_Error $reply,
-		string $package,
+		?string $package,
 		\WP_Upgrader $upgrader
 	): bool|\WP_Error {
+		if ( null === $package ) {
+			return $reply;
+		}
+
 		if ( ! $upgrader instanceof \Core_Upgrader ) {
 			return $reply;
 		}
