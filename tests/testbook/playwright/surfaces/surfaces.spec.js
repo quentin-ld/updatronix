@@ -70,6 +70,24 @@ for ( const surface of surfaces ) {
 						} )
 						.first()
 				).toBeVisible();
+
+				const guideCardAfter = await page
+					.locator( '.updatronix-doc-card' )
+					.first()
+					.evaluate( ( card ) => {
+						const style = window.getComputedStyle(
+							card,
+							'::after'
+						);
+						return {
+							content: style.content,
+							maskImage: style.maskImage,
+						};
+					} );
+				expect( [ 'none', 'normal' ] ).toContain(
+					guideCardAfter.content
+				);
+				expect( guideCardAfter.maskImage ).toBe( 'none' );
 				break;
 			case 'support':
 				await page.goto( `${ updatronixBase }&tab=support` );

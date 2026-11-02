@@ -17,7 +17,7 @@ Current live state is notifications-off, so the recipient, checkboxes, and clear
 
 ## Documentation
 
-Current page renders the three guide cards (Plugin Guide, Pro Guide, Developer Reference), each with its icon, title, description, and Read guide arrow; the dashboard external pseudo-icon is suppressed, leaving one native new-tab indicator. The “3 guides” badge is absent. The closing note and Visit Support link are present.
+Current page renders the three guide cards (Plugin Guide, Pro Guide, Developer Reference), each with its icon, title, description, and Read guide arrow; the dashboard external pseudo-icon was removed on 2026-11-02, leaving one native new-tab indicator. The “3 guides” badge is absent. The closing note and Visit Support link are present.
 
 ## Support
 

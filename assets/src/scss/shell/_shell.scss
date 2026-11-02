@@ -605,12 +605,6 @@ body.updatronix-admin-page {
 	}
 }
 
-.updatronix-dashboard-wrap .updatronix-doc-grid .updatronix-doc-card[target="_blank"]::after {
-	content: none;
-	display: none;
-	background: none;
-}
-
 .updatronix-doc-head {
 	display: flex;
 	align-items: center;
@@ -850,12 +844,6 @@ body.updatronix-admin-page {
 
 .updatronix-dashboard-wrap .updatronix-support-layout .updatronix-support-forum-cta[target="_blank"] {
 	color: var(--wpds-color-foreground-interactive-brand-strong);
-}
-
-.updatronix-dashboard-wrap .updatronix-support-layout .updatronix-support-forum-cta[target="_blank"]::after {
-	content: none;
-	display: none;
-	background: none;
 }
 
 .updatronix-support-docs-link {

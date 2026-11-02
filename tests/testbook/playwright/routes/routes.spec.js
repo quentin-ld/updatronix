@@ -22,6 +22,43 @@ const DESTINATIONS = [
 	[ 'support', 'Support' ],
 ];
 
+/**
+ * Assert every new-tab link in the shell renders at most one indicator.
+ *
+ * @param {import('@playwright/test').Page} page Page.
+ */
+async function expectSingleExternalIndicators( page ) {
+	const links = page.locator(
+		'.updatronix-dashboard-wrap a[target="_blank"]'
+	);
+	const count = await links.count();
+
+	for ( let index = 0; index < count; index++ ) {
+		const link = links.nth( index );
+		const after = await link.evaluate( ( anchor ) => {
+			const style = window.getComputedStyle( anchor, '::after' );
+			return {
+				content: style.content,
+				maskImage: style.maskImage,
+			};
+		} );
+
+		expect( [ 'none', 'normal' ] ).toContain( after.content );
+		expect( after.maskImage ).toBe( 'none' );
+
+		const indicators = await link
+			.locator( '[class*="__link-icon"]' )
+			.count();
+		expect( indicators ).toBeLessThanOrEqual( 1 );
+
+		if ( indicators === 0 ) {
+			await expect(
+				link.locator( '.updatronix-doc-top > svg' )
+			).toHaveCount( 1 );
+		}
+	}
+}
+
 test( 'destinations and viewports', async ( { page } ) => {
 	const routes = {};
 	const viewports = {};
@@ -41,6 +78,20 @@ test( 'destinations and viewports', async ( { page } ) => {
 		).toHaveCount( 1 );
 		routes[ slug ] = true;
 
+		if ( 'logs' === slug ) {
+			const firstTitle = page
+				.locator(
+					'.dataviews-view-table tbody .dataviews-view-table__row .dataviews-title-field'
+				)
+				.first();
+			if ( await firstTitle.count() ) {
+				await firstTitle.click();
+				await expect(
+					page.locator( '.updatronix-log-detail' ).first()
+				).toBeVisible();
+			}
+		}
+
 		const overflow = {};
 		for ( const [ widthLabel, width ] of [
 			[ '390', 390 ],
@@ -48,6 +99,7 @@ test( 'destinations and viewports', async ( { page } ) => {
 			[ 'desktop', 1280 ],
 		] ) {
 			await page.setViewportSize( { width, height: 844 } );
+			await expectSingleExternalIndicators( page );
 			const delta = await page.evaluate( () => {
 				const root = document.documentElement;
 				return root.scrollWidth - root.clientWidth;

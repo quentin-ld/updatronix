@@ -17,29 +17,6 @@
 
 		a:not(.components-button):not([class*="__button-link"]) {
 			color: $wp-color-accent;
-
-			&[target="_blank"] {
-				position: relative;
-				gap: var(--wpds-dimension-gap-xs);
-
-				&::after {
-					content: "";
-					display: inline-block;
-					width: 0.875em;
-					height: 0.875em;
-					margin-inline-start: var(--wpds-dimension-gap-xs);
-					vertical-align: -0.2em;
-					background: currentcolor;
-					mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M19.5 4.5h-7V6h4.44l-5.97 5.97 1.06 1.06L18 7.06v4.44h1.5v-7Zm-13 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-3H17v3a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h3V5.5h-3Z'/%3E%3C/svg%3E");
-					mask-repeat: no-repeat;
-					mask-position: center;
-					mask-size: contain;
-					-webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M19.5 4.5h-7V6h4.44l-5.97 5.97 1.06 1.06L18 7.06v4.44h1.5v-7Zm-13 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-3H17v3a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h3V5.5h-3Z'/%3E%3C/svg%3E");
-					-webkit-mask-repeat: no-repeat;
-					-webkit-mask-position: center;
-					-webkit-mask-size: contain;
-				}
-			}
 		}
 	}
 

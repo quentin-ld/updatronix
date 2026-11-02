@@ -42,8 +42,17 @@ import {
 import { LogDetailsContent } from './LogDetailsContent';
 import { ExportLogsModal } from './ExportLogsModal';
 
-const { AlertDialog, Badge, Button, Dialog, Icon, IconButton, Notice, Text } =
-	wpds.ui;
+const {
+	AlertDialog,
+	Badge,
+	Button,
+	Dialog,
+	Icon,
+	IconButton,
+	Link,
+	Notice,
+	Text,
+} = wpds.ui;
 const {
 	closeSmall,
 	download,
@@ -552,13 +561,13 @@ export function ActivityLogPanel( {
 				getValue: ( { item } ) => item.performed_by_display || '',
 				render: ( { item } ) =>
 					item.user_edit_link ? (
-						<a
+						<Link
 							href={ item.user_edit_link }
+							openInNewTab
 							rel="noopener noreferrer"
-							target="_blank"
 						>
 							{ item.performed_by_display || EMPTY_FALLBACK }
-						</a>
+						</Link>
 					) : (
 						item.performed_by_display || EMPTY_FALLBACK
 					),

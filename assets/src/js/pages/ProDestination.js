@@ -15,9 +15,8 @@ import SaveBar, { SaveButton } from '../shell/SaveBar';
 import wpds from '../shell/wpds';
 import { PRO_FEATURES, UPDATRONIX_3000_URL } from './proFeatures';
 
-const { Button, ButtonLink, Card, EmptyState, Icon, Notice, Stack, Text } =
-	wpds.ui;
-const { external, starFilled } = wpds.icons;
+const { Button, ButtonLink, Card, EmptyState, Notice, Stack, Text } = wpds.ui;
+const { starFilled } = wpds.icons;
 
 /**
  * Keep a Pro panel error inside the destination.
@@ -237,7 +236,6 @@ export default function ProDestination( {
 					tone="brand"
 				>
 					{ __( 'Discover Updatronix 3000', 'updatronix' ) }
-					<Icon icon={ external } size={ 16 } aria-hidden="true" />
 				</ButtonLink>
 			</div>
 		</>

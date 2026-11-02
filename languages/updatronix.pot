@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-11-02T18:13:50+01:00\n"
+"POT-Creation-Date: 2026-11-02T21:21:24+01:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: updatronix\n"
@@ -261,7 +261,7 @@ msgid "Element"
 msgstr ""
 
 #: inc/classes/class-updatronix-export-body-builder.php:1141
-#: assets/src/js/components/activityLog/ActivityLogPanel.js:695
+#: assets/src/js/components/activityLog/ActivityLogPanel.js:704
 #: assets/src/js/components/activityLog/ExportLogsModal.js:60
 #: assets/src/js/components/activityLog/ExportLogsModal.js:126
 #: assets/src/js/components/activityLog/exportReports.js:16
@@ -304,7 +304,7 @@ msgid "User"
 msgstr ""
 
 #: inc/classes/class-updatronix-export-body-builder.php:1146
-#: assets/src/js/components/activityLog/ActivityLogPanel.js:572
+#: assets/src/js/components/activityLog/ActivityLogPanel.js:581
 #: assets/src/js/components/activityLog/ExportLogsModal.js:72
 #: assets/src/js/components/activityLog/ExportLogsModal.js:131
 #: assets/src/js/components/activityLog/exportReports.js:21
@@ -315,7 +315,7 @@ msgid "Status"
 msgstr ""
 
 #: inc/classes/class-updatronix-export-body-builder.php:1147
-#: assets/src/js/components/activityLog/ActivityLogPanel.js:614
+#: assets/src/js/components/activityLog/ActivityLogPanel.js:623
 #: assets/src/js/components/activityLog/ExportLogsModal.js:80
 #: assets/src/js/components/activityLog/ExportLogsModal.js:133
 #: assets/src/js/components/activityLog/exportReports.js:23
@@ -326,7 +326,7 @@ msgid "Reason"
 msgstr ""
 
 #: inc/classes/class-updatronix-export-body-builder.php:1148
-#: assets/src/js/components/activityLog/ActivityLogPanel.js:594
+#: assets/src/js/components/activityLog/ActivityLogPanel.js:603
 #: assets/src/js/components/activityLog/ExportLogsModal.js:84
 #: assets/src/js/components/activityLog/ExportLogsModal.js:134
 #: assets/src/js/components/activityLog/exportReports.js:24
@@ -336,7 +336,7 @@ msgid "State"
 msgstr ""
 
 #: inc/classes/class-updatronix-export-body-builder.php:1149
-#: assets/src/js/components/activityLog/ActivityLogPanel.js:631
+#: assets/src/js/components/activityLog/ActivityLogPanel.js:640
 #: assets/src/js/components/activityLog/ExportLogsModal.js:88
 #: assets/src/js/components/activityLog/ExportLogsModal.js:135
 #: assets/src/js/components/activityLog/exportReports.js:25
@@ -346,7 +346,7 @@ msgid "Origin"
 msgstr ""
 
 #: inc/classes/class-updatronix-export-body-builder.php:1150
-#: assets/src/js/components/activityLog/ActivityLogPanel.js:644
+#: assets/src/js/components/activityLog/ActivityLogPanel.js:653
 #: assets/src/js/components/activityLog/ExportLogsModal.js:92
 #: assets/src/js/components/activityLog/ExportLogsModal.js:136
 #: assets/src/js/components/activityLog/exportReports.js:26
@@ -365,7 +365,7 @@ msgid "Chain"
 msgstr ""
 
 #: inc/classes/class-updatronix-export-body-builder.php:1152
-#: assets/src/js/components/activityLog/ActivityLogPanel.js:670
+#: assets/src/js/components/activityLog/ActivityLogPanel.js:679
 #: assets/src/js/components/activityLog/ExportLogsModal.js:100
 #: assets/src/js/components/activityLog/ExportLogsModal.js:138
 #: assets/src/js/components/activityLog/exportReports.js:28
@@ -1531,8 +1531,8 @@ msgid "Chain: %s"
 msgstr ""
 
 #: inc/classes/class-updatronix-settings.php:716
-#: assets/src/js/components/activityLog/ActivityLogPanel.js:418
-#: assets/src/js/components/activityLog/ActivityLogPanel.js:429
+#: assets/src/js/components/activityLog/ActivityLogPanel.js:427
+#: assets/src/js/components/activityLog/ActivityLogPanel.js:438
 #: assets/src/js/components/activityLog/LogDetailsContent.js:137
 #: assets/src/js/components/activityLog/utils.js:367
 #: assets/src/js/pages/HealthPage.js:674
@@ -1602,8 +1602,8 @@ msgid "Language pack updated for %s"
 msgstr ""
 
 #: inc/classes/class-updatronix-settings.php:1213
-#: assets/src/js/components/activityLog/ActivityLogPanel.js:765
-#: assets/src/js/components/activityLog/ActivityLogPanel.js:779
+#: assets/src/js/components/activityLog/ActivityLogPanel.js:774
+#: assets/src/js/components/activityLog/ActivityLogPanel.js:788
 msgid "The log entry could not be deleted. Try again or check your database connection."
 msgstr ""
 
@@ -1714,162 +1714,162 @@ msgstr ""
 msgid "Updatronix was activated on a subsite, but it only works from the Network Admin. Please go to <a href=\"%s\">Network Admin → Updatronix</a> to set it up."
 msgstr ""
 
-#: assets/src/js/components/activityLog/ActivityLogPanel.js:247
+#: assets/src/js/components/activityLog/ActivityLogPanel.js:256
 msgid "Update logging is off. Turn it on in Settings to keep a history of updates."
 msgstr ""
 
-#: assets/src/js/components/activityLog/ActivityLogPanel.js:439
+#: assets/src/js/components/activityLog/ActivityLogPanel.js:448
 msgid "Summary"
 msgstr ""
 
 #. translators: 1: trigger label, 2: actor label.
-#: assets/src/js/components/activityLog/ActivityLogPanel.js:459
+#: assets/src/js/components/activityLog/ActivityLogPanel.js:468
 #, js-format
 msgid "%1$s · %2$s"
 msgstr ""
 
-#: assets/src/js/components/activityLog/ActivityLogPanel.js:474
-#: assets/src/js/components/activityLog/ActivityLogPanel.js:527
+#: assets/src/js/components/activityLog/ActivityLogPanel.js:483
+#: assets/src/js/components/activityLog/ActivityLogPanel.js:536
 #: assets/src/js/components/activityLog/logFilters.js:185
 msgid "Type"
 msgstr ""
 
-#: assets/src/js/components/activityLog/ActivityLogPanel.js:508
-#: assets/src/js/components/activityLog/ActivityLogPanel.js:516
+#: assets/src/js/components/activityLog/ActivityLogPanel.js:517
+#: assets/src/js/components/activityLog/ActivityLogPanel.js:525
 #: assets/src/js/components/activityLog/logFilters.js:256
 msgid "Day"
 msgstr ""
 
-#: assets/src/js/components/activityLog/ActivityLogPanel.js:537
+#: assets/src/js/components/activityLog/ActivityLogPanel.js:546
 #: assets/src/js/components/activityLog/LogDetailsContent.js:161
 msgid "Trigger"
 msgstr ""
 
-#: assets/src/js/components/activityLog/ActivityLogPanel.js:551
+#: assets/src/js/components/activityLog/ActivityLogPanel.js:560
 #: assets/src/js/components/activityLog/LogDetailsContent.js:155
 #: assets/src/js/components/activityLog/logFilters.js:230
 #: assets/src/js/components/activityLog/logFilters.js:268
 msgid "Triggered by"
 msgstr ""
 
-#: assets/src/js/components/activityLog/ActivityLogPanel.js:686
+#: assets/src/js/components/activityLog/ActivityLogPanel.js:695
 msgid "Time"
 msgstr ""
 
-#: assets/src/js/components/activityLog/ActivityLogPanel.js:708
+#: assets/src/js/components/activityLog/ActivityLogPanel.js:717
 #: assets/src/js/components/activityLog/LogDetailsContent.js:167
 #: assets/src/js/components/activityLog/logFilters.js:281
 msgid "Run type"
 msgstr ""
 
-#: assets/src/js/components/activityLog/ActivityLogPanel.js:723
+#: assets/src/js/components/activityLog/ActivityLogPanel.js:732
 #: assets/src/js/components/autoUpdates/ItemsDataViewSection.js:258
 #: assets/src/js/pages/HealthPage.js:617
 msgid "View details"
 msgstr ""
 
-#: assets/src/js/components/activityLog/ActivityLogPanel.js:730
+#: assets/src/js/components/activityLog/ActivityLogPanel.js:739
 #: assets/src/js/components/activityLog/constants.js:26
 msgid "Delete"
 msgstr ""
 
-#: assets/src/js/components/activityLog/ActivityLogPanel.js:764
+#: assets/src/js/components/activityLog/ActivityLogPanel.js:773
 msgid "Log deleted."
 msgstr ""
 
 #. translators: %s: retention period in days.
-#: assets/src/js/components/activityLog/ActivityLogPanel.js:794
+#: assets/src/js/components/activityLog/ActivityLogPanel.js:803
 #, js-format
 msgid "Retention: %s days"
 msgstr ""
 
-#: assets/src/js/components/activityLog/ActivityLogPanel.js:808
+#: assets/src/js/components/activityLog/ActivityLogPanel.js:817
 msgid "Logs could not be loaded"
 msgstr ""
 
-#: assets/src/js/components/activityLog/ActivityLogPanel.js:822
+#: assets/src/js/components/activityLog/ActivityLogPanel.js:831
 #: assets/src/js/pages/HealthPage.js:508
 msgid "Update logging is off"
 msgstr ""
 
-#: assets/src/js/components/activityLog/ActivityLogPanel.js:825
+#: assets/src/js/components/activityLog/ActivityLogPanel.js:834
 msgid "Turn it on in Settings to keep a history of updates."
 msgstr ""
 
-#: assets/src/js/components/activityLog/ActivityLogPanel.js:859
+#: assets/src/js/components/activityLog/ActivityLogPanel.js:868
 msgid "Recent updates"
 msgstr ""
 
-#: assets/src/js/components/activityLog/ActivityLogPanel.js:860
+#: assets/src/js/components/activityLog/ActivityLogPanel.js:869
 msgid "Search and filter the history, then open a record for the full details."
 msgstr ""
 
-#: assets/src/js/components/activityLog/ActivityLogPanel.js:876
+#: assets/src/js/components/activityLog/ActivityLogPanel.js:885
 msgid "Export logs"
 msgstr ""
 
-#: assets/src/js/components/activityLog/ActivityLogPanel.js:893
-#: assets/src/js/components/activityLog/ActivityLogPanel.js:906
+#: assets/src/js/components/activityLog/ActivityLogPanel.js:902
+#: assets/src/js/components/activityLog/ActivityLogPanel.js:915
 msgid "Search update log"
 msgstr ""
 
-#: assets/src/js/components/activityLog/ActivityLogPanel.js:896
+#: assets/src/js/components/activityLog/ActivityLogPanel.js:905
 msgid "Loading update logs"
 msgstr ""
 
-#: assets/src/js/components/activityLog/ActivityLogPanel.js:897
+#: assets/src/js/components/activityLog/ActivityLogPanel.js:906
 msgid "No update logs yet. Entries appear after WordPress runs an update."
 msgstr ""
 
 #. translators: 1: visible entries, 2: total entries.
-#: assets/src/js/components/activityLog/ActivityLogPanel.js:934
+#: assets/src/js/components/activityLog/ActivityLogPanel.js:943
 #, js-format
 msgid "Showing %1$d of %2$d entries"
 msgstr ""
 
-#: assets/src/js/components/activityLog/ActivityLogPanel.js:959
+#: assets/src/js/components/activityLog/ActivityLogPanel.js:968
 msgid "Load more"
 msgstr ""
 
-#: assets/src/js/components/activityLog/ActivityLogPanel.js:970
+#: assets/src/js/components/activityLog/ActivityLogPanel.js:979
 #: assets/src/js/components/activityLog/LogDetailsContent.js:376
 msgid "Update details"
 msgstr ""
 
-#: assets/src/js/components/activityLog/ActivityLogPanel.js:973
-#: assets/src/js/components/activityLog/ActivityLogPanel.js:1022
+#: assets/src/js/components/activityLog/ActivityLogPanel.js:982
+#: assets/src/js/components/activityLog/ActivityLogPanel.js:1031
 #: assets/src/js/components/autoUpdates/ItemsDataViewSection.js:241
 msgid "Details"
 msgstr ""
 
-#: assets/src/js/components/activityLog/ActivityLogPanel.js:977
-#: assets/src/js/components/activityLog/ActivityLogPanel.js:1025
+#: assets/src/js/components/activityLog/ActivityLogPanel.js:986
+#: assets/src/js/components/activityLog/ActivityLogPanel.js:1034
 msgid "Close details"
 msgstr ""
 
-#: assets/src/js/components/activityLog/ActivityLogPanel.js:991
+#: assets/src/js/components/activityLog/ActivityLogPanel.js:1000
 msgid "Details content"
 msgstr ""
 
-#: assets/src/js/components/activityLog/ActivityLogPanel.js:1052
+#: assets/src/js/components/activityLog/ActivityLogPanel.js:1061
 msgid "Delete log entry"
 msgstr ""
 
 #. translators: %s: item name.
-#: assets/src/js/components/activityLog/ActivityLogPanel.js:1057
+#: assets/src/js/components/activityLog/ActivityLogPanel.js:1066
 #, js-format
 msgid "This permanently removes the update record for %s. The installed version is not affected."
 msgstr ""
 
-#: assets/src/js/components/activityLog/ActivityLogPanel.js:1062
+#: assets/src/js/components/activityLog/ActivityLogPanel.js:1071
 msgid "this item"
 msgstr ""
 
-#: assets/src/js/components/activityLog/ActivityLogPanel.js:1066
+#: assets/src/js/components/activityLog/ActivityLogPanel.js:1075
 msgid "Delete permanently"
 msgstr ""
 
-#: assets/src/js/components/activityLog/ActivityLogPanel.js:1070
+#: assets/src/js/components/activityLog/ActivityLogPanel.js:1079
 #: assets/src/js/pages/HealthPage.js:941
 msgid "Cancel"
 msgstr ""
@@ -2423,7 +2423,7 @@ msgstr ""
 #. translators: %s: plugin or theme name
 #: assets/src/js/components/autoUpdates/ItemsDataViewSection.js:251
 #, js-format
-msgid "View details for %s (opens in a new tab)"
+msgid "View details for %s"
 msgstr ""
 
 #: assets/src/js/components/autoUpdates/TranslationsSection.js:45

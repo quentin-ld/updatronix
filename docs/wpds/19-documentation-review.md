@@ -83,8 +83,8 @@
 ## Owner override (2026-10-25)
 
 - Removed the “3 guides” counter badge from the PageHeader.
-- Suppressed the dashboard-wide external-link pseudo-icon below each guide card with a higher-specificity rule; the intended top-right external icon and `target="_blank"` behavior remain.
-- Build verification: no counter text; all three card `::after` pseudo-elements resolve to `content:none; display:none; background:none`; each card still has its guide icon, top-right external icon, and Read guide arrow.
+- Removed the dashboard-wide external-link pseudo-icon entirely; the intended top-right external icon and `target="_blank"` behavior remain. The earlier higher-specificity suppression became ineffective once the dashboard selector gained `:not([class*="__button-link"])`, so the source rule itself was deleted on 2026-11-02.
+- Build verification: no counter text; no guide-card `::after` content or mask icon; each card still has its guide icon, top-right external icon, and Read guide arrow.
 
 ## Implementation result (2026-10-25)
 

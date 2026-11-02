@@ -11,7 +11,7 @@ import { ConstantNotices } from './ConstantNotices';
 import { isSectionLocked } from './utils';
 import wpds from '../../shell/wpds';
 
-const { SwitchControl } = wpds.ui;
+const { Link, SwitchControl } = wpds.ui;
 
 const FIXED_FIELDS = [
 	'auto_update',
@@ -241,22 +241,19 @@ export function ItemsDataViewSection( {
 				label: __( 'Details', 'updatronix' ),
 				render: ( { item } ) =>
 					item[ uriKey ] ? (
-						<a
+						<Link
 							className="updatronix-autoupdates__details-link"
 							href={ item[ uriKey ] }
-							target="_blank"
+							openInNewTab
 							rel="noopener noreferrer"
 							aria-label={ sprintf(
 								/* translators: %s: plugin or theme name */
-								__(
-									'View details for %s (opens in a new tab)',
-									'updatronix'
-								),
+								__( 'View details for %s', 'updatronix' ),
 								item.name
 							) }
 						>
 							{ __( 'View details', 'updatronix' ) }
-						</a>
+						</Link>
 					) : (
 						<span className="updatronix-autoupdates__details-empty">
 							—

@@ -58,7 +58,7 @@ The rendered link therefore shows the arrow plus the extra document/external ico
 
 ## Implementation result (2026-10-25)
 
-- **AU28-01 fixed:** a scoped rule suppresses the dashboard `a[target="_blank"]::after` icon inside `.updatronix-autoupdates-panel .updatronix-auto-item`; the WPDS Link `link-icon` remains (`::after: "⁠↗"`) and `target="_blank"` is preserved. Computed anchor `::after` is now `content:none; display:none; mask-image:none`.
+- **AU28-01 fixed:** the dashboard `a[target="_blank"]::after` rule was removed on 2026-11-02; the WPDS Link `link-icon` remains (`::after: "⁠↗"`) and `target="_blank"` is preserved. The earlier scoped suppression was deleted because the broader selector had gained enough specificity to override it.
 - **AU28-02 fixed:** `ConstantNotices` announces the relevant constant descriptions with `speak( …, 'polite' )`, guarded by a `useRef` so parent re-renders do not repeat it.
 - **AU28-03 recorded:** MCP coverage gap remains a note; local `@wordpress/ui` types stay authoritative.
 - Verification: ESLint, Stylelint, token lint, 15/15 JS tests, build; live link computed-style check.

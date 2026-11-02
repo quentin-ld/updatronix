@@ -161,6 +161,7 @@ No. The free plugin logs updates and controls the automatic update settings. Upd
 * New: The Updatronix 3000 destination shows what the Pro edition includes and links to its plugin page.
 * Change: The rail uses the blue Updatronix mark, or the colored Updatronix 3000 mark while a Pro license is active.
 * Fix: The update-log details card scrolls inside its own height, and the redundant retention note is gone.
+* Fix: External links show one new-tab indicator instead of two.
 * Improvement: Cards, rows, links, and health checks share the same short motion. Every toggle uses the design-system switch, and reduced-motion settings are respected.
 * Note: Updatronix 3000 0.8.0 runs one automatic pass and drops the legacy queue table. Back up the database before upgrading; queue rows are not migrated.
 * Copy: The interface follows the WordPress Documentation Style Guide across all eleven destinations.
