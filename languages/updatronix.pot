@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-11-01T14:10:58+01:00\n"
+"POT-Creation-Date: 2026-11-02T18:13:50+01:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: updatronix\n"
@@ -108,38 +108,34 @@ msgstr ""
 msgid "Loading your Updatronix settings"
 msgstr ""
 
-#: inc/admin/native-update-time.php:285
+#: inc/admin/native-update-time.php:284
 msgid "not scheduled"
 msgstr ""
 
 #. translators: 1: next automatic pass date and time, 2: timezone, 3: eligible items, 4: delayed items, 5: waiting items, 6: managed items.
-#: inc/admin/native-update-time.php:297
+#: inc/admin/native-update-time.php:296
 #, php-format
 msgid "Next automatic pass: %1$s (%2$s). %3$d eligible, %4$d delayed, %5$d waiting, %6$d managed."
 msgstr ""
 
 #. translators: %d: blocked items.
-#: inc/admin/native-update-time.php:313
+#: inc/admin/native-update-time.php:312
 #, php-format
 msgid "%d item is blocked."
 msgid_plural "%d items are blocked."
 msgstr[0] ""
 msgstr[1] ""
 
-#: inc/admin/native-update-time.php:326
-#: inc/admin/native-update-time.php:376
+#: inc/admin/native-update-time.php:325
+#: inc/admin/native-update-time.php:375
 #: inc/core/tabs.php:49
 #: assets/src/js/components/schedule/SchedulePanel.js:409
 #: assets/src/js/shell/routes.js:46
 msgid "Schedule"
 msgstr ""
 
-#: inc/admin/native-update-time.php:333
+#: inc/admin/native-update-time.php:332
 msgid "Flow"
-msgstr ""
-
-#: inc/admin/native-update-time.php:482
-msgid "WP-Cron is disabled; the automatic update pass will not run until a real cron job calls wp-cron.php."
 msgstr ""
 
 #. translators: 1: number of soak days configured, 2: datetime string when eligibility starts if the update is still offered.
@@ -277,10 +273,10 @@ msgstr ""
 #: inc/classes/class-updatronix-export-body-builder.php:1142
 #: assets/src/js/components/activityLog/ExportLogsModal.js:127
 #: assets/src/js/components/activityLog/exportReports.js:17
-#: assets/src/js/components/autoUpdates/ItemsDataViewSection.js:211
-#: assets/src/js/pages/HealthPage.js:674
-#: assets/src/js/pages/HealthPage.js:739
-#: assets/src/js/pages/HealthPage.js:895
+#: assets/src/js/components/autoUpdates/ItemsDataViewSection.js:215
+#: assets/src/js/pages/HealthPage.js:677
+#: assets/src/js/pages/HealthPage.js:742
+#: assets/src/js/pages/HealthPage.js:898
 msgid "Version"
 msgstr ""
 
@@ -314,7 +310,7 @@ msgstr ""
 #: assets/src/js/components/activityLog/exportReports.js:21
 #: assets/src/js/components/activityLog/LogDetailsContent.js:145
 #: assets/src/js/components/activityLog/logFilters.js:213
-#: assets/src/js/components/autoUpdates/ItemsDataViewSection.js:191
+#: assets/src/js/components/autoUpdates/ItemsDataViewSection.js:195
 msgid "Status"
 msgstr ""
 
@@ -385,15 +381,9 @@ msgstr ""
 msgid "Decision context"
 msgstr ""
 
-#: inc/classes/class-updatronix-export-body-builder.php:1275
-#: assets/src/js/components/activityLog/logFilters.js:217
-#: assets/src/js/components/activityLog/utils.js:58
-msgid "Success"
-msgstr ""
-
 #. translators: Decision state: the update attempt failed.
-#: inc/classes/class-updatronix-export-body-builder.php:1276
-#: inc/classes/class-updatronix-export-body-builder.php:1478
+#: inc/classes/class-updatronix-export-body-builder.php:1275
+#: inc/classes/class-updatronix-export-body-builder.php:1474
 #: inc/classes/class-updatronix-log-taxonomy.php:207
 #: inc/classes/class-updatronix-settings.php:950
 #: assets/src/js/components/activityLog/constants.js:24
@@ -404,7 +394,7 @@ msgid "Failed"
 msgstr ""
 
 #. translators: Decision state: the chain, license, or queue stopped the item.
-#: inc/classes/class-updatronix-export-body-builder.php:1277
+#: inc/classes/class-updatronix-export-body-builder.php:1276
 #: inc/classes/class-updatronix-log-taxonomy.php:227
 #: assets/src/js/components/activityLog/constants.js:50
 #: assets/src/js/components/activityLog/logFilters.js:219
@@ -412,18 +402,8 @@ msgstr ""
 msgid "Canceled"
 msgstr ""
 
-#. translators: Decision state: a soak window holds the offer until a known time.
-#: inc/classes/class-updatronix-export-body-builder.php:1278
-#: inc/classes/class-updatronix-log-taxonomy.php:192
-#: assets/src/js/components/activityLog/constants.js:46
-#: assets/src/js/components/activityLog/logFilters.js:220
-#: assets/src/js/components/activityLog/utils.js:70
-msgid "Delayed"
-msgstr ""
-
 #. translators: Decision state: a neutral observation, not an outcome.
-#: inc/classes/class-updatronix-export-body-builder.php:1279
-#: inc/classes/class-updatronix-export-body-builder.php:1282
+#: inc/classes/class-updatronix-export-body-builder.php:1278
 #: inc/classes/class-updatronix-log-taxonomy.php:233
 #: assets/src/js/components/activityLog/constants.js:51
 #: assets/src/js/components/activityLog/logFilters.js:221
@@ -431,76 +411,70 @@ msgstr ""
 msgid "Info"
 msgstr ""
 
-#: inc/classes/class-updatronix-export-body-builder.php:1280
-#: assets/src/js/components/activityLog/logFilters.js:222
-#: assets/src/js/components/activityLog/utils.js:61
-msgid "Warning"
-msgstr ""
-
-#: inc/classes/class-updatronix-export-body-builder.php:1419
+#: inc/classes/class-updatronix-export-body-builder.php:1415
 msgid "manual"
 msgstr ""
 
-#: inc/classes/class-updatronix-export-body-builder.php:1420
+#: inc/classes/class-updatronix-export-body-builder.php:1416
 msgid "automatic"
 msgstr ""
 
-#: inc/classes/class-updatronix-export-body-builder.php:1421
+#: inc/classes/class-updatronix-export-body-builder.php:1417
 msgid "upload"
 msgstr ""
 
-#: inc/classes/class-updatronix-export-body-builder.php:1442
+#: inc/classes/class-updatronix-export-body-builder.php:1438
 msgid "bulk"
 msgstr ""
 
-#: inc/classes/class-updatronix-export-body-builder.php:1443
+#: inc/classes/class-updatronix-export-body-builder.php:1439
 msgid "single"
 msgstr ""
 
-#: inc/classes/class-updatronix-export-body-builder.php:1474
+#: inc/classes/class-updatronix-export-body-builder.php:1470
 #: inc/classes/class-updatronix-settings.php:717
 #: inc/classes/class-updatronix-settings.php:946
 #: assets/src/js/components/activityLog/constants.js:20
 msgid "Update"
 msgstr ""
 
-#: inc/classes/class-updatronix-export-body-builder.php:1475
+#: inc/classes/class-updatronix-export-body-builder.php:1471
 #: inc/classes/class-updatronix-settings.php:947
 #: assets/src/js/components/activityLog/constants.js:21
 msgid "Rollback"
 msgstr ""
 
-#: inc/classes/class-updatronix-export-body-builder.php:1476
+#: inc/classes/class-updatronix-export-body-builder.php:1472
 #: inc/classes/class-updatronix-settings.php:948
 #: assets/src/js/components/activityLog/constants.js:22
 msgid "Install"
 msgstr ""
 
-#: inc/classes/class-updatronix-export-body-builder.php:1477
+#: inc/classes/class-updatronix-export-body-builder.php:1473
 #: inc/classes/class-updatronix-settings.php:949
 #: assets/src/js/components/activityLog/constants.js:23
 msgid "Reinstall"
 msgstr ""
 
-#: inc/classes/class-updatronix-export-body-builder.php:1479
+#: inc/classes/class-updatronix-export-body-builder.php:1475
 #: inc/classes/class-updatronix-settings.php:951
 #: assets/src/js/components/activityLog/constants.js:25
 msgid "Uninstall"
 msgstr ""
 
-#: inc/classes/class-updatronix-export-body-builder.php:1480
+#: inc/classes/class-updatronix-export-body-builder.php:1476
 #: inc/classes/class-updatronix-settings.php:952
 #: assets/src/js/components/activityLog/constants.js:27
 msgid "Prevented"
 msgstr ""
 
-#: inc/classes/class-updatronix-export-body-builder.php:1481
+#: inc/classes/class-updatronix-export-body-builder.php:1477
 #: inc/classes/class-updatronix-settings.php:953
 #: assets/src/js/components/activityLog/constants.js:28
 msgid "Incompatible"
 msgstr ""
 
-#: inc/classes/class-updatronix-export-body-builder.php:1482
+#: inc/classes/class-updatronix-export-body-builder.php:1478
 #: inc/classes/class-updatronix-health.php:538
 #: inc/classes/class-updatronix-health.php:912
 #: inc/classes/class-updatronix-settings.php:954
@@ -508,25 +482,25 @@ msgstr ""
 msgid "Disabled"
 msgstr ""
 
-#: inc/classes/class-updatronix-export-body-builder.php:1483
+#: inc/classes/class-updatronix-export-body-builder.php:1479
 #: inc/classes/class-updatronix-settings.php:955
 #: assets/src/js/components/activityLog/constants.js:30
 msgid "Automatic updates disabled by Safe mode"
 msgstr ""
 
-#: inc/classes/class-updatronix-export-body-builder.php:1499
+#: inc/classes/class-updatronix-export-body-builder.php:1495
 msgid "CORE"
 msgstr ""
 
-#: inc/classes/class-updatronix-export-body-builder.php:1500
+#: inc/classes/class-updatronix-export-body-builder.php:1496
 msgid "PLUGINS"
 msgstr ""
 
-#: inc/classes/class-updatronix-export-body-builder.php:1501
+#: inc/classes/class-updatronix-export-body-builder.php:1497
 msgid "THEMES"
 msgstr ""
 
-#: inc/classes/class-updatronix-export-body-builder.php:1502
+#: inc/classes/class-updatronix-export-body-builder.php:1498
 msgid "TRANSLATIONS"
 msgstr ""
 
@@ -601,7 +575,7 @@ msgid "Disk space"
 msgstr ""
 
 #: inc/classes/class-updatronix-health.php:475
-#: assets/src/js/components/autoUpdates/ItemsDataViewSection.js:97
+#: assets/src/js/components/autoUpdates/ItemsDataViewSection.js:100
 msgid "Unavailable"
 msgstr ""
 
@@ -629,7 +603,7 @@ msgid "WP-Cron"
 msgstr ""
 
 #: inc/classes/class-updatronix-health.php:541
-msgid "DISABLE_WP_CRON is set. Scheduled checks will not run until a real cron job calls wp-cron.php."
+msgid "DISABLE_WP_CRON is set. Scheduled checks will not run until a real cron job calls wp-cron.php. If you turned off WP-Cron on purpose and run your own server cron, you can ignore this alert."
 msgstr ""
 
 #: inc/classes/class-updatronix-health.php:547
@@ -746,7 +720,7 @@ msgid "The update failed without a message."
 msgstr ""
 
 #: inc/classes/class-updatronix-health.php:844
-#: assets/src/js/pages/HealthPage.js:767
+#: assets/src/js/pages/HealthPage.js:770
 msgid "PHP"
 msgstr ""
 
@@ -895,6 +869,14 @@ msgstr ""
 msgid "Waiting"
 msgstr ""
 
+#. translators: Decision state: a soak window holds the offer until a known time.
+#: inc/classes/class-updatronix-log-taxonomy.php:192
+#: assets/src/js/components/activityLog/constants.js:46
+#: assets/src/js/components/activityLog/logFilters.js:220
+#: assets/src/js/components/activityLog/utils.js:70
+msgid "Delayed"
+msgstr ""
+
 #. translators: Decision state: the item was not attempted and does not need to be.
 #: inc/classes/class-updatronix-log-taxonomy.php:201
 #: assets/src/js/components/activityLog/constants.js:47
@@ -924,6 +906,7 @@ msgstr ""
 #. translators: Log origin: an update Flow chain started the action.
 #: inc/classes/class-updatronix-log-taxonomy.php:265
 #: assets/src/js/components/activityLog/constants.js:75
+#: assets/src/js/pages/proFeatures.js:26
 #: assets/src/js/shell/routes.js:79
 msgid "Update Flow"
 msgstr ""
@@ -1342,136 +1325,142 @@ msgstr ""
 msgid "Legacy: reason not recorded"
 msgstr ""
 
-#: inc/classes/class-updatronix-schedule-state.php:532
+#: inc/classes/class-updatronix-schedule-state.php:516
 msgid "This site uses the network update schedule. Manage it in Network Admin."
 msgstr ""
 
-#: inc/classes/class-updatronix-schedule-state.php:541
-msgid "WP-Cron spawning is disabled. A real cron job must call wp-cron.php; the next automatic install time is unknown."
+#: inc/classes/class-updatronix-schedule-state.php:524
+msgid "Automatic update not scheduled. Save the schedule to create the check event."
 msgstr ""
 
-#: inc/classes/class-updatronix-schedule-state.php:549
+#: inc/classes/class-updatronix-schedule-state.php:528
 msgid "Automatic update not scheduled. There may be a problem with WP-Cron."
 msgstr ""
 
 #. translators: %s: human duration the next check is overdue by.
-#: inc/classes/class-updatronix-schedule-state.php:558
+#: inc/classes/class-updatronix-schedule-state.php:538
+#, php-format
+msgid "The next check is overdue by %s. Waiting for your server cron."
+msgstr ""
+
+#. translators: %s: human duration the next check is overdue by.
+#: inc/classes/class-updatronix-schedule-state.php:547
 #, php-format
 msgid "The next check is overdue by %s. WP-Cron may be stuck; the next automatic install time is unknown."
 msgstr ""
 
 #. translators: %s: version manager name, e.g. Git.
-#: inc/classes/class-updatronix-schedule-state.php:570
+#: inc/classes/class-updatronix-schedule-state.php:559
 #, php-format
 msgid "Managed via %s. Update through your manager."
 msgstr ""
 
 #. translators: %s: the blocking policy, e.g. Requires WordPress 6.8.
-#: inc/classes/class-updatronix-schedule-state.php:578
+#: inc/classes/class-updatronix-schedule-state.php:567
 #, php-format
 msgid "Blocked by %s. No automatic install time."
 msgstr ""
 
-#: inc/classes/class-updatronix-schedule-state.php:585
+#: inc/classes/class-updatronix-schedule-state.php:574
 msgid "Automatic updates are disabled by the site configuration."
 msgstr ""
 
-#: inc/classes/class-updatronix-schedule-state.php:589
+#: inc/classes/class-updatronix-schedule-state.php:578
 msgid "Automatic updates are off for this item."
 msgstr ""
 
-#: inc/classes/class-updatronix-schedule-state.php:594
+#: inc/classes/class-updatronix-schedule-state.php:583
 msgid "No automatic core update pending."
 msgstr ""
 
-#: inc/classes/class-updatronix-schedule-state.php:595
+#: inc/classes/class-updatronix-schedule-state.php:584
 msgid "No automatic update pending."
 msgstr ""
 
-#: inc/classes/class-updatronix-schedule-state.php:599
+#: inc/classes/class-updatronix-schedule-state.php:588
 msgid "Update data is stale or unknown. The next automatic decision is unknown."
 msgstr ""
 
 #. translators: 1: predecessor item, 2: version manager name.
-#: inc/classes/class-updatronix-schedule-state.php:611
+#: inc/classes/class-updatronix-schedule-state.php:600
 #, php-format
 msgid "Waiting for %1$s to be updated by %2$s. No automatic install time yet."
 msgstr ""
 
 #. translators: %s: predecessor item.
-#: inc/classes/class-updatronix-schedule-state.php:622
+#: inc/classes/class-updatronix-schedule-state.php:611
 #, php-format
 msgid "Waiting for %s to recover. No automatic install time yet."
 msgstr ""
 
 #. translators: %s: predecessor item.
-#: inc/classes/class-updatronix-schedule-state.php:631
+#: inc/classes/class-updatronix-schedule-state.php:620
 #, php-format
 msgid "Waiting for %s. No automatic install time yet."
 msgstr ""
 
-#: inc/classes/class-updatronix-schedule-state.php:638
+#: inc/classes/class-updatronix-schedule-state.php:627
 msgid "The last automatic attempt failed. The next automatic run re-evaluates."
 msgstr ""
 
-#: inc/classes/class-updatronix-schedule-state.php:645
+#: inc/classes/class-updatronix-schedule-state.php:634
 msgid "The last attempt needs review. No automatic install time."
 msgstr ""
 
 #. translators: %s: the next automatic check date and time.
-#: inc/classes/class-updatronix-schedule-state.php:654
+#: inc/classes/class-updatronix-schedule-state.php:643
 #, php-format
 msgid "The hold starts when the next check first sees this release. Next check: %s. The earliest install is not known yet."
 msgstr ""
 
 #. translators: 1: earliest eligible date and time, 2: timezone, 3: the date and time the hold ends.
-#: inc/classes/class-updatronix-schedule-state.php:668
+#: inc/classes/class-updatronix-schedule-state.php:657
 #, php-format
 msgid "Earliest automatic install: %1$s or later (%2$s). Hold ends %3$s."
 msgstr ""
 
 #. translators: %s: earliest eligible date and time.
-#: inc/classes/class-updatronix-schedule-state.php:683
+#: inc/classes/class-updatronix-schedule-state.php:672
 #, php-format
 msgid "Next in the current run at %s. It may run after the current item."
 msgstr ""
 
 #. translators: 1: earliest eligible date and time, 2: number of items ahead in the pass.
-#: inc/classes/class-updatronix-schedule-state.php:694
+#: inc/classes/class-updatronix-schedule-state.php:683
 #, php-format
 msgid "Eligible at %1$s; queued after %2$d items in the current pass. It may run later."
 msgstr ""
 
-#: inc/classes/class-updatronix-schedule-state.php:708
+#: inc/classes/class-updatronix-schedule-state.php:697
 msgid "Updating now."
 msgstr ""
 
 #. translators: 1: next automatic install date and time, 2: timezone.
-#: inc/classes/class-updatronix-schedule-state.php:714
+#: inc/classes/class-updatronix-schedule-state.php:703
 #, php-format
 msgid "Next automatic install: %1$s (%2$s)."
 msgstr ""
 
-#: inc/classes/class-updatronix-schedule-state.php:724
+#: inc/classes/class-updatronix-schedule-state.php:713
 msgid "The next automatic update time is unknown."
 msgstr ""
 
-#: inc/classes/class-updatronix-schedule-state.php:742
+#: inc/classes/class-updatronix-schedule-state.php:731
 msgid "Core major release."
 msgstr ""
 
-#: inc/classes/class-updatronix-schedule-state.php:743
+#: inc/classes/class-updatronix-schedule-state.php:732
 msgid "Core minor release."
 msgstr ""
 
 #. translators: %s: the actual local check time after the daylight-saving shift.
-#: inc/classes/class-updatronix-schedule-state.php:811
+#: inc/classes/class-updatronix-schedule-state.php:800
 #, php-format
 msgid "The next check is at %s because of the daylight-saving shift. Save the schedule to re-anchor it."
 msgstr ""
 
 #. translators: %d: number of days.
-#: inc/classes/class-updatronix-schedule-state.php:1016
+#: inc/classes/class-updatronix-schedule-state.php:1005
 #, php-format
 msgid "%d day"
 msgid_plural "%d days"
@@ -1479,7 +1468,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d: number of hours.
-#: inc/classes/class-updatronix-schedule-state.php:1029
+#: inc/classes/class-updatronix-schedule-state.php:1018
 #, php-format
 msgid "%d hour"
 msgid_plural "%d hours"
@@ -1487,22 +1476,22 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d: number of minutes.
-#: inc/classes/class-updatronix-schedule-state.php:1041
+#: inc/classes/class-updatronix-schedule-state.php:1030
 #, php-format
 msgid "%d minute"
 msgid_plural "%d minutes"
 msgstr[0] ""
 msgstr[1] ""
 
-#: inc/classes/class-updatronix-schedule-state.php:1066
+#: inc/classes/class-updatronix-schedule-state.php:1055
 msgid "your version manager"
 msgstr ""
 
-#: inc/classes/class-updatronix-schedule-state.php:1084
+#: inc/classes/class-updatronix-schedule-state.php:1073
 msgid "an update policy"
 msgstr ""
 
-#: inc/classes/class-updatronix-schedule-state.php:1096
+#: inc/classes/class-updatronix-schedule-state.php:1085
 msgid "another update"
 msgstr ""
 
@@ -1546,9 +1535,9 @@ msgstr ""
 #: assets/src/js/components/activityLog/ActivityLogPanel.js:429
 #: assets/src/js/components/activityLog/LogDetailsContent.js:137
 #: assets/src/js/components/activityLog/utils.js:367
-#: assets/src/js/pages/HealthPage.js:671
-#: assets/src/js/pages/HealthPage.js:734
-#: assets/src/js/pages/HealthPage.js:890
+#: assets/src/js/pages/HealthPage.js:674
+#: assets/src/js/pages/HealthPage.js:737
+#: assets/src/js/pages/HealthPage.js:893
 msgid "Item"
 msgstr ""
 
@@ -1662,51 +1651,51 @@ msgstr ""
 
 #. translators: %s: WordPress version number
 #: inc/classes/class-updatronix-update-logger.php:636
-#: inc/classes/class-updatronix-update-logger.php:2200
+#: inc/classes/class-updatronix-update-logger.php:2204
 #, php-format
 msgid "Core update to WordPress %s"
 msgstr ""
 
-#: inc/classes/class-updatronix-update-logger.php:1771
+#: inc/classes/class-updatronix-update-logger.php:1775
 msgid "Installed from an uploaded file."
 msgstr ""
 
 #. translators: %s: package download URL
-#: inc/classes/class-updatronix-update-logger.php:2190
+#: inc/classes/class-updatronix-update-logger.php:2194
 #, php-format
 msgid "Downloading the update from %s"
 msgstr ""
 
-#: inc/classes/class-updatronix-update-logger.php:2193
+#: inc/classes/class-updatronix-update-logger.php:2197
 msgid "Unpacking the update"
 msgstr ""
 
 #. translators: 1: item name (plugin or theme), 2: version number
-#: inc/classes/class-updatronix-update-logger.php:2579
+#: inc/classes/class-updatronix-update-logger.php:2583
 #, php-format
 msgid "Installed %1$s %2$s"
 msgstr ""
 
 #. translators: 1: item name (plugin or theme), 2: version number
-#: inc/classes/class-updatronix-update-logger.php:2587
+#: inc/classes/class-updatronix-update-logger.php:2591
 #, php-format
 msgid "Uninstalled %1$s %2$s"
 msgstr ""
 
 #. translators: 1: item name (plugin or theme), 2: version number
-#: inc/classes/class-updatronix-update-logger.php:2595
+#: inc/classes/class-updatronix-update-logger.php:2599
 #, php-format
 msgid "Rolled back %1$s to %2$s"
 msgstr ""
 
 #. translators: 1: item name (plugin or theme), 2: version number
-#: inc/classes/class-updatronix-update-logger.php:2603
+#: inc/classes/class-updatronix-update-logger.php:2607
 #, php-format
 msgid "Reinstalled %1$s %2$s (same version)"
 msgstr ""
 
 #. translators: 1: item name (plugin or theme), 2: version number
-#: inc/classes/class-updatronix-update-logger.php:2611
+#: inc/classes/class-updatronix-update-logger.php:2615
 #, php-format
 msgid "Updated %1$s to %2$s"
 msgstr ""
@@ -1714,7 +1703,7 @@ msgstr ""
 #: inc/core/tabs.php:43
 #: assets/src/js/components/autoUpdates/AutoUpdatesPanel.js:162
 #: assets/src/js/components/autoUpdates/AutoUpdatesPanel.js:478
-#: assets/src/js/components/autoUpdates/ItemsDataViewSection.js:86
+#: assets/src/js/components/autoUpdates/ItemsDataViewSection.js:89
 #: assets/src/js/shell/routes.js:35
 msgid "Auto updates"
 msgstr ""
@@ -1774,8 +1763,8 @@ msgid "Run type"
 msgstr ""
 
 #: assets/src/js/components/activityLog/ActivityLogPanel.js:723
-#: assets/src/js/components/autoUpdates/ItemsDataViewSection.js:254
-#: assets/src/js/pages/HealthPage.js:614
+#: assets/src/js/components/autoUpdates/ItemsDataViewSection.js:258
+#: assets/src/js/pages/HealthPage.js:617
 msgid "View details"
 msgstr ""
 
@@ -1799,7 +1788,7 @@ msgid "Logs could not be loaded"
 msgstr ""
 
 #: assets/src/js/components/activityLog/ActivityLogPanel.js:822
-#: assets/src/js/pages/HealthPage.js:505
+#: assets/src/js/pages/HealthPage.js:508
 msgid "Update logging is off"
 msgstr ""
 
@@ -1848,42 +1837,40 @@ msgid "Update details"
 msgstr ""
 
 #: assets/src/js/components/activityLog/ActivityLogPanel.js:973
-#: assets/src/js/components/activityLog/ActivityLogPanel.js:1012
-#: assets/src/js/components/autoUpdates/ItemsDataViewSection.js:237
+#: assets/src/js/components/activityLog/ActivityLogPanel.js:1022
+#: assets/src/js/components/autoUpdates/ItemsDataViewSection.js:241
 msgid "Details"
 msgstr ""
 
 #: assets/src/js/components/activityLog/ActivityLogPanel.js:977
-#: assets/src/js/components/activityLog/ActivityLogPanel.js:1015
+#: assets/src/js/components/activityLog/ActivityLogPanel.js:1025
 msgid "Close details"
 msgstr ""
 
-#. translators: %s: retention period in days.
-#: assets/src/js/components/activityLog/ActivityLogPanel.js:1037
-#, js-format
-msgid "The daily cleanup removes entries older than %s days."
+#: assets/src/js/components/activityLog/ActivityLogPanel.js:991
+msgid "Details content"
 msgstr ""
 
-#: assets/src/js/components/activityLog/ActivityLogPanel.js:1056
+#: assets/src/js/components/activityLog/ActivityLogPanel.js:1052
 msgid "Delete log entry"
 msgstr ""
 
 #. translators: %s: item name.
-#: assets/src/js/components/activityLog/ActivityLogPanel.js:1061
+#: assets/src/js/components/activityLog/ActivityLogPanel.js:1057
 #, js-format
 msgid "This permanently removes the update record for %s. The installed version is not affected."
 msgstr ""
 
-#: assets/src/js/components/activityLog/ActivityLogPanel.js:1066
+#: assets/src/js/components/activityLog/ActivityLogPanel.js:1062
 msgid "this item"
 msgstr ""
 
-#: assets/src/js/components/activityLog/ActivityLogPanel.js:1070
+#: assets/src/js/components/activityLog/ActivityLogPanel.js:1066
 msgid "Delete permanently"
 msgstr ""
 
-#: assets/src/js/components/activityLog/ActivityLogPanel.js:1074
-#: assets/src/js/pages/HealthPage.js:938
+#: assets/src/js/components/activityLog/ActivityLogPanel.js:1070
+#: assets/src/js/pages/HealthPage.js:941
 msgid "Cancel"
 msgstr ""
 
@@ -1983,10 +1970,10 @@ msgstr ""
 
 #: assets/src/js/components/activityLog/ExportLogsModal.js:678
 #: assets/src/js/components/activityLog/ExportLogsModal.js:977
-#: assets/src/js/pages/HealthPage.js:720
-#: assets/src/js/pages/HealthPage.js:838
-#: assets/src/js/pages/HealthPage.js:872
-#: assets/src/js/pages/HealthPage.js:964
+#: assets/src/js/pages/HealthPage.js:723
+#: assets/src/js/pages/HealthPage.js:841
+#: assets/src/js/pages/HealthPage.js:875
+#: assets/src/js/pages/HealthPage.js:967
 msgid "Close"
 msgstr ""
 
@@ -2094,7 +2081,7 @@ msgid "Copy without formatting"
 msgstr ""
 
 #: assets/src/js/components/activityLog/ExportLogsModal.js:964
-#: assets/src/js/pages/HealthPage.js:998
+#: assets/src/js/pages/HealthPage.js:1001
 msgid "Download"
 msgstr ""
 
@@ -2159,6 +2146,16 @@ msgstr ""
 msgid "No additional details are available for this log entry."
 msgstr ""
 
+#: assets/src/js/components/activityLog/logFilters.js:217
+#: assets/src/js/components/activityLog/utils.js:58
+msgid "Success"
+msgstr ""
+
+#: assets/src/js/components/activityLog/logFilters.js:222
+#: assets/src/js/components/activityLog/utils.js:61
+msgid "Warning"
+msgstr ""
+
 #: assets/src/js/components/activityLog/logFilters.js:483
 msgid "Search"
 msgstr ""
@@ -2203,8 +2200,8 @@ msgid "Target version"
 msgstr ""
 
 #: assets/src/js/components/activityLog/utils.js:327
-#: assets/src/js/pages/HealthPage.js:772
-#: assets/src/js/pages/HealthPage.js:904
+#: assets/src/js/pages/HealthPage.js:775
+#: assets/src/js/pages/HealthPage.js:907
 msgid "Attempt"
 msgstr ""
 
@@ -2253,12 +2250,12 @@ msgid "No update data is available for this extension."
 msgstr ""
 
 #: assets/src/js/components/autoUpdates/AutoUpdatesPanel.js:135
-#: assets/src/js/components/autoUpdates/ItemsDataViewSection.js:196
+#: assets/src/js/components/autoUpdates/ItemsDataViewSection.js:200
 msgid "Active"
 msgstr ""
 
 #: assets/src/js/components/autoUpdates/AutoUpdatesPanel.js:136
-#: assets/src/js/components/autoUpdates/ItemsDataViewSection.js:200
+#: assets/src/js/components/autoUpdates/ItemsDataViewSection.js:204
 msgid "Inactive"
 msgstr ""
 
@@ -2281,7 +2278,7 @@ msgstr ""
 #: assets/src/js/components/autoUpdates/AutoUpdatesPanel.js:256
 #: assets/src/js/components/autoUpdates/AutoUpdatesPanel.js:333
 #: assets/src/js/pages/HealthPage.js:346
-#: assets/src/js/pages/HealthPage.js:627
+#: assets/src/js/pages/HealthPage.js:630
 msgid "Retry"
 msgstr ""
 
@@ -2305,7 +2302,7 @@ msgstr ""
 
 #: assets/src/js/components/autoUpdates/AutoUpdatesPanel.js:368
 #: assets/src/js/components/autoUpdates/ConstantNotices.js:21
-#: assets/src/js/components/autoUpdates/TranslationsSection.js:33
+#: assets/src/js/components/autoUpdates/TranslationsSection.js:36
 msgid "Translations"
 msgstr ""
 
@@ -2314,7 +2311,7 @@ msgid "Update language files automatically."
 msgstr ""
 
 #: assets/src/js/components/autoUpdates/AutoUpdatesPanel.js:375
-#: assets/src/js/components/autoUpdates/TranslationsSection.js:42
+#: assets/src/js/components/autoUpdates/TranslationsSection.js:44
 msgid "Automatic translation updates"
 msgstr ""
 
@@ -2395,41 +2392,41 @@ msgstr ""
 msgid "This choice is set in your wp-config.php file. Edit that file to change it."
 msgstr ""
 
-#: assets/src/js/components/autoUpdates/ItemsDataViewSection.js:92
+#: assets/src/js/components/autoUpdates/ItemsDataViewSection.js:95
 msgid "Automatic updates are not available for this item (for example, it is not hosted on WordPress.org)."
 msgstr ""
 
-#: assets/src/js/components/autoUpdates/ItemsDataViewSection.js:112
+#: assets/src/js/components/autoUpdates/ItemsDataViewSection.js:116
 msgid "Locked by Safe mode due to incompatibility"
 msgstr ""
 
 #. translators: %s: plugin or theme name
-#: assets/src/js/components/autoUpdates/ItemsDataViewSection.js:125
+#: assets/src/js/components/autoUpdates/ItemsDataViewSection.js:129
 #, js-format
 msgid "Turn off automatic updates for %s"
 msgstr ""
 
 #. translators: %s: plugin or theme name
-#: assets/src/js/components/autoUpdates/ItemsDataViewSection.js:134
+#: assets/src/js/components/autoUpdates/ItemsDataViewSection.js:138
 #, js-format
 msgid "Turn on automatic updates for %s"
 msgstr ""
 
-#: assets/src/js/components/autoUpdates/ItemsDataViewSection.js:151
+#: assets/src/js/components/autoUpdates/ItemsDataViewSection.js:155
 msgid "Icon"
 msgstr ""
 
-#: assets/src/js/components/autoUpdates/ItemsDataViewSection.js:224
+#: assets/src/js/components/autoUpdates/ItemsDataViewSection.js:228
 msgid "Description"
 msgstr ""
 
 #. translators: %s: plugin or theme name
-#: assets/src/js/components/autoUpdates/ItemsDataViewSection.js:247
+#: assets/src/js/components/autoUpdates/ItemsDataViewSection.js:251
 #, js-format
 msgid "View details for %s (opens in a new tab)"
 msgstr ""
 
-#: assets/src/js/components/autoUpdates/TranslationsSection.js:43
+#: assets/src/js/components/autoUpdates/TranslationsSection.js:45
 msgid "WordPress downloads translation updates automatically by default. Turn this off to skip automatic downloads."
 msgstr ""
 
@@ -2830,7 +2827,7 @@ msgid "opens in a new tab"
 msgstr ""
 
 #: assets/src/js/pages/DocumentationPage.js:118
-#: assets/src/js/pages/HealthPage.js:484
+#: assets/src/js/pages/HealthPage.js:487
 msgid "Read the guide"
 msgstr ""
 
@@ -2929,7 +2926,7 @@ msgid "Health checks failed"
 msgstr ""
 
 #: assets/src/js/pages/HealthPage.js:324
-#: assets/src/js/pages/ProDestination.js:85
+#: assets/src/js/pages/ProDestination.js:87
 msgid "Try again"
 msgstr ""
 
@@ -2941,183 +2938,225 @@ msgstr ""
 msgid "The last check failed"
 msgstr ""
 
-#: assets/src/js/pages/HealthPage.js:423
+#: assets/src/js/pages/HealthPage.js:426
 msgid "Checks"
 msgstr ""
 
-#: assets/src/js/pages/HealthPage.js:424
+#: assets/src/js/pages/HealthPage.js:427
 msgid "The environment and safeguards every update run depends on."
 msgstr ""
 
 #. translators: 1: check label, 2: current value, 3: status label.
-#: assets/src/js/pages/HealthPage.js:436
+#: assets/src/js/pages/HealthPage.js:439
 #, js-format
 msgid "%1$s: %2$s, %3$s"
 msgstr ""
 
-#: assets/src/js/pages/HealthPage.js:496
+#: assets/src/js/pages/HealthPage.js:499
 msgid "Issues to review"
 msgstr ""
 
-#: assets/src/js/pages/HealthPage.js:497
+#: assets/src/js/pages/HealthPage.js:500
 msgid "Failed updates keep the previous version active until a retry succeeds."
 msgstr ""
 
-#: assets/src/js/pages/HealthPage.js:508
+#: assets/src/js/pages/HealthPage.js:511
 msgid "Readiness checks still run, but update failures will not appear here until logging is enabled in Settings."
 msgstr ""
 
-#: assets/src/js/pages/HealthPage.js:520
+#: assets/src/js/pages/HealthPage.js:523
 msgid "No issues to review"
 msgstr ""
 
-#: assets/src/js/pages/HealthPage.js:523
+#: assets/src/js/pages/HealthPage.js:526
 msgid "Every recent update failure has been resolved. New issues will appear here after the next run."
 msgstr ""
 
-#: assets/src/js/pages/HealthPage.js:533
-#: assets/src/js/pages/HealthPage.js:638
+#: assets/src/js/pages/HealthPage.js:536
+#: assets/src/js/pages/HealthPage.js:641
 msgid "Open update log"
 msgstr ""
 
 #. translators: 1: error code, 2: date/time, 3: attempt count.
-#: assets/src/js/pages/HealthPage.js:579
+#: assets/src/js/pages/HealthPage.js:582
 #, js-format
 msgid "%1$s · %2$s · attempt %3$d"
 msgstr ""
 
 #. translators: 1: previous version, 2: new version, 3: site host, 4: PHP version.
-#: assets/src/js/pages/HealthPage.js:597
+#: assets/src/js/pages/HealthPage.js:600
 #, js-format
 msgid "%1$s → %2$s · %3$s · PHP %4$s"
 msgstr ""
 
-#: assets/src/js/pages/HealthPage.js:652
+#: assets/src/js/pages/HealthPage.js:655
 msgid "Recently fixed"
 msgstr ""
 
-#: assets/src/js/pages/HealthPage.js:653
+#: assets/src/js/pages/HealthPage.js:656
 msgid "Failures cleared in the last 30 days, with the action that resolved them."
 msgstr ""
 
-#: assets/src/js/pages/HealthPage.js:660
+#: assets/src/js/pages/HealthPage.js:663
 msgid "No failures were resolved in the last 30 days."
 msgstr ""
 
-#: assets/src/js/pages/HealthPage.js:677
+#: assets/src/js/pages/HealthPage.js:680
 msgid "Resolution"
 msgstr ""
 
-#: assets/src/js/pages/HealthPage.js:680
+#: assets/src/js/pages/HealthPage.js:683
 msgid "Resolved"
 msgstr ""
 
 #. translators: %s: item name.
-#: assets/src/js/pages/HealthPage.js:714
+#: assets/src/js/pages/HealthPage.js:717
 #, js-format
 msgid "%s failed"
 msgstr ""
 
-#: assets/src/js/pages/HealthPage.js:717
+#: assets/src/js/pages/HealthPage.js:720
 msgid "Error details"
 msgstr ""
 
-#: assets/src/js/pages/HealthPage.js:748
+#: assets/src/js/pages/HealthPage.js:751
 msgid "Severity"
 msgstr ""
 
-#: assets/src/js/pages/HealthPage.js:763
-#: assets/src/js/pages/HealthPage.js:909
+#: assets/src/js/pages/HealthPage.js:766
+#: assets/src/js/pages/HealthPage.js:912
 msgid "Site"
 msgstr ""
 
-#: assets/src/js/pages/HealthPage.js:778
+#: assets/src/js/pages/HealthPage.js:781
 msgid "Occurred"
 msgstr ""
 
-#: assets/src/js/pages/HealthPage.js:788
+#: assets/src/js/pages/HealthPage.js:791
 msgid "Technical detail"
 msgstr ""
 
-#: assets/src/js/pages/HealthPage.js:795
+#: assets/src/js/pages/HealthPage.js:798
 msgid "No additional detail is available."
 msgstr ""
 
-#: assets/src/js/pages/HealthPage.js:807
+#: assets/src/js/pages/HealthPage.js:810
 msgid "Details copied."
 msgstr ""
 
-#: assets/src/js/pages/HealthPage.js:819
+#: assets/src/js/pages/HealthPage.js:822
 msgid "Copy details"
 msgstr ""
 
-#: assets/src/js/pages/HealthPage.js:850
-#: assets/src/js/pages/HealthPage.js:869
+#: assets/src/js/pages/HealthPage.js:853
+#: assets/src/js/pages/HealthPage.js:872
 msgid "Retry update"
 msgstr ""
 
 #. translators: %s: item name.
-#: assets/src/js/pages/HealthPage.js:881
+#: assets/src/js/pages/HealthPage.js:884
 #, js-format
 msgid "Schedule %s for another attempt. The current version stays active until the retry succeeds."
 msgstr ""
 
-#: assets/src/js/pages/HealthPage.js:915
+#: assets/src/js/pages/HealthPage.js:918
 msgid "The retry runs after the current update. Its result is recorded in the update log."
 msgstr ""
 
-#: assets/src/js/pages/HealthPage.js:947
+#: assets/src/js/pages/HealthPage.js:950
 msgid "Scheduling"
 msgstr ""
 
-#: assets/src/js/pages/HealthPage.js:948
+#: assets/src/js/pages/HealthPage.js:951
 msgid "Schedule retry"
 msgstr ""
 
-#: assets/src/js/pages/HealthPage.js:961
+#: assets/src/js/pages/HealthPage.js:964
 msgid "Diagnostics"
 msgstr ""
 
-#: assets/src/js/pages/HealthPage.js:975
+#: assets/src/js/pages/HealthPage.js:978
 msgid "Diagnostics copied."
 msgstr ""
 
-#: assets/src/js/pages/HealthPage.js:985
+#: assets/src/js/pages/HealthPage.js:988
 msgid "Copy"
 msgstr ""
 
 #. translators: %s: Pro panel name.
-#: assets/src/js/pages/ProDestination.js:68
+#: assets/src/js/pages/ProDestination.js:70
 #, js-format
 msgid "%s could not be loaded."
 msgstr ""
 
-#: assets/src/js/pages/ProDestination.js:74
+#: assets/src/js/pages/ProDestination.js:76
 msgid "Reload the page or try again."
 msgstr ""
 
-#: assets/src/js/pages/ProDestination.js:149
+#: assets/src/js/pages/ProDestination.js:151
 msgid "This panel is not available in this version of Updatronix 3000."
 msgstr ""
 
-#: assets/src/js/pages/ProDestination.js:155
+#: assets/src/js/pages/ProDestination.js:157
 msgid "Your Updatronix 3000 tools are on that page."
 msgstr ""
 
-#: assets/src/js/pages/ProDestination.js:165
+#: assets/src/js/pages/ProDestination.js:167
 msgid "Open Updatronix 3000"
 msgstr ""
 
-#: assets/src/js/pages/ProDestination.js:179
-msgid "Updatronix 3000 adds more update tools."
+#: assets/src/js/pages/ProDestination.js:180
+msgid "See what Updatronix 3000 adds to your update workflow."
 msgstr ""
 
-#: assets/src/js/pages/ProDestination.js:185
-msgid "Updatronix 3000 adds Update Shield, Update Flow, White label, and exports in CSV and JSON. No Updatronix 3000 feature is active on this site."
+#: assets/src/js/pages/ProDestination.js:191
+msgid "What Updatronix 3000 includes"
 msgstr ""
 
-#: assets/src/js/pages/ProDestination.js:196
-msgid "Read the Updatronix 3000 guide"
+#: assets/src/js/pages/ProDestination.js:200
+msgid "Protection, update order, branding, and developer tools."
+msgstr ""
+
+#: assets/src/js/pages/ProDestination.js:239
+msgid "Discover Updatronix 3000"
+msgstr ""
+
+#: assets/src/js/pages/proFeatures.js:19
+#: assets/src/js/shell/routes.js:68
+msgid "Update Shield"
+msgstr ""
+
+#: assets/src/js/pages/proFeatures.js:20
+msgid "Stops incompatible updates and records what was blocked."
+msgstr ""
+
+#: assets/src/js/pages/proFeatures.js:27
+msgid "Runs updates in the order your site depends on."
+msgstr ""
+
+#: assets/src/js/pages/proFeatures.js:33
+#: assets/src/js/shell/routes.js:90
+msgid "White label"
+msgstr ""
+
+#: assets/src/js/pages/proFeatures.js:34
+msgid "Puts your name, mark, and colors on the admin and emails."
+msgstr ""
+
+#: assets/src/js/pages/proFeatures.js:40
+msgid "CSV and JSON exports"
+msgstr ""
+
+#: assets/src/js/pages/proFeatures.js:41
+msgid "Creates a downloadable report from the update log."
+msgstr ""
+
+#: assets/src/js/pages/proFeatures.js:47
+msgid "Developer tools"
+msgstr ""
+
+#: assets/src/js/pages/proFeatures.js:48
+msgid "Hooks, functions, and a REST API for your own update workflow."
 msgstr ""
 
 #: assets/src/js/pages/SettingsPage.js:322
@@ -3260,20 +3299,12 @@ msgstr ""
 msgid "Manage your Updatronix 3000 license and tools."
 msgstr ""
 
-#: assets/src/js/shell/routes.js:68
-msgid "Update Shield"
-msgstr ""
-
 #: assets/src/js/shell/routes.js:69
 msgid "Blocks incompatible updates and protects extensions under version control."
 msgstr ""
 
 #: assets/src/js/shell/routes.js:80
 msgid "Install updates in the order your site depends on."
-msgstr ""
-
-#: assets/src/js/shell/routes.js:90
-msgid "White label"
 msgstr ""
 
 #: assets/src/js/shell/routes.js:91

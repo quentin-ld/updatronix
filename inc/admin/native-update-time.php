@@ -1,8 +1,7 @@
 <?php
 /**
  * Native WordPress update-time surfaces: the plugin row, the theme rows, the
- * single-site theme overlay, the update-core summary, the scoped JS map, and
- * the one-line WP-Cron hint.
+ * single-site theme overlay, the update-core summary, and the scoped JS map.
  *
  * The calculator owns the sentence; this file only places it in the native
  * markup. Every hook is read-only and feature-detects its container, so a
@@ -443,48 +442,3 @@ function updatronix_enqueue_native_time_script( string $admin_page ): void {
 }
 
 add_action( 'admin_enqueue_scripts', 'updatronix_enqueue_native_time_script' );
-
-/**
- * Prints the one-line WP-Cron hint on the native update screens.
- *
- * The old 920px blue banner is gone (T16, analysis 04 §13). This is a single
- * paragraph, shown only when WP-Cron spawning is disabled and the user can act
- * on the screen. The Schedule screen keeps its own fuller warning.
- *
- * @since 1.3.0
- * @return void
- */
-function updatronix_render_wp_cron_hint(): void {
-	if ( ! updatronix_native_time_enabled() ) {
-		return;
-	}
-
-	if ( ! class_exists( 'Updatronix_Schedule_Context' )
-		|| ! Updatronix_Schedule_Context::cron_disabled() ) {
-		return;
-	}
-
-	$screen = function_exists( 'get_current_screen' ) ? get_current_screen(
-	) : null;
-	$id     = $screen instanceof WP_Screen ? (string) $screen->id : '';
-
-	$allowed = match ( $id ) {
-		'plugins', 'plugins-network' => current_user_can( 'update_plugins' ),
-		'themes', 'themes-network'   => current_user_can( 'update_themes' ),
-		'update-core'                => current_user_can( 'update_core' ),
-		default                      => false,
-	};
-
-	if ( ! $allowed ) {
-		return;
-	}
-
-	echo '<p class="updatronix-wp-cron-hint">' . esc_html__(
-		// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
-		'WP-Cron is disabled; the automatic update pass will not run until a real cron job calls wp-cron.php.',
-		'updatronix'
-	) . '</p>';
-}
-
-add_action( 'admin_notices', 'updatronix_render_wp_cron_hint' );
-add_action( 'network_admin_notices', 'updatronix_render_wp_cron_hint' );

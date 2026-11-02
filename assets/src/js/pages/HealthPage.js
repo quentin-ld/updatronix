@@ -403,7 +403,10 @@ export default function HealthPage( { destination, onNavigate } ) {
 							/>
 						</span>
 						<Stack direction="column" gap="xs">
-							<Badge intent={ snapshot.summary.intent }>
+							<Badge
+								intent={ snapshot.summary.intent }
+								className="updatronix-health-summary-badge"
+							>
 								{ snapshot.summary.label }
 							</Badge>
 							<Text

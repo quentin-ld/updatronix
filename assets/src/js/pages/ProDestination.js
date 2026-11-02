@@ -13,9 +13,11 @@ import { store as noticesStore } from '@wordpress/notices';
 import PageHeader from '../shell/PageHeader';
 import SaveBar, { SaveButton } from '../shell/SaveBar';
 import wpds from '../shell/wpds';
+import { PRO_FEATURES, UPDATRONIX_3000_URL } from './proFeatures';
 
-const { Button, ButtonLink, EmptyState, Notice } = wpds.ui;
-const { starFilled } = wpds.icons;
+const { Button, ButtonLink, Card, EmptyState, Icon, Notice, Stack, Text } =
+	wpds.ui;
+const { external, starFilled } = wpds.icons;
 
 /**
  * Keep a Pro panel error inside the destination.
@@ -172,31 +174,72 @@ export default function ProDestination( {
 
 	return (
 		<>
-			<PageHeader destination={ destination } />
-			<EmptyState.Root>
-				<EmptyState.Icon icon={ starFilled } />
-				<EmptyState.Title>
-					{ __(
-						'Updatronix 3000 adds more update tools.',
+			<PageHeader
+				destination={ {
+					...destination,
+					description: __(
+						'See what Updatronix 3000 adds to your update workflow.',
 						'updatronix'
-					) }
-				</EmptyState.Title>
-				<EmptyState.Description>
-					{ __(
-						'Updatronix 3000 adds Update Shield, Update Flow, White label, and exports in CSV and JSON. No Updatronix 3000 feature is active on this site.',
-						'updatronix'
-					) }
-				</EmptyState.Description>
-				<EmptyState.Actions>
-					<ButtonLink
-						href="https://holdmywp.com/en/documents/updatronix-3000-documentation/"
-						target="_blank"
-						rel="noopener noreferrer"
-					>
-						{ __( 'Read the Updatronix 3000 guide', 'updatronix' ) }
-					</ButtonLink>
-				</EmptyState.Actions>
-			</EmptyState.Root>
+					),
+				} }
+			/>
+			<div className="updatronix-page-body">
+				<Card.Root>
+					<Card.Header>
+						<Stack direction="column" gap="xs">
+							<Card.Title role="heading" aria-level={ 2 }>
+								{ __(
+									'What Updatronix 3000 includes',
+									'updatronix'
+								) }
+							</Card.Title>
+							<Text
+								variant="body-sm"
+								className="updatronix-muted"
+							>
+								{ __(
+									'Protection, update order, branding, and developer tools.',
+									'updatronix'
+								) }
+							</Text>
+						</Stack>
+					</Card.Header>
+					<Card.Content>
+						<div className="updatronix-3000-features">
+							{ PRO_FEATURES.map( ( feature ) => (
+								<div
+									className="updatronix-3000-feature"
+									key={ feature.name }
+								>
+									<Text
+										variant="body-md"
+										className="updatronix-3000-feature-name"
+									>
+										{ feature.name }
+									</Text>
+									<Text
+										variant="body-sm"
+										className="updatronix-muted"
+									>
+										{ feature.description }
+									</Text>
+								</div>
+							) ) }
+						</div>
+					</Card.Content>
+				</Card.Root>
+				<ButtonLink
+					className="updatronix-3000-discover"
+					href={ UPDATRONIX_3000_URL }
+					target="_blank"
+					rel="noopener noreferrer"
+					variant="solid"
+					tone="brand"
+				>
+					{ __( 'Discover Updatronix 3000', 'updatronix' ) }
+					<Icon icon={ external } size={ 16 } aria-hidden="true" />
+				</ButtonLink>
+			</div>
 		</>
 	);
 }

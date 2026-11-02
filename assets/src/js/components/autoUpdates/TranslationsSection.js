@@ -2,11 +2,14 @@
  * Translations auto-update toggle section.
  */
 
-import { Icon, ToggleControl } from '@wordpress/components';
+import { Icon } from '@wordpress/components';
 import { language as languageIcon } from '@wordpress/icons';
 import { __ } from '@wordpress/i18n';
 import { ConstantNotices } from './ConstantNotices';
 import { isSectionLocked } from './utils';
+import wpds from '../../shell/wpds';
+
+const { SwitchControl } = wpds.ui;
 
 /**
  * Render the translations auto-update toggle.
@@ -37,15 +40,14 @@ export function TranslationsSection( {
 				sections={ [ 'translations' ] }
 				lockingOnly
 			/>
-			<ToggleControl
-				__nextHasNoMarginBottom
+			<SwitchControl
 				label={ __( 'Automatic translation updates', 'updatronix' ) }
-				help={ __(
+				description={ __(
 					'WordPress downloads translation updates automatically by default. Turn this off to skip automatic downloads.',
 					'updatronix'
 				) }
 				checked={ translations.auto_update }
-				onChange={ ( checked ) => toggleTranslation( checked ) }
+				onCheckedChange={ ( checked ) => toggleTranslation( checked ) }
 				disabled={ locked || busy }
 			/>
 		</div>

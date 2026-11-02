@@ -190,6 +190,9 @@ body.updatronix-admin-page {
 	line-height: var(--wpds-typography-line-height-md);
 	text-decoration: none;
 	border-radius: var(--wpds-border-radius-md);
+	transition:
+		background-color var(--wpds-motion-duration-sm) var(--wpds-motion-easing-balanced),
+		color var(--wpds-motion-duration-sm) var(--wpds-motion-easing-balanced);
 
 	&:hover {
 		background: transparent;
@@ -638,6 +641,14 @@ body.updatronix-admin-page {
 
 .updatronix-doc-card-root {
 	height: 100%;
+	transition:
+		transform var(--wpds-motion-duration-sm) var(--wpds-motion-easing-balanced),
+		box-shadow var(--wpds-motion-duration-sm) var(--wpds-motion-easing-balanced);
+}
+
+.updatronix-doc-card:hover .updatronix-doc-card-root,
+.updatronix-doc-card:focus-visible .updatronix-doc-card-root {
+	transform: translateY(-2px);
 }
 
 .updatronix-doc-card-content {
@@ -774,6 +785,11 @@ body.updatronix-admin-page {
 
 .updatronix-support-forum-card {
 	height: 100%;
+	transition: border-color var(--wpds-motion-duration-sm) var(--wpds-motion-easing-balanced);
+}
+
+.updatronix-support-forum-card:focus-within {
+	border-color: var(--wpds-color-stroke-surface-neutral);
 }
 
 .updatronix-support-forum-top {
@@ -863,6 +879,38 @@ body.updatronix-admin-page {
 	}
 }
 
+/* Free-only Updatronix 3000 presentation */
+
+.updatronix-3000-features {
+	display: grid;
+	gap: 0 var(--wpds-dimension-gap-xl);
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	max-width: var(--wpds-dimension-surface-width-2xl);
+}
+
+.updatronix-3000-feature {
+	border-top: 1px solid var(--wpds-color-stroke-surface-neutral-weak);
+	display: flex;
+	flex-direction: column;
+	gap: var(--wpds-dimension-gap-xs);
+	padding: var(--wpds-dimension-padding-md) 0;
+}
+
+.updatronix-3000-feature-name {
+	font-weight: var(--wpds-typography-font-weight-emphasis);
+}
+
+.updatronix-3000-discover {
+	align-self: flex-start;
+}
+
+@media (max-width: 760px) {
+
+	.updatronix-3000-features {
+		grid-template-columns: 1fr;
+	}
+}
+
 /* Health */
 
 .updatronix-health,
@@ -926,6 +974,11 @@ body.updatronix-admin-page {
 	font-weight: var(--wpds-typography-font-weight-emphasis);
 }
 
+.updatronix-health-summary-badge {
+	align-self: flex-start;
+	width: fit-content;
+}
+
 .updatronix-health-checks {
 	display: grid;
 	gap: var(--wpds-dimension-gap-md);
@@ -940,6 +993,12 @@ body.updatronix-admin-page {
 	flex-direction: column;
 	gap: var(--wpds-dimension-gap-sm);
 	padding: var(--wpds-dimension-padding-md);
+	transition: border-color var(--wpds-motion-duration-sm) var(--wpds-motion-easing-balanced);
+}
+
+.updatronix-health-check:hover,
+.updatronix-health-check:focus-within {
+	border-color: var(--wpds-color-stroke-surface-neutral);
 }
 
 .updatronix-health-check-head {
@@ -1458,5 +1517,20 @@ body.updatronix-admin-page {
 	.updatronix-rail .updatronix-rail-link.is-current,
 	.updatronix-rail .updatronix-rail-link.is-current:visited {
 		color: #fff;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+	.updatronix-rail-link,
+	.updatronix-doc-card-root,
+	.updatronix-support-forum-card,
+	.updatronix-health-check {
+		transition: none;
+	}
+
+	.updatronix-doc-card:hover .updatronix-doc-card-root,
+	.updatronix-doc-card:focus-visible .updatronix-doc-card-root {
+		transform: none;
 	}
 }

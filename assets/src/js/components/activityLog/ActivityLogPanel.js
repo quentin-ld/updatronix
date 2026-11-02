@@ -984,11 +984,21 @@ export function ActivityLogPanel( {
 								/>
 							}
 						>
-							<LogDetailsContent
-								log={ detail }
-								logId={ detail.id }
-								fetchLogDetails={ fetchLogDetails }
-							/>
+							<div
+								className="updatronix-log-preview__scroll"
+								tabIndex={ 0 }
+								role="region"
+								aria-label={ __(
+									'Details content',
+									'updatronix'
+								) }
+							>
+								<LogDetailsContent
+									log={ detail }
+									logId={ detail.id }
+									fetchLogDetails={ fetchLogDetails }
+								/>
+							</div>
 						</Section>
 					</aside>
 				) }
@@ -1027,20 +1037,6 @@ export function ActivityLogPanel( {
 					</Dialog.Popup>
 				</Dialog.Root>
 			) }
-
-			<Text
-				variant="body-sm"
-				className="updatronix-muted updatronix-logs-note"
-			>
-				{ sprintf(
-					/* translators: %s: retention period in days. */
-					__(
-						'The daily cleanup removes entries older than %s days.',
-						'updatronix'
-					),
-					retentionDays
-				) }
-			</Text>
 
 			<AlertDialog.Root
 				open={ Boolean( toDelete ) }

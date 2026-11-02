@@ -3,12 +3,15 @@
  */
 
 import { useMemo, useState, useCallback } from '@wordpress/element';
-import { ToggleControl, Icon } from '@wordpress/components';
+import { Icon } from '@wordpress/components';
 import { DataViews, filterSortAndPaginate } from '@wordpress/dataviews';
 import { __, sprintf } from '@wordpress/i18n';
 import { StatusBadge } from '../activityLog/StatusBadge';
 import { ConstantNotices } from './ConstantNotices';
 import { isSectionLocked } from './utils';
+import wpds from '../../shell/wpds';
+
+const { SwitchControl } = wpds.ui;
 
 const FIXED_FIELDS = [
 	'auto_update',
@@ -97,10 +100,11 @@ export function ItemsDataViewSection( {
 								{ __( 'Unavailable', 'updatronix' ) }
 							</span>
 						) : (
-							<ToggleControl
-								__nextHasNoMarginBottom
+							<SwitchControl
+								label={ item.name }
+								hideLabelFromVision
 								checked={ item.auto_update }
-								onChange={ ( checked ) =>
+								onCheckedChange={ ( checked ) =>
 									onToggle( item[ itemIdKey ], checked )
 								}
 								disabled={

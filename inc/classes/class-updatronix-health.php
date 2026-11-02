@@ -540,7 +540,7 @@ final class Updatronix_Health {
 				// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 				__(
 					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
-					'DISABLE_WP_CRON is set. Scheduled checks will not run until a real cron job calls wp-cron.php.',
+					'DISABLE_WP_CRON is set. Scheduled checks will not run until a real cron job calls wp-cron.php. If you turned off WP-Cron on purpose and run your own server cron, you can ignore this alert.',
 					'updatronix'
 				),
 				$href,

@@ -59,7 +59,7 @@
 	.dataviews-view-activity__item {
 		border-radius: var(--wpds-border-radius-md);
 		cursor: pointer;
-		transition: background-color 120ms ease;
+		transition: background-color var(--wpds-motion-duration-sm) var(--wpds-motion-easing-balanced);
 	}
 
 	.dataviews-view-activity__item:hover,
@@ -94,13 +94,49 @@
 	margin-bottom: var(--wpds-dimension-gap-xl);
 }
 
-.updatronix-logs-note {
-	margin-top: var(--wpds-dimension-gap-xl);
-}
-
 .updatronix-log-preview {
 	position: sticky;
 	top: var(--wpds-dimension-gap-lg);
+	animation: updatronix-details-enter var(--wpds-motion-duration-md) var(--wpds-motion-easing-balanced);
+}
+
+@keyframes updatronix-details-enter {
+
+	from {
+		opacity: 0;
+	}
+
+	to {
+		opacity: 1;
+	}
+}
+
+.updatronix-log-preview > .updatronix-section {
+	display: flex;
+	flex-direction: column;
+	/* stylelint-disable-next-line @stylistic/max-line-length */
+	max-height: calc(100dvh - 32px - var(--wpds-dimension-gap-lg) - var(--wpds-dimension-gap-lg));
+	min-height: 0;
+	overflow: hidden;
+}
+
+.updatronix-log-preview > .updatronix-section > :last-child {
+	display: flex;
+	flex-direction: column;
+	min-height: 0;
+	overflow: hidden;
+}
+
+.updatronix-log-preview__scroll {
+	flex: 1;
+	min-height: 0;
+	overflow-y: auto;
+	overscroll-behavior: contain;
+}
+
+.updatronix-log-preview__scroll:focus-visible {
+	outline: 2px solid var(--wpds-color-stroke-focus);
+	outline-offset: -2px;
 }
 
 .updatronix-log-detail-dialog {
@@ -361,6 +397,20 @@
 	.updatronix-log-preview {
 		position: static;
 	}
+
+	.updatronix-log-preview > .updatronix-section {
+		max-height: none;
+		overflow: visible;
+	}
+
+	.updatronix-log-preview > .updatronix-section > :last-child {
+		display: block;
+		overflow: visible;
+	}
+
+	.updatronix-log-preview__scroll {
+		overflow: visible;
+	}
 }
 
 .updatronix-export-modal {
@@ -525,5 +575,14 @@
 	&__scopes {
 		border-top: 1px solid var(--wpds-color-stroke-surface-neutral-weak);
 		padding-top: var(--wpds-dimension-padding-md);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+	.updatronix-log-layout .dataviews-view-activity__item,
+	.updatronix-log-preview {
+		animation: none;
+		transition: none;
 	}
 }

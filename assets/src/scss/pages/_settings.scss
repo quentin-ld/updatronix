@@ -1,9 +1,9 @@
 // An `a` nested in the header navigation sits at a lower specificity than
-// `.updatronix-dashboard-wrap a:not(.components-button)` further up the
-// file. The rule compares compiled selectors, and the two live under
-// different parents, so they can never both match the same element -- it
-// cannot see that, and neither can a reorder fix it without flattening the
-// nesting the file is written in.
+// The anchor colour rule further up the file excludes WPDS ButtonLinks so a
+// solid button keeps its own foreground. The rule compares compiled selectors,
+// and the two live under different parents, so they can never both match the
+// same element -- it cannot see that, and neither can a reorder fix it without
+// flattening the nesting the file is written in.
 /* stylelint-disable no-descending-specificity -- disjoint parents. */
 @use "../abstracts/variables" as *;
 
@@ -15,7 +15,7 @@
 			box-sizing: border-box;
 		}
 
-		a:not(.components-button) {
+		a:not(.components-button):not([class*="__button-link"]) {
 			color: $wp-color-accent;
 
 			&[target="_blank"] {
@@ -145,7 +145,7 @@
 			}
 		}
 
-		a:not(.components-button) {
+		a:not(.components-button):not([class*="__button-link"]) {
 			color: var(--wpds-color-background-surface-neutral-strong);
 		}
 

@@ -380,7 +380,7 @@ function updatronix_admin_enqueue_scripts( string $admin_page ): void {
  * @return array<string, mixed>
  */
 function updatronix_get_admin_brand(): array {
-	$logo_url = plugins_url( 'assets/img/logo-60x60.png', updatronix_PLUGIN_FILE );
+	$logo_url = plugins_url( 'assets/img/logo-blue-60x60.png', updatronix_PLUGIN_FILE );
 
 	return (array) apply_filters(
 		'updatronix_admin_brand',
@@ -412,7 +412,7 @@ function updatronix_localize_settings( string $admin_page ): void {
 	$tabs        = updatronix_get_admin_tabs();
 	$active_tab  = updatronix_get_active_tab( $tabs );
 	$logo_url    = plugins_url(
-		'assets/img/logo-60x60.png',
+		'assets/img/logo-blue-60x60.png',
 		updatronix_PLUGIN_FILE
 	);
 	$brand       = updatronix_get_admin_brand();

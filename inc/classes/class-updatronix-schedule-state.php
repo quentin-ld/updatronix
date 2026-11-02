@@ -29,13 +29,6 @@ final class Updatronix_Schedule_State {
 	public const STATE_NETWORK = 'network';
 
 	/**
-	 * WP-Cron spawning is disabled.
-	 *
-	 * @since 1.3.0
-	 */
-	public const STATE_WP_CRON_DISABLED = 'wp_cron_disabled';
-
-	/**
 	 * No `wp_version_check` event.
 	 *
 	 * @since 1.3.0
@@ -305,15 +298,6 @@ final class Updatronix_Schedule_State {
 			);
 		}
 
-		if ( (bool) $in['cron_disabled'] ) {
-			return self::emit(
-				$result,
-				self::STATE_WP_CRON_DISABLED,
-				'cron',
-				'wp_cron_disabled'
-			);
-		}
-
 		if ( false === $in['next_check'] ) {
 			return self::emit(
 				$result,
@@ -535,33 +519,38 @@ final class Updatronix_Schedule_State {
 				);
 				break;
 
-			case self::STATE_WP_CRON_DISABLED:
-				$sentence =
-					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
-					__(
-						// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
-						'WP-Cron spawning is disabled. A real cron job must call wp-cron.php; the next automatic install time is unknown.',
+			case self::STATE_NOT_SCHEDULED:
+				$sentence = true === $in['cron_disabled']
+					? __(
+						'Automatic update not scheduled. Save the schedule to create the check event.',
+						'updatronix'
+					)
+					: __(
+						'Automatic update not scheduled. There may be a problem with WP-Cron.',
 						'updatronix'
 					);
 				break;
 
-			case self::STATE_NOT_SCHEDULED:
-				$sentence = __(
-					'Automatic update not scheduled. There may be a problem with WP-Cron.',
-					'updatronix'
-				);
-				break;
-
 			case self::STATE_OVERDUE:
-				$sentence = sprintf(
-					/* translators: %s: human duration the next check is overdue by. */
-					__(
-						// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
-						'The next check is overdue by %s. WP-Cron may be stuck; the next automatic install time is unknown.',
-						'updatronix'
-					),
-					(string) ( $row['overdue_by'] ?? '' )
-				);
+				$sentence = true === $in['cron_disabled']
+					? sprintf(
+						/* translators: %s: human duration the next check is overdue by. */
+						__(
+							// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+							'The next check is overdue by %s. Waiting for your server cron.',
+							'updatronix'
+						),
+						$row['overdue_by'] ?? ''
+					)
+					: sprintf(
+						/* translators: %s: human duration the next check is overdue by. */
+						__(
+							// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
+							'The next check is overdue by %s. WP-Cron may be stuck; the next automatic install time is unknown.',
+							'updatronix'
+						),
+						$row['overdue_by'] ?? ''
+					);
 				break;
 
 			case self::STATE_LOCKED:
