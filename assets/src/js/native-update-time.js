@@ -111,6 +111,87 @@ export function checkboxKey( element, type ) {
 }
 
 /**
+ * Replaces the native message inside one text node.
+ *
+ * @param {Text}    node      Text node.
+ * @param {string}  native    Native message.
+ * @param {string}  text      Replacement text.
+ * @param {boolean} allowPart Replace only a trailing `| native` marker.
+ * @return {boolean} True when the node changed.
+ */
+function replaceTextNode( node, native, text, allowPart ) {
+	const value = node.nodeValue ?? '';
+	const trimmed = value.trim();
+
+	if ( trimmed === native ) {
+		const at = value.indexOf( native );
+
+		if ( -1 === at ) {
+			return false;
+		}
+
+		node.nodeValue =
+			value.slice( 0, at ) + text + value.slice( at + native.length );
+
+		return true;
+	}
+
+	if ( ! allowPart ) {
+		return false;
+	}
+
+	const marker = `| ${ native }`;
+	const at = value.lastIndexOf( marker );
+
+	if ( -1 === at || marker !== value.slice( at ).trim() ) {
+		return false;
+	}
+
+	const textStart = at + marker.length - native.length;
+	node.nodeValue =
+		value.slice( 0, textStart ) +
+		text +
+		value.slice( textStart + native.length );
+
+	return true;
+}
+
+/**
+ * Replaces the native message in the first matching text node.
+ *
+ * Nested elements are never touched: the walk stops at the text node that
+ * carries the message, so icons, links, and `<br />` siblings survive.
+ *
+ * @param {Element} element   Container.
+ * @param {string}  native    Native message.
+ * @param {string}  text      Replacement text.
+ * @param {boolean} allowPart Replace only a trailing `| native` marker.
+ * @return {boolean} True when a text node changed.
+ */
+function replaceTextNodes( element, native, text, allowPart ) {
+	const doc = element.ownerDocument;
+
+	if ( ! doc ) {
+		return false;
+	}
+
+	// 4 is NodeFilter.SHOW_TEXT. The filter constant is not on every jsdom
+	// window, and a number keeps the walker identical in the browser.
+	const walker = doc.createTreeWalker( element, 4 );
+	let node = walker.nextNode();
+
+	while ( node ) {
+		if ( replaceTextNode( node, native, text, allowPart ) ) {
+			return true;
+		}
+
+		node = walker.nextNode();
+	}
+
+	return false;
+}
+
+/**
  * Replaces the text of one container, once.
  *
  * @param {Object}  data      Payload.
@@ -132,18 +213,20 @@ export function replaceText( data, element, text, allowPart = false ) {
 
 	const native = String( data.nativePatterns?.message ?? '' ).trim();
 	const trimmed = current.trim();
-	let next = '';
+	const isNative = '' !== native && trimmed === native;
+	const hasPart =
+		allowPart && '' !== native && current.includes( `| ${ native }` );
 
-	if ( trimmed === native ) {
-		next = text;
-	} else if ( allowPart && native && trimmed.endsWith( `| ${ native }` ) ) {
-		next = `${ trimmed.slice( 0, trimmed.length - native.length ) }${ text }`;
-	} else {
+	if ( ! isNative && ! hasPart ) {
+		return false;
+	}
+
+	if ( ! replaceTextNodes( element, native, text, allowPart ) ) {
+		// No single text node carries the message: keep the native row whole.
 		return false;
 	}
 
 	element.setAttribute( NATIVE_TEXT, current );
-	element.textContent = next;
 	element.setAttribute( ENHANCED, '1' );
 
 	return true;

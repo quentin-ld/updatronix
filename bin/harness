@@ -3960,7 +3960,7 @@ cmd_pcp() {
 	# command with `.cache` added finished in under two minutes and passed.
 	# `artifacts/` and `test-results/` are Playwright's, and the archive itself
 	# is named by `bin/harness zip`, which leaves it at the project root.
-	local exclude_dirs=".git,.github,.agents,.reasonix,.harness,.githooks,.config,.claude,.cursor,.vscode,graft,bin,tests,vendor,node_modules,build,assets/src,.cache,artifacts,test-results"
+	local exclude_dirs=".git,.github,.agents,.reasonix,.harness,.githooks,.config,.claude,.cursor,.vscode,graft,bin,tests,vendor,node_modules,build,assets/src,docs,.cache,artifacts,test-results"
 	local exclude_files="workflow.md,AGENTS.md,infection.json5,.distignore,.ignore,.gitignore,.gitattributes,.editorconfig,.mcp.json,${PROJECT_ARCHIVE_NAME}.zip"
 
 	# Only two codes are silenced outright, and both because this plugin exists

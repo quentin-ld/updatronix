@@ -89,6 +89,58 @@ describe( 'list tables', () => {
 		).not.toBeNull();
 	} );
 
+	it( 'inserts the schedule sentence as text, not HTML', () => {
+		const payload = {
+			...DATA,
+			items: {
+				...DATA.items,
+				'plugin:example/example.php': {
+					text: '<img src="x" onerror="window.__updatronixXss=1">Payload',
+					state: 'held',
+				},
+			},
+		};
+
+		document.body.innerHTML = pluginRow( 'example/example.php' );
+
+		enhanceNativeTime( document, payload );
+
+		const cell = document.querySelector( '.auto-update-time' );
+
+		expect( cell.querySelector( 'img' ) ).toBeNull();
+		expect( cell.textContent ).toContain( '<img' );
+		expect( window.__updatronixXss ).toBeUndefined();
+	} );
+
+	it( 'matches a localized message with non-breaking spaces', () => {
+		const localizedNative =
+			'Mise à jour automatique dans 3\u00a0heures\u00a0: «\u00a0bientôt\u00a0».';
+		const localizedText =
+			'Prochaine installation automatique\u00a0: demain.';
+		const localized = {
+			...DATA,
+			items: {
+				...DATA.items,
+				'plugin:example/example.php': {
+					text: localizedText,
+					state: 'eligible',
+				},
+			},
+			nativePatterns: { message: localizedNative },
+		};
+
+		document.body.innerHTML = pluginRow(
+			'example/example.php',
+			`<div class="plugin-autoupdate"><div class="auto-update-time">${ localizedNative }</div></div>`
+		);
+
+		const changed = enhanceNativeTime( document, localized );
+		const cell = document.querySelector( '.auto-update-time' );
+
+		expect( changed ).toBe( 1 );
+		expect( cell.textContent ).toBe( localizedText );
+	} );
+
 	it( 'keeps the hidden class', () => {
 		document.body.innerHTML = pluginRow(
 			'example/example.php',
@@ -214,6 +266,74 @@ describe( 'update-core', () => {
 		);
 	} );
 
+	it( 'keeps the update-core plugin row markup', () => {
+		document.body.innerHTML = `<table><tbody class="plugins">${ fixture.updateCorePluginRow }</tbody></table>`;
+
+		const paragraph = document.querySelector( 'td.plugin-title p' );
+		const changed = enhanceNativeTime( document, DATA );
+
+		expect( changed ).toBe( 1 );
+		expect(
+			paragraph.querySelector( 'span.dashicons-admin-plugins' )
+		).not.toBeNull();
+		expect( paragraph.querySelector( 'strong' )?.textContent ).toBe(
+			'Example Plugin'
+		);
+		expect(
+			paragraph.querySelector( 'a.open-plugin-details-modal' )
+				?.textContent
+		).toBe( 'View version 1.1.0 details.' );
+		expect( paragraph.querySelectorAll( 'br' ) ).toHaveLength( 1 );
+		expect( paragraph.textContent ).toContain(
+			'Compatibility with WordPress 7.1.4: Yes (according to its author) | Earliest automatic install: 2026-10-30 19:00 or later.'
+		);
+		expect(
+			paragraph.getAttribute( 'data-updatronix-native-text' )
+		).toContain( NATIVE );
+		expect( paragraph.getAttribute( 'data-updatronix-enhanced' ) ).toBe(
+			'1'
+		);
+	} );
+
+	it( 'keeps the update-core theme row markup', () => {
+		document.body.innerHTML = `<table><tbody class="plugins">${ fixture.updateCoreThemeRow }</tbody></table>`;
+
+		const paragraph = document.querySelector( 'td.plugin-title p' );
+		const changed = enhanceNativeTime( document, DATA );
+
+		expect( changed ).toBe( 1 );
+		expect(
+			paragraph.querySelector( 'img.updates-table-screenshot' )
+		).not.toBeNull();
+		expect( paragraph.querySelector( 'strong' )?.textContent ).toBe(
+			'Example Theme'
+		);
+		expect(
+			paragraph.querySelector( 'a.open-plugin-details-modal' )
+				?.textContent
+		).toBe( 'View version 2.1 details.' );
+		expect( paragraph.querySelectorAll( 'br' ) ).toHaveLength( 1 );
+		expect( paragraph.textContent ).toContain(
+			'| Next automatic install: 2026-10-30 19:00.'
+		);
+	} );
+
+	it( 'replaces the message before a later upgrade notice', () => {
+		document.body.innerHTML = `<table><tbody class="plugins">${ fixture.updateCorePluginRowWithUpgradeNotice }</tbody></table>`;
+
+		const paragraph = document.querySelector( 'td.plugin-title p' );
+		const changed = enhanceNativeTime( document, DATA );
+
+		expect( changed ).toBe( 1 );
+		expect( paragraph.textContent ).toContain(
+			'| Earliest automatic install: 2026-10-30 19:00 or later.'
+		);
+		expect( paragraph.textContent ).toContain(
+			'Important upgrade notice.'
+		);
+		expect( paragraph.querySelectorAll( 'br' ) ).toHaveLength( 2 );
+	} );
+
 	it( 'replaces the theme row part after the pipe', () => {
 		document.body.innerHTML = `<table><tbody class="plugins"><tr><td class="check-column"><input type="checkbox" name="checked[]" value="example-theme" /></td><td class="plugin-update colspanchange"><p>You have version 2.0 installed. Update to 2.1. | ${ NATIVE }</p></td></tr></tbody></table>`;
 
@@ -223,6 +343,31 @@ describe( 'update-core', () => {
 		expect(
 			document.querySelector( 'td.plugin-update p' ).textContent
 		).toContain( DATA.items[ 'theme:example-theme' ].text );
+	} );
+
+	it( 'leaves a row whole when no single text node carries the message', () => {
+		document.body.innerHTML = `<table><tbody class="plugins"><tr><td class="check-column"><input type="checkbox" name="checked[]" value="example/example.php" /></td><td class="plugin-title"><p>You have version 1.0.0 installed. <em>| Automatic update scheduled in </em>3 hours.</p></td></tr></tbody></table>`;
+
+		const paragraph = document.querySelector( 'td.plugin-title p' );
+		const changed = enhanceNativeTime( document, DATA );
+
+		expect( changed ).toBe( 0 );
+		expect( paragraph.querySelector( 'em' ) ).not.toBeNull();
+		expect( paragraph.textContent ).toContain( NATIVE );
+		expect( paragraph.hasAttribute( 'data-updatronix-enhanced' ) ).toBe(
+			false
+		);
+	} );
+
+	it( 'leaves a plugin row with a map miss whole', () => {
+		document.body.innerHTML = pluginRow( 'missing/plugin.php' );
+
+		const cell = document.querySelector( '.auto-update-time' );
+		const changed = enhanceNativeTime( document, DATA );
+
+		expect( changed ).toBe( 0 );
+		expect( cell.textContent ).toBe( NATIVE );
+		expect( cell.hasAttribute( 'data-updatronix-enhanced' ) ).toBe( false );
 	} );
 
 	it( 'leaves a row without a checkbox untouched', () => {
@@ -243,15 +388,19 @@ describe( 'single-site theme overlay', () => {
 	} );
 
 	it( 'replaces the fallback overlay text when the slug is known', () => {
-		document.body.innerHTML = `<div id="theme-overlay" data-slug="example-theme"><span class="auto-update-time"><br />${ NATIVE }</span></div>`;
+		document.body.innerHTML = fixture.themeOverlay;
 
 		const changed = enhanceNativeTime( document, DATA );
 
 		expect( changed ).toBe( 1 );
 		expect(
-			document.querySelector( '#theme-overlay .auto-update-time' )
-				.textContent
+			document
+				.querySelector( '#theme-overlay .auto-update-time' )
+				.textContent.trim()
 		).toBe( DATA.items[ 'theme:example-theme' ].text );
+		expect(
+			document.querySelector( '#theme-overlay .auto-update-time br' )
+		).not.toBeNull();
 	} );
 
 	it( 'leaves the overlay alone without a slug', () => {

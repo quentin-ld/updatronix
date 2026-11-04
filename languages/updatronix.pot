@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-11-02T21:21:24+01:00\n"
+"POT-Creation-Date: 2026-11-04T15:27:29+01:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: updatronix\n"
@@ -1763,7 +1763,7 @@ msgid "Run type"
 msgstr ""
 
 #: assets/src/js/components/activityLog/ActivityLogPanel.js:732
-#: assets/src/js/components/autoUpdates/ItemsDataViewSection.js:258
+#: assets/src/js/components/autoUpdates/ItemsDataViewSection.js:255
 #: assets/src/js/pages/HealthPage.js:617
 msgid "View details"
 msgstr ""
@@ -2926,7 +2926,7 @@ msgid "Health checks failed"
 msgstr ""
 
 #: assets/src/js/pages/HealthPage.js:324
-#: assets/src/js/pages/ProDestination.js:87
+#: assets/src/js/pages/ProDestination.js:86
 msgid "Try again"
 msgstr ""
 
@@ -3084,40 +3084,40 @@ msgid "Copy"
 msgstr ""
 
 #. translators: %s: Pro panel name.
-#: assets/src/js/pages/ProDestination.js:70
+#: assets/src/js/pages/ProDestination.js:69
 #, js-format
 msgid "%s could not be loaded."
 msgstr ""
 
-#: assets/src/js/pages/ProDestination.js:76
+#: assets/src/js/pages/ProDestination.js:75
 msgid "Reload the page or try again."
 msgstr ""
 
-#: assets/src/js/pages/ProDestination.js:151
+#: assets/src/js/pages/ProDestination.js:150
 msgid "This panel is not available in this version of Updatronix 3000."
 msgstr ""
 
-#: assets/src/js/pages/ProDestination.js:157
+#: assets/src/js/pages/ProDestination.js:156
 msgid "Your Updatronix 3000 tools are on that page."
 msgstr ""
 
-#: assets/src/js/pages/ProDestination.js:167
+#: assets/src/js/pages/ProDestination.js:166
 msgid "Open Updatronix 3000"
 msgstr ""
 
-#: assets/src/js/pages/ProDestination.js:180
+#: assets/src/js/pages/ProDestination.js:179
 msgid "See what Updatronix 3000 adds to your update workflow."
 msgstr ""
 
-#: assets/src/js/pages/ProDestination.js:191
+#: assets/src/js/pages/ProDestination.js:190
 msgid "What Updatronix 3000 includes"
 msgstr ""
 
-#: assets/src/js/pages/ProDestination.js:200
+#: assets/src/js/pages/ProDestination.js:199
 msgid "Protection, update order, branding, and developer tools."
 msgstr ""
 
-#: assets/src/js/pages/ProDestination.js:239
+#: assets/src/js/pages/ProDestination.js:238
 msgid "Discover Updatronix 3000"
 msgstr ""
 
