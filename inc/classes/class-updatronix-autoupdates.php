@@ -110,10 +110,10 @@ final class Updatronix_AutoUpdates {
 			// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 			if (
 				// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
-				'Keeps a record of every update and puts the automatic update settings in one place.' === $raw ) {
+				'Update WordPress without fear: see every change, control automatic updates, and keep a clear record you can share.' === $raw ) {
 				$raw = __(
 					// phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
-					'Keeps a record of every update and puts the automatic update settings in one place.',
+					'Update WordPress without fear: see every change, control automatic updates, and keep a clear record you can share.',
 					'updatronix'
 				);
 			}

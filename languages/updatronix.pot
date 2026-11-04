@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-11-04T15:27:29+01:00\n"
+"POT-Creation-Date: 2026-11-04T19:50:34+01:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: updatronix\n"
@@ -27,7 +27,7 @@ msgstr ""
 #. Description of the plugin
 #: updatronix.php
 #: inc/classes/class-updatronix-autoupdates.php:114
-msgid "Keeps a record of every update and puts the automatic update settings in one place."
+msgid "Update WordPress without fear: see every change, control automatic updates, and keep a clear record you can share."
 msgstr ""
 
 #. Author of the plugin

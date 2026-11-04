@@ -9,7 +9,7 @@
  * @license   GPL v2 or later
  *
  * Plugin Name: Updatronix - Update Manager Enhanced
- * Description: Keeps a record of every update and puts the automatic update settings in one place.
+ * Description: Update WordPress without fear: see every change, control automatic updates, and keep a clear record you can share.
  * Version: 2.0.0
  * Plugin URI: https://wordpress.org/plugins/updatronix/
  * Author: Quentin Le Duff (--Q--)
