@@ -23,7 +23,7 @@ final class HeaderDescriptionTest extends TestCase {
 			'Free' => array(
 				'updatronix.php',
 				// phpcs:ignore Generic.Files.LineLength -- The header description is intentionally one line.
-				'Update WordPress without fear: see every change, control automatic updates, and keep a clear record you can share.',
+				'Update WordPress without fear. Monitor every change, take precise control over all updates, schedule on your terms.',
 			),
 			'Pro'  => array(
 				'../updatronix-pro/updatronix-pro.php',

@@ -9,8 +9,8 @@
  * @license   GPL v2 or later
  *
  * Plugin Name: Updatronix - Update Manager Enhanced
- * Description: Update WordPress without fear: see every change, control automatic updates, and keep a clear record you can share.
- * Version: 2.0.0
+ * Description: Update WordPress without fear. Monitor every change, take precise control over all updates, schedule on your terms.
+ * Version: 2.0.1
  * Plugin URI: https://wordpress.org/plugins/updatronix/
  * Author: Quentin Le Duff (--Q--)
  * Author URI: https://profiles.wordpress.org/quentinldd/
@@ -40,7 +40,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 // phpcs:ignore Generic.Files.LineLength -- Long line kept intact.
 /** Plugin version (must match Version header above; used for DB schema version). */
-define( 'UPDATRONIX_VERSION', '2.0.0' );
+define( 'UPDATRONIX_VERSION', '2.0.1' );
 
 define( 'UPDATRONIX_PLUGIN_FILE', __FILE__ ); // Absolute path to this file.
 define( 'UPDATRONIX_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );

@@ -4,12 +4,12 @@ Donate link: https://buymeacoffee.com/quentinld
 Tags: updates, auto-updates, update-log, maintenance, multisite
 Requires at least: 6.2
 Tested up to: 7.1
-Stable tag: 2.0.0
+Stable tag: 2.0.1
 Requires PHP: 8.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Update WordPress without fear: see every change, control automatic updates, and keep a clear record you can share.
+Update WordPress without fear. Monitor every change, take precise control over all updates, schedule on your terms.
 
 == Description ==
 
@@ -74,8 +74,10 @@ We want Updatronix to work for everyone. If you find an accessibility problem, o
 7. Schedule: Recurrence, preferred time, next run, and the 3-day hold.
 8. Health: The update checks, with the action for the one that needs attention.
 9. Settings: Logging, retention, email routing, and the uninstall data choice.
-10. Updatronix 3000: The Pro destination, with the automation features.
-11. Multisite: The network update log, with the blue mark on the rail and the site ID in the entry details.
+10. Multisite: The network update log, with the blue mark on the rail.
+11. Updatronix 3000: Update Shield, with Version Lock and the behavior on an incompatible update.
+12. Updatronix 3000: Update Flow, with a dependency chain that updates analytics and SEO before core.
+13. Updatronix 3000: White label, with your brand name, logo, and colors on the screens.
 
 == Installation ==
 
@@ -143,6 +145,9 @@ If Updatronix helps you, [leave a review](https://wordpress.org/plugins/updatron
 
 == Changelog ==
 
+= 2.0.1 =
+* Documentation: Update documentation and screenshots.
+
 = 2.0.0 =
 * New: Each log entry records the decision behind an update and the pass or chain it belonged to; old rows show "Legacy - reason not recorded".
 * New: Schedule keeps the check frequency, preferred time, and a hold of up to 365 days; the screen shows the WordPress default instead of an empty field.
@@ -152,6 +157,7 @@ If Updatronix helps you, [leave a review](https://wordpress.org/plugins/updatron
 * Improvement: The Plugins, Themes, and Updates screens show auto-update status and a short next-pass summary, and keep their icons and names when the schedule notice replaces the native text.
 * Improvement: WP-Cron warnings move to Health, which explains when the alert can be ignored, and the auto-update estimate stays accurate with WP-Cron disabled.
 * Fix: Theme details no longer fail on the changelog request, Cmd/Ctrl+S saves dirty screens without opening the browser dialog, Health centers its empty state, and Settings no longer repeats its save and email notes.
+* Documentation: Refresh the short description, the banner, and the WordPress.org screenshots.
 * Note: Updatronix 3000 0.8.0 runs one automatic pass and drops the legacy queue table; back up the database before upgrading, because queue rows are not migrated.
 * Dev: `updatronix_log_decision_layer_enabled` and `updatronix_native_update_time_enabled` control the decision layer and native update time.
 * Compatibility: WordPress 6.2 or later and PHP 8.1 or later.

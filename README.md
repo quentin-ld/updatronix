@@ -5,11 +5,11 @@
 [![WordPress tested](https://img.shields.io/badge/WordPress%20tested-7.1-21759b)](https://wordpress.org/plugins/updatronix/)
 [![WordPress requires](https://img.shields.io/badge/WordPress%20requires-6.2%2B-21759b)](https://wordpress.org/plugins/updatronix/)
 [![PHP](https://img.shields.io/badge/PHP-8.1%2B-8892BF)](https://www.php.net/)
-[![Version](https://img.shields.io/badge/version-2.0.0-2E77BC)](https://wordpress.org/plugins/updatronix/)
+[![Version](https://img.shields.io/badge/version-2.0.1-2E77BC)](https://wordpress.org/plugins/updatronix/)
 [![License](https://img.shields.io/badge/license-GPL--2.0--or--later-brightgreen)](https://www.gnu.org/licenses/gpl-2.0.html)
 [![WordPress downloads](https://img.shields.io/wordpress/plugin/dt/updatronix)](https://wordpress.org/plugins/updatronix/)
 
-**Update WordPress without fear: see every change, control automatic updates, and keep a clear record you can share.**
+**Update WordPress without fear. Monitor every change, take precise control over all updates, schedule on your terms.**
 
 Updating WordPress should not feel like a gamble.
 
@@ -83,7 +83,7 @@ Updatronix 3000 requires the free Updatronix plugin. A license covers one site o
 <!-- harness:compat:start -->
 - WordPress **6.2+** (tested up to **7.1**)
 - PHP **8.1+**
-- Version **2.0.0**
+- Version **2.0.1**
 <!-- harness:compat:end -->
 
 ### License

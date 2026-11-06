@@ -2,14 +2,14 @@
 # This file is distributed under the GPL v2 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Updatronix - Update Manager Enhanced 2.0.0\n"
+"Project-Id-Version: Updatronix - Update Manager Enhanced 2.0.1\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/updatronix\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-11-04T19:50:34+01:00\n"
+"POT-Creation-Date: 2026-11-06T18:33:33+01:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: updatronix\n"
@@ -27,7 +27,7 @@ msgstr ""
 #. Description of the plugin
 #: updatronix.php
 #: inc/classes/class-updatronix-autoupdates.php:114
-msgid "Update WordPress without fear: see every change, control automatic updates, and keep a clear record you can share."
+msgid "Update WordPress without fear. Monitor every change, take precise control over all updates, schedule on your terms."
 msgstr ""
 
 #. Author of the plugin
