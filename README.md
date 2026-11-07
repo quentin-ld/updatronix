@@ -27,6 +27,7 @@ It uses WordPress's own update engine. It does not replace the updater.
 
 - [Features](#features)
 - [Updatronix 3000 (Pro)](#updatronix-3000-pro)
+- [Documentation](#documentation)
 - [Compatibility & Multisite](#compatibility--multisite)
 - [Installation](#installation)
 - [Development](#development)
@@ -75,6 +76,18 @@ Updatronix 3000 is the Pro edition. It adds automation when a site needs it:
 - **Developer tools:** use hooks, functions, and the REST API to connect the log to your own workflow.
 
 Updatronix 3000 requires the free Updatronix plugin. A license covers one site or one multisite network.
+
+## Documentation
+
+The canonical documentation lives in [`docs/`](docs/README.md), in English and French:
+
+- **Updatronix guide:** [English](docs/updatronix/en.md) · [Français](docs/updatronix/fr.md)
+- **Updatronix 3000 guide:** [English](docs/updatronix-pro/en.md) · [Français](docs/updatronix-pro/fr.md)
+- **WordPress update system reference:** [English](docs/wordpress-update-system/en.md) · [Français](docs/wordpress-update-system/fr.md)
+- **Engineering Documentation Library:** [English](docs/engineering-documentation-library/en.md) · [Français](docs/engineering-documentation-library/fr.md)
+- **Developer API:** [English](docs/developer-api/en.md) · [Français](docs/developer-api/fr.md)
+
+The pages on holdmywp.com are a published mirror. The Markdown files in `docs/` are the source of truth.
 
 ## Compatibility & Multisite
 

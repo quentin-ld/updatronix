@@ -41,6 +41,13 @@ Updatronix is not a backup plugin. It gives you the record and the controls; kee
 * **Freelancers:** Show a client exactly what you did, with versions and results.
 * **Developers and agencies:** Keep a clear record on each site.
 
+= Documentation =
+
+The full documentation is maintained in the plugin repository, in English and French:
+[github.com/quentin-ld/updatronix/tree/main/docs](https://github.com/quentin-ld/updatronix/tree/main/docs)
+
+It covers the Free guide, the Updatronix 3000 guide, the WordPress update system developer reference, the Engineering Documentation Library, and the developer API.
+
 = Updatronix 3000 =
 
 Updatronix 3000 is the Pro edition. It adds automation when a site needs it:
