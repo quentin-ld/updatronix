@@ -15,7 +15,7 @@ from pathlib import Path
 
 TB = Path(__file__).resolve().parent
 ROOT = TB.parents[1]
-OUT = ROOT / "docs/testing/test-book-coverage.md"
+OUT = ROOT / ".agents/testing/test-book-coverage.md"
 
 
 def registry() -> dict:

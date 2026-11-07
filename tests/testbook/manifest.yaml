@@ -2,7 +2,7 @@ schema: updatronix-testbook/manifest/v1
 version: 1
 updated: 2026-10-29
 generated_by: tests/testbook/testbook.py
-book: docs/testing/test-book.md
+book: .agents/testing/test-book.md
 owners: [free, pro, shared]
 automation_states: [planned, implemented, partial, quarantined, retired]
 required_fields:

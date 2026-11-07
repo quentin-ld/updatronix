@@ -1,7 +1,7 @@
 # Updatronix test book — authoring and execution guide
 
 The catalog is the source of truth. The Markdown book
-(`docs/testing/test-book.md`), the coverage report, and the generated
+(`.agents/testing/test-book.md`), the coverage report, and the generated
 case/combination files are outputs; do not edit them by hand.
 
 ## Files
@@ -102,7 +102,7 @@ into both single sites; the runner's code sync covers the plugin runtime only.
 For anti-tautology work on the current change, `bin/gate mutation HEAD~1` runs
 Infection and the counterfactual against that diff; the generated pre-push hook
 still judges the whole branch (`@{upstream}`). The manual-regression boundary is
-in `docs/testing/manual-elimination.md`.
+in `.agents/testing/manual-elimination.md`.
 
 The simple UI surfaces (`TB-UI-002/003/005/008/009/011..015`) run in **one**
 Playwright process per site. `CaseSpec.ui="surface:<name>"` opts a case into
@@ -193,7 +193,7 @@ a `full` reset can restore a package the fixtures no longer offer.
 ## Current execution coverage
 
 **152 of 152 catalog cases have executors** (147 full, 5 partial); **0 are
-pending**. The generated report in `docs/testing/test-book-coverage.md` is the
+pending**. The generated report in `.agents/testing/test-book-coverage.md` is the
 current list, generated from `run.py --list --json`.
 
 The Playwright project runs from the working checkout/container against the

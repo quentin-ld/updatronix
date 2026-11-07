@@ -407,3 +407,7 @@ artifacts/
 /.ignore
 !docs/user/
 !docs/user/**
+
+# Working documentation lives under .agents/, not docs/.
+/docs/wpds/
+/docs/testing/

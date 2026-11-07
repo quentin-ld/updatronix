@@ -2,7 +2,7 @@
 
 > **Automation status.** Most items below are covered by the test book,
 > integration suite, or proxy assertions. See
-> `docs/testing/manual-elimination.md` for the item-to-case mapping and the
+> `.agents/testing/manual-elimination.md` for the item-to-case mapping and the
 > short list that remains genuinely manual (real Word/Gmail rendering, a real
 > screen reader, real SMTP delivery, and visual taste).
 

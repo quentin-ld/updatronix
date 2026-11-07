@@ -85,11 +85,13 @@ Before rotating, update `## Session checkpoint` (last task done, files touched, 
 
 **i18n** — Never reword strings inside `__()`, `_e()`, `_n()`, `_x()`, `esc_html__()`, `esc_attr__()`. Text domain stays `updatronix`. Intentional string change: flag in chat + changelog entry + wait for confirmation.
 
-**Frozen** — `.agents/docs/wordpress-native-updates-reference.md` is read-only without owner authorization.
+**Frozen** — `docs/wordpress-update-system/en.md` is the canonical native WordPress update reference. Edit it only with owner authorization, and verify claims against the installed core.
 
 **Version** — Never bump `UPDATRONIX_VERSION`, headers, `Stable tag:`, or package versions without explicit owner authorization in the current conversation.
 
 **Files** — Never delete `.agents/tasks/` or `.agents/notes/` without owner confirmation. Stay in task scope.
+
+**Documentation** — `docs/` is the canonical Markdown source for the five guides. `holdmywp.com` publishes a mirror; the site is not edited from this repository. Internal links and images are relative. Working material stays under `.agents/`. A documentation-only commit contains documentation, images, and documentation tooling, and never bumps a version.
 
 ## Maintenance — Monthly Rule Review
 

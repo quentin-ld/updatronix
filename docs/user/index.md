@@ -1,3 +1,5 @@
-# Updatronix user guide
+# Updatronix documentation
 
-<!-- TODO: installation, getting started, task pages, reference, troubleshooting. -->
+The published documentation is in [`docs/README.md`](../README.md).
+
+[Updatronix Free guide](../updatronix/fr.md)

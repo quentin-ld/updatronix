@@ -21,7 +21,7 @@ TB = ROOT / "tests/testbook"
 CASE_IDS = TB / "case-ids.yaml"
 GEN_CASES = TB / "cases.generated.yaml"
 COMBOS = TB / "combinations.yaml"
-BOOK = ROOT / "docs/testing/test-book.md"
+BOOK = ROOT / ".agents/testing/test-book.md"
 
 GROUP_CODE = {
     "free.settings": "SET",

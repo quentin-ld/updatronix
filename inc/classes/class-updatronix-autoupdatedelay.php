@@ -4,7 +4,7 @@
  * schedule.delay_updates only).
  *
  * Hooks {@see WP_Automatic_Updater::should_update()} via `auto_update_{$type}`
- * (wordpress-native-updates-reference.md §3.3, §6.5).
+ * (docs/wordpress-update-system/en.md §3.3, §6.5).
  * Manual updates (`update-core.php`, uploads, WP-CLI installs) bypass this
  * stack entirely.
  *
@@ -37,7 +37,7 @@ final class Updatronix_AutoUpdateDelay {
 
 	/**
 	 * Runs after Core's default opt-in and eligibility merges
-	 * (`wordpress-native-updates-reference.md` §3.3).
+	 * (`docs/wordpress-update-system/en.md` §3.3).
 	 *
 	 * Sibling features that hook the same `auto_update_{$type}` filter family must
 	 * document their priority
