@@ -28,13 +28,15 @@
 
 **Where to start**
 
-- Find out why no update is offered: §1.2 and §1.6.
-- Change something during download or install: Part 6, §6.3 and §6.4.
-- Stop automatic updates for one plugin or theme: §3.3 and §3.8.
-- Send update results somewhere else: §4.7.
-- Look up a hook signature: Part 6.
-- Find which core file does a job: Part 7.
-- Diagnose a failed upgrade: Part 2, then §4.8 for fatal errors.
+| What you want to do | The part to read |
+|---|---|
+| Find out why no update is offered | [Part 1](#part-1--discovery-how-wordpress-detects-available-updates), §1.2 and §1.6 |
+| Change something during download or install | [Part 6](#part-6--hook-and-filter-reference), §6.3 and §6.4 |
+| Stop automatic updates for one plugin or theme | [Part 3](#part-3--automatic-background-updates), §3.3 and §3.8 |
+| Send update results somewhere else | [Part 4](#part-4--notifications-and-feedback), §4.7 |
+| Look up a hook signature | [Part 6](#part-6--hook-and-filter-reference) |
+| Find which core file does a job | [Part 7](#part-7--file-and-class-reference) |
+| Diagnose a failed upgrade | [Part 2](#part-2--application-how-wordpress-installs-updates), then §4.8 for fatal errors |
 
 ---
 
